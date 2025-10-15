@@ -198,6 +198,8 @@ weather_types = function(data, variables,dates, n_wt = NULL,coordinates,
 #' @keywords internal
 #' @importFrom lubridate year
 estimtransition = function(wt, dates, K){
+  # Paper : see section 3.1
+  
   # Function to estimate transition matrices based on weather types 
   # Arguments:
   #   wt: A vector indicating the weather type 
