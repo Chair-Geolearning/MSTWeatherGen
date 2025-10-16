@@ -15,9 +15,8 @@
 #'
 #' @keywords internal
 orderNorm <- function(x,left, n_logit_fit = min(length(x), 100000), ..., warn = TRUE) {
-  # Paper : see section 3.2
-  # Function for ordered normalization Ordered Quantile normalizing transformation
 
+  # Paper : see section 3.2
   # Function for ordered normalization Ordered Quantile normalizing transformation
   # Function inspired from "bestNormalize" package and adapted for truncated normal distributions.
   
