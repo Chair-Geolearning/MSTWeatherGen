@@ -9,6 +9,7 @@
 #' @importFrom PTAk PTA3
 #' @keywords internal
 data_compression = function(data) {
+  # Paper : See Section 2.2 Paragraph 2
   # Data compression function
   # Arguments:
   #   data: The dataset to be compressed
@@ -59,6 +60,7 @@ utils::globalVariables(c("lon", "lat", "x"))
 weather_types = function(data, variables,dates, n_wt = NULL,coordinates,
                          max_number_wt = NULL,threshold = 0, return_plots = T, 
                          names_units, dir){
+  # Paper : See Section 2.2 Paragraph 2
   # Function to identify and visualize different weather types (WTs) based on input data
   # Arguments:
   #   data: An array with dimensions [time, locations, variables] containing meteorological data
@@ -308,6 +310,8 @@ estimate_transitions = function(cluster, dates, nb = 30, K){
 #' @keywords internal
 
 simulate_weathertypes = function(first_state, dates_sim, dates, tm, K) {
+  # Paper : See Section 4 
+
   # Function to simulate weather types over specified dates using transition matrices
   # Arguments:
   #   first_state: The initial weather type from which to start the simulation
