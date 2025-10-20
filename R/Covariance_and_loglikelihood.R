@@ -10,7 +10,8 @@
 #'
 #' @keywords internal
 Matern <- function(h, r, v) {
-  # Calculates the Matern covariance function for a given vector of distances.
+  # See section 2.4 Eq 9
+  # Calculateste Matern covariance function for a given vector of distances.
   
   # Arguments:
   #   h: Numeric vector of distances between points.
@@ -38,6 +39,8 @@ Matern <- function(h, r, v) {
 #' @keywords internal
 
 Gneiting <- function(h, u, par, dij) {
+  # See section 2.4 
+
   # Multivariate space-time Gneiting's covariance function
   # From the paper: https://doi.org/10.1016/j.spasta.2022.100706
   
