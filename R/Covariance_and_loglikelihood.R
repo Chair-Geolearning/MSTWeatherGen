@@ -10,7 +10,7 @@
 #'
 #' @keywords internal
 Matern <- function(h, r, v) {
-  # See section 2.4 Eq 9
+  # Paper : See section 2.4 Eq 8 and 9
   # Calculateste Matern covariance function for a given vector of distances.
   
   # Arguments:
@@ -39,7 +39,7 @@ Matern <- function(h, r, v) {
 #' @keywords internal
 
 Gneiting <- function(h, u, par, dij) {
-  # See section 2.4 
+  # Paper : See section 2.4 Equation 8
 
   # Multivariate space-time Gneiting's covariance function
   # From the paper: https://doi.org/10.1016/j.spasta.2022.100706
@@ -187,6 +187,7 @@ param <- function(par, names) {
 #' @keywords internal
 
 compute_beta <- function(parm, names, cr) {
+  # Paper : See section 2.4 Equation 8
   # Function for calculating correlations (dij) based on the Gneiting function
   
   # Arguments:
@@ -254,6 +255,7 @@ compute_beta <- function(parm, names, cr) {
 
 
 compute_ax <- function(parm, names) {
+  # Paper :  See section 2.4 Equation 8
   # Extract a matrix of correction terms ('ax') for a set of variables based on parameters 
   # provided in 'parm'. 
   
@@ -284,6 +286,8 @@ compute_ax <- function(parm, names) {
 #' @keywords internal
 
 extract_beta <- function(parm, names) {
+  # Paper : See section 2.4 Equation 8
+
   
   ax = sapply(names, function(v1){
     sapply(names, function(v2){
