@@ -81,22 +81,28 @@ Gneiting <- function(h, u, par, dij) {
   rjj <- par[23]
   vii <- par[24]
   vjj <- par[25]
+  # ax : correction term ?
   ax <- par[26]
   
   # Calculated intermediate parameters for the covariance calculation.
+
+  # Details : Paper : See equation 10
   vij <- (vii + vjj) / 2
   rij <- sqrt((rii^2 + rjj^2) / 2)
   
+  # Details : Paper : See equation 10
   eij <- dij * ((rii^vii * rjj^vjj) / rij^(2*vij)) * 
     (gamma(vij) / (gamma(vii)^(1/2) * gamma(vjj)^(1/2))) * 
     sqrt((1-ai^2)*(1-aj^2)) * sqrt((1-bi^2)*(1-bj^2))
   
+  # Details : Paper : See equation 10 Variogram
   muij <- (((a1 * abs(u))^(2*b1) + 1)^(c) - (ai*aj * ((a2 * abs(u))^(2*b2) + 1)^(-c))) 
+  # Details : Additional Temporal attenuation
   rhoij <- 1 / (((d1 * abs(u))^(2*e1) + 1)^(f) - (bi*bj * ((d2 * abs(u))^(2*e2) + 1)^(-f)))
   
   A1 <- eij / muij
   A2 <- Matern(abs(h), r = (rij^2 / muij)^(1/2), v = vij) * rhoij
-  
+  # A3 : Additional Term NOT in the paper
   A3 <- ax * 1 / (((g1 * abs(u))^(2*l1) + 1)^(m) - ci*cj * ((g2 * abs(u))^(2*l2) + 1)^(-m))
   
   return(A1 * A2 + A3)
@@ -116,6 +122,8 @@ Gneiting <- function(h, u, par, dij) {
 #' @keywords internal
 
 param <- function(par, names) {
+  # Paper : See section 2.4  Details : Help for Gneiting Method
+
   # Function to construct a data frame with covariance parameters 
   
   # Arguments:
@@ -188,6 +196,8 @@ param <- function(par, names) {
 
 compute_beta <- function(parm, names, cr) {
   # Paper : See section 2.4 Equation 8
+  # Details : Calculate rho ij
+
   # Function for calculating correlations (dij) based on the Gneiting function
   
   # Arguments:
@@ -256,6 +266,7 @@ compute_beta <- function(parm, names, cr) {
 
 compute_ax <- function(parm, names) {
   # Paper :  See section 2.4 Equation 8
+  # Paper :  In link with Gneiting function
   # Extract a matrix of correction terms ('ax') for a set of variables based on parameters 
   # provided in 'parm'. 
   
@@ -287,6 +298,7 @@ compute_ax <- function(parm, names) {
 
 extract_beta <- function(parm, names) {
   # Paper : See section 2.4 Equation 8
+  # Paper : Details : Bij calculation
 
   
   ax = sapply(names, function(v1){
