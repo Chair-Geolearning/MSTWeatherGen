@@ -331,6 +331,7 @@ extract_beta <- function(parm, names) {
 #' @keywords internal
 
 loglik_pair <- function(par, parms, pair, par_all, data, names, Vi, h, u, uh, ep, cr) {
+  # Paper : See section 3.3.
   # Function to compute the log-likelihood for a pair of variables using the Gneiting spatio-temporal 
   # covariance model.
   
@@ -464,6 +465,7 @@ loglik_pair <- function(par, parms, pair, par_all, data, names, Vi, h, u, uh, ep
 
 
 loglik <- function(par, parms, par_all, data, names, Vi, h, u, uh, ep, cr) {
+  # Paper : See section 3.3.
   # Calculates the total log-likelihood for spatial or spatio-temporal data based on model parameters,
   # integrating across all variable pairs to support model fitting and optimization.
   
@@ -580,6 +582,8 @@ loglik <- function(par, parms, par_all, data, names, Vi, h, u, uh, ep, cr) {
 #' @keywords internal
 
 loglik_spatial <- function(par, data, h, uh, v) {
+  # Paper : See section 2.4 and 3.3.
+
   # Function to calculate the log-likelihood for spatial data using the Matérn covariance function.
   # This is crucial for estimating geostatistical parameters in spatial models.
   # Arguments:
@@ -654,6 +658,7 @@ loglik_spatial <- function(par, data, h, uh, v) {
 
 
 spacetime_cov <- function(data, wt_id, locations, ds = NULL, dates, lagstime, dist, covgm = TRUE) {
+  # Paper : See section 2.4
   # Computes spatial and temporal covariances for spatio-temporal data.
   
   # Arguments:
