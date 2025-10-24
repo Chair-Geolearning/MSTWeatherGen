@@ -238,7 +238,7 @@ optimize_spatial_parameters <- function(par_all, data, names, Vi, uh, cr, max_it
 #' @keywords internal
 #' @importFrom stringr str_split
 optimize_pairs_spatiotemporal <- function(par_all, data, names, Vi, uh, cr, max_it, ep) {
-  # Paper : Used for function log_lik and log See sections : 3.3
+  # Paper : Used for functions log_lik and log See sections : 3.3
   pairs <- paste(ep[,1],ep[,2], sep = "-")
   # Optimize model parameters for each pair of variables using the log-likelihood function
   for (i in seq(nrow(ep))) {
@@ -338,6 +338,7 @@ optimize_temporal_parameters <- function(par_all, data, names, Vi, uh, cr, max_i
 
 estimation_gf <- function(data, wt_id, max_it, dates, tmax, names, par_all = NULL,
                           coordinates, n1, n2, ax, cr, threshold_precip) {
+  # Paper :  See sections : 3.3
   # Estimate geostatistical parameters for spatio-temporal data 
   
   # Arguments:
@@ -421,7 +422,7 @@ estimation_gf <- function(data, wt_id, max_it, dates, tmax, names, par_all = NUL
 #' @keywords internal
 #' @importFrom stats kmeans
 selectUniformPointsIndices <- function(coordinates, N) {
-  
+  # Paper :  See sections : 3.3
   colnames(coordinates) <- c("lon", "lat")
   # K-means clustering
   clusters <- stats::kmeans(coordinates, centers = N)
@@ -452,6 +453,7 @@ selectUniformPointsIndices <- function(coordinates, N) {
 
 
 selectPoints <- function(coordinates, betaIndex, v) {
+  # Paper :  See sections : 3.3  Eq 17
   if (v > nrow(coordinates) || betaIndex > nrow(coordinates)) {
     stop("Invalid v or betaIndex")
   }
@@ -480,6 +482,8 @@ selectPoints <- function(coordinates, betaIndex, v) {
 #' @keywords internal
 #' @importFrom stringr str_split
 generate_spatial_index_pairs <- function(coordinates,n1, n2) {
+  # Paper :  See sections : 3.3 Eq 17
+
   D = as.matrix(dist(coordinates))
   Ns = nrow(coordinates)
   rs <- selectUniformPointsIndices(coordinates, n1)
@@ -510,6 +514,7 @@ generate_spatial_index_pairs <- function(coordinates,n1, n2) {
 #' @keywords internal
 
 generate_temporal_index_pairs <- function(wt_id,dates, tmax) {
+  # Paper :  See sections : 3.3 Eq 18
   Ti = lapply(0:tmax, function(i){
     Ti = cbind(wt_id-i,wt_id,i)
     diff = dates[wt_id]-dates[wt_id-i]
@@ -533,6 +538,7 @@ generate_temporal_index_pairs <- function(wt_id,dates, tmax) {
 #' @keywords internal
 
 generate_variable_index_pairs <- function(names) {
+  # Paper :  See sections : 3.3 
   u1 = sapply(names, function(v1) sapply(names, function(v2) v1))
   u2 = sapply(names, function(v1) sapply(names, function(v2) v2))
   ep = data.frame(cbind(u1[!upper.tri(u1)],u2[!upper.tri(u2)]))
@@ -551,6 +557,7 @@ generate_variable_index_pairs <- function(names) {
 #' @keywords internal
 
 unique_elements <- function(Si) {
+  # Paper :  See sections : 3.3 
   Si <- unlist(Si)
   Si <- Si[!duplicated(Si)]
   return(Si)
@@ -568,6 +575,7 @@ unique_elements <- function(Si) {
 #' @keywords internal
 
 preprocess_data <- function(Ti, Si, coordinates) {
+  # Paper :  See sections : 3.3 
   e <- expand.grid(1:nrow(Ti), 1:nrow(Si))
   u <- Ti[e[, 1], 3] 
   h <- ds(Si[e[, 2], 1], Si[e[, 2], 2],coordinates)
@@ -594,6 +602,7 @@ preprocess_data <- function(Ti, Si, coordinates) {
 #' @keywords internal
 #' @importFrom geosphere distHaversine
 estimate_gaussian_field_params <- function(data, wt, names, coordinates, tmax, max_it, n1, n2, dates, threshold_precip) {
+  # Paper :  See sections : 3.3 
   K = length(unique(wt))
   # Initialize the Gaussian field parameters storage
   gf_par <- vector(mode = "list", length = K)
