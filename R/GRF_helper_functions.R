@@ -11,6 +11,7 @@
 #' @noRd
 
 generate_variable_index_pairs <- function(names) {
+  # Paper : Used for function log_lik and log See sections : 3.3
   # This function creates a matrix with all combinations of variable names
   u1 = sapply(names, function(v1) sapply(names, function(v2) v1))
   u2 = sapply(names, function(v1) sapply(names, function(v2) v2))
@@ -37,6 +38,7 @@ generate_variable_index_pairs <- function(names) {
 #' @noRd
 
 initialize_par_all_if_missing <- function(par_all, names, pairs, par_s, ax, cr) {
+  # Paper : See sections : 3.3
   # Initialize the `par_all` vector if it is missing, with default values or using `par_s`
   if (is.null(par_all)) {
     names_par_all <- c(paste(pairs, "dij", sep = ":"), "a1", "d1", "g1", "a2", "d2", "g2",
@@ -84,6 +86,7 @@ initialize_par_all_if_missing <- function(par_all, names, pairs, par_s, ax, cr) 
 #' @noRd
 #' @importFrom Matrix nearPD
 update_ax_parameters <- function(par_all, names, ax) {
+  # Paper : Used for function log_lik and log See sections : 2.4
   # Update the `ax` parameters in `par_all` based on the covariance information in `ax`
   if(!is.matrix(ax)){
     for (v1 in names) {
@@ -132,6 +135,7 @@ update_ax_parameters <- function(par_all, names, ax) {
 #' @keywords internal
 #' @importFrom parallel mclapply
 init_space_par <- function(data, names, h, uh, max_it = 2000) {
+  # Paper : Used for function log_lik and log See sections : 3.3
   # Initializes spatial parameters for each variable
   # by optimizing an initial log-likelihood function (loglik0)
   
@@ -192,6 +196,7 @@ init_space_par <- function(data, names, h, uh, max_it = 2000) {
 #' @keywords internal
 #' @importFrom stringr str_split
 optimize_spatial_parameters <- function(par_all, data, names, Vi, uh, cr, max_it, ep) {
+  # Paper : Used for function log_lik and log See sections : 3.3
   pairs <- paste(ep[,1],ep[,2], sep = "-")
   parms <- c(paste(pairs, "ax", sep = ":"), paste(names, "ci", sep = ":"),
              paste(pairs[1:length(names)], "rij", sep = ":"), 
@@ -233,6 +238,7 @@ optimize_spatial_parameters <- function(par_all, data, names, Vi, uh, cr, max_it
 #' @keywords internal
 #' @importFrom stringr str_split
 optimize_pairs_spatiotemporal <- function(par_all, data, names, Vi, uh, cr, max_it, ep) {
+  # Paper : Used for function log_lik and log See sections : 3.3
   pairs <- paste(ep[,1],ep[,2], sep = "-")
   # Optimize model parameters for each pair of variables using the log-likelihood function
   for (i in seq(nrow(ep))) {
@@ -292,6 +298,7 @@ optimize_pairs_spatiotemporal <- function(par_all, data, names, Vi, uh, cr, max_
 #'
 #' @keywords internal
 optimize_temporal_parameters <- function(par_all, data, names, Vi, uh, cr, max_it, ep) {
+  # Paper : Used for function log_lik and log See sections : 3.3  
   # Final optimization step for the subset of parameters across all variable pairs
   parms <- c("a1", "d1", "g1", "a2", "d2", "g2",
              "b1", "e1", "l1", "b2", "e2", "l2", "c", "f", "m",
