@@ -11,6 +11,7 @@
 #'
 #' @keywords internal
 calculate_Bk_matrices <- function(C_k_matrices, Bk_0) {
+  # Paper : see section 4
   # Function for calculating coefficients matrices (Bk) for an autoregressive (AR) model
   # using lagged covariance matrices (C_k_matrices).
   #
@@ -83,6 +84,7 @@ calculate_Bk_matrices <- function(C_k_matrices, Bk_0) {
 #'
 #' @export
 calculate_AR_coefficients_matrices <- function(parm, coordinates, AR_lag){
+  # Paper : see section 4
   names = parm$names
   bk = lapply(1:length(parm$swg), function(s){
     K = length(parm$swg[[s]]$gf_par)
@@ -122,6 +124,7 @@ calculate_AR_coefficients_matrices <- function(parm, coordinates, AR_lag){
 #'
 #' @keywords internal
 simulate_Z <- function(Bk, M, num_steps, Z_initial,wt) {
+  # Paper : see section 4
   n <- nrow(Bk[[1]]$bk$Bk_0)  # Assuming Bk0 is square and represents the dimension of Z
   Z_list <- vector("list", num_steps)  # List to store the simulated values of Z
   
@@ -155,6 +158,7 @@ simulate_Z <- function(Bk, M, num_steps, Z_initial,wt) {
 #'
 #' @keywords internal
 generate_initial_conditions <- function(AR_lag, bk, wt) {
+  # Paper : see section 4
   # Generate initial conditions for the AR process based on Bk matrices and initial weather type.
   #
   # Arguments:
