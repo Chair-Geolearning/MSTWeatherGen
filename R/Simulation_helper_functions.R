@@ -11,6 +11,7 @@
 #'
 #' @keywords internal
 calculate_Bk_matrices <- function(C_k_matrices, Bk_0) {
+  # Paper : see Section 4
   # Function for calculating coefficients matrices (Bk) for an autoregressive (AR) model
   # using lagged covariance matrices (C_k_matrices).
   #
@@ -83,6 +84,7 @@ calculate_Bk_matrices <- function(C_k_matrices, Bk_0) {
 #'
 #' @export
 calculate_AR_coefficients_matrices <- function(parm, coordinates, AR_lag){
+  # Paper : see Section 4
   names = parm$names
   bk = lapply(1:length(parm$swg), function(s){
     K = length(parm$swg[[s]]$gf_par)
@@ -122,6 +124,7 @@ calculate_AR_coefficients_matrices <- function(parm, coordinates, AR_lag){
 #'
 #' @keywords internal
 simulate_Z <- function(Bk, M, num_steps, Z_initial,wt) {
+  # Paper : See Section 4
   n <- nrow(Bk[[1]]$bk$Bk_0)  # Assuming Bk0 is square and represents the dimension of Z
   Z_list <- vector("list", num_steps)  # List to store the simulated values of Z
   
@@ -155,6 +158,7 @@ simulate_Z <- function(Bk, M, num_steps, Z_initial,wt) {
 #'
 #' @keywords internal
 generate_initial_conditions <- function(AR_lag, bk, wt) {
+  # Paper : See Section 4
   # Generate initial conditions for the AR process based on Bk matrices and initial weather type.
   #
   # Arguments:
@@ -222,6 +226,7 @@ list_to_array <- function(Y, names, dates) {
 #'
 #' @keywords internal
 most_probable_weather_type = function(sim, centroids, transitions, names_weather_types) {
+  # Paper : see section 2.2 and 5
   # Function to predict the most likely weather type for the next time step in a simulated weather series.
   #
   # Arguments:
@@ -261,6 +266,7 @@ most_probable_weather_type = function(sim, centroids, transitions, names_weather
 #'
 #' @keywords internal
 find_centroids = function(data, dates, seasons, wt_seasons, names_weather_types) {
+  # Paper : see section 2.2 and 5
   # Calculates centroids of weather types for each season.
   #
   # Arguments:
@@ -305,6 +311,7 @@ find_centroids = function(data, dates, seasons, wt_seasons, names_weather_types)
 #'
 #' @keywords internal
 assign_seasons <- function(dates, seasons) {
+  # Paper : see section  5
   # Assigns a season to each date based on predefined season boundaries.
   #
   # Arguments:

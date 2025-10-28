@@ -10,7 +10,8 @@
 #'
 #' @keywords internal
 Matern <- function(h, r, v) {
-  # Calculates the Matern covariance function for a given vector of distances.
+  # Paper : See section 2.4 Eq 8 and 9
+  # Calculateste Matern covariance function for a given vector of distances.
   
   # Arguments:
   #   h: Numeric vector of distances between points.
@@ -38,6 +39,8 @@ Matern <- function(h, r, v) {
 #' @keywords internal
 
 Gneiting <- function(h, u, par, dij) {
+  # Paper : See section 2.4 Equation 8
+
   # Multivariate space-time Gneiting's covariance function
   # From the paper: https://doi.org/10.1016/j.spasta.2022.100706
   
@@ -78,22 +81,28 @@ Gneiting <- function(h, u, par, dij) {
   rjj <- par[23]
   vii <- par[24]
   vjj <- par[25]
+  # ax : correction term ?
   ax <- par[26]
   
   # Calculated intermediate parameters for the covariance calculation.
+
+  # Details : Paper : See equation 10
   vij <- (vii + vjj) / 2
   rij <- sqrt((rii^2 + rjj^2) / 2)
   
+  # Details : Paper : See equation 10
   eij <- dij * ((rii^vii * rjj^vjj) / rij^(2*vij)) * 
     (gamma(vij) / (gamma(vii)^(1/2) * gamma(vjj)^(1/2))) * 
     sqrt((1-ai^2)*(1-aj^2)) * sqrt((1-bi^2)*(1-bj^2))
   
+  # Details : Paper : See equation 10 Variogram
   muij <- (((a1 * abs(u))^(2*b1) + 1)^(c) - (ai*aj * ((a2 * abs(u))^(2*b2) + 1)^(-c))) 
+  # Details : Additional Temporal attenuation
   rhoij <- 1 / (((d1 * abs(u))^(2*e1) + 1)^(f) - (bi*bj * ((d2 * abs(u))^(2*e2) + 1)^(-f)))
   
   A1 <- eij / muij
   A2 <- Matern(abs(h), r = (rij^2 / muij)^(1/2), v = vij) * rhoij
-  
+  # A3 : Additional Term NOT in the paper
   A3 <- ax * 1 / (((g1 * abs(u))^(2*l1) + 1)^(m) - ci*cj * ((g2 * abs(u))^(2*l2) + 1)^(-m))
   
   return(A1 * A2 + A3)
@@ -113,6 +122,8 @@ Gneiting <- function(h, u, par, dij) {
 #' @keywords internal
 
 param <- function(par, names) {
+  # Paper : See section 2.4  Details : Help for Gneiting Method
+
   # Function to construct a data frame with covariance parameters 
   
   # Arguments:
@@ -184,6 +195,9 @@ param <- function(par, names) {
 #' @keywords internal
 
 compute_beta <- function(parm, names, cr) {
+  # Paper : See section 2.4 Equation 8
+  # Details : Calculate rho ij
+
   # Function for calculating correlations (dij) based on the Gneiting function
   
   # Arguments:
@@ -251,6 +265,8 @@ compute_beta <- function(parm, names, cr) {
 
 
 compute_ax <- function(parm, names) {
+  # Paper :  See section 2.4 Equation 8
+  # Paper :  In link with Gneiting function
   # Extract a matrix of correction terms ('ax') for a set of variables based on parameters 
   # provided in 'parm'. 
   
@@ -281,6 +297,9 @@ compute_ax <- function(parm, names) {
 #' @keywords internal
 
 extract_beta <- function(parm, names) {
+  # Paper : See section 2.4 Equation 8
+  # Paper : Details : Bij calculation
+
   
   ax = sapply(names, function(v1){
     sapply(names, function(v2){
@@ -312,6 +331,7 @@ extract_beta <- function(parm, names) {
 #' @keywords internal
 
 loglik_pair <- function(par, parms, pair, par_all, data, names, Vi, h, u, uh, ep, cr) {
+  # Paper : See section 3.3.
   # Function to compute the log-likelihood for a pair of variables using the Gneiting spatio-temporal 
   # covariance model.
   
@@ -445,6 +465,7 @@ loglik_pair <- function(par, parms, pair, par_all, data, names, Vi, h, u, uh, ep
 
 
 loglik <- function(par, parms, par_all, data, names, Vi, h, u, uh, ep, cr) {
+  # Paper : See section 3.3.
   # Calculates the total log-likelihood for spatial or spatio-temporal data based on model parameters,
   # integrating across all variable pairs to support model fitting and optimization.
   
@@ -561,6 +582,8 @@ loglik <- function(par, parms, par_all, data, names, Vi, h, u, uh, ep, cr) {
 #' @keywords internal
 
 loglik_spatial <- function(par, data, h, uh, v) {
+  # Paper : See section 2.4 and 3.3.
+
   # Function to calculate the log-likelihood for spatial data using the Matérn covariance function.
   # This is crucial for estimating geostatistical parameters in spatial models.
   # Arguments:
@@ -635,6 +658,7 @@ loglik_spatial <- function(par, data, h, uh, v) {
 
 
 spacetime_cov <- function(data, wt_id, locations, ds = NULL, dates, lagstime, dist, covgm = TRUE) {
+  # Paper : See section 2.4
   # Computes spatial and temporal covariances for spatio-temporal data.
   
   # Arguments:

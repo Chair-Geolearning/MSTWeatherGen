@@ -11,6 +11,7 @@
 #' @noRd
 
 generate_variable_index_pairs <- function(names) {
+  # Paper : Used for function log_lik and log See sections : 3.3
   # This function creates a matrix with all combinations of variable names
   u1 = sapply(names, function(v1) sapply(names, function(v2) v1))
   u2 = sapply(names, function(v1) sapply(names, function(v2) v2))
@@ -37,6 +38,7 @@ generate_variable_index_pairs <- function(names) {
 #' @noRd
 
 initialize_par_all_if_missing <- function(par_all, names, pairs, par_s, ax, cr) {
+  # Paper : See sections : 3.3
   # Initialize the `par_all` vector if it is missing, with default values or using `par_s`
   if (is.null(par_all)) {
     names_par_all <- c(paste(pairs, "dij", sep = ":"), "a1", "d1", "g1", "a2", "d2", "g2",
@@ -84,6 +86,7 @@ initialize_par_all_if_missing <- function(par_all, names, pairs, par_s, ax, cr) 
 #' @noRd
 #' @importFrom Matrix nearPD
 update_ax_parameters <- function(par_all, names, ax) {
+  # Paper : Used for function log_lik and log See sections : 2.4
   # Update the `ax` parameters in `par_all` based on the covariance information in `ax`
   if(!is.matrix(ax)){
     for (v1 in names) {
@@ -132,6 +135,7 @@ update_ax_parameters <- function(par_all, names, ax) {
 #' @keywords internal
 #' @importFrom parallel mclapply
 init_space_par <- function(data, names, h, uh, max_it = 2000) {
+  # Paper : Used for function log_lik and log See sections : 3.3
   # Initializes spatial parameters for each variable
   # by optimizing an initial log-likelihood function (loglik0)
   
@@ -191,6 +195,7 @@ init_space_par <- function(data, names, h, uh, max_it = 2000) {
 #' @keywords internal
 #' @importFrom stringr str_split
 optimize_spatial_parameters <- function(par_all, data, names, Vi, uh, cr, max_it, ep) {
+  # Paper : Used for function log_lik and log See sections : 3.3
   pairs <- paste(ep[,1],ep[,2], sep = "-")
   parms <- c(paste(pairs, "ax", sep = ":"), paste(names, "ci", sep = ":"),
              paste(pairs[1:length(names)], "rij", sep = ":"), 
@@ -232,6 +237,7 @@ optimize_spatial_parameters <- function(par_all, data, names, Vi, uh, cr, max_it
 #' @keywords internal
 #' @importFrom stringr str_split
 optimize_pairs_spatiotemporal <- function(par_all, data, names, Vi, uh, cr, max_it, ep) {
+  # Paper : Used for functions log_lik and log See sections : 3.3
   pairs <- paste(ep[,1],ep[,2], sep = "-")
   # Optimize model parameters for each pair of variables using the log-likelihood function
   for (i in seq(nrow(ep))) {
@@ -291,6 +297,7 @@ optimize_pairs_spatiotemporal <- function(par_all, data, names, Vi, uh, cr, max_
 #'
 #' @keywords internal
 optimize_temporal_parameters <- function(par_all, data, names, Vi, uh, cr, max_it, ep) {
+  # Paper : Used for function log_lik and log See sections : 3.3  
   # Final optimization step for the subset of parameters across all variable pairs
   parms <- c("a1", "d1", "g1", "a2", "d2", "g2",
              "b1", "e1", "l1", "b2", "e2", "l2", "c", "f", "m",
@@ -330,6 +337,7 @@ optimize_temporal_parameters <- function(par_all, data, names, Vi, uh, cr, max_i
 
 estimation_gf <- function(data, wt_id, max_it, dates, tmax, names, par_all = NULL,
                           coordinates, n1, n2, ax, cr, threshold_precip) {
+  # Paper :  See sections : 3.3
   # Estimate geostatistical parameters for spatio-temporal data 
   
   # Arguments:
@@ -413,7 +421,7 @@ estimation_gf <- function(data, wt_id, max_it, dates, tmax, names, par_all = NUL
 #' @keywords internal
 #' @importFrom stats kmeans
 selectUniformPointsIndices <- function(coordinates, N) {
-  
+  # Paper :  See sections : 3.3
   colnames(coordinates) <- c("lon", "lat")
   # K-means clustering
   clusters <- stats::kmeans(coordinates, centers = N)
@@ -444,6 +452,7 @@ selectUniformPointsIndices <- function(coordinates, N) {
 
 
 selectPoints <- function(coordinates, betaIndex, v) {
+  # Paper :  See sections : 3.3  Eq 17
   if (v > nrow(coordinates) || betaIndex > nrow(coordinates)) {
     stop("Invalid v or betaIndex")
   }
@@ -472,6 +481,8 @@ selectPoints <- function(coordinates, betaIndex, v) {
 #' @keywords internal
 #' @importFrom stringr str_split
 generate_spatial_index_pairs <- function(coordinates,n1, n2) {
+  # Paper :  See sections : 3.3 Eq 17
+
   D = as.matrix(dist(coordinates))
   Ns = nrow(coordinates)
   rs <- selectUniformPointsIndices(coordinates, n1)
@@ -502,6 +513,7 @@ generate_spatial_index_pairs <- function(coordinates,n1, n2) {
 #' @keywords internal
 
 generate_temporal_index_pairs <- function(wt_id,dates, tmax) {
+  # Paper :  See sections : 3.3 Eq 18
   Ti = lapply(0:tmax, function(i){
     Ti = cbind(wt_id-i,wt_id,i)
     diff = dates[wt_id]-dates[wt_id-i]
@@ -525,6 +537,7 @@ generate_temporal_index_pairs <- function(wt_id,dates, tmax) {
 #' @keywords internal
 
 generate_variable_index_pairs <- function(names) {
+  # Paper :  See sections : 3.3 
   u1 = sapply(names, function(v1) sapply(names, function(v2) v1))
   u2 = sapply(names, function(v1) sapply(names, function(v2) v2))
   ep = data.frame(cbind(u1[!upper.tri(u1)],u2[!upper.tri(u2)]))
@@ -543,6 +556,7 @@ generate_variable_index_pairs <- function(names) {
 #' @keywords internal
 
 unique_elements <- function(Si) {
+  # Paper :  See sections : 3.3 
   Si <- unlist(Si)
   Si <- Si[!duplicated(Si)]
   return(Si)
@@ -560,6 +574,7 @@ unique_elements <- function(Si) {
 #' @keywords internal
 
 preprocess_data <- function(Ti, Si, coordinates) {
+  # Paper :  See sections : 3.3 
   e <- expand.grid(1:nrow(Ti), 1:nrow(Si))
   u <- Ti[e[, 1], 3] 
   h <- ds(Si[e[, 2], 1], Si[e[, 2], 2],coordinates)
@@ -586,6 +601,7 @@ preprocess_data <- function(Ti, Si, coordinates) {
 #' @keywords internal
 #' @importFrom geosphere distHaversine
 estimate_gaussian_field_params <- function(data, wt, names, coordinates, tmax, max_it, n1, n2, dates, threshold_precip) {
+  # Paper :  See sections : 3.3 
   K = length(unique(wt))
   # Initialize the Gaussian field parameters storage
   gf_par <- vector(mode = "list", length = K)

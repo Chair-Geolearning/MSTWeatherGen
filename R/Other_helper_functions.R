@@ -13,7 +13,7 @@
 #' @keywords internal
 #' @importFrom lubridate year leap_year month
 season_indices = function(dates, season, Year){
-  
+  # Paper : see section 5
   years = unique(lubridate::year(dates))
   years = c(years, max(years) + 1)
   md = lapply(years, function(Year) {
@@ -107,6 +107,7 @@ season_indices = function(dates, season, Year){
 #'
 #' @keywords internal
 filter_season_data <- function(data, dates, season, names) {
+  # Paper : see section 5
   # Ensure 'dates' is converted to Date class
   dates <- as.Date(dates)
   
@@ -175,6 +176,7 @@ haversine <- function(point1, point2) {
 #' @importFrom geosphere distHaversine
 #' @keywords internal
 ds = function(i,j,coordinates) {
+  # Paper : see section 3.3
   return(geosphere::distHaversine(coordinates[i,], coordinates[j,])/1000)
   #return(sqrt(rowSums((coordinates[i,]-coordinates[j,])^2)))
 }
