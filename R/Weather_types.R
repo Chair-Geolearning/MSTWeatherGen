@@ -200,7 +200,7 @@ weather_types = function(data, variables,dates, n_wt = NULL,coordinates,
 #' @keywords internal
 #' @importFrom lubridate year
 estimtransition = function(wt, dates, K){
-  # Paper : see section 3.1
+  # Paper : see section 3.1 Eq 12 but homogenous case.
   
   # Function to estimate transition matrices based on weather types 
   # Arguments:
@@ -247,6 +247,7 @@ estimtransition = function(wt, dates, K){
 #' @importFrom FNN get.knn
 #' @importFrom lubridate year
 estimate_transitions = function(cluster, dates, nb = 30, K){
+  # Paper : see section 3.1 Eq 12 but full case this time.
   # Function to estimate transition matrices between clusters over time
   # Arguments:
   #   cluster: A vector of cluster assignments for each time point
