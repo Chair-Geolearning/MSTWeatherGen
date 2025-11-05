@@ -15,8 +15,7 @@
 #'
 #' @keywords internal
 orderNorm <- function(x,left, n_logit_fit = min(length(x), 100000), ..., warn = TRUE) {
-
-  # Paper : see section 3.2
+  # Paper : see section 3.2 Eq (14) (15) and (16)
   # Function for ordered normalization Ordered Quantile normalizing transformation
   # Function inspired from "bestNormalize" package and adapted for truncated normal distributions.
   
@@ -79,7 +78,7 @@ orderNorm <- function(x,left, n_logit_fit = min(length(x), 100000), ..., warn = 
 #'
 #' @keywords internal
 predict_binomial = function(fit, newdata){
-  # Paper : see section 3.2 
+  # Paper : see section 3.2 Eq (16)
 
   if(missing(newdata)) newdata = fit$x_red
   pred = fit$coef[1]+fit$coef[2]*newdata
@@ -104,7 +103,7 @@ predict_binomial = function(fit, newdata){
 #' @keywords internal
 orderNorm_all <- function(data, j, coordinates, left) {
   
-  # Paper : see section 3.2 case: Zero-inflated data
+  # Paper : see section 3.2 Eq (14), section 2.3 Eq (5) and section 2.1 Eq (1) : Zero-inflated data
 
   # Function to perform normalization on a selected variable 'j' from 'data', considering spatial information 
   # from 'coordinates' and a threshold 'left' for the transformation. This is particularly useful for variables with 
@@ -156,7 +155,7 @@ predict.orderNormTransf <- function(object,
                                     inverse = FALSE, 
                                     warn = TRUE,
                                     ...) {
-  # Paper : see section 2.3 : Transformation
+  # Paper : see section 2.3 and 2.1 Eq (1): Transformation
 
   stopifnot(is.null(newdata) || is.numeric(newdata))
   
@@ -191,7 +190,7 @@ predict.orderNormTransf <- function(object,
 #'
 #' @keywords internal
 inv_orderNorm_Transf <- function(orderNorm_obj, new_points_x_t, left, warn = FALSE) {
-  # Paper : see section 2.3 : Transformation
+  # Paper : see section 2.3, 2.1 and 3.2 : Transformation
 
   # Reverses the normalization or transformation applied by the orderNorm function.
   # Arguments:
@@ -258,7 +257,7 @@ inv_orderNorm_Transf <- function(orderNorm_obj, new_points_x_t, left, warn = FAL
 #'
 #' @keywords internal
 orderNormTransf <- function(orderNorm_obj, new_points, warn, left) {
-  # Paper : see section 2.3 and 3.2
+  # Paper : see section 2.3 and 3.2 Ed (13-16)
   # Transforms new data points based on a previously fitted normalization or transformation model.
   # This function is used to apply the same transformation to new data that was applied to the original data.
   
@@ -314,7 +313,7 @@ orderNormTransf <- function(orderNorm_obj, new_points, warn, left) {
 #' @importFrom lubridate year
 #' @keywords internal
 scale_data <- function(data, names, dates, window_size = 30) {
-  # Paper : see section 5 and 3.2
+  # Paper : see section 5 and 3.2 : Seasonality case
   
   if(length(unique(lubridate::year(dates))) > 5){
     # Initialize scale parameters storage
@@ -378,8 +377,8 @@ scale_data <- function(data, names, dates, window_size = 30) {
 #'
 #' @keywords internal
 estimate_lambda_transformations <- function(data, wt, names, coordinates) {
-  # Paper : see section 2.3 and 3.2
-
+  # Paper : see section 2.3 and 3.2.
+  
   ns = dim(data)[2]
   K = length(unique(wt))
   # Iterate over each weather type
@@ -540,6 +539,7 @@ apply_inverse_transformations <- function(sim, wt, parm, names) {
 #'
 #' @keywords internal
 rescale_data <- function(sim, parm, names, dates) {
+  # Paper : see section 5.
   # Rescales simulated weather data for variables other than "Precipitation" to their original scale.
   #
   # Arguments:
