@@ -10,7 +10,7 @@
 #'
 #' @keywords internal
 Matern <- function(h, r, v) {
-  # Paper : See section 2.4 Eq 8 and 9
+  # Paper : See section 2.4 Eq (8) and (9)
   # Calculateste Matern covariance function for a given vector of distances.
   
   # Arguments:
@@ -39,7 +39,7 @@ Matern <- function(h, r, v) {
 #' @keywords internal
 
 Gneiting <- function(h, u, par, dij) {
-  # Paper : See section 2.4 Equation 8
+  # Paper : See section 2.4 Equation (8)
 
   # Multivariate space-time Gneiting's covariance function
   # From the paper: https://doi.org/10.1016/j.spasta.2022.100706
@@ -195,7 +195,7 @@ param <- function(par, names) {
 #' @keywords internal
 
 compute_beta <- function(parm, names, cr) {
-  # Paper : See section 2.4 Equation 8
+  # Paper : See section 2.4 Equation (8)
   # Details : Calculate rho ij
 
   # Function for calculating correlations (dij) based on the Gneiting function
@@ -265,7 +265,7 @@ compute_beta <- function(parm, names, cr) {
 
 
 compute_ax <- function(parm, names) {
-  # Paper :  See section 2.4 Equation 8
+  # Paper :  See section 2.4 Equation (8)
   # Paper :  In link with Gneiting function
   # Extract a matrix of correction terms ('ax') for a set of variables based on parameters 
   # provided in 'parm'. 
@@ -297,7 +297,7 @@ compute_ax <- function(parm, names) {
 #' @keywords internal
 
 extract_beta <- function(parm, names) {
-  # Paper : See section 2.4 Equation 8
+  # Paper : See Section 2.4 Equation (8)
   # Paper : Details : Bij calculation
 
   
@@ -331,7 +331,7 @@ extract_beta <- function(parm, names) {
 #' @keywords internal
 
 loglik_pair <- function(par, parms, pair, par_all, data, names, Vi, h, u, uh, ep, cr) {
-  # Paper : See section 3.3.
+  # Paper : See Section 3.3.
   # Function to compute the log-likelihood for a pair of variables using the Gneiting spatio-temporal 
   # covariance model.
   
@@ -465,7 +465,7 @@ loglik_pair <- function(par, parms, pair, par_all, data, names, Vi, h, u, uh, ep
 
 
 loglik <- function(par, parms, par_all, data, names, Vi, h, u, uh, ep, cr) {
-  # Paper : See section 3.3.
+  # Paper : See Section 3.3.
   # Calculates the total log-likelihood for spatial or spatio-temporal data based on model parameters,
   # integrating across all variable pairs to support model fitting and optimization.
   
@@ -582,7 +582,7 @@ loglik <- function(par, parms, par_all, data, names, Vi, h, u, uh, ep, cr) {
 #' @keywords internal
 
 loglik_spatial <- function(par, data, h, uh, v) {
-  # Paper : See section 2.4 and 3.3.
+  # Paper : See Dection 2.4 and 3.3.
 
   # Function to calculate the log-likelihood for spatial data using the Matérn covariance function.
   # This is crucial for estimating geostatistical parameters in spatial models.
@@ -658,7 +658,7 @@ loglik_spatial <- function(par, data, h, uh, v) {
 
 
 spacetime_cov <- function(data, wt_id, locations, ds = NULL, dates, lagstime, dist, covgm = TRUE) {
-  # Paper : See section 2.4
+  # Paper : See Section 2.4
   # Computes spatial and temporal covariances for spatio-temporal data.
   
   # Arguments:
