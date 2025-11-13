@@ -162,6 +162,9 @@ MSTWeatherGen_Sim = function(dates_sim, dates_original, data, seasons = NULL, pa
 #' estimation of scaling parameters, computation of transition probabilities between weather types, and estimation
 #' of parameters for the Gaussian field model.
 #'
+#'  This function implements the methods described in Sections 3.1–3.3 of the article
+#' *Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8). 
+#'                         
 #' @param data Array of weather data with dimensions [time, location, variable].
 #' @param dates Vector of dates corresponding to the time dimension of the data.
 #' @param precipitation Logical indicating if precipitation is to be considered as a primary variable.
@@ -177,39 +180,19 @@ MSTWeatherGen_Sim = function(dates_sim, dates_original, data, seasons = NULL, pa
 #'
 #' @return A list containing dates, scale parameters, weather types, transition probabilities, lambda transformations,
 #' and parameters for the Gaussian field model for the specified season.
+#'   \itemize{
+#'   \item \strong{dates}: A vector of relevant dates for the season;
+#'   \item \strong{scale_params}: Scale parameters used in the model;
+#'   \item \strong{weather_types}: Classified weather types for the period;
+#'   \item \strong{transition_probs}: Transition probabilities between weather types;
+#'   \item \strong{lambda_transformations}: Applied lambda transformations;
+#'   \item \strong{gaussian_params}: Parameters of the Gaussian field model for the specified season.
+#' }
 #'
 #' @keywords internal
 MSTWeatherGen_Estim_season = function(data, dates, precipitation = T, scale = FALSE, names = NULL, 
                                       names_weather_types = NULL, coordinates,
                                       season, max_it, tmax, n1, n2) {
-  # Paper : see section 3.1, 3.2 and 3.3.
-  # Function to perform seasonal estimation for a space-time stochastic weather generator.
-  # It processes input weather data, identifies weather types for a given season,
-  # estimates scaling parameters, computes transition probabilities between weather types,
-  # and estimates parameters for the Gaussian field representing spatial dependencies.
-  #
-  # Arguments:
-  #   data: Array of weather data with dimensions [time, location, variable].
-  #   dates: Vector of dates corresponding to the time dimension of the data.
-  #   names: Names of the variables in the data array to be used for analysis.
-  #   names_weather_types: Subset of 'names', the variables to be used for weather type classification.
-  #   coordinates: Matrix with columns for coordinates of each location.
-  #   season: Vector of integers representing months to define the season for analysis.
-  #   max_it: Maximum number of iterations for certain optimization procedures.
-  #   tmax: Maximum time lag for temporal analysis.
-  #   n1, n2: Parameters defining spatial window size for analysis.
-  #   return_plots: Logical, indicating if plots should be generated and returned.
-  #
-  # Returns:
-  #   A list containing:
-  #     - dates: Filtered dates for the specified season.
-  #     - scale_parm: Scaling parameters for each variable.
-  #     - wt: Identified weather types for the season.
-  #     - transitions: Transition probabilities between weather types.
-  #     - lmbd: Parameters for lambda transformations for each weather type and variable.
-  #     - gf_par: Parameters for the Gaussian field model.
-  
-  
   # Check names
   if(is.null(names)&precipitation){
     names = c("Precipitation", paste0("v",2:dim(data)[3]))
