@@ -5,6 +5,9 @@
 #' allowing for detailed analysis and modeling of weather data. Estimation can be performed on a seasonal basis
 #' or annually, depending on the provided data and specified parameters. It handles multiple weather variables,
 #' with special consideration for precipitation if indicated.
+#' 
+#'  This function implements the methods described in Sections 3.1–3.3 of the article
+#' *Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8). 
 #'
 #' @param data A multi-dimensional array of weather data, encompassing time, location, and various weather variables.
 #' @param dates A vector of dates corresponding to the time dimension in the data array, used for temporal analysis.
@@ -36,25 +39,6 @@
 MSTWeatherGen_Estim = function(data, dates, by_season = TRUE,  seasons, scale = FALSE, precipitation = T, names = NULL, 
                                names_weather_types = NULL, coordinates,
                                max_it, tmax, n1, n2){
-  # Paper : see section 3.1, 3.2 and 3.3.
-  # Function for estimating parameters for a Multivariate Space-Time Stochastic Weather Generator (MSTWeatherGen).
-  # This can be done either on a seasonal basis or annually, based on the provided data and parameters.
-  #
-  # Arguments:
-  #   data: A multi-dimensional array of weather data, typically including time, location, and various weather variables.
-  #   dates: A vector of dates corresponding to the time dimension in the data array.
-  #   by_season: Logical flag indicating whether the estimation should be done seasonally (TRUE) or annually (FALSE).
-  #   seasons: A list defining the seasons, each with start and end days and months. Necessary if by_season is TRUE.
-  #   names: Names of the variables in the data array that will be used in the analysis.
-  #   names_weather_types: Specific variables from 'names' that will be used to classify weather types.
-  #   coordinates: A matrix or data frame containing the coordinates coordinates for each location in the data.
-  #   max_it: The maximum number of iterations for the optimization procedures within the estimation process.
-  #   tmax: The maximum temporal lag to be considered in the analysis.
-  #   n1, n2: Parameters defining spatial window sizes for the analysis.
-  #
-  # Returns:
-  #   A list of results from the MSTWeatherGen_Estim_season function for each season (or annually, if by_season is FALSE),
-  #   including estimated parameters and potentially other analytical outputs relevant to weather generation.
   
   # Validate input parameters, especially the requirement for 'seasons' when 'by_season' is TRUE
   if(by_season & missing(seasons)){
