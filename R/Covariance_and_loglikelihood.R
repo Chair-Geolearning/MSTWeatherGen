@@ -2,6 +2,9 @@
 #'
 #' Calculates the Matern covariance function for a given vector of distances. This function is intended for internal use within the package to compute spatial covariances with the Matern model. It is not exported for end-user interaction.
 #'
+#'  This function implements the methods described in Sections 2.4 in Equations 8 and 9 of the article
+#' *Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8). 
+#'
 #' @param h Numeric vector of distances between points.
 #' @param r Scalar range parameter of the Matern function, affecting the spatial correlation decay.
 #' @param v Scalar smoothness parameter of the Matern function, controlling the smoothness of the resulting field.
@@ -10,17 +13,7 @@
 #'
 #' @keywords internal
 Matern <- function(h, r, v) {
-  # Paper : See section 2.4 Eq (8) and (9)
-  # Calculateste Matern covariance function for a given vector of distances.
-  
-  # Arguments:
-  #   h: Numeric vector of distances between points.
-  #   r: Scalar range parameter of the Matern function, affecting spatial correlation decay.
-  #   v: Scalar smoothness parameter of the Matern function, controlling the smoothness of the resulting field.
-  
-  # Returns:
-  #   Numeric vector representing the covariance values calculated using the Matern function for the distances in h.
-  
+
   rt <- (2 ^ (1 - v)) / gamma(v) * ((r * abs(h)) ^ v) * besselK(r * abs(h), nu = v)
   rt[h == 0] <- 1  # Ensures that the covariance at distance 0 is 1.
   return(rt)
@@ -28,6 +21,9 @@ Matern <- function(h, r, v) {
 #' Gneiting's Spatio-Temporal Covariance Model
 #'
 #' Computes the covariance based on Gneiting's spatio-temporal model. Intended for internal package use.
+#'
+#'  This function implements the methods described in Section 2.4 in Equations 8 of the article
+#' *Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8). 
 #'
 #' @param h Numeric vector of spatial distances.
 #' @param u Numeric vector of temporal distances.
@@ -39,20 +35,7 @@ Matern <- function(h, r, v) {
 #' @keywords internal
 
 Gneiting <- function(h, u, par, dij) {
-  # Paper : See section 2.4 Equation (8)
-
-  # Multivariate space-time Gneiting's covariance function
-  # From the paper: https://doi.org/10.1016/j.spasta.2022.100706
-  
-  # Arguments:loglik
-  #   h: Numeric vector of spatial distances.
-  #   u: Numeric vector of temporal distances.
-  #   par: Numeric vector of parameters used in the covariance function.
-  #   dij: correlation parameter between variable i and j.
-  
-  # Returns:
-  #   Covariance value(s) calculated using Gneiting's spatio-temporal covariance model.
-  
+ 
   if(!is.numeric(par)) par <- as.numeric(par)
   
   # Unpack parameters from the 'par' vector for clarity.
@@ -113,26 +96,18 @@ Gneiting <- function(h, u, par, dij) {
 #' Creates a data frame of covariance parameters for all possible pairs of variables. This function is 
 #' designed for internal use, facilitating the organization of parameters for spatio-temporal modeling.
 #'
+#'  This function implements the methods described in Section 2.4 of the article
+#' *Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8). 
+#'
 #' @param par Named vector of parameters.
 #' @param names Character vector of variable names.
 #'
-#' @return A data frame where each row corresponds to a pair of variables (including self-pairs) 
+#' @return A data frame where each row corresponds to a pair of variables (including self-pairs) filled with values specified in the 'par' vector.
 #' and their associated spatio-temporal covariance parameters.
 #'
 #' @keywords internal
 
 param <- function(par, names) {
-  # Paper : See section 2.4  Details : Help for Gneiting Method
-
-  # Function to construct a data frame with covariance parameters 
-  
-  # Arguments:
-  #   par: Named vector of parameters
-  #   names: Character vector of variable names, such as "temperature", "wind", etc.
-  
-  # Returns:
-  #   A data frame with columns for each combination of variables and their associated parameters,
-  #   filled with values specified in the 'par' vector.
   
   # Generate all possible pairs of variable names, including self-pairs, for parameter definitions
   ep <- generate_variable_index_pairs(names)
@@ -185,30 +160,22 @@ param <- function(par, names) {
 #'
 #' This function calculates the beta correlation coefficients between variables based on the Gneiting function, adjusted for a correction term. It is intended for internal use within package functions to adjust initial correlation values using specified parameters.
 #'
+#'  This function implements the methods described in Section 2.4 in Equation 8 of the article
+#' *Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8). 
+#'
 #' @param parm A data frame or list containing parameters for the Gneiting function.
-#' @param names Character vector of variable names to calculate correlations between.
+#' @param names A vector of variable names (e.g., "temperature", "wind") to calculate correlations between.
 #' @param cr Matrix of initial correlation values between the variables.
 #'
 #' @return Symmetric matrix of adjusted correlation coefficients (beta) between the variables.
+#' where each element [i, j] represents the correlation coefficient
+#'  between variables i and j, adjusted based on the Gneiting function and a correction term.
 #'
 #' @importFrom Matrix nearPD
 #' @keywords internal
 
 compute_beta <- function(parm, names, cr) {
-  # Paper : See section 2.4 Equation (8)
-  # Details : Calculate rho ij
 
-  # Function for calculating correlations (dij) based on the Gneiting function
-  
-  # Arguments:
-  #   parm: A data frame or similar structure containing parameters for the Gneiting function,
-  #   names: A vector of variable names (e.g., "temperature", "wind") to calculate correlations between.
-  #   cr: A matrix containing initial correlation values between the variables.
-  
-  # Returns:
-  #   A symmetric matrix (beta) where each element [i, j] represents the correlation coefficient
-  #   between variables i and j, adjusted based on the Gneiting function and a correction term.
-  
   J = length(names)  # Number of variables
   beta <- matrix(0, ncol = J, nrow = J)  # Initialize the beta matrix with zeros
   colnames(beta) <- rownames(beta) <- names  # Set the row and column names of the matrix to variable names
@@ -254,7 +221,10 @@ compute_beta <- function(parm, names, cr) {
 }
 #' Extract Correction Terms Matrix
 #'
-#' Extracts a matrix of correction terms ('ax') for each pair of variables based on the model parameters. Designed for internal use to facilitate calculations involving correction terms in spatial or spatio-temporal modeling.
+#' Extracts a matrix of correction terms ('ax') for each pair of variables based on the model parameters provided in 'parm'. Designed for internal use to facilitate calculations involving correction terms in spatial or spatio-temporal modeling.
+#'
+#'  This function implements the methods described in Sections 2.4 in Equation 8 of the article
+#' *Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8). 
 #'
 #' @param parm A data frame or list containing the model parameters, including 'ax' values.
 #' @param names Character vector specifying the variable names for which correction terms are to be calculated.
@@ -265,17 +235,6 @@ compute_beta <- function(parm, names, cr) {
 
 
 compute_ax <- function(parm, names) {
-  # Paper :  See section 2.4 Equation (8)
-  # Paper :  In link with Gneiting function
-  # Extract a matrix of correction terms ('ax') for a set of variables based on parameters 
-  # provided in 'parm'. 
-  
-  # Arguments:
-  #   parm: A data frame or list containing the model parameters.
-  #   names: A vector of variable names. 
-  
-  # Returns:
-  #   A matrix where each element [i, j] represents the correction term ('ax') between the ith and jth variables
   
   ax = sapply(names, function(v1){
     sapply(names, function(v2){
@@ -289,6 +248,9 @@ compute_ax <- function(parm, names) {
 #'
 #' Extracts a matrix of beta coefficients ('dij') for each pair of variables from the provided model parameters. Intended for internal use, this function supports spatial and spatio-temporal modeling by organizing pairwise beta coefficients into a structured format.
 #'
+#'  This function implements the methods described in Sections 2.4 in Equation 8 of the article
+#' *Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8). 
+#'
 #' @param parm A data frame or list containing the model parameters, which must include 'dij' values representing beta coefficients between pairs of variables.
 #' @param names Character vector of variable names for which beta coefficients are to be extracted.
 #'
@@ -297,9 +259,6 @@ compute_ax <- function(parm, names) {
 #' @keywords internal
 
 extract_beta <- function(parm, names) {
-  # Paper : See Section 2.4 Equation (8)
-  # Paper : Details : Bij calculation
-
   
   ax = sapply(names, function(v1){
     sapply(names, function(v2){
@@ -312,7 +271,11 @@ extract_beta <- function(parm, names) {
 #'
 #' Calculates the log-likelihood for a given pair of variables using the Gneiting spatio-temporal covariance model. This function is part of the internal mechanism for optimizing model parameters based on observed data.
 #'
+#'  This function implements the methods described in Section 3.3 of the article
+#' *Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8). 
+#'
 #' @param par Current parameters being optimized.
+#' @param beta Matrix of beta coefficients, precomputed.
 #' @param parms Indices or names of parameters in 'par' to be updated.
 #' @param pair A string indicating the pair of variables (e.g., "temperature-wind") being analyzed.
 #' @param par_all Complete set of parameters for the model.
@@ -331,27 +294,6 @@ extract_beta <- function(parm, names) {
 #' @keywords internal
 
 loglik_pair <- function(par, parms, pair, par_all, data, names, Vi, h, u, uh, ep, cr) {
-  # Paper : See Section 3.3.
-  # Function to compute the log-likelihood for a pair of variables using the Gneiting spatio-temporal 
-  # covariance model.
-  
-  # Arguments:
-  #   par: Current parameters being optimized.
-  #   parms: Indices or names of parameters in 'par' to be updated.
-  #   pair: A string indicating the pair of variables (e.g., "temperature-wind") being analyzed.
-  #   par_all: Complete set of parameters for the model.
-  #   data: 3D array of observed data, with dimensions corresponding to  times, locations, and variables.
-  #   names: Vector of variable names, indicating the variables' names (e.g., "temperature" and "wind").
-  #   Vi: Matrix where each line corresponds for a possible combination of variables in "names"
-  #   h: Vector of spatial distances for the pair.
-  #   u: Vector of temporal distances for the pair.
-  #   uh: Matrix containing pairs of spatial and temporal distances, and additional information.
-  #   ep: A matrix or data frame defining pairs of variables.
-  #   beta: Matrix of beta coefficients, precomputed.
-  #   cr: Correlation matrix, initial or base correlations between variables.
-  
-  # Returns:
-  #   The log-likelihood value for the given pair of variables based on the current model parameters.
   
   J = length(names)  # Number of variables
   pairs = paste(ep[,1], ep[,2], sep = "-")  # Constructing pairs from 'ep' data frame
@@ -442,11 +384,16 @@ loglik_pair <- function(par, parms, pair, par_all, data, names, Vi, h, u, uh, ep
 
 #' Total Log-Likelihood Calculation
 #'
-#' Calculates the total log-likelihood for spatial or spatio-temporal data across all variable pairs. Utilizes the Gneiting spatio-temporal covariance model to integrate log-likelihood contributions from each variable pair. This function is core to the optimization process within model fitting.
+#' Calculates the total log-likelihood for spatial or spatio-temporal data across all variable pairs. 
+#' Utilizes the Gneiting spatio-temporal covariance model to integrate log-likelihood contributions from each variable pair. 
+#' This function is core to the optimization process within model fitting.
+#'
+#'  This function implements the methods described in Section 3.3 of the article
+#' *Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8). 
 #'
 #' @param par Vector of parameter estimates currently being optimized.
 #' @param parms Indices or names of parameters within 'par' that are subject to update.
-#' @param par_all Comprehensive list of all model parameters.
+#' @param par_all Comprehensive list of all model parameters, including those not currently being optimized.
 #' @param data 3D array of observed data across locations, times, and variables.
 #' @param names Character vector of variable names.
 #' @param Vi Matrix indicating all combinations of variables for analysis.
@@ -455,6 +402,8 @@ loglik_pair <- function(par, parms, pair, par_all, data, names, Vi, h, u, uh, ep
 #' @param uh Combined matrix of spatial and temporal distances with additional identifiers.
 #' @param ep Data frame defining variable pairs for analysis.
 #' @param cr Initial correlation matrix across variables.
+#' @param beta: Precomputed beta coefficients matrix for all pairs.
+
 #'
 #' @return Total log-likelihood value for the observed data given the current model parameters.
 #'
@@ -465,27 +414,6 @@ loglik_pair <- function(par, parms, pair, par_all, data, names, Vi, h, u, uh, ep
 
 
 loglik <- function(par, parms, par_all, data, names, Vi, h, u, uh, ep, cr) {
-  # Paper : See Section 3.3.
-  # Calculates the total log-likelihood for spatial or spatio-temporal data based on model parameters,
-  # integrating across all variable pairs to support model fitting and optimization.
-  
-  # Arguments:
-  #   par: Vector of current parameter estimates to be optimized.
-  #   parms: Indices or names of parameters in 'par' that are to be updated.
-  #   par_all: Complete vector of all model parameters, including those not currently being optimized.
-  #   data: 3D array of observed data, with dimensions for locations, times, and variables.
-  #   names: Vector of variable names corresponding to the third dimension of 'data'.
-  #   Vi: Matrix where each line corresponds for a possible combination of variables in "names"
-  #   h: Vector of spatial distances for the pairs being analyzed.
-  #   u: Vector of temporal distances for the pairs being analyzed.
-  #   uh: Matrix containing combined spatial and temporal distances along with additional identifiers.
-  #   ep: Data frame defining pairs of variables for analysis.
-  #   beta: Precomputed beta coefficients matrix for all pairs.
-  #   cr: Initial correlation matrix for the variables.
-  
-  # Returns:
-  #   The total log-likelihood value for the data based on the current set of parameters.
-  
   
   J = length(names)  # Number of variables in the analysis.
   pairs = paste(ep[,1], ep[,2], sep = "-")  # Construct pairs from 'ep' for parameter naming.
@@ -568,12 +496,15 @@ loglik <- function(par, parms, par_all, data, names, Vi, h, u, uh, ep, cr) {
 }
 #' Log-Likelihood for Spatial Data
 #'
-#' Calculates the log-likelihood for spatial data based on the Matérn covariance function. This function plays a pivotal role in estimating spatial parameters for geostatistical models.
+#' Calculates the log-likelihood for spatial data based on the Matérn covariance function. This function plays a pivotal role in estimating spatial parameters for geostatistical models in spatial models.
+#'
+#' This function implements the methods described in Sections 2.4 and 3.3 of the article
+#' *Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8). 
 #'
 #' @param par Vector containing parameters for the Matérn covariance function: range (`par[1]`) and smoothness (`par[2]`). Both parameters must be positive.
-#' @param data 3D array of observed spatial data.
-#' @param h Vector of spatial distances between observations.
-#' @param uh Matrix specifying indices for pairing spatial observations.
+#' @param a data 3D array of observed spatial data.
+#' @param h Vector of spatial distances between observations, used in the covariance function.
+#' @param uh Matrix specifying indices for pairing spatial observations for which the log-likelihood is calculated.
 #' @param v Index of the variable within `data` for which the log-likelihood is computed.
 #'
 #' @return Log-likelihood value for the spatial data under the Matérn covariance model.
@@ -582,20 +513,6 @@ loglik <- function(par, parms, par_all, data, names, Vi, h, u, uh, ep, cr) {
 #' @keywords internal
 
 loglik_spatial <- function(par, data, h, uh, v) {
-  # Paper : See Dection 2.4 and 3.3.
-
-  # Function to calculate the log-likelihood for spatial data using the Matérn covariance function.
-  # This is crucial for estimating geostatistical parameters in spatial models.
-  # Arguments:
-  #   par: Vector of parameters for the Matérn covariance function, specifically the range (par[1]) and 
-  #        smoothness (par[2]). Both parameters must be positive.
-  #   data: A 3D array of observed data, with dimensions representing different spatial locations, time points, 
-  #         and variables.
-  #   h: A vector of spatial distances between locations, used in the covariance function.
-  #   uh: A matrix with indices to map the data array to spatial-temporal pairs for which the log-likelihood is calculated.
-  #   v: The index of the variable in 'data' for which the log-likelihood is being calculated.
-  # Returns:
-  #   The log-likelihood value of the spatial data under the specified Matérn covariance model
   
   # Penalize negative parameters to enforce model constraints.
   if(par[1] < 0 | par[2] < 0) {
@@ -643,6 +560,9 @@ loglik_spatial <- function(par, data, h, uh, v) {
 #'
 #' Calculates spatial and temporal covariances for given spatio-temporal data, facilitating the understanding of spatial and temporal variability in the context of different weather types.
 #'
+#' This function implements the methods described in Section 2.4 of the article
+#' *Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8). 
+#'
 #' @param data 3D array representing time, location, and variable dimensions of the spatio-temporal data.
 #' @param wt_id Indices of weather types for which covariances are computed.
 #' @param locations Matrix of spatial locations for the data points.
@@ -658,21 +578,6 @@ loglik_spatial <- function(par, data, h, uh, v) {
 
 
 spacetime_cov <- function(data, wt_id, locations, ds = NULL, dates, lagstime, dist, covgm = TRUE) {
-  # Paper : See Section 2.4
-  # Computes spatial and temporal covariances for spatio-temporal data.
-  
-  # Arguments:
-  #   data: A 3D array with dimensions time*location*variable
-  #   wt_id: Weather type indices
-  #   locations: Spatial locations of the data points.
-  #   ds: Precomputed distance matrix. If NULL, distances are computed from 'locations'.
-  #   dates: Time points corresponding to the observations.
-  #   lagstime: Vector of time lags for which covariances are computed.
-  #   dist: Vector of spatial distances for which covariances are computed.
-  #   covgm: Flag indicating whether a cross-covariances should be calculated (default TRUE).
-  
-  # Returns:
-  #   A data frame of computed covariances across specified spatial distances and time lags.
   
   # Validate input data structure
   if (covgm && length(dim(data)) < 3) {
@@ -749,19 +654,7 @@ spacetime_cov <- function(data, wt_id, locations, ds = NULL, dates, lagstime, di
 #' @keywords internal
 
 cov_matrices = function(par, coordinates, names, M) {
-  # Function for generating covariance matrices for a multivariate space-time model.
-  # The covariance is calculated using Gneiting's function.
-  #
-  # Arguments:
-  #   par: Parameters for the covariance function
-  #   coordinates: A matrix or data frame of coordinates coordinates for each spatial location.
-  #   names: Names of the variables involved in the covariance calculation.
-  #   M: The maximum time lag considered in the model.
-  #
-  # Returns:
-  #   A list of covariance matrices for each time lag (up to M) and for each pair of variables.
-  #   Each matrix represents the spatial covariance structure for a given time lag and variable pair.
-  
+
   Nt = M + 1  # Number of time points considered
   Ns = nrow(coordinates)  # Number of spatial locations
   Nv = length(names)  # Number of variables
