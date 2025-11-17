@@ -1,6 +1,9 @@
 #' Calculate Bk Matrices for Autoregressive (AR) Model
 #'
-#' Computes the coefficient matrices (Bk) for an autoregressive (AR) model using lagged covariance matrices.
+#' Computes the coefficient matrices (Bk) for an autoregressive (AR) model using lagged covariance matrices (C_k_matrices).
+#' 
+#' This function implements the methods described in Section 4 of the article
+#' *Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8). 
 #'
 #' @param C_k_matrices A list of covariance matrices, where each matrix represents the covariance at a different time lag. 
 #'                     C_k_matrices[[1]] is the covariance matrix at lag 0.
@@ -11,18 +14,7 @@
 #'
 #' @keywords internal
 calculate_Bk_matrices <- function(C_k_matrices, Bk_0) {
-  # Paper : see Section 4
-  # Function for calculating coefficients matrices (Bk) for an autoregressive (AR) model
-  # using lagged covariance matrices (C_k_matrices).
-  #
-  # Arguments:
-  #   C_k_matrices: A list of covariance matrices, where each matrix represents the covariance
-  #                 at a different time lag. C_k_matrices[[1]] is the covariance matrix at lag 0.
-  #
-  # Returns:
-  #   A list of Bk matrices (coefficient matrices) for the AR model, including Bk_0,
-  #   which is derived separately from the rest of the Bk matrices.
-  
+
   M <- length(C_k_matrices) - 1  # Determine AR maximum lag
   
   matrix_size <- nrow(C_k_matrices[[1]])  
@@ -66,6 +58,9 @@ calculate_Bk_matrices <- function(C_k_matrices, Bk_0) {
 #' Calculate AR Coefficient Matrices
 #'
 #' Computes autoregressive (AR) coefficient matrices for each season and weather state based on the parameters of a fitted spatial weather model and the spatial coordinates of observation locations. This function is part of the process for preparing data for spatial weather simulations, allowing the AR process to consider spatial correlations.
+#' 
+#' This function implements the methods described in Section 4 of the article
+#' *Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8). 
 #'
 #' @param parm A list containing the fitted parameters of the spatial weather model. This list should include elements for each season, and within each season, parameters (`gf_par`) for each weather state.
 #' @param coordinates A matrix or data frame of geographic coordinates for the locations represented in the model. The coordinates are used to calculate spatial covariance matrices.
@@ -84,7 +79,6 @@ calculate_Bk_matrices <- function(C_k_matrices, Bk_0) {
 #'
 #' @export
 calculate_AR_coefficients_matrices <- function(parm, coordinates, AR_lag){
-  # Paper : see Section 4
   names = parm$names
   bk = lapply(1:length(parm$swg), function(s){
     K = length(parm$swg[[s]]$gf_par)
@@ -96,7 +90,7 @@ calculate_AR_coefficients_matrices <- function(parm, coordinates, AR_lag){
     })
     return(bk)
   })
-  for(s in 1:length(parm$swg)){
+  for(s in 1:length(parm$swg)){s
     K = length(parm$swg[[s]]$gf_par)
     for(k in 1:K){
       j = k-1
@@ -113,6 +107,9 @@ calculate_AR_coefficients_matrices <- function(parm, coordinates, AR_lag){
 #' Simulate AR Process
 #'
 #' Simulates the autoregressive (AR) process to generate synthetic weather data.
+#' 
+#' This function implements the methods described in Section 4 of the article
+#' *Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8). 
 #'
 #' @param Bk A list of Bk matrices for the AR model.
 #' @param M The lag order of the AR model.
@@ -124,7 +121,6 @@ calculate_AR_coefficients_matrices <- function(parm, coordinates, AR_lag){
 #'
 #' @keywords internal
 simulate_Z <- function(Bk, M, num_steps, Z_initial,wt) {
-  # Paper : See Section 4
   n <- nrow(Bk[[1]]$bk$Bk_0)  # Assuming Bk0 is square and represents the dimension of Z
   Z_list <- vector("list", num_steps)  # List to store the simulated values of Z
   
@@ -149,25 +145,18 @@ simulate_Z <- function(Bk, M, num_steps, Z_initial,wt) {
 #' Generate Initial Conditions for AR Process
 #'
 #' Generates initial conditions for the autoregressive (AR) process based on Bk matrices and initial weather type.
+#' 
+#'  This function implements the methods described in Section 4 of the article
+#' *Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8). 
 #'
 #' @param AR_lag The lag order of the AR model.
 #' @param bk A list of Bk matrices for the AR model, one for each weather type.
 #' @param wt The initial weather type (state) for the simulation.
 #'
-#' @return A matrix representing the initial conditions for the AR process simulation.
+#' @return Z_initial : A matrix representing the initial conditions for the AR process simulation.
 #'
 #' @keywords internal
-generate_initial_conditions <- function(AR_lag, bk, wt) {
-  # Paper : See Section 4
-  # Generate initial conditions for the AR process based on Bk matrices and initial weather type.
-  #
-  # Arguments:
-  #   AR_lag: The lag order of the AR model.
-  #   bk: A list of Bk matrices for the AR model, one for each weather type.
-  #   wt: The initial weather type (state) for the simulation.
-  #
-  # Returns:
-  #   Z_initial: A matrix representing the initial conditions for the AR process simulation.
+generate_initial_conditions <- function(AR_lag, bk, wt) {  
   
   Z_initial <- sapply(1:AR_lag, function(m) {
     cov0 <- bk[[wt[m]]]$cov0
@@ -189,19 +178,13 @@ generate_initial_conditions <- function(AR_lag, bk, wt) {
 #' @param names Vector of names representing the variables in the simulated data (columns of the matrices).
 #' @param dates Vector of dates representing the time steps.
 #'
-#' @return A 3D array where the first dimension corresponds to time steps, the second dimension corresponds to spatial locations, and the third dimension corresponds to variables.
+#' @return A 3D array where the first dimension corresponds to time steps, the second dimension corresponds 
+#' to spatial locations, and the third dimension corresponds to variables.
 #'
 #' @keywords internal
 list_to_array <- function(Y, names, dates) {
-  # Converts a list of matrices into a 3D array.
-  #
-  # Arguments:
-  #   Y: A list of matrices, where each matrix represents simulated data for a specific time step.
-  #   names: Vector of names representing the variables in the simulated data (columns of the matrices).
-  #
-  # Returns:
-  #   A 3D array where the first dimension corresponds to time steps, the second dimension corresponds to
-  #   spatial locations, and the third dimension corresponds to variables.
+  
+
   
   sim = lapply(1:length(Y), function(i) matrix(Y[[i]], ncol = length(names)))
   sim = array(unlist(sim), dim = c(nrow(sim[[1]]), ncol(sim[[1]]),length(sim)))  
@@ -217,28 +200,19 @@ list_to_array <- function(Y, names, dates) {
 #'
 #' Predicts the most likely weather type for the next time step in a simulated weather series.
 #'
+#' This function implements the methods described in Sections 2.2 and 5 of the article
+#' *Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8). 
+#'
 #' @param sim A matrix containing simulated weather data for a single time step.
 #' @param centroids A list of centroids, where each centroid is a vector representing the mean values of weather variables for a specific weather type.
 #' @param transitions A list (or matrix) of transition probabilities between weather types. Each element transitions[[i]][j, k] represents the probability of transitioning from weather type j to k.
 #' @param names_weather_types Names of the weather variables used to determine the weather type.
 #'
-#' @return The predicted weather type for the next time step, selected based on the calculated probabilities.
+#' @return new_wt: The predicted weather type for the next time step, selected based on the calculated probabilities.
 #'
 #' @keywords internal
 most_probable_weather_type = function(sim, centroids, transitions, names_weather_types) {
-  # Paper : see section 2.2 and 5
-  # Function to predict the most likely weather type for the next time step in a simulated weather series.
-  #
-  # Arguments:
-  #   sim: A matrix containing simulated weather data for a single time step.
-  #   centroids: A list of centroids, where each centroid is a vector representing the mean values of weather variables for a specific weather type.
-  #   transitions: A list (or matrix) of transition probabilities between weather types. 
-  #                Each element transitions[[i]][j, k] represents the probability of transitioning from weather type j to k.
-  #   names_weather_types: Names of the weather variables used to determine the weather type.
-  #
-  # Returns:
-  #   new_wt: The predicted weather type for the next time step, selected based on the calculated probabilities.
-  
+
   # Determine the number of weather types from the length of the centroids list
   K = length(centroids)
   
@@ -256,28 +230,19 @@ most_probable_weather_type = function(sim, centroids, transitions, names_weather
 #'
 #' Calculates centroids of weather types for each season.
 #'
+#' This function implements the methods described in Sections 2.2 and 5 of the article
+#' *Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8). 
+#'               
 #' @param data A multi-dimensional array of weather data, with dimensions [time, locations, variables].
 #' @param dates A vector of dates corresponding to the time dimension in the data array.
 #' @param seasons A list defining the start and end dates of each season.
 #' @param wt_seasons A list containing vectors of weather type classifications for each season.
 #' @param names_weather_types Names of the weather variables used to determine the weather type centroids.
 #'
-#' @return A list of lists, where each inner list contains the centroids for each weather type within a specific season.
+#' @return centroids A list of lists, where each inner list contains the centroids for each weather type within a specific season.
 #'
 #' @keywords internal
 find_centroids = function(data, dates, seasons, wt_seasons, names_weather_types) {
-  # Paper : see section 2.2 and 5
-  # Calculates centroids of weather types for each season.
-  #
-  # Arguments:
-  #   data: A multi-dimensional array of weather data, with dimensions [time, locations, variables].
-  #   dates: A vector of dates corresponding to the time dimension in the data array.
-  #   seasons: A list defining the start and end dates of each season.
-  #   wt_seasons: A list containing vectors of weather type classifications for each season.
-  #   names_weather_types: Names of the weather variables used to determine the weather type centroids.
-  #
-  # Returns:
-  #   centroids: A list of lists, where each inner list contains the centroids for each weather type within a specific season.
   
   centroids = lapply(1:length(seasons), function(s) {
     # Identify the indices for the current season
@@ -304,6 +269,9 @@ find_centroids = function(data, dates, seasons, wt_seasons, names_weather_types)
 #'
 #' Assigns a season to each date based on predefined season boundaries.
 #'
+#' This function implements the methods described in Section 5 of the article
+#' *Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8). 
+#'  
 #' @param dates A vector of dates to classify into seasons.
 #' @param seasons A list where each element represents a season with its start and end dates and months.
 #'
@@ -311,15 +279,6 @@ find_centroids = function(data, dates, seasons, wt_seasons, names_weather_types)
 #'
 #' @keywords internal
 assign_seasons <- function(dates, seasons) {
-  # Paper : see section  5
-  # Assigns a season to each date based on predefined season boundaries.
-  #
-  # Arguments:
-  #   dates: A vector of dates to classify into seasons.
-  #   seasons: A list where each element represents a season with its start and end dates and months.
-  #
-  # Returns:
-  #   A numeric vector where each element represents the season assigned to the corresponding date in the input vector.
   
   # Initialize a vector to store the assigned season for each date
   seasons_assigned <- numeric(length(dates))
