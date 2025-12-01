@@ -84,6 +84,9 @@ MSTWeatherGen_Estim = function(data, dates, by_season = TRUE,  seasons, scale = 
 #'
 #' This function simulates weather data over specified dates using the Multivariate Space-Time Stochastic Weather Generator (MSTWeatherGen). The simulation can be conducted on either a seasonal basis or for the entire period, depending on the provided parameters and the structure of the historical data. It utilizes autoregressive models and specified parameters to generate realistic weather variables.
 #'
+#'  This function implements the methods described in Section 4 of the article
+#' *Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8). 
+#'
 #' @param dates_sim Dates for which to simulate weather data, specifying the target period for simulation.
 #' @param dates_original The original dates corresponding to the historical weather data, used for aligning and deriving simulation parameters.
 #' @param data Historical weather data array, serving as the basis for deriving parameters for simulation models and ensuring realistic weather patterns.
@@ -96,20 +99,6 @@ MSTWeatherGen_Estim = function(data, dates, by_season = TRUE,  seasons, scale = 
 #' @export
 
 MSTWeatherGen_Sim = function(dates_sim, dates_original, data, seasons = NULL, parm, AR_lag=1, bk) {
-  # Paper : see section 4 
-  # Function to simulate weather data using the Multivariate Space-Time Stochastic Weather Generator (MSTWeatherGen).
-  #
-  # Arguments:
-  #   dates_sim: Dates for which to simulate weather data.
-  #   dates_original: The original dates corresponding to the input data.
-  #   data: Historical weather data used for deriving simulation parameters.
-  #   seasons: Definitions of seasons to potentially apply different simulation parameters seasonally.
-  #   parm: Parameters object containing the parameters.
-  #   AR_lag: The lag order of the autoregressive model to be used in the simulation.
-  #   bk: Coefficients matrices for the AR model, potentially varying by season or weather type.
-  #
-  # Returns:
-  #   sim: A 3D array of simulated weather data for the specified dates.
   
   by_season = parm$by_season # Flag indicating whether to simulate data by season.
   names = parm$names
@@ -253,6 +242,9 @@ MSTWeatherGen_Estim_season = function(data, dates, precipitation = T, scale = FA
 #' This function is designed to generate synthetic weather data for a specified season, leveraging an autoregressive model 
 #' and predefined parameters to accurately reflect weather type transitions and spatial-temporal correlations.
 #'
+#'  This function implements the methods described in Section 5 of the article
+#' *Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8). 
+#'                         
 #' @param dates Vector of dates for which to simulate weather data.
 #' @param names Names of weather variables to be simulated.
 #' @param first_state Optional initial state (weather type) for the simulation. If not provided, it is determined based on state frequencies.
@@ -269,22 +261,7 @@ MSTWeatherGen_Estim_season = function(data, dates, precipitation = T, scale = FA
 #' }
 #' @keywords internal
 
-MSTWeatherGen_Sim_season = function(dates, names, first_state = NULL, Z_initial = NULL, parm, AR_lag = 1, bk) {
-  # Paper : see section 5
-  # Function to simulate seasonal weather data using the multivariate space-time stochastic weather generator.
-  #
-  # Arguments:
-  #   dates: Vector of dates for which to simulate weather data.
-  #   first_state: The initial state (weather type) for the simulation. If missing, it is sampled based on the frequency of states.
-  #   Z_initial: Initial conditions for the AR process. If missing, they are generated based on the covariance structure of the initial state.
-  #   parm: Parameters of the stochastic weather generator.
-  #   AR_lag: The lag order of the AR model to be used in the simulation.
-  #   bk: A list of Bk matrices for the AR model, one for each weather type.
-  #
-  # Returns:
-  #   A list containing the simulated weather data ('sim'), the sequence of simulated weather types ('wt'), and the initial conditions for the next simulation ('Z_initial_next').
-  
-  
+MSTWeatherGen_Sim_season = function(dates, names, first_state = NULL, Z_initial = NULL, parm, AR_lag = 1, bk) {    
   # Determine the number of weather types (K) and their relative frequencies (fr)
   K <- length(unique(parm$wt))
   fr <- sapply(1:K, function(k) length(which(parm$wt == k)) / length(parm$wt))
