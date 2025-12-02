@@ -18,9 +18,13 @@ find_centroids(data, dates, seasons, wt_seasons, names_weather_types)
 \item{names_weather_types}{Names of the weather variables used to determine the weather type centroids.}
 }
 \value{
-A list of lists, where each inner list contains the centroids for each weather type within a specific season.
+centroids A list of lists, where each inner list contains the centroids for each weather type within a specific season.
 }
 \description{
 Calculates centroids of weather types for each season.
+}
+\details{
+This function implements the methods described in Sections 2.2 and 5 of the article
+*Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8).
 }
 \keyword{internal}

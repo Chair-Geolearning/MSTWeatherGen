@@ -19,4 +19,8 @@ A list containing the preprocessed data, including a combined matrix of temporal
 \description{
 Performs preprocessing on spatio-temporal data to prepare for model fitting, including computing spatial distances and temporal lags.
 }
+\details{
+This function implements the methods described in Section 3.3 of the article
+*Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8).
+}
 \keyword{internal}

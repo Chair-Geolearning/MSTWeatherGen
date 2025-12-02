@@ -19,6 +19,10 @@ A list of AR coefficient matrices (`bk`) for each season and weather state, alon
 \description{
 Computes autoregressive (AR) coefficient matrices for each season and weather state based on the parameters of a fitted spatial weather model and the spatial coordinates of observation locations. This function is part of the process for preparing data for spatial weather simulations, allowing the AR process to consider spatial correlations.
 }
+\details{
+This function implements the methods described in Section 4 of the article
+*Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8).
+}
 \examples{
 \dontrun{
   # Assuming `fitted_parms` contains the fitted model parameters and

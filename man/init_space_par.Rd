@@ -31,4 +31,8 @@ Optimizes initial spatial parameters for each variable in a dataset. This functi
 a log-likelihood based optimization approach to determine initial values of spatial parameters
 that best fit the spatial structure of the data for each variable.
 }
+\details{
+This function implements the methods described in Section 3.3 of the article, functions log_lik and log
+*Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8).
+}
 \keyword{internal}

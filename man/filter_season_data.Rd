@@ -21,4 +21,8 @@ A list containing the filtered weather data ('data_filtered') and corresponding 
 \description{
 Filters weather data and corresponding dates for a specified season.
 }
+\details{
+This function implements the methods described in Section 5 of the article
+*Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8).
+}
 \keyword{internal}

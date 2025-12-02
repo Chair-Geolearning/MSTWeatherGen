@@ -26,4 +26,9 @@ Function to perform normalization on a selected variable 'j' from 'data', consid
 from 'coordinates' and a threshold 'left' for the transformation. This is particularly useful for variables with 
 many zero values, ensuring robust normalization across spatially correlated variables.
 }
+\details{
+This function implements the methods described in Section 3.2 (Eqs. 14–16) together with the
+zero-inflated data formulations in Section 2.3 (Eq. 5) and Section 2.1 (Eq. 1) of the article
+*Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8).
+}
 \keyword{internal}

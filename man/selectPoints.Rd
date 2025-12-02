@@ -20,4 +20,8 @@ A vector of selected indices from the coordinates matrix/data frame, including t
 Selects a set of points from a dataset based on probabilities calculated from their spatial distances to a specific reference point.
 The function calculates the probability for each point as inversely proportional to its squared distance from the reference point, ensuring a higher chance of selecting closer points.
 }
+\details{
+This function implements the methods described in Section 3.3 of the article, in Equation 17
+*Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8).
+}
 \keyword{internal}

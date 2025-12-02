@@ -21,4 +21,8 @@ Generates pairs of spatial indices based on a subset of uniformly distributed po
 This function first selects a set of n1 points uniformly distributed across the spatial domain. For each of these points,
 it then selects n2 points based on their proximity, ensuring a diverse yet focused selection of spatial pairs for further analysis.
 }
+\details{
+This function implements the methods described in Section 3.3 of the article, in Equation 17
+*Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8).
+}
 \keyword{internal}

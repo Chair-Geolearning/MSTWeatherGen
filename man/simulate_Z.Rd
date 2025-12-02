@@ -23,4 +23,8 @@ A list containing the simulated values of Z for each time step.
 \description{
 Simulates the autoregressive (AR) process to generate synthetic weather data.
 }
+\details{
+This function implements the methods described in Section 4 of the article
+*Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8).
+}
 \keyword{internal}

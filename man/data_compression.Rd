@@ -14,5 +14,7 @@ The compressed data.
 }
 \description{
 Function to compress data using the PTA3 method.
+ This function implements the methods described in Section 2.2, Paragraph 2 of the article
+*Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8).
 }
 \keyword{internal}
