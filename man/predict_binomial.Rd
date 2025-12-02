@@ -17,4 +17,8 @@ Predicted binomial probabilities.
 \description{
 Function to predict binomial probabilities using a fitted model object.
 }
+\details{
+This function implements the methods described in Section 3.2 in Equation 16 of the article
+*Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8).
+}
 \keyword{internal}

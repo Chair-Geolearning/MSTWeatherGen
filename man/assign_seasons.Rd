@@ -17,4 +17,8 @@ A numeric vector where each element represents the season assigned to the corres
 \description{
 Assigns a season to each date based on predefined season boundaries.
 }
+\details{
+This function implements the methods described in Section 5 of the article
+*Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8).
+}
 \keyword{internal}

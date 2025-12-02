@@ -18,4 +18,8 @@ A vector of indices corresponding to the selected uniformly distributed points.
 This function selects indices of points from a given set of coordinates that are uniformly distributed across the spatial domain.
 The selection process involves performing k-means clustering on the coordinates and then selecting the closest data point to each cluster center.
 }
+\details{
+This function implements the methods described in Section 3.3 of the article
+*Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8).
+}
 \keyword{internal}

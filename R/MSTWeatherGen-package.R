@@ -22,15 +22,18 @@
 #'
 #' @author Said Obakrim \email{saidobak@@gmail.com}
 #' @author Jean-François Rey \email{jean-francois@@inrae.fr}
+#' @author Ahmed Boualam \email{ahmed.boualam@@inrae.fr}
+#' @author Denis Allard \email{denis.allard@@inrae.fr}
+#' @author Lionel Benoit \email{lionel.benoit@@inrae.fr}
 #'
-#' Maintainer: Said Obakrim \email{saidobak@@gmail.com}
+#' Maintainer: Jean-FRançois Rey \email{jean-francois.rey@@inrae.fr}
 #' @docType package
 #' @name MSTWeatherGen-package
 #' @details \tabular{ll}{
 #'          Package: \tab MSTWeatherGen\cr
 #'          Type: \tab Package\cr
-#'          Version: \tab 0.1.0\cr
-#'          Date: \tab 2024-03-30\cr
+#'          Version: \tab 0.1.0.9999\cr
+#'          Date: \tab 2025-12-02\cr
 #'          License: \tab GPL (>=3)\cr
 #'          }
 #'

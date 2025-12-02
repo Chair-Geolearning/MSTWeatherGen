@@ -37,4 +37,8 @@ Performs optimization of model parameters for each pair of variables based on sp
 This function iteratively optimizes spatial parameters to maximize the log-likelihood
 of observing the data given the model, focusing on the spatial interaction between pairs of variables.
 }
+\details{
+This function implements the methods described in Section 3.3 of the article, functions log_lik and log
+*Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8).
+}
 \keyword{internal}

@@ -42,4 +42,8 @@ considering interactions across all variable pairs. This function aims to enhanc
 model's temporal dynamics by optimizing a subset of parameters that influence temporal 
 relationships.
 }
+\details{
+This function implements the methods described in Section 3.3 of the article, functions log_lik and log
+*Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8).
+}
 \keyword{internal}
