@@ -9,13 +9,13 @@ loglik_spatial(par, data, h, uh, v)
 \arguments{
 \item{par}{Vector containing parameters for the Matérn covariance function: range (`par[1]`) and smoothness (`par[2]`). Both parameters must be positive.}
 
+\item{data}{data 3D array of observed spatial data.}
+
 \item{h}{Vector of spatial distances between observations, used in the covariance function.}
 
 \item{uh}{Matrix specifying indices for pairing spatial observations for which the log-likelihood is calculated.}
 
 \item{v}{Index of the variable within `data` for which the log-likelihood is computed.}
-
-\item{a}{data 3D array of observed spatial data.}
 }
 \value{
 Log-likelihood value for the spatial data under the Matérn covariance model.

@@ -275,7 +275,7 @@ extract_beta <- function(parm, names) {
 #' *Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8). 
 #'
 #' @param par Current parameters being optimized.
-#' @param beta Matrix of beta coefficients, precomputed.
+# beta Matrix of beta coefficients, precomputed.
 #' @param parms Indices or names of parameters in 'par' to be updated.
 #' @param pair A string indicating the pair of variables (e.g., "temperature-wind") being analyzed.
 #' @param par_all Complete set of parameters for the model.
@@ -402,8 +402,7 @@ loglik_pair <- function(par, parms, pair, par_all, data, names, Vi, h, u, uh, ep
 #' @param uh Combined matrix of spatial and temporal distances with additional identifiers.
 #' @param ep Data frame defining variable pairs for analysis.
 #' @param cr Initial correlation matrix across variables.
-#' @param beta: Precomputed beta coefficients matrix for all pairs.
-
+#  beta: Precomputed beta coefficients matrix for all pairs.
 #'
 #' @return Total log-likelihood value for the observed data given the current model parameters.
 #'
@@ -502,7 +501,7 @@ loglik <- function(par, parms, par_all, data, names, Vi, h, u, uh, ep, cr) {
 #' *Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8). 
 #'
 #' @param par Vector containing parameters for the Matérn covariance function: range (`par[1]`) and smoothness (`par[2]`). Both parameters must be positive.
-#' @param a data 3D array of observed spatial data.
+#' @param data data 3D array of observed spatial data.
 #' @param h Vector of spatial distances between observations, used in the covariance function.
 #' @param uh Matrix specifying indices for pairing spatial observations for which the log-likelihood is calculated.
 #' @param v Index of the variable within `data` for which the log-likelihood is computed.
@@ -575,8 +574,6 @@ loglik_spatial <- function(par, data, h, uh, v) {
 #' @return Data frame containing computed covariances for specified spatial distances and time lags, facilitating the analysis of spatial and temporal patterns in the data.
 #'
 #' @keywords internal
-
-
 spacetime_cov <- function(data, wt_id, locations, ds = NULL, dates, lagstime, dist, covgm = TRUE) {
   
   # Validate input data structure

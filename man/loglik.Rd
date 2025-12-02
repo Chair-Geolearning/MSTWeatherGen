@@ -28,8 +28,6 @@ loglik(par, parms, par_all, data, names, Vi, h, u, uh, ep, cr)
 \item{ep}{Data frame defining variable pairs for analysis.}
 
 \item{cr}{Initial correlation matrix across variables.}
-
-\item{beta:}{Precomputed beta coefficients matrix for all pairs.}
 }
 \value{
 Total log-likelihood value for the observed data given the current model parameters.

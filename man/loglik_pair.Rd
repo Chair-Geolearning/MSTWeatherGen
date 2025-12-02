@@ -30,8 +30,6 @@ loglik_pair(par, parms, pair, par_all, data, names, Vi, h, u, uh, ep, cr)
 \item{ep}{A matrix or data frame defining pairs of variables.}
 
 \item{cr}{Correlation matrix, initial or base correlations between variables.}
-
-\item{beta}{Matrix of beta coefficients, precomputed.}
 }
 \value{
 The log-likelihood value for the given pair of variables based on the current model parameters.
