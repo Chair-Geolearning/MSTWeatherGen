@@ -133,7 +133,6 @@ plot_dry_wet_spells_maps = function(sim, observed, coordinates, dates){
     return(df_sum)
   })
   df = do.call(rbind, df)
-    
   p <- ggplot(df, aes(lon, lat)) +
     ggplot2::geom_polygon(
       data = ggplot2::map_data("world"),
@@ -335,7 +334,7 @@ plot_wet_frequency = function(sim, observed, dates, seasons, coordinates, names_
     
     # Create the plot
     p = ggplot2::ggplot(df, ggplot2::aes(lon, lat )) + 
-      ggplot2::borders("world", colour="black",fill= "grey",xlim=range(df$lon), ylim = range(df$lat)) +
+      ggplot2::annotation_borders("world", colour="black",fill= "grey",xlim=range(df$lon), ylim = range(df$lat)) +
       ggplot2::coord_cartesian(xlim=range(df$lon), ylim = range(df$lat))+
       ggplot2::scale_color_gradientn(name = "Frequency of wet days (%)", colours = rev(viridis::viridis(10, option = "magma"))) +
       ggplot2::geom_point(ggplot2::aes(color = Frequency),size=7, shape=15)+
