@@ -132,6 +132,7 @@ plot_dry_wet_spells_maps = function(sim, observed, coordinates, dates){
     return(df_sum)
   })
   df = do.call(rbind, df)
+
   p <- ggplot(df, aes(lon, lat)) +
     ggplot2::geom_polygon(
       data = ggplot2::map_data("world"),
@@ -149,7 +150,7 @@ plot_dry_wet_spells_maps = function(sim, observed, coordinates, dates){
     ggplot2::xlab("Longitude (degree)") + 
     ggplot2::ylab("Latitude (degree)") +
     ggplot2::theme(legend.position = "top")
-  
+    
   return(p)
 }
 utils::globalVariables(c("mu", "x"))
