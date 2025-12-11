@@ -1,8 +1,10 @@
-#' Matern Covariance Function
+#' @title Matern Covariance Function
 #'
+#' @description 
 #' Calculates the Matern covariance function for a given vector of distances. This function is intended for internal use within the package to compute spatial covariances with the Matern model. It is not exported for end-user interaction.
 #'
-#'  This function implements the methods described in Sections 2.4 in Equations 8 and 9 of the article
+#' @details
+#' This function implements the methods described in Sections 2.4 in Equations 8 and 9 of the article
 #' *Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8). 
 #'
 #' @param h Numeric vector of distances between points.
@@ -33,7 +35,6 @@ Matern <- function(h, r, v) {
 #' @return Numeric vector of covariance values calculated using Gneiting's model.
 #'
 #' @keywords internal
-
 Gneiting <- function(h, u, par, dij) {
  
   if(!is.numeric(par)) par <- as.numeric(par)
