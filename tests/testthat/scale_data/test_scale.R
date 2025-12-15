@@ -2,23 +2,25 @@
 library(testthat)
 library(MSTWeatherGen)  
 
-# Data to be tested on:
+# Data:
 data("data", package = "MSTWeatherGen")
 data("coordinates", package = "MSTWeatherGen")
 names = c("Precipitation", "Wind", "Temp_max")
 dates = seq(as.Date("2012-01-01"),as.Date("2022-12-31"), by="day")
 
-# Test de la sous-fonction moving average :
+# --- Test of the moving average sub-function ---
+
+# 0.
 test_that("moving_average n=1 is identity on real Temp_max data, same with n=0", {
   x <- data[, 1, "Temp_max"]
   
-  expect_equal(unname(moving_average(x, 0)), unname(x)) #moving_average n=1 is identity on real Temp_max data, same with n=0
-  expect_equal(unname(moving_average(x, 1)), unname(x)) #We unname 
+  expect_equal(unname(moving_average(x, 0)), unname(x)) # moving_average n=1 is identity on real Temp_max data, same with n=0
+  expect_equal(unname(moving_average(x, 1)), unname(x)) # We unnamem as it can create an error with names.
   expect_equal(unname(moving_average(x, 2)), unname(moving_average(x, 3))) # Test on even number, which should be equal to 3 in this case.
 
 })
 
-# Edge case :
+# 1.
 test_that("moving_average handles edges correctly on the edges.", {
   x <- data[, 1, "Wind"]
   res <- moving_average(x, 5)
@@ -29,7 +31,7 @@ test_that("moving_average handles edges correctly on the edges.", {
   
 })
 
-#Type and length
+# 2.
 test_that("moving_average output has same length and type", {
   x <- data[, 1, "Temp_max"]
   res <- moving_average(x, 7)
@@ -37,7 +39,7 @@ test_that("moving_average output has same length and type", {
   expect_true(is.numeric(res))
 })
 
-# Handling of NA values.
+# 3.
 test_that("moving_average handles NA values correctly", {
   x <- data[, 1, "Temp_max"]
   x[100] <- NA
@@ -49,50 +51,25 @@ test_that("moving_average handles NA values correctly", {
 })
 
 
-# ---Scaled Data Function ---
+# --- Scaled Data Function ---
 
 # 0.
-test_that("Structure des résultats", {
+test_that("Results structure", {
   result <- scale_data(data, names, dates)
   
   expect_is(result, "list")
   expect_equal(length(result), 2)
   expect_named(result, c("data", "scale_parm"))
   expect_equal(dim(result$data), dim(data))
-  expect_false(all(result$data  ==  data)) # La donnee a bien ete modifiee. 
+  expect_false(all(result$data  ==  data)) # We check that the data has been modified
   expect_equal(length(result$scale_parm), 2)
   expect_equal(length(result$scale_parm$mu), length(result$scale_parm$sd))
-  expect_equal(length(result$scale_parm$mu), dim(data)[3]-1) # On prend pas en compte la precipitation.
+  expect_equal(length(result$scale_parm$mu), dim(data)[3]-1) # We do no take into account precipitation.
   
 })
 
 # 1.
-test_that("Periode trop courte, expect warning", {
-  datesbis = seq(as.Date("2019-01-01"),as.Date("2022-12-31"), by="day")
-  
-  expect_warning(
-    result <- scale_data(data, names, datesbis)
-  )
-  
-})
-
-# 2.  
-test_that("Structure des résultats", {
-  result <- scale_data(data, names, dates)
-  
-  expect_is(result, "list")
-  expect_equal(length(result), 2)
-  expect_named(result, c("data", "scale_parm"))
-  expect_equal(dim(result$data), dim(data))
-  expect_false(all(result$data  ==  data)) # La donnee a bien ete modifiee. 
-  expect_equal(length(result$scale_parm), 2)
-  expect_equal(length(result$scale_parm$mu), length(result$scale_parm$sd))
-  expect_equal(length(result$scale_parm$mu), dim(data)[3]-1) # On prend pas en compte la precipitation.
-
-})
-
-# 3.
-test_that("Periode trop courte, expect warning", {
+test_that("Period too short, expect warning", {
   datesbis = seq(as.Date("2019-01-01"),as.Date("2022-12-31"), by="day")
 
   expect_warning(
@@ -101,21 +78,21 @@ test_that("Periode trop courte, expect warning", {
   
 })
 
-# 4. 
+# 2. 
 test_that("window_size = 1 or 0 does not smooth seasonal means", {
   res1  <-scale_data(data, names, dates, window_size = 1)
   res0  <-scale_data(data, names, dates, window_size = 0)
   res30 <-scale_data(data, names, dates, window_size = 30)
-  # On teste une variable lissée (donc pas Precipitation)
+  # Testing a variable (not Precipitation).
   mu0  <- res0$scale_parm$mu$Wind
   mu1  <- res1$scale_parm$mu$Wind
   mu30 <- res30$scale_parm$mu$Wind
   
-  # Vérifie qu’une fenêtre différente produit un résultat différent.
+  # Verify that a different window produces a different result.
   expect_false(all(mu1 == mu30))
   expect_false(all(mu0 == mu30))
   expect_true(all(mu0 == mu1))
-  # mu0 doit être identique à mu1.
+  # mu0 should be equal to mu1.
   expect_equal(mu1, mu0, tolerance = 1e-12)
   expect_false(all(res0$data == data))
   expect_failure(expect_equal(res1$data, res30$data, tolerance = 1e-12))

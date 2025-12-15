@@ -166,3 +166,4 @@ testthat::test_that("Gneiting works for scalar h and vector u", {
   res <- Gneiting(h = h, u = u, par = par, dij = dij)
   expect_equal(length(res), length(u))
 })
+

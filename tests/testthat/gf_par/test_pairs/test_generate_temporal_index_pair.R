@@ -9,22 +9,22 @@ names = c("Precipitation", "Wind", "Temp_max")
 dates = seq(as.Date("2018-01-01"),as.Date("2021-12-31"), by="day")
 names = c("Precipitation", "Wind", "Temp_max")
 
+# Retrieve results:
 resultperm <- readRDS("resultperm2.rds")
 
+# Parameters
 set.seed(1)
 wt <- resultperm$cluster
 K <- length(unique(wt))
 
-# --- Tests sous-fonction Estimation gf ----
-
-# Récupération des dimensions réelles
+# Dimensions 
 Nt <- dim(data)[1]
 Ns <- dim(data)[2]
 Nv <- dim(data)[3]
 
-# --- Tests pour generate_temporal_index_pairs ---
+# --- Tests for generate_temporal_index_pairs ---
 
-# 0. Structure de la sortie
+# 0. 
 test_that("generate_temporal_index_pairs returns a matrix with 3 columns", {
   wt_id <- 10:20
   res <- generate_temporal_index_pairs(wt_id, dates, tmax = 3)
@@ -34,7 +34,7 @@ test_that("generate_temporal_index_pairs returns a matrix with 3 columns", {
   expect_equal(colnames(res), c("t1", "t2", "u"))
 })
 
-# 1. Les indices t1 et t2 doivent être valides
+# 1. 
 test_that("generate_temporal_index_pairs returns valid time indices", {
   wt_id <- 15:25
   tmax <- 4
@@ -44,7 +44,7 @@ test_that("generate_temporal_index_pairs returns valid time indices", {
   expect_true(all(res[,2] >= 1 & res[,2] <= Nt))
 })
 
-# 2. Vérifier que u = t2 - t1 en jours
+# 2. 
 test_that("temporal pairs have correct time differences", {
   wt_id <- 30:40
   tmax <- 5
@@ -60,7 +60,7 @@ test_that("generate_temporal_index_pairs handles tmax = 0", {
   res <- generate_temporal_index_pairs(wt_id, dates, tmax = 0)
   
   expect_true(all(res[,"u"] == 0))
-  expect_equal(res[,"t1"], res[,"t2"])  # même indice
+  expect_equal(res[,"t1"], res[,"t2"])  # Same indices
 })
 
 # 4. Bord inférieur : indices trop petits doivent être exclus Jeff

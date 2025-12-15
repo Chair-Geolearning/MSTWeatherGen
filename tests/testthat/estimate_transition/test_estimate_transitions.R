@@ -1,39 +1,35 @@
-# Librairies:
+# Libraries:
 library(testthat)
 library(PTAk)
 library(MSTWeatherGen)  
 
-# Donnees:
+# Data:
 data("data", package = "MSTWeatherGen")
 data("coordinates", package = "MSTWeatherGen")
 names = c("Precipitation", "Wind", "Temp_max")
 dates = seq(as.Date("2012-01-01"),as.Date("2022-12-31"), by="day")
 K <- 5
 
-# Chargement de resultats:
+# Retrieving results:
 resultperm <- readRDS("resultperm2.rds")
 wt <- resultperm$cluster
 
-# TEST de la sous-fonction estimtransition :
+# ----- Test of the sub-function estimtransition -----
+M <- estimtransition(wt, dates, K)
 
 # 0.
-test_that("Structure des resultats", {
-  # On tronque si data n'a pas la même longueur
-  M <- estimtransition(wt, dates, K)
-  
+test_that("Structure of the results", {
+
   expect_true(is.matrix(M))
   expect_equal(dim(M), c(K, K))
 })
 
 # 1.
-test_that("La meme experience produit les memes resultats", {
-  # On tronque si data n'a pas la même longueur
+test_that("The same experiment produces the same results", {
   M1 <- estimtransition(wt, dates, K)
-  M2 <- estimtransition(wt, dates, K)
-  
-  expect_equal(M1, M2)
-})
 
+  expect_equal(M, M2)
+})
 
 # 2.
 test_that("Rows with no outgoing transitions remain zero", {
@@ -60,18 +56,15 @@ test_that("Transitions are counted separately per year", {
 
 # 4.
 test_that("Rows with transitions sum to 1 on realistic data", {
-  M <- estimtransition(wt, dates, K)
   row_sums <- rowSums(M, na.rm = TRUE)
-  col_sums <- colSums(M, na.rm = TRUE)
-  
+
   expect_true(all(row_sums[row_sums > 0] == 1))
   expect_true(all(M <= 1 | is.na(M)))  
 })
 
-# TEST de la fonction estimate_transitions --------TESTS GLOBAUX --------
+# ----- TEST of the function estimate_transitions -----
 
 # 1.
-
 test_that("estimate_transitions output matrices contain no NA", {
   tm <- estimate_transitions(wt, dates, nb = 5, K = 5)
   "A voir avec Jeff"
@@ -90,7 +83,7 @@ test_that("estimate_transitions returns a list", {
 })
 
 # 3.
-test_that("Reproduire les experiences", {
+test_that("Same experiment leads to same results", {
   set.seed(1)
   tm1 <- estimate_transitions(wt, dates, nb = 10, K = 5)
   set.seed(1)
