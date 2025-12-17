@@ -15,7 +15,7 @@ set.seed(1)
 wt <- resultperm$cluster
 K <- length(unique(wt))
 
-# Récupération des dimensions réelles
+# Dimensions
 Nt <- dim(data)[1]
 Ns <- dim(data)[2]
 Nv <- dim(data)[3]
@@ -23,7 +23,7 @@ Nv <- dim(data)[3]
 wt_id <- 100:120
 tmax <- 4
 
-# Parametres.
+# Parameters.
 Ti <- generate_temporal_index_pairs(wt_id, dates, tmax)
 Si <- generate_spatial_index_pairs(coordinates, n1 = 3, n2 = 2)
 
@@ -41,8 +41,7 @@ test_that("preprocess_data_mst returns the expected structure", {
 
 # 1.
 test_that("Dimensions of u, h, uh are coherent", {
-  res <- preprocess_data(Ti, Si, coordinates)
-  
+  res <- preprocess_data(Ti, Si, coordinates)s
   nT <- nrow(Ti)
   nS <- nrow(Si)
   npairs <- nT * nS
@@ -59,7 +58,6 @@ test_that("Dimensions of u, h, uh are coherent", {
 # 2.
 test_that("uh combines components correctly", {
   res <- preprocess_data(Ti, Si, coordinates)
-  
   uh <- res$uh
   
   expect_equal(uh[,1], res$u)      # lag
@@ -81,12 +79,10 @@ test_that("Indices in uh match Ti and Si", {
   res <- preprocess_data(Ti, Si, coordinates)
   uh <- res$uh
   
-  # Vérifie que les indices temporels proviennent bien de Ti
-  expect_true(all(uh[,3] %in% Ti[,1]))
-  expect_true(all(uh[,4] %in% Ti[,2]))
   
-  # Vérifie que les indices spatiaux proviennent bien de Si
-  expect_true(all(uh[,5] %in% Si[,1]))
+  expect_true(all(uh[,3] %in% Ti[,1])) # Verify that the temporal indices indeed come from Ti.
+  expect_true(all(uh[,4] %in% Ti[,2]))
+  expect_true(all(uh[,5] %in% Si[,1]))# Verify that the temporal indices indeed come from Si
   expect_true(all(uh[,6] %in% Si[,2]))
 })
 
@@ -95,7 +91,6 @@ test_that("preprocess_data_mst works on minimal inputs", {
   Ti_min <- matrix(c(1, 2, 3), ncol = 3)
   Si_min <- matrix(c(1, 2), ncol = 2)
   coord_min <- matrix(c(0,0, 1,0), ncol=2, byrow=TRUE)
-  
   res <- preprocess_data(Ti_min, Si_min, coord_min)
   
   expect_equal(length(res$u), 1)
@@ -105,8 +100,8 @@ test_that("preprocess_data_mst works on minimal inputs", {
 
 # 6.
 test_that("preprocess_data_mst throws errors on invalid inputs", {
-  Ti_bad <- matrix(1:4, ncol = 2)      # pas assez de colonnes
-  Si_bad <- matrix(1:3, ncol = 1)      # pas assez de colonnes
+  Ti_bad <- matrix(1:4, ncol = 2)      # not enough cols
+  Si_bad <- matrix(1:3, ncol = 1)      # not enough cols
   
   expect_error(preprocess_data(Ti_bad, Si, coordinates))
   expect_error(preprocess_data(Ti, Si_bad, coordinates))

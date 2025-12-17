@@ -1,41 +1,57 @@
-# Librairies:
+# Libraries:
 library(testthat)
 library(MSTWeatherGen)  
 
-# Donnees:
+# Data:
 data("data", package = "MSTWeatherGen")
 data("coordinates", package = "MSTWeatherGen")
 names = c("Precipitation", "Wind", "Temp_max")
 dates = seq(as.Date("2018-01-01"),as.Date("2021-12-31"), by="day")
 names = c("Precipitation", "Wind", "Temp_max")
 
+# Retrieve results : 
 resultperm <- readRDS("resultperm2.rds")
 
+# Parameters: 
 set.seed(1)
 wt <- resultperm$cluster
 K <- length(unique(wt))
-
-# --- Tests sous-fonction Estimation gf ----
-
-# Récupération des dimensions réelles
-Nt <- dim(data)[1]
-Ns <- dim(data)[2]
-Nv <- dim(data)[3]
-
-# Paramètres fictifs pour les tests
 threshold_precip <- c(0, 1, 2)
 n1 <- 2
 n2 <- 2
 max_it <- 5
 tmax <- 2
-ax <- matrix(1, length(names), length(names))
+ax <- list(
+  v1  = c("Wind", "Wind", "Temp"),
+  v2  = c("Wind", "Temp", "Temp"),
+  cov = c(0.01, 0.01, 0.01)
+)
 cr <- diag(length(names))
+vgm <-spacetime_cov(
+  data = data[,,variable],
+  wt_id = 50:200,
+  locations = coordinates,
+  ds = dst,
+  dates = dates,
+  lagstime = 0,
+  dist = dist,
+  covgm = TRUE
+)
+
+ax <- vgm[vgm$lagtime==0&vgm$dist==max(vgm$dist),]
+
+# --- Tests for function Estimation gf ----
+
+# Dimensions
+Nt <- dim(data)[1]
+Ns <- dim(data)[2]
+Nv <- dim(data)[3]
 
 # 0.
 test_that("estimation_gf returns a list with parm and par_all", {
   res <- estimation_gf(
     data = data,
-    wt_id = 1:length(dates),
+    wt_id = 100:150,
     max_it = max_it,
     dates = dates,
     tmax = tmax,

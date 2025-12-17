@@ -1,38 +1,31 @@
-# Librairies:
+# Libraries:
 library(testthat)
 library(MSTWeatherGen)  
 
-# Donnees:
+# Data:
 data("data", package = "MSTWeatherGen")
 data("coordinates", package = "MSTWeatherGen")
 names = c("Precipitation", "Wind", "Temp_max")
 dates = seq(as.Date("2018-01-01"),as.Date("2021-12-31"), by="day")
 names = c("Precipitation", "Wind", "Temp_max")
 
-
+# Retrieve results : 
 resultperm <- readRDS("resultperm2.rds")
 
+# Parameters
 set.seed(1)
 wt <- resultperm$cluster
 K <- length(unique(wt))
 
-# --- Tests sous-fonction Estimation gf ----
+# --- Tests for the sub-fonction Estimation gf ----
 
-# Récupération des dimensions réelles
+# DImensions
 Nt <- dim(data)[1]
 Ns <- dim(data)[2]
 Nv <- dim(data)[3]
 
 test_that("estimation_gf fonctionne avec des données du package MSTWeatherGen", {
-  # Données du package MSTWeatherGen
-  data("data", package = "MSTWeatherGen")
-  data("coordinates", package = "MSTWeatherGen")
   
-  # Création de la séquence de dates
-  dates <- seq(as.Date("2018-01-01"), as.Date("2021-12-31"), by = "day")
-  names <- c("Precipitation", "Wind", "Temp_max")  # Noms des variables
-  
-  # Paramètres supplémentaires
   wt_id <- rep(1:3, length.out = length(dates))  # Simuler 3 types de météo pour chaque jour
   max_it <- 50  # Nombre d'itérations pour l'optimisation
   tmax <- 5  # Maximum temporal lag
