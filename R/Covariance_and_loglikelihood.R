@@ -25,6 +25,7 @@ Matern <- function(h, r, v) {
 #' @description 
 #' Computes the covariance based on Gneiting's spatio-temporal model. Intended for internal package use.
 #'
+#' @details
 #'  This function implements the methods described in Section 2.4 in Equations 8 of the article
 #' *Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8). 
 #'
@@ -99,6 +100,7 @@ Gneiting <- function(h, u, par, dij) {
 #' Creates a data frame of covariance parameters for all possible pairs of variables. This function is 
 #' designed for internal use, facilitating the organization of parameters for spatio-temporal modeling.
 #'
+#' @details
 #'  This function implements the methods described in Section 2.4 of the article
 #' *Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8). 
 #'
@@ -164,6 +166,7 @@ param <- function(par, names) {
 #' @description 
 #' This function calculates the beta correlation coefficients between variables based on the Gneiting function, adjusted for a correction term. It is intended for internal use within package functions to adjust initial correlation values using specified parameters.
 #'
+#' @details
 #'  This function implements the methods described in Section 2.4 in Equation 8 of the article
 #' *Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8). 
 #'
@@ -228,7 +231,8 @@ compute_beta <- function(parm, names, cr) {
 #' @description 
 #' Extracts a matrix of correction terms ('ax') for each pair of variables based on the model parameters provided in 'parm'. Designed for internal use to facilitate calculations involving correction terms in spatial or spatio-temporal modeling.
 #'
-#'  This function implements the methods described in Sections 2.4 in Equation 8 of the article
+#' @details
+#' This function implements the methods described in Sections 2.4 in Equation 8 of the article
 #' *Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8). 
 #'
 #' @param parm A data frame or list containing the model parameters, including 'ax' values.
@@ -254,7 +258,8 @@ compute_ax <- function(parm, names) {
 #' @description 
 #' Extracts a matrix of beta coefficients ('dij') for each pair of variables from the provided model parameters. Intended for internal use, this function supports spatial and spatio-temporal modeling by organizing pairwise beta coefficients into a structured format.
 #'
-#'  This function implements the methods described in Sections 2.4 in Equation 8 of the article
+#' @details
+#' This function implements the methods described in Sections 2.4 in Equation 8 of the article
 #' *Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8). 
 #'
 #' @param parm A data frame or list containing the model parameters, which must include 'dij' values representing beta coefficients between pairs of variables.
@@ -278,6 +283,7 @@ extract_beta <- function(parm, names) {
 #' @description 
 #' Calculates the log-likelihood for a given pair of variables using the Gneiting spatio-temporal covariance model. This function is part of the internal mechanism for optimizing model parameters based on observed data.
 #'
+#' @details
 #'  This function implements the methods described in Section 3.3 of the article
 #' *Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8). 
 #'
@@ -396,6 +402,7 @@ loglik_pair <- function(par, parms, pair, par_all, data, names, Vi, h, u, uh, ep
 #' Utilizes the Gneiting spatio-temporal covariance model to integrate log-likelihood contributions from each variable pair. 
 #' This function is core to the optimization process within model fitting.
 #'
+#' @details
 #'  This function implements the methods described in Section 3.3 of the article
 #' *Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8). 
 #'
@@ -506,6 +513,7 @@ loglik <- function(par, parms, par_all, data, names, Vi, h, u, uh, ep, cr) {
 #' @description 
 #' Calculates the log-likelihood for spatial data based on the Matérn covariance function. This function plays a pivotal role in estimating spatial parameters for geostatistical models in spatial models.
 #'
+#' @details
 #' This function implements the methods described in Sections 2.4 and 3.3 of the article
 #' *Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8). 
 #'
@@ -569,6 +577,7 @@ loglik_spatial <- function(par, data, h, uh, v) {
 #' @description 
 #' Calculates spatial and temporal covariances for given spatio-temporal data, facilitating the understanding of spatial and temporal variability in the context of different weather types.
 #'
+#' @details
 #' This function implements the methods described in Section 2.4 of the article
 #' *Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8). 
 #'
