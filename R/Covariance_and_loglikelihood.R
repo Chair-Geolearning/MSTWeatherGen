@@ -5,7 +5,7 @@
 #'
 #' @details
 #' This function implements the methods described in Sections 2.4 in Equations 8 and 9 of the article
-#' *Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8). 
+#' Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8). 
 #'
 #' @param h Numeric vector of distances between points.
 #' @param r Scalar range parameter of the Matern function, affecting the spatial correlation decay.
@@ -92,7 +92,7 @@ Gneiting <- function(h, u, par, dij) {
   return(A1 * A2 + A3)
 }
 
-#' Construct Covariance Parameters DataFrame
+#' @title Construct Covariance Parameters DataFrame
 #'
 #' Creates a data frame of covariance parameters for all possible pairs of variables. This function is 
 #' designed for internal use, facilitating the organization of parameters for spatio-temporal modeling.
@@ -157,7 +157,7 @@ param <- function(par, names) {
   }
   return(u)
 }
-#' Compute Beta Correlations
+#' @title Compute Beta Correlations
 #'
 #' This function calculates the beta correlation coefficients between variables based on the Gneiting function, adjusted for a correction term. It is intended for internal use within package functions to adjust initial correlation values using specified parameters.
 #'
@@ -220,7 +220,7 @@ compute_beta <- function(parm, names, cr) {
   
   return(beta)  
 }
-#' Extract Correction Terms Matrix
+#' @title Extract Correction Terms Matrix
 #'
 #' Extracts a matrix of correction terms ('ax') for each pair of variables based on the model parameters provided in 'parm'. Designed for internal use to facilitate calculations involving correction terms in spatial or spatio-temporal modeling.
 #'
@@ -268,7 +268,7 @@ extract_beta <- function(parm, names) {
   })
   return(ax)
 }
-#' Compute Log-likelihood for Variable Pair
+#' @title Compute Log-likelihood for Variable Pair
 #'
 #' Calculates the log-likelihood for a given pair of variables using the Gneiting spatio-temporal covariance model. This function is part of the internal mechanism for optimizing model parameters based on observed data.
 #'
@@ -383,7 +383,7 @@ loglik_pair <- function(par, parms, pair, par_all, data, names, Vi, h, u, uh, ep
   }
 }
 
-#' Total Log-Likelihood Calculation
+#' @title Total Log-Likelihood Calculation
 #'
 #' Calculates the total log-likelihood for spatial or spatio-temporal data across all variable pairs. 
 #' Utilizes the Gneiting spatio-temporal covariance model to integrate log-likelihood contributions from each variable pair. 
@@ -494,7 +494,7 @@ loglik <- function(par, parms, par_all, data, names, Vi, h, u, uh, ep, cr) {
     return(abs(rnorm(1)) * 1e+20)
   }
 }
-#' Log-Likelihood for Spatial Data
+#' @title Log-Likelihood for Spatial Data
 #'
 #' Calculates the log-likelihood for spatial data based on the Matérn covariance function. This function plays a pivotal role in estimating spatial parameters for geostatistical models in spatial models.
 #'
@@ -556,7 +556,7 @@ loglik_spatial <- function(par, data, h, uh, v) {
     return(ll)
   }
 }
-#' Compute Spatio-Temporal Covariances
+#' @title Compute Spatio-Temporal Covariances
 #'
 #' Calculates spatial and temporal covariances for given spatio-temporal data, facilitating the understanding of spatial and temporal variability in the context of different weather types.
 #'
@@ -638,7 +638,7 @@ spacetime_cov <- function(data, wt_id, locations, ds = NULL, dates, lagstime, di
   # Combine and return results
   return(do.call(rbind, vgm))
 }
-#' Generate Covariance Matrices for Spatio-Temporal Model
+#' @title Generate Covariance Matrices for Spatio-Temporal Model
 #'
 #' Creates covariance matrices for each time lag and pair of variables using Gneiting's function, based on provided model parameters and spatial locations. These matrices are essential for multivariate space-time modeling, reflecting the covariance structure across space and time.
 #'
@@ -689,7 +689,7 @@ cov_matrices = function(par, coordinates, names, M) {
   })
   return(cp)
 }
-#' Check Positive Definiteness Condition
+#' @title Check Positive Definiteness Condition
 #'
 #' Verifies the positive definiteness of the covariance matrix constructed from model parameters, which is crucial for ensuring valid covariance structures in spatio-temporal modeling.
 #'
@@ -726,7 +726,7 @@ pd_condition = function(parm, names){
   pd = try(chol(eij), silent = T)
   return(!is.character(pd))
 }
-#' Modify Beta Parameters in Model Parameters
+#' @title Modify Beta Parameters in Model Parameters
 #'
 #' Adjusts the 'dij' parameters in the model parameter set based on computed beta coefficients, ensuring that the covariance structure reflects these adjustments.
 #'
