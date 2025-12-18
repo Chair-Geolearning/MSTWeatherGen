@@ -23,12 +23,13 @@ resultperm <- readRDS("resultperm2.rds")
 # names_units = c("m/s", "°C"),
 #  dir = tempdir()
 # )
+n_wt <- 3
 
 result <- weather_types(
   data = data,
   variables = c("Wind", "Temp_max"),
   dates = dates,
-  n_wt = 3,
+  n_wt = n_wt,
   coordinates = coordinates,
   return_plots = FALSE,
   names_units = c("m/s", "°C"),
@@ -37,7 +38,6 @@ result <- weather_types(
 
 # 0. 
 test_that("weather_types returns a cluster vector and works even if return_plots = FALSE", {
-  n_wt <- 3
   expect_type(result$cluster, "double")                    # type of the result
   expect_equal(length(result$cluster), dim(data)[1])       # one label per day
   expect_equal(length(unique(result$cluster)), n_wt)       # exactly n_wt clusters
