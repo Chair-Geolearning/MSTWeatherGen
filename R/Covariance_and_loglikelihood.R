@@ -20,8 +20,9 @@ Matern <- function(h, r, v) {
   rt[h == 0] <- 1  # Ensures that the covariance at distance 0 is 1.
   return(rt)
 }
-#' Gneiting's Spatio-Temporal Covariance Model
+#' @title Gneiting's Spatio-Temporal Covariance Model
 #'
+#' @description 
 #' Computes the covariance based on Gneiting's spatio-temporal model. Intended for internal package use.
 #'
 #'  This function implements the methods described in Section 2.4 in Equations 8 of the article
@@ -94,6 +95,7 @@ Gneiting <- function(h, u, par, dij) {
 
 #' @title Construct Covariance Parameters DataFrame
 #'
+#' @description 
 #' Creates a data frame of covariance parameters for all possible pairs of variables. This function is 
 #' designed for internal use, facilitating the organization of parameters for spatio-temporal modeling.
 #'
@@ -159,6 +161,7 @@ param <- function(par, names) {
 }
 #' @title Compute Beta Correlations
 #'
+#' @description 
 #' This function calculates the beta correlation coefficients between variables based on the Gneiting function, adjusted for a correction term. It is intended for internal use within package functions to adjust initial correlation values using specified parameters.
 #'
 #'  This function implements the methods described in Section 2.4 in Equation 8 of the article
@@ -222,6 +225,7 @@ compute_beta <- function(parm, names, cr) {
 }
 #' @title Extract Correction Terms Matrix
 #'
+#' @description 
 #' Extracts a matrix of correction terms ('ax') for each pair of variables based on the model parameters provided in 'parm'. Designed for internal use to facilitate calculations involving correction terms in spatial or spatio-temporal modeling.
 #'
 #'  This function implements the methods described in Sections 2.4 in Equation 8 of the article
@@ -245,8 +249,9 @@ compute_ax <- function(parm, names) {
   })
   return(ax)
 }
-#' Extract Beta Coefficients Matrix
+#' @titleExtract Beta Coefficients Matrix
 #'
+#' @description 
 #' Extracts a matrix of beta coefficients ('dij') for each pair of variables from the provided model parameters. Intended for internal use, this function supports spatial and spatio-temporal modeling by organizing pairwise beta coefficients into a structured format.
 #'
 #'  This function implements the methods described in Sections 2.4 in Equation 8 of the article
@@ -270,6 +275,7 @@ extract_beta <- function(parm, names) {
 }
 #' @title Compute Log-likelihood for Variable Pair
 #'
+#' @description 
 #' Calculates the log-likelihood for a given pair of variables using the Gneiting spatio-temporal covariance model. This function is part of the internal mechanism for optimizing model parameters based on observed data.
 #'
 #'  This function implements the methods described in Section 3.3 of the article
@@ -385,6 +391,7 @@ loglik_pair <- function(par, parms, pair, par_all, data, names, Vi, h, u, uh, ep
 
 #' @title Total Log-Likelihood Calculation
 #'
+#' @description 
 #' Calculates the total log-likelihood for spatial or spatio-temporal data across all variable pairs. 
 #' Utilizes the Gneiting spatio-temporal covariance model to integrate log-likelihood contributions from each variable pair. 
 #' This function is core to the optimization process within model fitting.
@@ -496,6 +503,7 @@ loglik <- function(par, parms, par_all, data, names, Vi, h, u, uh, ep, cr) {
 }
 #' @title Log-Likelihood for Spatial Data
 #'
+#' @description 
 #' Calculates the log-likelihood for spatial data based on the Matérn covariance function. This function plays a pivotal role in estimating spatial parameters for geostatistical models in spatial models.
 #'
 #' This function implements the methods described in Sections 2.4 and 3.3 of the article
@@ -558,6 +566,7 @@ loglik_spatial <- function(par, data, h, uh, v) {
 }
 #' @title Compute Spatio-Temporal Covariances
 #'
+#' @description 
 #' Calculates spatial and temporal covariances for given spatio-temporal data, facilitating the understanding of spatial and temporal variability in the context of different weather types.
 #'
 #' This function implements the methods described in Section 2.4 of the article
@@ -640,6 +649,7 @@ spacetime_cov <- function(data, wt_id, locations, ds = NULL, dates, lagstime, di
 }
 #' @title Generate Covariance Matrices for Spatio-Temporal Model
 #'
+#' @description 
 #' Creates covariance matrices for each time lag and pair of variables using Gneiting's function, based on provided model parameters and spatial locations. These matrices are essential for multivariate space-time modeling, reflecting the covariance structure across space and time.
 #'
 #' @param par Parameters for the Gneiting covariance function, including details for variable pairs.
@@ -691,6 +701,7 @@ cov_matrices = function(par, coordinates, names, M) {
 }
 #' @title Check Positive Definiteness Condition
 #'
+#' @description 
 #' Verifies the positive definiteness of the covariance matrix constructed from model parameters, which is crucial for ensuring valid covariance structures in spatio-temporal modeling.
 #'
 #' @param parm A data frame or list containing the model parameters.
@@ -728,6 +739,7 @@ pd_condition = function(parm, names){
 }
 #' @title Modify Beta Parameters in Model Parameters
 #'
+#' @description 
 #' Adjusts the 'dij' parameters in the model parameter set based on computed beta coefficients, ensuring that the covariance structure reflects these adjustments.
 #'
 #' @param parm A data frame or list representing the current set of model parameters, including 'v1', 'v2', and 'dij' among others.
