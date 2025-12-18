@@ -14,7 +14,7 @@
 #' The user has the option to configure the model to fit data for each season, with the seasons defined by the user.
 #' 
 #' This function implements the methods described in Sections 3.1–3.3 of the article
-#' __Stochastic Environmental Research and Risk Assessment, 2025__ (DOI: 10.1007/s00477-024-02897-8). 
+#' \strong{Stochastic Environmental Research and Risk Assessment, 2025} (DOI: 10.1007/s00477-024-02897-8). 
 #' 
 #' @param data A multi-dimensional array of weather data, encompassing time, location, and various weather variables.
 #' @param dates A vector of dates corresponding to the time dimension in the data array, used for temporal analysis.
@@ -83,7 +83,7 @@ MSTWeatherGen_Estim = function(data, dates, by_season = TRUE,  seasons, scale = 
 #' This function simulates weather data over specified dates using the Multivariate Space-Time Stochastic Weather Generator (MSTWeatherGen). The simulation can be conducted on either a seasonal basis or for the entire period, depending on the provided parameters and the structure of the historical data. It utilizes autoregressive models and specified parameters to generate realistic weather variables.
 #'
 #'  This function implements the methods described in Section 4 of the article
-#' __Stochastic Environmental Research and Risk Assessment, 2025__ (DOI: 10.1007/s00477-024-02897-8). 
+#' \strong{Stochastic Environmental Research and Risk Assessment, 2025} (DOI: 10.1007/s00477-024-02897-8). 
 #'
 #' @param dates_sim Dates for which to simulate weather data, specifying the target period for simulation.
 #' @param dates_original The original dates corresponding to the historical weather data, used for aligning and deriving simulation parameters.
@@ -150,7 +150,7 @@ MSTWeatherGen_Sim = function(dates_sim, dates_original, data, seasons = NULL, pa
 #' of parameters for the Gaussian field model.
 #'
 #'  This function implements the methods described in Sections 3.1–3.3 of the article
-#' __Stochastic Environmental Research and Risk Assessment, 2025__ (DOI: 10.1007/s00477-024-02897-8). 
+#' \strong{Stochastic Environmental Research and Risk Assessment, 2025} (DOI: 10.1007/s00477-024-02897-8). 
 #'                         
 #' @param data Array of weather data with dimensions [time, location, variable].
 #' @param dates Vector of dates corresponding to the time dimension of the data.
@@ -241,7 +241,7 @@ MSTWeatherGen_Estim_season = function(data, dates, precipitation = T, scale = FA
 #' and predefined parameters to accurately reflect weather type transitions and spatial-temporal correlations.
 #'
 #'  This function implements the methods described in Section 5 of the article
-#' __Stochastic Environmental Research and Risk Assessment, 2025__ (DOI: 10.1007/s00477-024-02897-8). 
+#' \strong{Stochastic Environmental Research and Risk Assessment, 2025} (DOI: 10.1007/s00477-024-02897-8). 
 #'                         
 #' @param dates Vector of dates for which to simulate weather data.
 #' @param names Names of weather variables to be simulated.
