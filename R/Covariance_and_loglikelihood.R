@@ -5,7 +5,7 @@
 #'
 #' @details
 #' This function implements the methods described in Sections 2.4 in Equations 8 and 9 of the article
-#' Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8). 
+#' \strong{Stochastic Environmental Research and Risk Assessment, 2025} (DOI: 10.1007/s00477-024-02897-8). 
 #'
 #' @param h Numeric vector of distances between points.
 #' @param r Scalar range parameter of the Matern function, affecting the spatial correlation decay.
@@ -102,7 +102,7 @@ Gneiting <- function(h, u, par, dij) {
 #'
 #' @details
 #'  This function implements the methods described in Section 2.4 of the article
-#' *Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8). 
+#' \strong{Stochastic Environmental Research and Risk Assessment, 2025} (DOI: 10.1007/s00477-024-02897-8). 
 #'
 #' @param par Named vector of parameters.
 #' @param names Character vector of variable names.
@@ -167,8 +167,8 @@ param <- function(par, names) {
 #' This function calculates the beta correlation coefficients between variables based on the Gneiting function, adjusted for a correction term. It is intended for internal use within package functions to adjust initial correlation values using specified parameters.
 #'
 #' @details
-#'  This function implements the methods described in Section 2.4 in Equation 8 of the article
-#' *Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8). 
+#' This function implements the methods described in Section 2.4 in Equation 8 of the article
+#' \strong{Stochastic Environmental Research and Risk Assessment, 2025} (DOI: 10.1007/s00477-024-02897-8). 
 #'
 #' @param parm A data frame or list containing parameters for the Gneiting function.
 #' @param names A vector of variable names (e.g., "temperature", "wind") to calculate correlations between.
@@ -233,7 +233,7 @@ compute_beta <- function(parm, names, cr) {
 #'
 #' @details
 #' This function implements the methods described in Sections 2.4 in Equation 8 of the article
-#' *Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8). 
+#' \strong{Stochastic Environmental Research and Risk Assessment, 2025} (DOI: 10.1007/s00477-024-02897-8). 
 #'
 #' @param parm A data frame or list containing the model parameters, including 'ax' values.
 #' @param names Character vector specifying the variable names for which correction terms are to be calculated.
@@ -260,7 +260,7 @@ compute_ax <- function(parm, names) {
 #'
 #' @details
 #' This function implements the methods described in Sections 2.4 in Equation 8 of the article
-#' *Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8). 
+#' \strong{Stochastic Environmental Research and Risk Assessment, 2025} (DOI: 10.1007/s00477-024-02897-8). 
 #'
 #' @param parm A data frame or list containing the model parameters, which must include 'dij' values representing beta coefficients between pairs of variables.
 #' @param names Character vector of variable names for which beta coefficients are to be extracted.
@@ -284,8 +284,8 @@ extract_beta <- function(parm, names) {
 #' Calculates the log-likelihood for a given pair of variables using the Gneiting spatio-temporal covariance model. This function is part of the internal mechanism for optimizing model parameters based on observed data.
 #'
 #' @details
-#'  This function implements the methods described in Section 3.3 of the article
-#' *Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8). 
+#' This function implements the methods described in Section 3.3 of the article
+#' \strong{Stochastic Environmental Research and Risk Assessment, 2025} (DOI: 10.1007/s00477-024-02897-8). 
 #'
 #' @param par Current parameters being optimized.
 # beta Matrix of beta coefficients, precomputed.
@@ -403,8 +403,8 @@ loglik_pair <- function(par, parms, pair, par_all, data, names, Vi, h, u, uh, ep
 #' This function is core to the optimization process within model fitting.
 #'
 #' @details
-#'  This function implements the methods described in Section 3.3 of the article
-#' *Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8). 
+#' This function implements the methods described in Section 3.3 of the article
+#' \strong{Stochastic Environmental Research and Risk Assessment, 2025} (DOI: 10.1007/s00477-024-02897-8). 
 #'
 #' @param par Vector of parameter estimates currently being optimized.
 #' @param parms Indices or names of parameters within 'par' that are subject to update.
@@ -515,7 +515,7 @@ loglik <- function(par, parms, par_all, data, names, Vi, h, u, uh, ep, cr) {
 #'
 #' @details
 #' This function implements the methods described in Sections 2.4 and 3.3 of the article
-#' *Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8). 
+#' \strong{Stochastic Environmental Research and Risk Assessment, 2025} (DOI: 10.1007/s00477-024-02897-8). 
 #'
 #' @param par Vector containing parameters for the Matérn covariance function: range (`par[1]`) and smoothness (`par[2]`). Both parameters must be positive.
 #' @param data data 3D array of observed spatial data.
@@ -579,7 +579,7 @@ loglik_spatial <- function(par, data, h, uh, v) {
 #'
 #' @details
 #' This function implements the methods described in Section 2.4 of the article
-#' *Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8). 
+#' \strong{Stochastic Environmental Research and Risk Assessment, 2025} (DOI: 10.1007/s00477-024-02897-8). 
 #'
 #' @param data 3D array representing time, location, and variable dimensions of the spatio-temporal data.
 #' @param wt_id Indices of weather types for which covariances are computed.
