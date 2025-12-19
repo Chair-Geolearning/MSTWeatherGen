@@ -29,7 +29,6 @@ First, let's load the `MSTWeatherGen` package.
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE}
 library(MSTWeatherGen)
-library(magrittr)
 ```
 
 ## Data
