@@ -65,4 +65,7 @@ a clustering algorithm. Subsequently, for each identified weather type, the weat
 into residuals that adhere to a normal distribution via a specific transformation function. In the final stage, 
 a multivariate space-time Gaussian random field is fitted to these transformed variables for each weather type.
 The user has the option to configure the model to fit data for each season, with the seasons defined by the user.
+
+This function implements the methods described in Sections 3.1–3.3 of the article
+\strong{Stochastic Environmental Research and Risk Assessment, 2025} (DOI: 10.1007/s00477-024-02897-8).
 }

@@ -42,4 +42,8 @@ A list of estimated Gaussian field parameters for each weather type.
 \description{
 Estimates the parameters of a Gaussian field model for each weather type across spatial and temporal dimensions of weather data.
 }
+\details{
+This function implements the methods described in Section 3.3 of the article
+*Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8).
+}
 \keyword{internal}

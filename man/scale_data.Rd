@@ -21,4 +21,8 @@ A list containing the scaled data and scale parameters (mean and standard deviat
 \description{
 Function to scale the input data based on daily mean and standard deviation, and optionally smooth them using a moving average.
 }
+\details{
+This function implements the methods described in Sections 3.5 and 5 of the article
+*Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8).
+}
 \keyword{internal}

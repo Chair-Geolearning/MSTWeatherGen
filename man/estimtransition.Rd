@@ -20,4 +20,8 @@ A square matrix of size K x K where each element [i, j] represents the normalize
 \description{
 Function to estimate transition matrices based on weather types.
 }
+\details{
+This function implements the methods described in Sections 3.1, in Eq. 12 of the article
+*Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8).
+}
 \keyword{internal}

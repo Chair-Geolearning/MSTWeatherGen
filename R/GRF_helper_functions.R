@@ -3,6 +3,9 @@
 #'
 #' Constructs a matrix containing all possible combinations of variable names, including self-pairs and cross-pairs. This facilitates the analysis and modeling of interactions between different variables in a multivariate dataset.
 #'
+#' This function implements the methods described in Section 3.3 of the article, functions log_lik and log
+#' *Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8). 
+#'
 #' @param names Vector of variable names from which pairs are to be generated.
 #'
 #' @return A data frame where each row represents a pair of variables, with columns 'v1' and 'v2' indicating the variable names in the pair. This includes both self-pairs (where 'v1' and 'v2' are the same) and cross-pairs (where 'v1' and 'v2' are different).
@@ -23,6 +26,9 @@ generate_variable_index_pairs <- function(names) {
 #' Initialize Model Parameters If Missing
 #'
 #' Sets up the `par_all` vector with default values or based on provided parameters if it hasn't been initialized. This function ensures that all necessary model parameters are prepared for the modeling process.
+#'
+#' This function implements the methods described in Section 3.3 of the article
+#' *Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8). 
 #'
 #' @param par_all Existing vector of all model parameters; if NULL, it will be initialized.
 #' @param names Vector of variable names involved in the model.
@@ -74,6 +80,9 @@ initialize_par_all_if_missing <- function(par_all, names, pairs, par_s, ax, cr) 
 #'
 #' Modifies the 'ax' parameters within the complete set of model parameters (`par_all`) using the covariance information provided by the 'ax' matrix. This adjustment is crucial for ensuring accurate covariance structures in the model.
 #'
+#' This function implements the methods described in Section 2.4 of the article, functions log_lik and log
+#' *Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8). 
+#'                                         
 #' @param par_all The complete set of model parameters, including 'ax' values to be updated.
 #' @param names Vector of variable names, indicating the variables for which 'ax' adjustments are applied.
 #' @param ax Matrix or data frame containing the updated covariance information to adjust 'ax' parameters in `par_all`. If `ax` is not a matrix, it will be transformed to ensure positive definiteness before updating.
@@ -116,6 +125,9 @@ update_ax_parameters <- function(par_all, names, ax) {
 #' a log-likelihood based optimization approach to determine initial values of spatial parameters
 #' that best fit the spatial structure of the data for each variable.
 #'
+#' This function implements the methods described in Section 3.3 of the article, functions log_lik and log
+#' *Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8). 
+#'                                         
 #' @param data The dataset for which spatial parameters are being initialized, typically
 #'        a 3D array or a list of spatial observations for multiple variables.
 #' @param names A vector of variable names for which spatial parameters are to be initialized.
@@ -171,6 +183,9 @@ init_space_par <- function(data, names, h, uh, max_it = 2000) {
 #' This function iteratively optimizes spatial parameters to maximize the log-likelihood
 #' of observing the data given the model, focusing on the spatial interaction between pairs of variables.
 #'
+#' This function implements the methods described in Section 3.3 of the article, functions log_lik and log
+#' *Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8). 
+#'
 #' @param par_all Initial set of all model parameters before optimization.
 #' @param data The dataset used for optimization, typically a 3D array or a list
 #'        of spatial observations for multiple variables over time.
@@ -191,6 +206,7 @@ init_space_par <- function(data, names, h, uh, max_it = 2000) {
 #' @keywords internal
 #' @importFrom stringr str_split
 optimize_spatial_parameters <- function(par_all, data, names, Vi, uh, cr, max_it, ep) {
+
   pairs <- paste(ep[,1],ep[,2], sep = "-")
   parms <- c(paste(pairs, "ax", sep = ":"), paste(names, "ci", sep = ":"),
              paste(pairs[1:length(names)], "rij", sep = ":"), 
@@ -208,6 +224,9 @@ optimize_spatial_parameters <- function(par_all, data, names, Vi, uh, cr, max_it
 #' log-likelihood of the observed data under the model. This function focuses on both spatial
 #' and temporal interactions between pairs of variables, refining the model's ability to capture
 #' complex spatio-temporal dependencies.
+#'
+#' This function implements the methods described in Section 3.3 of the article, functions log_lik and log
+#' *Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8). 
 #'
 #' @param par_all Initial comprehensive set of model parameters to be refined through optimization.
 #' @param data Dataset containing spatio-temporal observations, typically a 3D array or list
@@ -232,6 +251,7 @@ optimize_spatial_parameters <- function(par_all, data, names, Vi, uh, cr, max_it
 #' @keywords internal
 #' @importFrom stringr str_split
 optimize_pairs_spatiotemporal <- function(par_all, data, names, Vi, uh, cr, max_it, ep) {
+  
   pairs <- paste(ep[,1],ep[,2], sep = "-")
   # Optimize model parameters for each pair of variables using the log-likelihood function
   for (i in seq(nrow(ep))) {
@@ -267,6 +287,9 @@ optimize_pairs_spatiotemporal <- function(par_all, data, names, Vi, uh, cr, max_
 #' considering interactions across all variable pairs. This function aims to enhance the 
 #' model's temporal dynamics by optimizing a subset of parameters that influence temporal 
 #' relationships.
+#'
+#' This function implements the methods described in Section 3.3 of the article, functions log_lik and log
+#' *Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8). 
 #'
 #' @param par_all Comprehensive set of model parameters, including both spatial and temporal
 #'        parameters, to be optimized in this step.
@@ -309,6 +332,9 @@ optimize_temporal_parameters <- function(par_all, data, names, Vi, uh, cr, max_i
 #' based on observed spatio-temporal data. It integrates various preprocessing and optimization
 #' steps to derive the optimal model parameters that best fit the observed data.
 #'
+#' This function implements the methods described in Section 3.3 of the article
+#' *Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8). 
+#'                                         
 #' @param data A 3D array containing the observed data values across time, space, and variables.
 #' @param wt_id Vector of identifiers indicating specific weather types or variable categorizations within the dataset.
 #' @param max_it Maximum number of iterations allowed during the optimization process.
@@ -405,6 +431,9 @@ estimation_gf <- function(data, wt_id, max_it, dates, tmax, names, par_all = NUL
 #' This function selects indices of points from a given set of coordinates that are uniformly distributed across the spatial domain.
 #' The selection process involves performing k-means clustering on the coordinates and then selecting the closest data point to each cluster center.
 #'
+#' This function implements the methods described in Section 3.3 of the article
+#' *Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8). 
+#'
 #' @param coordinates A matrix or data frame of geographical coordinates (longitude and latitude).
 #' @param N The number of uniformly distributed points to select.
 #'
@@ -413,7 +442,6 @@ estimation_gf <- function(data, wt_id, max_it, dates, tmax, names, par_all = NUL
 #' @keywords internal
 #' @importFrom stats kmeans
 selectUniformPointsIndices <- function(coordinates, N) {
-  
   colnames(coordinates) <- c("lon", "lat")
   # K-means clustering
   clusters <- stats::kmeans(coordinates, centers = N)
@@ -434,6 +462,9 @@ selectUniformPointsIndices <- function(coordinates, N) {
 #' Selects a set of points from a dataset based on probabilities calculated from their spatial distances to a specific reference point.
 #' The function calculates the probability for each point as inversely proportional to its squared distance from the reference point, ensuring a higher chance of selecting closer points.
 #'
+#' This function implements the methods described in Section 3.3 of the article, in Equation 17
+#' *Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8). 
+#'                
 #' @param coordinates A matrix or data frame containing the coordinates of points.
 #' @param betaIndex The index of the reference point in the coordinates matrix/data frame.
 #' @param v The number of points to select, including the reference point.
@@ -463,6 +494,9 @@ selectPoints <- function(coordinates, betaIndex, v) {
 #' This function first selects a set of n1 points uniformly distributed across the spatial domain. For each of these points,
 #' it then selects n2 points based on their proximity, ensuring a diverse yet focused selection of spatial pairs for further analysis.
 #'
+#' This function implements the methods described in Section 3.3 of the article, in Equation 17
+#' *Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8). 
+#'       
 #' @param coordinates A matrix or data frame containing the coordinates of points.
 #' @param n1 The number of points to uniformly distribute across the spatial domain.
 #' @param n2 The number of points to select based on proximity to each of the n1 points.
@@ -472,6 +506,7 @@ selectPoints <- function(coordinates, betaIndex, v) {
 #' @keywords internal
 #' @importFrom stringr str_split
 generate_spatial_index_pairs <- function(coordinates,n1, n2) {
+
   D = as.matrix(dist(coordinates))
   Ns = nrow(coordinates)
   rs <- selectUniformPointsIndices(coordinates, n1)
@@ -492,6 +527,9 @@ generate_spatial_index_pairs <- function(coordinates,n1, n2) {
 #' Creates pairs of temporal indices based on specified time lags up to a maximum time lag (tmax). This function is useful for
 #' analyzing temporal relationships and covariances at different lags in spatio-temporal data.
 #'
+#' This function implements the methods described in Section 3.3 of the article, in Equation 18
+#' *Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8). 
+#'                        
 #' @param wt_id Identifiers (indices) corresponding to specific time points in the dataset.
 #' @param dates Vector of dates corresponding to the time dimension in the dataset.
 #' @param tmax Maximum temporal lag for which pairs are to be generated.
@@ -517,6 +555,9 @@ generate_temporal_index_pairs <- function(wt_id,dates, tmax) {
 #' generating covariance matrices and parameter matrices where interactions between different variables (or the same variable) are
 #' considered.
 #'
+#' This function implements the methods described in Section 3.3 of the article
+#' *Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8). 
+#'
 #' @param names A vector of variable names for which index pairs are to be generated.
 #'
 #' @return A data frame with two columns ('v1' and 'v2') listing all unique pairs of variables. The data frame includes both
@@ -525,6 +566,7 @@ generate_temporal_index_pairs <- function(wt_id,dates, tmax) {
 #' @keywords internal
 
 generate_variable_index_pairs <- function(names) {
+  
   u1 = sapply(names, function(v1) sapply(names, function(v2) v1))
   u2 = sapply(names, function(v1) sapply(names, function(v2) v2))
   ep = data.frame(cbind(u1[!upper.tri(u1)],u2[!upper.tri(u2)]))
@@ -536,6 +578,9 @@ generate_variable_index_pairs <- function(names) {
 #'
 #' Extracts unique elements from a vector or list, effectively removing duplicates.
 #'
+#' This function implements the methods described in Section 3.3 of the article
+#' *Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8). 
+#'                                         
 #' @param Si A vector or list from which unique elements need to be extracted.
 #'
 #' @return A vector containing only unique elements from the input.
@@ -543,6 +588,7 @@ generate_variable_index_pairs <- function(names) {
 #' @keywords internal
 
 unique_elements <- function(Si) {
+  
   Si <- unlist(Si)
   Si <- Si[!duplicated(Si)]
   return(Si)
@@ -551,6 +597,9 @@ unique_elements <- function(Si) {
 #'
 #' Performs preprocessing on spatio-temporal data to prepare for model fitting, including computing spatial distances and temporal lags.
 #'
+#' This function implements the methods described in Section 3.3 of the article
+#' *Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8). 
+#'                                        
 #' @param Ti A matrix containing temporal index pairs and their respective lags.
 #' @param Si A matrix containing spatial index pairs.
 #' @param coordinates A matrix of spatial coordinates for each location.
@@ -560,6 +609,7 @@ unique_elements <- function(Si) {
 #' @keywords internal
 
 preprocess_data <- function(Ti, Si, coordinates) {
+  
   e <- expand.grid(1:nrow(Ti), 1:nrow(Si))
   u <- Ti[e[, 1], 3] 
   h <- ds(Si[e[, 2], 1], Si[e[, 2], 2],coordinates)
@@ -571,6 +621,9 @@ preprocess_data <- function(Ti, Si, coordinates) {
 #'
 #' Estimates the parameters of a Gaussian field model for each weather type across spatial and temporal dimensions of weather data.
 #'
+#' This function implements the methods described in Section 3.3 of the article
+#' *Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8). 
+#'                                        
 #' @param data A 3D array containing weather data with dimensions [time, location, variable].
 #' @param wt Vector of weather type classifications for each time point in the data.
 #' @param names Vector of variable names in the data array.
@@ -586,6 +639,7 @@ preprocess_data <- function(Ti, Si, coordinates) {
 #' @keywords internal
 #' @importFrom geosphere distHaversine
 estimate_gaussian_field_params <- function(data, wt, names, coordinates, tmax, max_it, n1, n2, dates, threshold_precip) {
+
   K = length(unique(wt))
   # Initialize the Gaussian field parameters storage
   gf_par <- vector(mode = "list", length = K)

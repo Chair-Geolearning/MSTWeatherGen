@@ -22,5 +22,10 @@ A list with class 'orderNorm' containing the normalized data (x.t), the original
 }
 \description{
 Function for ordered normalization using Ordered Quantile Normalizing transformation.
+Function inspired from "bestNormalize" package and adapted for truncated normal distributions.
+}
+\details{
+This function implements the methods described in Section 3.2 in Equations 14, 15 and 16 of the article
+*Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8).
 }
 \keyword{internal}

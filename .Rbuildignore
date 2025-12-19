@@ -3,3 +3,4 @@
 ^.git.*$
 ^_pkgdown.yml$
 ^docs$
+.Rcheck$

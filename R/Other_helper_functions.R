@@ -3,6 +3,9 @@
 #' Calculates the indices of dates within a specified season across multiple years.
 #' This function handles leap years and seasons that span the end of one year and the beginning of the next.
 #'
+#' This function implements the methods described in Section 5 of the article
+#' *Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8). 
+#'
 #' @param dates A vector of dates to evaluate.
 #' @param season A list specifying the season with 'min_day', 'max_day', 'min_month', and 'max_month'.
 #' @param Year Optional. If specified, only returns indices for the given year.
@@ -13,7 +16,6 @@
 #' @keywords internal
 #' @importFrom lubridate year leap_year month
 season_indices = function(dates, season, Year){
-  
   years = unique(lubridate::year(dates))
   years = c(years, max(years) + 1)
   md = lapply(years, function(Year) {
@@ -98,6 +100,9 @@ season_indices = function(dates, season, Year){
 #'
 #' Filters weather data and corresponding dates for a specified season.
 #'
+#' This function implements the methods described in Section 5 of the article
+#' *Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8). 
+#'
 #' @param data A 3D array of weather data with dimensions [time, location, variable].
 #' @param dates A vector of dates corresponding to the time dimension of the data.
 #' @param season A list specifying the season with 'min_day', 'max_day', 'min_month', and 'max_month'.
@@ -165,6 +170,9 @@ haversine <- function(point1, point2) {
 #' Calculate Haversine Distance Between Two Coordinates
 #'
 #' Computes the Haversine distance between two coordinates using the geosphere package.
+#'
+#' This function implements the methods described in Section 3.3 of the article
+#' *Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8). 
 #'
 #' @param i Index of the first coordinate.
 #' @param j Index of the second coordinate.

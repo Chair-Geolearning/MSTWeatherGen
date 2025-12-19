@@ -7,7 +7,7 @@
 inv_orderNorm_Transf(orderNorm_obj, new_points_x_t, left, warn = FALSE)
 }
 \arguments{
-\item{orderNorm_obj}{Fitted orderNorm object containing details of the original normalization or transformation.}
+\item{orderNorm_obj}{Fitted orderNorm object containing details of the original normalization or transformation including the transformed and original data points and the fitting model.}
 
 \item{new_points_x_t}{Transformed data points for which the original values are to be estimated.}
 
@@ -20,5 +20,9 @@ Estimated original data values corresponding to the transformed data points.
 }
 \description{
 Function to perform inverse transformation or normalization applied by the orderNorm function.
+}
+\details{
+This function implements the methods described in Sections 2.1, 2.3 and 3.2 of the article
+*Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8).
 }
 \keyword{internal}
