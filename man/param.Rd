@@ -21,6 +21,6 @@ designed for internal use, facilitating the organization of parameters for spati
 }
 \details{
 This function implements the methods described in Section 2.4 of the article
-*Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8).
+\strong{Stochastic Environmental Research and Risk Assessment, 2025} (DOI: 10.1007/s00477-024-02897-8).
 }
 \keyword{internal}

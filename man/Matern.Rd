@@ -21,6 +21,6 @@ Calculates the Matern covariance function for a given vector of distances. This 
 }
 \details{
 This function implements the methods described in Sections 2.4 in Equations 8 and 9 of the article
-*Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8).
+\strong{Stochastic Environmental Research and Risk Assessment, 2025} (DOI: 10.1007/s00477-024-02897-8).
 }
 \keyword{internal}

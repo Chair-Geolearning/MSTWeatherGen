@@ -62,6 +62,6 @@ of parameters for the Gaussian field model.
 }
 \details{
 This function implements the methods described in Sections 3.1–3.3 of the article
-*Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8).
+\strong{Stochastic Environmental Research and Risk Assessment, 2025} (DOI: 10.1007/s00477-024-02897-8).
 }
 \keyword{internal}
