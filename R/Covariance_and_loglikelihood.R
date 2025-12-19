@@ -253,7 +253,7 @@ compute_ax <- function(parm, names) {
   })
   return(ax)
 }
-#' @titleExtract Beta Coefficients Matrix
+#' @title Extract Beta Coefficients Matrix
 #'
 #' @description 
 #' Extracts a matrix of beta coefficients ('dij') for each pair of variables from the provided model parameters. Intended for internal use, this function supports spatial and spatio-temporal modeling by organizing pairwise beta coefficients into a structured format.

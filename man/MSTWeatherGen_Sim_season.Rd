@@ -44,6 +44,6 @@ and predefined parameters to accurately reflect weather type transitions and spa
 }
 \details{
 This function implements the methods described in Section 5 of the article
-*Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8).
+\strong{Stochastic Environmental Research and Risk Assessment, 2025} (DOI: 10.1007/s00477-024-02897-8).
 }
 \keyword{internal}
