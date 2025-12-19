@@ -1,0 +1,21 @@
+url: https://github.com/sobakrim/MSTWeatherGen
+template:
+  bootstrap: 3
+  bootswatch: cosmo
+authors:
+  Said Obakrim:
+    href: "https://wp.unil.ch/gaia/team/said-obakrim/"
+  Lionel Benoit:
+    href: "https://biosp.mathnum.inrae.fr/homepage-lionel-benoit"
+  Denis Allard:
+    href: "https://biosp.mathnum.inrae.fr/homepage-denis-allard"
+  Jean-François Rey:
+    href: "https://jeff.biosp.org"
+navbar:
+  structure:
+    left:  [home, intro, reference, articles, tutorials, news]
+    right: [github]
+  components:
+    github:
+      icon: fa-brands fa-github
+      href: https://github.com/sobakrim/MSTWeatherGen
