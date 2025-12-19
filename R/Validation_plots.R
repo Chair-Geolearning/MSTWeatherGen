@@ -82,7 +82,6 @@ utils::globalVariables(c("r", "y", "v", "lon", "lat", "n"))
 #' @import ggplot2
 #' @import patchwork
 #' @importFrom dplyr group_by tally mutate case_when summarise
-#' @importFrom magrittr "%>%"
 #' @import viridis
 #' @export
 plot_dry_wet_spells_maps = function(sim, observed, coordinates, dates){
