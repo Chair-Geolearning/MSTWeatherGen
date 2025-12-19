@@ -82,7 +82,6 @@ utils::globalVariables(c("r", "y", "v", "lon", "lat", "n"))
 #' @import ggplot2
 #' @import patchwork
 #' @importFrom dplyr group_by tally mutate case_when summarise
-#' @importFrom magrittr "%>%"
 #' @import viridis
 #' @export
 plot_dry_wet_spells_maps = function(sim, observed, coordinates, dates){
@@ -136,7 +135,7 @@ plot_dry_wet_spells_maps = function(sim, observed, coordinates, dates){
   p <- ggplot(df, aes(lon, lat)) +
     ggplot2::geom_polygon(
       data = ggplot2::map_data("world"),
-      aes(long, lat, group = group),
+      ggplot2::aes(x=.data$long, y=.data$lat, group = .data$group),
       fill = "NA",
       color = "black",
       inherit.aes = FALSE
