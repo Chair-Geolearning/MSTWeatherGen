@@ -1,6 +1,5 @@
 # Libraries:
 library(testthat)
-library(MSTWeatherGen)  
 
 # Data:
 data("data", package = "MSTWeatherGen")
@@ -15,7 +14,7 @@ test_that("moving_average n=1 is identity on real Temp_max data, same with n=0",
   x <- data[, 1, "Temp_max"]
   
   expect_equal(unname(moving_average(x, 0)), unname(x)) # moving_average n=1 is identity on real Temp_max data, same with n=0
-  expect_equal(unname(moving_average(x, 1)), unname(x)) # We unnamem as it can create an error with names.
+  expect_equal(unname(moving_average(x, 1)), unname(x)) # We unnamed everything as it can create an error with names.
   expect_equal(unname(moving_average(x, 2)), unname(moving_average(x, 3))) # Test on even number, which should be equal to 3 in this case.
 
 })
@@ -51,13 +50,13 @@ test_that("moving_average handles NA values correctly", {
 })
 
 
-# --- Scaled Data Function ---
+# --- Test for Scaled Data Function ---
 
 # 0.
 test_that("Results structure", {
   result <- scale_data(data, names, dates)
   
-  expect_is(result, "list")
+  expect_type(result, "list")
   expect_equal(length(result), 2)
   expect_named(result, c("data", "scale_parm"))
   expect_equal(dim(result$data), dim(data))

@@ -1,6 +1,5 @@
 # Libraries:
 library(testthat)
-library(MSTWeatherGen)  
 library(mclust)
 
 # Data :
@@ -9,10 +8,9 @@ data("coordinates", package = "MSTWeatherGen")
 names = c("Precipitation", "Wind", "Temp_max")
 dates = seq(as.Date("2012-01-01"),as.Date("2022-12-31"), by="day")
 
-resultperm <- readRDS("resultperm2.rds")
-
+# Parameters:
+resultperm <- readRDS("/home/aboualam/MSTWeatherGen/tests/testthat/resultperm2.rds")
 # Saved results if you want to reproduce them.
-
 # resultperm <- weather_types(
 # data = data,
 #  variables = c("Wind", "Temp_max"),
@@ -23,6 +21,7 @@ resultperm <- readRDS("resultperm2.rds")
 # names_units = c("m/s", "°C"),
 #  dir = tempdir()
 # )
+
 n_wt <- 3
 
 result <- weather_types(
@@ -38,16 +37,16 @@ result <- weather_types(
 
 # 0. 
 test_that("weather_types returns a cluster vector and works even if return_plots = FALSE", {
-  expect_type(result$cluster, "double")                    # type of the result
-  expect_equal(length(result$cluster), dim(data)[1])       # one label per day
-  expect_equal(length(unique(result$cluster)), n_wt)       # exactly n_wt clusters
-  expect_true(all(result$cluster %in% 1:n_wt))             # integers comprised between 1 and n_wt
+  expect_type(result$cluster, "double")                    
+  expect_equal(length(result$cluster), dim(data)[1])      
+  expect_equal(length(unique(result$cluster)), n_wt)       
+  expect_true(all(result$cluster %in% 1:n_wt))             
 })
 
-# 1."
+# 1.
 test_that("Results structure", {
  
-  expect_is(result, "list")
+  expect_type(result, "list")
   expect_equal(length(result),2)
   expect_true(is.numeric(result$cluster))
   
