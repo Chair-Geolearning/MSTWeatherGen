@@ -23,4 +23,8 @@ A vector of simulated weather types or states for each date in 'dates_sim'.
 \description{
 Function to simulate weather types over specified dates using transition matrices.
 }
+\details{
+This function implements the methods described in Section 4 of the article
+*Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8).
+}
 \keyword{internal}

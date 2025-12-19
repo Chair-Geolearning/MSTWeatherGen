@@ -35,3 +35,7 @@ A 3D array (`sim`) of simulated weather data for the specified dates, encapsulat
 \description{
 This function simulates weather data over specified dates using the Multivariate Space-Time Stochastic Weather Generator (MSTWeatherGen). The simulation can be conducted on either a seasonal basis or for the entire period, depending on the provided parameters and the structure of the historical data. It utilizes autoregressive models and specified parameters to generate realistic weather variables.
 }
+\details{
+This function implements the methods described in Section 4 of the article
+\strong{Stochastic Environmental Research and Risk Assessment, 2025} (DOI: 10.1007/s00477-024-02897-8).
+}

@@ -54,4 +54,8 @@ This function estimates the geostatistical parameters for a multivariate space-t
 based on observed spatio-temporal data. It integrates various preprocessing and optimization
 steps to derive the optimal model parameters that best fit the observed data.
 }
+\details{
+This function implements the methods described in Section 3.3 of the article
+*Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8).
+}
 \keyword{internal}

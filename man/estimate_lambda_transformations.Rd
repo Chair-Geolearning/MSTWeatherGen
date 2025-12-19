@@ -21,4 +21,8 @@ A list containing lambda transformations for each variable, location, and weathe
 \description{
 Function to estimate lambda transformations for each variable, location, and weather type based on the data.
 }
+\details{
+This function implements the methods described in Sections 2.3 and 3.2 of the article
+*Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8).
+}
 \keyword{internal}

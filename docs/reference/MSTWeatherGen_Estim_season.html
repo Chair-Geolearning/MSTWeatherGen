@@ -19,7 +19,7 @@ of parameters for the Gaussian field model."><!-- mathjax --><script src="https:
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">MSTWeatherGen</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.0.9000</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.0.9999</span>
       </span>
     </div>
 
@@ -46,7 +46,7 @@ of parameters for the Gaussian field model."><!-- mathjax --><script src="https:
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Seasonal Estimation for MSTWeatherGen</h1>
-    <small class="dont-index">Source: <a href="https://github.com/sobakrim/MSTWeatherGen/blob/main/R/MSTWeatherGen.R"><code>R/MSTWeatherGen.R</code></a></small>
+    <small class="dont-index">Source: <a href="https://github.com/Chair-Geolearning/MSTWeatherGen/blob/main/R/MSTWeatherGen.R" class="external-link"><code>R/MSTWeatherGen.R</code></a></small>
     <div class="hidden name"><code>MSTWeatherGen_Estim_season.Rd</code></div>
     </div>
 
@@ -125,7 +125,17 @@ is standardized at each location using smoothed mean and standard deviation.</p>
     <div id="value">
     <h2>Value</h2>
     <p>A list containing dates, scale parameters, weather types, transition probabilities, lambda transformations,
-and parameters for the Gaussian field model for the specified season.</p>
+and parameters for the Gaussian field model for the specified season.</p><ul><li><p><strong>dates</strong>: A vector of relevant dates for the season;</p></li>
+<li><p><strong>scale_params</strong>: Scale parameters used in the model;</p></li>
+<li><p><strong>weather_types</strong>: Classified weather types for the period;</p></li>
+<li><p><strong>transition_probs</strong>: Transition probabilities between weather types;</p></li>
+<li><p><strong>lambda_transformations</strong>: Applied lambda transformations;</p></li>
+<li><p><strong>gaussian_params</strong>: Parameters of the Gaussian field model for the specified season.</p></li>
+</ul></div>
+    <div id="details">
+    <h2>Details</h2>
+    <p>This function implements the methods described in Sections 3.1–3.3 of the article
+<strong>Stochastic Environmental Research and Risk Assessment, 2025</strong> (DOI: 10.1007/s00477-024-02897-8).</p>
     </div>
 
   </div>
@@ -136,7 +146,7 @@ and parameters for the Gaussian field model for the specified season.</p>
 
 
       <footer><div class="copyright">
-  <p></p><p>Developed by <a href="https://wp.unil.ch/gaia/team/said-obakrim/" class="external-link">Said Obakrim</a>, <a href="https://biosp.mathnum.inrae.fr/homepage-lionel-benoit" class="external-link">Lionel Benoit</a>, <a href="https://biosp.mathnum.inrae.fr/homepage-denis-allard" class="external-link">Denis Allard</a>, <a href="https://jeff.biosp.org" class="external-link">Jean-François Rey</a>.</p>
+  <p></p><p>Developed by <a href="https://wp.unil.ch/gaia/team/said-obakrim/" class="external-link">Said Obakrim</a>, <a href="https://jeff.biosp.org" class="external-link">Jean-François Rey</a>, Ahmed Boualam.</p>
 </div>
 
 <div class="pkgdown">

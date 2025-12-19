@@ -18,7 +18,7 @@ analyzing temporal relationships and covariances at different lags in spatio-tem
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">MSTWeatherGen</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.0.9000</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.0.9999</span>
       </span>
     </div>
 
@@ -45,7 +45,7 @@ analyzing temporal relationships and covariances at different lags in spatio-tem
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Generate Temporal Index Pairs</h1>
-    <small class="dont-index">Source: <a href="https://github.com/sobakrim/MSTWeatherGen/blob/main/R/GRF_helper_functions.R"><code>R/GRF_helper_functions.R</code></a></small>
+    <small class="dont-index">Source: <a href="https://github.com/Chair-Geolearning/MSTWeatherGen/blob/main/R/GRF_helper_functions.R" class="external-link"><code>R/GRF_helper_functions.R</code></a></small>
     <div class="hidden name"><code>generate_temporal_index_pairs.Rd</code></div>
     </div>
 
@@ -79,6 +79,11 @@ analyzing temporal relationships and covariances at different lags in spatio-tem
     <p>A matrix with each row representing a pair of temporal indices and their corresponding time lag. The columns 't1' and 't2'
 represent the indices of the paired time points, and 'u' represents the time lag between them.</p>
     </div>
+    <div id="details">
+    <h2>Details</h2>
+    <p>This function implements the methods described in Section 3.3 of the article, in Equation 18
+*Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8).</p>
+    </div>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
@@ -88,7 +93,7 @@ represent the indices of the paired time points, and 'u' represents the time lag
 
 
       <footer><div class="copyright">
-  <p></p><p>Developed by <a href="https://wp.unil.ch/gaia/team/said-obakrim/" class="external-link">Said Obakrim</a>, <a href="https://biosp.mathnum.inrae.fr/homepage-lionel-benoit" class="external-link">Lionel Benoit</a>, <a href="https://biosp.mathnum.inrae.fr/homepage-denis-allard" class="external-link">Denis Allard</a>, <a href="https://jeff.biosp.org" class="external-link">Jean-François Rey</a>.</p>
+  <p></p><p>Developed by <a href="https://wp.unil.ch/gaia/team/said-obakrim/" class="external-link">Said Obakrim</a>, <a href="https://jeff.biosp.org" class="external-link">Jean-François Rey</a>, Ahmed Boualam.</p>
 </div>
 
 <div class="pkgdown">

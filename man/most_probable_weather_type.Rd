@@ -16,9 +16,13 @@ most_probable_weather_type(sim, centroids, transitions, names_weather_types)
 \item{names_weather_types}{Names of the weather variables used to determine the weather type.}
 }
 \value{
-The predicted weather type for the next time step, selected based on the calculated probabilities.
+new_wt: The predicted weather type for the next time step, selected based on the calculated probabilities.
 }
 \description{
 Predicts the most likely weather type for the next time step in a simulated weather series.
+}
+\details{
+This function implements the methods described in Sections 2.2 and 5 of the article
+*Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8).
 }
 \keyword{internal}

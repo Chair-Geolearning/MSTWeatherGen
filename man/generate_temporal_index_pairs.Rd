@@ -21,4 +21,8 @@ represent the indices of the paired time points, and 'u' represents the time lag
 Creates pairs of temporal indices based on specified time lags up to a maximum time lag (tmax). This function is useful for
 analyzing temporal relationships and covariances at different lags in spatio-temporal data.
 }
+\details{
+This function implements the methods described in Section 3.3 of the article, in Equation 18
+*Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8).
+}
 \keyword{internal}

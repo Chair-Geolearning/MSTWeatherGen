@@ -46,10 +46,22 @@ is standardized at each location using smoothed mean and standard deviation.}
 \value{
 A list containing dates, scale parameters, weather types, transition probabilities, lambda transformations,
 and parameters for the Gaussian field model for the specified season.
+  \itemize{
+  \item \strong{dates}: A vector of relevant dates for the season;
+  \item \strong{scale_params}: Scale parameters used in the model;
+  \item \strong{weather_types}: Classified weather types for the period;
+  \item \strong{transition_probs}: Transition probabilities between weather types;
+  \item \strong{lambda_transformations}: Applied lambda transformations;
+  \item \strong{gaussian_params}: Parameters of the Gaussian field model for the specified season.
+}
 }
 \description{
 Performs seasonal estimation for the MSTWeatherGen package, which includes identification of weather types,
 estimation of scaling parameters, computation of transition probabilities between weather types, and estimation
 of parameters for the Gaussian field model.
+}
+\details{
+This function implements the methods described in Sections 3.1–3.3 of the article
+\strong{Stochastic Environmental Research and Risk Assessment, 2025} (DOI: 10.1007/s00477-024-02897-8).
 }
 \keyword{internal}

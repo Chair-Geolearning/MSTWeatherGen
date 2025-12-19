@@ -41,4 +41,8 @@ log-likelihood of the observed data under the model. This function focuses on bo
 and temporal interactions between pairs of variables, refining the model's ability to capture
 complex spatio-temporal dependencies.
 }
+\details{
+This function implements the methods described in Section 3.3 of the article, functions log_lik and log
+*Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8).
+}
 \keyword{internal}

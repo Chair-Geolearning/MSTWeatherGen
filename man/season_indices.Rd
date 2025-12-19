@@ -21,4 +21,8 @@ A vector of indices corresponding to dates within the specified season.
 Calculates the indices of dates within a specified season across multiple years.
 This function handles leap years and seasons that span the end of one year and the beginning of the next.
 }
+\details{
+This function implements the methods described in Section 5 of the article
+*Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8).
+}
 \keyword{internal}

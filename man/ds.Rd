@@ -19,4 +19,8 @@ The Haversine distance between the two coordinates in kilometers.
 \description{
 Computes the Haversine distance between two coordinates using the geosphere package.
 }
+\details{
+This function implements the methods described in Section 3.3 of the article
+*Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8).
+}
 \keyword{internal}

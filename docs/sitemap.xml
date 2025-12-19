@@ -5,16 +5,20 @@
 <url><loc>https://github.com/sobakrim/MSTWeatherGen/articles/index.html</loc></url>
 <url><loc>https://github.com/sobakrim/MSTWeatherGen/authors.html</loc></url>
 <url><loc>https://github.com/sobakrim/MSTWeatherGen/index.html</loc></url>
+<url><loc>https://github.com/sobakrim/MSTWeatherGen/reference/Gneiting.html</loc></url>
 <url><loc>https://github.com/sobakrim/MSTWeatherGen/reference/MSTWeatherGen-package.html</loc></url>
 <url><loc>https://github.com/sobakrim/MSTWeatherGen/reference/MSTWeatherGen_Estim.html</loc></url>
 <url><loc>https://github.com/sobakrim/MSTWeatherGen/reference/MSTWeatherGen_Estim_season.html</loc></url>
 <url><loc>https://github.com/sobakrim/MSTWeatherGen/reference/MSTWeatherGen_Sim.html</loc></url>
 <url><loc>https://github.com/sobakrim/MSTWeatherGen/reference/MSTWeatherGen_Sim_season.html</loc></url>
+<url><loc>https://github.com/sobakrim/MSTWeatherGen/reference/Matern.html</loc></url>
 <url><loc>https://github.com/sobakrim/MSTWeatherGen/reference/apply_inverse_transformations.html</loc></url>
 <url><loc>https://github.com/sobakrim/MSTWeatherGen/reference/assign_seasons.html</loc></url>
 <url><loc>https://github.com/sobakrim/MSTWeatherGen/reference/calculate_AR_coefficients_matrices.html</loc></url>
 <url><loc>https://github.com/sobakrim/MSTWeatherGen/reference/calculate_Bk_matrices.html</loc></url>
 <url><loc>https://github.com/sobakrim/MSTWeatherGen/reference/calculate_ICI.html</loc></url>
+<url><loc>https://github.com/sobakrim/MSTWeatherGen/reference/compute_ax.html</loc></url>
+<url><loc>https://github.com/sobakrim/MSTWeatherGen/reference/compute_beta.html</loc></url>
 <url><loc>https://github.com/sobakrim/MSTWeatherGen/reference/coordinates.html</loc></url>
 <url><loc>https://github.com/sobakrim/MSTWeatherGen/reference/cov_matrices.html</loc></url>
 <url><loc>https://github.com/sobakrim/MSTWeatherGen/reference/data.html</loc></url>
@@ -25,6 +29,7 @@
 <url><loc>https://github.com/sobakrim/MSTWeatherGen/reference/estimate_transitions.html</loc></url>
 <url><loc>https://github.com/sobakrim/MSTWeatherGen/reference/estimation_gf.html</loc></url>
 <url><loc>https://github.com/sobakrim/MSTWeatherGen/reference/estimtransition.html</loc></url>
+<url><loc>https://github.com/sobakrim/MSTWeatherGen/reference/extract_beta.html</loc></url>
 <url><loc>https://github.com/sobakrim/MSTWeatherGen/reference/filter_season_data.html</loc></url>
 <url><loc>https://github.com/sobakrim/MSTWeatherGen/reference/find_centroids.html</loc></url>
 <url><loc>https://github.com/sobakrim/MSTWeatherGen/reference/generate_initial_conditions.html</loc></url>
@@ -36,6 +41,10 @@
 <url><loc>https://github.com/sobakrim/MSTWeatherGen/reference/init_space_par.html</loc></url>
 <url><loc>https://github.com/sobakrim/MSTWeatherGen/reference/inv_orderNorm_Transf.html</loc></url>
 <url><loc>https://github.com/sobakrim/MSTWeatherGen/reference/list_to_array.html</loc></url>
+<url><loc>https://github.com/sobakrim/MSTWeatherGen/reference/loglik.html</loc></url>
+<url><loc>https://github.com/sobakrim/MSTWeatherGen/reference/loglik_pair.html</loc></url>
+<url><loc>https://github.com/sobakrim/MSTWeatherGen/reference/loglik_spatial.html</loc></url>
+<url><loc>https://github.com/sobakrim/MSTWeatherGen/reference/modify_beta_parm.html</loc></url>
 <url><loc>https://github.com/sobakrim/MSTWeatherGen/reference/most_probable_weather_type.html</loc></url>
 <url><loc>https://github.com/sobakrim/MSTWeatherGen/reference/optimize_pairs_spatiotemporal.html</loc></url>
 <url><loc>https://github.com/sobakrim/MSTWeatherGen/reference/optimize_spatial_parameters.html</loc></url>
@@ -43,6 +52,8 @@
 <url><loc>https://github.com/sobakrim/MSTWeatherGen/reference/orderNorm.html</loc></url>
 <url><loc>https://github.com/sobakrim/MSTWeatherGen/reference/orderNormTransf.html</loc></url>
 <url><loc>https://github.com/sobakrim/MSTWeatherGen/reference/orderNorm_all.html</loc></url>
+<url><loc>https://github.com/sobakrim/MSTWeatherGen/reference/param.html</loc></url>
+<url><loc>https://github.com/sobakrim/MSTWeatherGen/reference/pd_condition.html</loc></url>
 <url><loc>https://github.com/sobakrim/MSTWeatherGen/reference/plot_dry_wet_spells_maps.html</loc></url>
 <url><loc>https://github.com/sobakrim/MSTWeatherGen/reference/plot_mean_by_month.html</loc></url>
 <url><loc>https://github.com/sobakrim/MSTWeatherGen/reference/plot_multivariate_st_covariances.html</loc></url>
@@ -58,6 +69,7 @@
 <url><loc>https://github.com/sobakrim/MSTWeatherGen/reference/selectUniformPointsIndices.html</loc></url>
 <url><loc>https://github.com/sobakrim/MSTWeatherGen/reference/simulate_Z.html</loc></url>
 <url><loc>https://github.com/sobakrim/MSTWeatherGen/reference/simulate_weathertypes.html</loc></url>
+<url><loc>https://github.com/sobakrim/MSTWeatherGen/reference/spacetime_cov.html</loc></url>
 <url><loc>https://github.com/sobakrim/MSTWeatherGen/reference/transformations.html</loc></url>
 <url><loc>https://github.com/sobakrim/MSTWeatherGen/reference/unique_elements.html</loc></url>
 <url><loc>https://github.com/sobakrim/MSTWeatherGen/reference/weather_types.html</loc></url>

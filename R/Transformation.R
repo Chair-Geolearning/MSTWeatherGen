@@ -1,6 +1,10 @@
 #' Ordered Normalization
 #'
 #' Function for ordered normalization using Ordered Quantile Normalizing transformation.
+#' Function inspired from "bestNormalize" package and adapted for truncated normal distributions.
+#' 
+#'  This function implements the methods described in Section 3.2 in Equations 14, 15 and 16 of the article
+#' *Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8). 
 #'
 #' @param x Numeric vector to be normalized.
 #' @param left Numeric value specifying the left truncation.
@@ -15,21 +19,7 @@
 #'
 #' @keywords internal
 orderNorm <- function(x,left, n_logit_fit = min(length(x), 100000), ..., warn = TRUE) {
-  # Function for ordered normalization Ordered Quantile normalizing transformation
-  # Function inspired from "bestNormalize" package and adapted for truncated normal distributions.
   
-  
-  # Arguments:
-  #   x: Numeric vector to be normalized.
-  #   left: Numeric value specifying the left truncation.
-  #   n_logit_fit: The number of points to use in the logistic regression for extrapolation,
-  #                default is the lesser of the length of x or 100,000.
-  #   ...: Additional arguments passed to glm function.
-  #   warn: Logical flag indicating whether to issue a warning when ties are detected in the data.
-  
-  # Returns:
-  #   A list with class 'orderNorm' containing the normalized data (x.t), the original data (x),
-  #   and a fitted model object (fit) for future extrapolation.
   stopifnot(is.numeric(x))
   ties_status <- 0
   nunique <- length(unique(x))
@@ -70,6 +60,9 @@ orderNorm <- function(x,left, n_logit_fit = min(length(x), 100000), ..., warn = 
 #'
 #' Function to predict binomial probabilities using a fitted model object.
 #'
+#'  This function implements the methods described in Section 3.2 in Equation 16 of the article
+#' *Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8). 
+#'
 #' @param fit Fitted model object containing coefficients.
 #' @param newdata New data for prediction.
 #'
@@ -77,6 +70,7 @@ orderNorm <- function(x,left, n_logit_fit = min(length(x), 100000), ..., warn = 
 #'
 #' @keywords internal
 predict_binomial = function(fit, newdata){
+
   if(missing(newdata)) newdata = fit$x_red
   pred = fit$coef[1]+fit$coef[2]*newdata
   return(1/(1+exp(-pred)))
@@ -86,6 +80,10 @@ predict_binomial = function(fit, newdata){
 #' Function to perform normalization on a selected variable 'j' from 'data', considering spatial information 
 #' from 'coordinates' and a threshold 'left' for the transformation. This is particularly useful for variables with 
 #' many zero values, ensuring robust normalization across spatially correlated variables.
+#'
+#' This function implements the methods described in Section 3.2 (Eqs. 14–16) together with the
+#' zero-inflated data formulations in Section 2.3 (Eq. 5) and Section 2.1 (Eq. 1) of the article
+#' *Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8).
 #'
 #' @param data A matrix or data frame containing the variables to be normalized. Rows represent observations, 
 #'             and columns represent different variables.
@@ -99,21 +97,6 @@ predict_binomial = function(fit, newdata){
 #'
 #' @keywords internal
 orderNorm_all <- function(data, j, coordinates, left) {
-  # Function to perform normalization on a selected variable 'j' from 'data', considering spatial information 
-  # from 'coordinates' and a threshold 'left' for the transformation. This is particularly useful for variables with 
-  # many zero values, ensuring robust normalization across spatially correlated variables.
-  
-  # Arguments:
-  #   data: A matrix or data frame containing the variables to be normalized. Rows represent observations, 
-  #         and columns represent different variables.
-  #   j: The index of the variable within 'data' to be normalized.
-  #   coordinates: A matrix or data frame of spatial coordinates (coordinates) corresponding to each 
-  #           variable in 'data'. It is used to calculate spatial distances and determine proximity.
-  #   left: A parameter for the orderNorm function, specifying the transformation threshold.
-  
-  # Returns:
-  #   The result of applying the orderNorm function to the selected variable 'j', considering spatial proximity 
-  #   and handling variables with a high proportion of zero values.
   
   D = as.matrix(dist(coordinates))
   kn = order(D[j,])
@@ -135,6 +118,9 @@ orderNorm_all <- function(data, j, coordinates, left) {
 #' Function to predict the normalized values for new data using a fitted orderNormTransf object or 
 #' to perform inverse transformation.
 #'
+#'  This function implements the methods described in Sections 2.3 and 2.1 in Equation 1 of the article
+#' *Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8). 
+#'
 #' @param object Fitted orderNormTransf object.
 #' @param newdata Numeric vector of new data to be transformed. If NULL, transformation is applied to the original data.
 #' @param inverse Logical indicating whether to perform inverse transformation. Default is FALSE.
@@ -149,6 +135,7 @@ predict.orderNormTransf <- function(object,
                                     inverse = FALSE, 
                                     warn = TRUE,
                                     ...) {
+
   stopifnot(is.null(newdata) || is.numeric(newdata))
   
   # Perform transformation
@@ -173,7 +160,10 @@ predict.orderNormTransf <- function(object,
 #'
 #' Function to perform inverse transformation or normalization applied by the orderNorm function.
 #'
-#' @param orderNorm_obj Fitted orderNorm object containing details of the original normalization or transformation.
+#'  This function implements the methods described in Sections 2.1, 2.3 and 3.2 of the article
+#' *Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8). 
+#'
+#' @param orderNorm_obj Fitted orderNorm object containing details of the original normalization or transformation including the transformed and original data points and the fitting model.
 #' @param new_points_x_t Transformed data points for which the original values are to be estimated.
 #' @param left Parameter used in the original transformation, affecting the normalization method.
 #' @param warn Logical indicating whether to issue warnings for transformations outside the observed domain. Default is FALSE.
@@ -182,14 +172,7 @@ predict.orderNormTransf <- function(object,
 #'
 #' @keywords internal
 inv_orderNorm_Transf <- function(orderNorm_obj, new_points_x_t, left, warn = FALSE) {
-  # Reverses the normalization or transformation applied by the orderNorm function.
-  # Arguments:
-  #   orderNorm_obj: An object containing details of the original normalization or transformation,
-  #                  including the transformed and original data points and the fitting model.
-  #   new_points_x_t: Transformed data points for which the original values are to be estimated.
-  #   left: Parameter used in the original transformation, affecting the normalization method.
-  #   warn: A logical flag indicating whether to issue warnings for transformations outside the observed domain.
-  
+
   # Extract transformed and original data points from the orderNorm object.
   x_t <- orderNorm_obj$x.t
   old_points <- orderNorm_obj$x
@@ -238,7 +221,7 @@ inv_orderNorm_Transf <- function(orderNorm_obj, new_points_x_t, left, warn = FAL
 #'
 #' Function to transform new data points based on a previously fitted normalization or transformation model.
 #'
-#' @param orderNorm_obj Fitted orderNorm object containing details of the original normalization or transformation.
+#' @param orderNorm_obj Fitted orderNorm object containing details of the original normalization or transformation as well as the fit model.
 #' @param new_points New data points to be transformed.
 #' @param warn Logical indicating whether to issue warnings for transformations outside the observed domain.
 #' @param left Parameter affecting the normalization method used in the original transformation.
@@ -247,15 +230,7 @@ inv_orderNorm_Transf <- function(orderNorm_obj, new_points_x_t, left, warn = FAL
 #'
 #' @keywords internal
 orderNormTransf <- function(orderNorm_obj, new_points, warn, left) {
-  # Transforms new data points based on a previously fitted normalization or transformation model.
-  # This function is used to apply the same transformation to new data that was applied to the original data.
-  
-  # Arguments:
-  #   orderNorm_obj: An object containing the original and transformed data points, as well as the fit model.
-  #   new_points: The new data points to be transformed.
-  #   warn: A logical flag indicating whether to issue warnings for transformations outside the observed domain.
-  #   left: A parameter affecting the normalization method used in the original transformation.
-  
+
   # Extract transformed and original data points from the orderNorm object.
   x_t <- orderNorm_obj$x.t
   old_points <- orderNorm_obj$x
@@ -292,6 +267,9 @@ orderNormTransf <- function(orderNorm_obj, new_points, warn, left) {
 #' Scale Data
 #'
 #' Function to scale the input data based on daily mean and standard deviation, and optionally smooth them using a moving average.
+#'
+#'  This function implements the methods described in Sections 3.5 and 5 of the article
+#' *Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8). 
 #'
 #' @param data Input weather data, organized as a 3D array where the dimensions are [time, locations, variables].
 #' @param names Names of the variables in the data.
@@ -356,6 +334,9 @@ scale_data <- function(data, names, dates, window_size = 30) {
 #'
 #' Function to estimate lambda transformations for each variable, location, and weather type based on the data.
 #'
+#'  This function implements the methods described in Sections 2.3 and 3.2 of the article
+#' *Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8). 
+#'
 #' @param data Input weather data, organized as a 3D array where the dimensions are [time, locations, variables].
 #' @param wt Vector indicating the weather type for each observation.
 #' @param names Names of the variables in the data.
@@ -365,6 +346,7 @@ scale_data <- function(data, names, dates, window_size = 30) {
 #'
 #' @keywords internal
 estimate_lambda_transformations <- function(data, wt, names, coordinates) {
+  
   ns = dim(data)[2]
   K = length(unique(wt))
   # Iterate over each weather type
@@ -403,6 +385,9 @@ estimate_lambda_transformations <- function(data, wt, names, coordinates) {
 #'
 #' Function to transform data using lambda transformations based on the provided lambda parameters.
 #'
+#'  This function implements the methods described in Sections 2.3 and 3.2 of the article
+#' *Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8). 
+#'                            
 #' @param data Input weather data, organized as a 3D array where the dimensions are [time, locations, variables].
 #' @param wt Vector indicating the weather type for each observation.
 #' @param names Names of the variables in the data.
@@ -413,6 +398,7 @@ estimate_lambda_transformations <- function(data, wt, names, coordinates) {
 #'
 #' @keywords internal
 transformations <- function(data, wt, names, coordinates, lmbd) {
+
   ns = dim(data)[2]
   K = length(unique(wt))
   # Iterate over each weather type
@@ -458,8 +444,11 @@ transformations <- function(data, wt, names, coordinates, lmbd) {
 
 #' Apply Inverse Transformations
 #'
-#' Function to apply inverse transformations to the simulated data, reversing the lambda transformations applied during simulation.
+#' Function to apply inverse transformations to the simulated data, reversing the lambda transformations applied during simulation for each weather type and variable.
 #'
+#'  This function implements the methods described in Sections 2.3 and 3.2 of the article
+#' *Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8). 
+#'                                         
 #' @param sim Simulated weather data, organized as a 3D array where the dimensions are [time, locations, variables].
 #' @param wt Vector indicating the weather type for each time step.
 #' @param parm Parameters object containing lambda transformations and other model parameters.
@@ -470,17 +459,6 @@ transformations <- function(data, wt, names, coordinates, lmbd) {
 #' @keywords internal
 
 apply_inverse_transformations <- function(sim, wt, parm, names) {
-  # Reverses transformations applied to the simulated data for each weather type and variable.
-  #
-  # Arguments:
-  #   sim: A 3D array of simulated weather data, with dimensions [time, locations, variables].
-  #   wt: A vector of simulated weather types for each time step.
-  #   parm: Parameters object containing lambda transformations and other model parameters.
-  #   names: Names of the variables included in the simulation.
-  #
-  # Returns:
-  #   The sim array with inverse transformations applied, bringing the data back to its original scale.
-  
   
   lmbd = parm$lmbd
   nt = dim(sim)[1]
@@ -510,8 +488,11 @@ apply_inverse_transformations <- function(sim, wt, parm, names) {
 }
 #' Rescale Simulated Data
 #'
-#' Function to rescale simulated weather data for variables other than "Precipitation" to their original scale.
+#' Function to rescale simulated weather data for variables other than "Precipitation" to their original scale.                                                     
 #'
+#'  This function implements the methods described in Sections 5 of the article
+#' *Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8). 
+#'                                                                
 #' @param sim Simulated weather data, organized as a 3D array where the dimensions are [time, locations, variables].
 #' @param parm Parameters object containing model parameters, including scale parameters (mu and sd) for each variable.
 #' @param names Names of the variables included in the simulation.
@@ -521,16 +502,6 @@ apply_inverse_transformations <- function(sim, wt, parm, names) {
 #'
 #' @keywords internal
 rescale_data <- function(sim, parm, names, dates) {
-  # Rescales simulated weather data for variables other than "Precipitation" to their original scale.
-  #
-  # Arguments:
-  #   sim: A 3D array of simulated weather data, with dimensions [time, locations, variables].
-  #   parm: An object containing model parameters, including scale parameters (mu and sd) for each variable.
-  #   names: Names of the variables included in the simulation.
-  #   dates: Vector of dates corresponding to the time dimension in the sim array.
-  #
-  # Returns:
-  #   The sim array with data rescaled back to its original scale for variables other than "Precipitation".
   
   nt <- dim(sim)[1]  # Number of time steps
   ns <- dim(sim)[2]  # Number of spatial locations

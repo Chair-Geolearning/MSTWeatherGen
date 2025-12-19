@@ -24,4 +24,8 @@ Transformed or inverse-transformed data based on the specified operation.
 Function to predict the normalized values for new data using a fitted orderNormTransf object or 
 to perform inverse transformation.
 }
+\details{
+This function implements the methods described in Sections 2.3 and 2.1 in Equation 1 of the article
+*Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8).
+}
 \keyword{internal}

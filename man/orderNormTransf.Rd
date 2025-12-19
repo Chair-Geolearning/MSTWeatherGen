@@ -7,7 +7,7 @@
 orderNormTransf(orderNorm_obj, new_points, warn, left)
 }
 \arguments{
-\item{orderNorm_obj}{Fitted orderNorm object containing details of the original normalization or transformation.}
+\item{orderNorm_obj}{Fitted orderNorm object containing details of the original normalization or transformation as well as the fit model.}
 
 \item{new_points}{New data points to be transformed.}
 

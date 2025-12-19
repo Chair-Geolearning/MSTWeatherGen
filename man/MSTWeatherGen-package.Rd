@@ -14,8 +14,8 @@ It provides tools for estimating the model parameters and generating
 \tabular{ll}{
          Package: \tab MSTWeatherGen\cr
          Type: \tab Package\cr
-         Version: \tab 0.1.0\cr
-         Date: \tab 2024-03-30\cr
+         Version: \tab 0.1.0.9999\cr
+         Date: \tab 2025-12-02\cr
          License: \tab GPL (>=3)\cr
          }
 }
@@ -36,9 +36,9 @@ url: https://cran.r-project.org/package=MSTWeatherGen.
 \seealso{
 Useful links:
 \itemize{
-  \item \url{https://github.com/sobakrim/MSTWeatherGen}
-  \item \url{http://sobakrim.github.io/MSTWeatherGen}
-  \item Report bugs at \url{https://github.com/sobakrim/MSTWeatherGen/issues}
+  \item \url{https://github.com/Chair-Geolearning/MSTWeatherGen}
+  \item \url{http://chair-Geolearning.github.io/MSTWeatherGen}
+  \item Report bugs at \url{https://github.com/Chair-Geolearning/MSTWeatherGen/issues}
 }
 
 }
@@ -47,6 +47,12 @@ Said Obakrim \email{saidobak@gmail.com}
 
 Jean-François Rey \email{jean-francois@inrae.fr}
 
-Maintainer: Said Obakrim \email{saidobak@gmail.com}
+Ahmed Boualam \email{ahmed.boualam@inrae.fr}
+
+Denis Allard \email{denis.allard@inrae.fr}
+
+Lionel Benoit \email{lionel.benoit@inrae.fr}
+
+Maintainer: Jean-FRançois Rey \email{jean-francois.rey@inrae.fr}
 }
 \keyword{internal}

@@ -14,6 +14,10 @@ C_k_matrices[[1]] is the covariance matrix at lag 0.}
 A list of Bk matrices (coefficient matrices) for the AR model, including Bk_0, which is derived separately from the rest of the Bk matrices.
 }
 \description{
-Computes the coefficient matrices (Bk) for an autoregressive (AR) model using lagged covariance matrices.
+Computes the coefficient matrices (Bk) for an autoregressive (AR) model using lagged covariance matrices (C_k_matrices).
+}
+\details{
+This function implements the methods described in Section 4 of the article
+*Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8).
 }
 \keyword{internal}

@@ -14,9 +14,13 @@ generate_initial_conditions(AR_lag, bk, wt)
 \item{wt}{The initial weather type (state) for the simulation.}
 }
 \value{
-A matrix representing the initial conditions for the AR process simulation.
+Z_initial : A matrix representing the initial conditions for the AR process simulation.
 }
 \description{
 Generates initial conditions for the autoregressive (AR) process based on Bk matrices and initial weather type.
+}
+\details{
+This function implements the methods described in Section 4 of the article
+*Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8).
 }
 \keyword{internal}
