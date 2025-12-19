@@ -40,7 +40,7 @@ MSTWeatherGen_Estim = function(data, dates, by_season = TRUE,  seasons, scale = 
   
   # Validate input parameters, especially the requirement for 'seasons' when 'by_season' is TRUE
   if(by_season & missing(seasons)){
-    stop("Please provide a lsit of seasons that cover all the year in following format: seasons <- list(
+    stop("Please provide a list of seasons that cover all the year in following format: seasons <- list(
           s1 = list(min_day = 1, max_day = 29, min_month = 12, max_month = 2),
           s2 = list(min_day = 1, max_day = 31, min_month = 3, max_month = 5),
           s3 = list(min_day = 1, max_day = 31, min_month = 6, max_month = 8),
