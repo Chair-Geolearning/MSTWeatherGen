@@ -82,6 +82,7 @@ utils::globalVariables(c("r", "y", "v", "lon", "lat", "n"))
 #' @import ggplot2
 #' @import patchwork
 #' @importFrom dplyr group_by tally mutate case_when summarise
+#' @importFrom magrittr "%>%"
 #' @import viridis
 #' @export
 plot_dry_wet_spells_maps = function(sim, observed, coordinates, dates){
@@ -132,15 +133,24 @@ plot_dry_wet_spells_maps = function(sim, observed, coordinates, dates){
     return(df_sum)
   })
   df = do.call(rbind, df)
-  p = ggplot2::ggplot(df[df$v>0,], ggplot2::aes(lon, lat)) +
-    ggplot2::borders("world", colour="black", fill= "grey", xlim=range(df$lon), ylim = range(df$lat)) +
-    ggplot2::coord_cartesian(xlim=range(df$lon), ylim = range(df$lat)) +
-    ggplot2::geom_point(ggplot2::aes(color = n), size=7, shape=15) + ggplot2::xlab("Longitude (degree)") + 
-    ggplot2::ylab("Latitude (degree)") + 
-    ggplot2::scale_color_gradientn("Number of consecutive wet days (NC)", colours = rev(viridis::viridis(10, option="magma"))) + 
+    
+  p <- ggplot(df, aes(lon, lat)) +
+    ggplot2::geom_polygon(
+      data = ggplot2::map_data("world"),
+      aes(long, lat, group = group),
+      fill = "NA",
+      color = "black",
+      inherit.aes = FALSE
+    ) +
+    ggplot2::coord_quickmap(xlim = range(df$lon), ylim = range(df$lat)) +
+    ggplot2::geom_point(aes(color = n), size = 7, shape = 15, alpha = 0.8) +
+    ggplot2::scale_color_viridis_c(option = "magma") +
+    ggplot2::scale_color_viridis_c(name = "Number of consecutive wet days (NC)", option = "magma", direction = -1) +
+    ggplot2::facet_grid(y ~ v_label) +
     ggplot2::theme_bw() +
-    ggplot2::theme(legend.position = "top") + 
-    ggplot2::facet_grid(y ~ v_label) 
+    ggplot2::xlab("Longitude (degree)") + 
+    ggplot2::ylab("Latitude (degree)") +
+    ggplot2::theme(legend.position = "top")
   
   return(p)
 }
@@ -329,7 +339,7 @@ plot_wet_frequency = function(sim, observed, dates, seasons, coordinates, names_
       ggplot2::coord_cartesian(xlim=range(df$lon), ylim = range(df$lat))+
       ggplot2::scale_color_gradientn(name = "Frequency of wet days (%)", colours = rev(viridis::viridis(10, option = "magma"))) +
       ggplot2::geom_point(ggplot2::aes(color = Frequency),size=7, shape=15)+
-      ggplot2::facet_wrap(~Type, scales = "free", ncol = 1) +
+      ggplot2::facet_wrap(vars("Type"), scales = "free", ncol = 1) +
       ggplot2::theme_light() +
       ggplot2::theme(plot.title = ggplot2::element_text(size = 15, hjust = 0.5), 
                      panel.spacing = ggplot2::unit(1, "lines"), aspect.ratio = 0.9, legend.position = "top") +

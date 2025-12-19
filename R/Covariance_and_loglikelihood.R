@@ -536,7 +536,7 @@ loglik <- function(par, parms, par_all, data, names, Vi, h, u, uh, ep, cr) {
         
         return(l1 + l2 + l3 + l4)
       }
-    })
+    }, mc.cores = 1)
     
     # Sum and negate the log-likelihood contributions from all pairs.
     return(-sum(unlist(ll)))
