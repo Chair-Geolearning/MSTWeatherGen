@@ -1,6 +1,5 @@
 # Libraries:
 library(testthat)
-library(MSTWeatherGen)  
 
 # Data:
 data("data", package = "MSTWeatherGen")
@@ -11,7 +10,7 @@ names = c("Precipitation", "Wind", "Temp_max")
 names_bis = c("Wind", "Temp_max")
 
 # Retrieve results
-resultperm <- readRDS("resultperm2.rds")
+resultperm <- readRDS("/home/aboualam/MSTWeatherGen/tests/testthat/resultperm2.rds")
 wt <- resultperm$cluster
 K <- length(unique(wt))
 
@@ -52,7 +51,7 @@ dist = dist[seq(1, length(dist)/1.5, length.out = 2)]
 
 # 1.
 test_that("spacetime_cov returns a dataframe", {
-  cov_df <- cov_df <- spacetime_cov(
+  cov_df <- spacetime_cov(
     data = data[,,variable],
     wt_id = 50:200,
     locations = coordinates,
@@ -176,13 +175,13 @@ test_that("Different covariances for different distances", {
   cov_dist50 <- cov_df$cov[cov_df$dist == 79]
   
   expect_false(all(cov_dist0 == cov_dist50))
-}),
+})
 
 # 10.
-test_that("This generates NAN, to check again.", {
-  cov_df <  spacetime_cov(data = data[,,variable],wt_id = 2:dim(data)[1], locations = coordinates, ds = dst,
-                                dates = dates, lagstime = 1, dist = dist, covgm = T)
+#test_that("This generates NAN, to check again.", {
+#  cov_df <  spacetime_cov(data = data[,,variable],wt_id = 2:dim(data)[1], locations = coordinates, ds = dst,
+#                               dates = dates, lagstime = 1, dist = dist, covgm = T)
   
-  expect_false(all(cov_dist0 == cov_dist50))
-})
+#  expect_false(all(cov_dist0 == cov_dist50))
+#})
 

@@ -1,6 +1,5 @@
 # Libraries:
 library(testthat)
-library(MSTWeatherGen)  
 
 # Data:
 data("data", package = "MSTWeatherGen")
@@ -11,7 +10,7 @@ names = c("Precipitation", "Wind", "Temp_max")
 names_bis = c("Wind", "Temp_max")
 
 # Retrieve results
-resultperm <- readRDS("resultperm2.rds")
+resultperm <- readRDS("/home/aboualam/MSTWeatherGen/tests/testthat/resultperm2.rds")
 wt <- resultperm$cluster
 K <- length(unique(wt))
 
