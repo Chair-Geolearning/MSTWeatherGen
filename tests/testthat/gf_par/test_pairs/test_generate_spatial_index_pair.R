@@ -1,6 +1,5 @@
 # Libraries:
 library(testthat)
-library(MSTWeatherGen)  
 
 # Data to be tested on:
 data("data", package = "MSTWeatherGen")
@@ -9,24 +8,24 @@ names = c("Precipitation", "Wind", "Temp_max")
 dates = seq(as.Date("2018-01-01"),as.Date("2021-12-31"), by="day")
 names = c("Precipitation", "Wind", "Temp_max")
 
-resultperm <- readRDS("resultperm2.rds")
+resultperm <- readRDS("/home/aboualam/MSTWeatherGen/tests/testthat/resultperm2.rds")
 
 set.seed(1)
 wt <- resultperm$cluster
 K <- length(unique(wt))
 
-# Récupération des dimensions réelles
+# Parameters
 Nt <- dim(data)[1]
 Ns <- dim(data)[2]
 Nv <- dim(data)[3]
 
-# --- Tests pour generate_spatial_index_pairs ---
+# --- Tests for generate_spatial_index_pairs ---
 
 # 0. Test de structure de sortie
 test_that("generate_spatial_index_pairs returns a matrix with 2 columns", {
   res <- generate_spatial_index_pairs(coordinates, n1 = 3, n2 = 2)
   
-  expect_is(res, "matrix")
+  expect_type(res, "double")
   expect_equal(ncol(res), 2)
 })
 

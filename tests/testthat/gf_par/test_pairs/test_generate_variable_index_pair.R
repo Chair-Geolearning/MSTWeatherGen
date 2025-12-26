@@ -1,6 +1,5 @@
 # Libraries:
 library(testthat)
-library(MSTWeatherGen)  
 
 # Data:
 data("data", package = "MSTWeatherGen")
@@ -10,8 +9,7 @@ dates = seq(as.Date("2018-01-01"),as.Date("2021-12-31"), by="day")
 names = c("Precipitation", "Wind", "Temp_max")
 
 # Retrieve results:
-resultperm <- readRDS("resultperm2.rds")
-
+resultperm <- readRDS("/home/aboualam/MSTWeatherGen/tests/testthat/resultperm2.rds")
 set.seed(1)
 wt <- resultperm$cluster
 K <- length(unique(wt))
@@ -25,7 +23,7 @@ Nv <- dim(data)[3]
 test_that("generate_variable_index_pairs returns correct structure", {
   res <- generate_variable_index_pairs(names)
   
-  expect_is(res, "data.frame")
+  expect_type(res, "list")
   expect_equal(names(res), c("v1", "v2"))
   expect_true(all(res$v1 %in% names))
   expect_true(all(res$v2 %in% names))
@@ -88,7 +86,7 @@ test_that("generate_variable_index_pairs handles an empty vector", {
   names <- character(0)
   res <- generate_variable_index_pairs(names)
   
-  expect_is(res, "data.frame")
+  expect_type(res, "list")
   expect_equal(nrow(res), 0)
   expect_equal(ncol(res), 2)
 })

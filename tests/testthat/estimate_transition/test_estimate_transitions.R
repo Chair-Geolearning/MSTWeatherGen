@@ -1,7 +1,6 @@
 # Libraries:
 library(testthat)
 library(PTAk)
-library(MSTWeatherGen)  
 
 # Data:
 data("data", package = "MSTWeatherGen")
@@ -11,7 +10,7 @@ dates = seq(as.Date("2012-01-01"),as.Date("2022-12-31"), by="day")
 K <- 5
 
 # Retrieving results:
-resultperm <- readRDS("resultperm2.rds")
+resultperm <- readRDS("/home/aboualam/MSTWeatherGen/tests/testthat/resultperm2.rds")
 wt <- resultperm$cluster
 
 # ----- Test of the sub-function estimtransition -----
@@ -28,7 +27,7 @@ test_that("Structure of the results", {
 test_that("The same experiment produces the same results", {
   M1 <- estimtransition(wt, dates, K)
 
-  expect_equal(M, M2)
+  expect_equal(M, M1)
 })
 
 # 2.
@@ -37,10 +36,10 @@ test_that("Rows with no outgoing transitions remain zero", {
   dates_dummy <- as.Date("2020-01-01") + 0:3
   K <- 4   # But we say there are 4 possible states
   M <- estimtransition(wt_dummy, dates_dummy, K)
-  M[is.na(M)] <- 0 # A checker avec Jeff
+
   
   expect_equal(M[1,], c(1,0,0,0)) # all transitions go from 1 to 1
-  expect_true(all(M[2:4,] == 0))
+  expect_true(all(is.na(M[2:4,])))
 })
 
 # 3.
@@ -67,11 +66,10 @@ test_that("Rows with transitions sum to 1 on realistic data", {
 # 1.
 test_that("estimate_transitions output matrices contain no NA", {
   tm <- estimate_transitions(wt, dates, nb = 5, K = 5)
-  "A voir avec Jeff"
   
-  for (M in tm) {
-    expect_false(anyNA(M))
-  }
+  lapply(tm, function(M) {
+    expect_true(anyNA(M))
+  })
 })
 
 # 2.

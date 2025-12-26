@@ -1,6 +1,5 @@
 # Libraries:
 library(testthat)
-library(MSTWeatherGen)  
 
 # Data:
 data("data", package = "MSTWeatherGen")
@@ -10,7 +9,7 @@ dates = seq(as.Date("2018-01-01"),as.Date("2021-12-31"), by="day")
 names = c("Precipitation", "Wind", "Temp_max")
 
 # Retrieve results:
-resultperm <- readRDS("resultperm2.rds")
+resultperm <- readRDS("/home/aboualam/MSTWeatherGen/tests/testthat/resultperm2.rds")
 
 # Parameters
 set.seed(1)
