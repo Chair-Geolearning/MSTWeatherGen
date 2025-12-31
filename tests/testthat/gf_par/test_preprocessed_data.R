@@ -1,6 +1,5 @@
 # Libraries:
 library(testthat)
-library(MSTWeatherGen)  
 
 # Data:
 data("data", package = "MSTWeatherGen")
@@ -9,7 +8,7 @@ names = c("Precipitation", "Wind", "Temp_max")
 dates = seq(as.Date("2018-01-01"),as.Date("2021-12-31"), by="day")
 names = c("Precipitation", "Wind", "Temp_max")
 
-resultperm <- readRDS("resultperm2.rds")
+resultperm <- readRDS("/home/aboualam/MSTWeatherGen/tests/testthat/resultperm2.rds")
 
 set.seed(1)
 wt <- resultperm$cluster
@@ -41,7 +40,7 @@ test_that("preprocess_data_mst returns the expected structure", {
 
 # 1.
 test_that("Dimensions of u, h, uh are coherent", {
-  res <- preprocess_data(Ti, Si, coordinates)s
+  res <- preprocess_data(Ti, Si, coordinates)
   nT <- nrow(Ti)
   nS <- nrow(Si)
   npairs <- nT * nS

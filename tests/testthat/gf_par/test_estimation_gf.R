@@ -9,9 +9,6 @@ names = c("Precipitation", "Wind", "Temp_max")
 dates = seq(as.Date("2018-01-01"),as.Date("2021-12-31"), by="day")
 names = c("Precipitation", "Wind", "Temp_max")
 
-# Retrieve results : 
-resultperm <- readRDS("resultperm2.rds")
-
 # Parameters: 
 set.seed(1)
 wt <- resultperm$cluster
@@ -51,7 +48,7 @@ Nv <- dim(data)[3]
 test_that("estimation_gf returns a list with parm and par_all", {
   res <- estimation_gf(
     data = data,
-    wt_id = 100:150,
+    wt_id = 110:150,
     max_it = max_it,
     dates = dates,
     tmax = tmax,

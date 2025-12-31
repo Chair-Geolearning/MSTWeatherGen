@@ -9,6 +9,7 @@ names = c("Precipitation", "Wind", "Temp_max")
 dates = seq(as.Date("2018-01-01"),as.Date("2021-12-31"), by="day")
 names = c("Precipitation", "Wind", "Temp_max")
 names_bis = c("Wind", "Temp_max")
+variable = c("Wind")
 
 # Retrieve results
 resultperm <- readRDS("resultperm2.rds")
@@ -39,6 +40,11 @@ cr <- sapply(names, function(v1) {
     mean(sapply(1:dim(data)[2], function(j) cor(data[, j, v1], data[, j, v2], use = "complete.obs")), na.rm = TRUE)
   })
 })
+
+par_s <- readRDS("/home/aboualam/MSTWeatherGen/pars.rds")
+pairs = c("Wind-Wind", "Wind-Temp", "Temp-Temp")
+
+par_all <- initialize_par_all_if_missing(par_all, names, pairs, par_s, ax, cr = cr)
 
 
 test_that("initialize_par_all_if_missing initializes par_all", {

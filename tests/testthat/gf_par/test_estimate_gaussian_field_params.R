@@ -1,6 +1,5 @@
 # Libraries:
 library(testthat)
-library(MSTWeatherGen)  
 
 # Data:
 data("data", package = "MSTWeatherGen")
@@ -9,55 +8,74 @@ names = c("Precipitation", "Wind", "Temp_max")
 dates = seq(as.Date("2018-01-01"),as.Date("2021-12-31"), by="day")
 names = c("Precipitation", "Wind", "Temp_max")
 
-# Retrieve results : 
-resultperm <- readRDS("resultperm2.rds")
+seasons <- list(
+  s1 = list(min_day = 1, max_day = 29, min_month = 12, max_month = 2),
+  s2 = list(min_day = 1, max_day = 31, min_month = 3, max_month = 5),
+  s3 = list(min_day = 1, max_day = 31, min_month = 6, max_month = 8),
+  s4 = list(min_day = 1, max_day = 30, min_month = 9, max_month = 11)
+)
 
-# Parameters
-set.seed(1)
-wt <- resultperm$cluster
+filtered = filter_season_data(data, dates, s1, names)
+data = filtered$data_filtered
+dates = filtered$dates_filtered
+rm(filtered)
+names_weather_types = names
+K <- 5
+
+#Reproducing results
+'# Parameters
 K <- length(unique(wt))
+n1 <- 3
+n2 <- 4  
+tmax <- 1  
+max_it <- 100
 
-# --- Tests for the sub-fonction Estimation gf ----
-
-# DImensions
 Nt <- dim(data)[1]
 Ns <- dim(data)[2]
 Nv <- dim(data)[3]
 
-test_that("estimation_gf fonctionne avec des données du package MSTWeatherGen", {
+lmbd = estimate_lambda_transformations(data = data, wt = wt, names = names_weather_types, coordinates = coordinates)
+threshold_precip = lmbd$threshold_precip
+
+
+swg <- lapply(seasons["s1"], function(season) {
+  # Step 1: Filter the input data and dates for the specified season
+  filtered = filter_season_data(data, dates, season, names)
+  data = filtered$data_filtered
+  dates = filtered$dates_filtered
+  rm(filtered)
   
-  wt_id <- rep(1:3, length.out = length(dates))  # Simuler 3 types de météo pour chaque jour
-  max_it <- 50  # Nombre d'itérations pour l'optimisation
-  tmax <- 5  # Maximum temporal lag
-  n1 <- 2  # Paramètre pour la granularité spatiale
-  n2 <- 2  # Paramètre pour la granularité spatiale
-  ax <- matrix(runif(100), ncol = 10)  # Covariance correction terms simulés
-  cr <- matrix(runif(100), ncol = 10)  # Matrice de corrélation simulée
-  threshold_precip <- c(0, 10, 20, 30)  # Seuils de précipitation simulés
+  # Step 3-1: Identify weather types for the season
+  wt = weather_types(data = data, variables = names_weather_types, dates = dates,coordinates =  coordinates,
+                     max_number_wt = 6, return_plots = F)
+  wt = wt$cluster # extract weather types 
   
-  # Appel de la fonction avec les données
-  result <- estimation_gf(
-    data = data, 
-    wt_id = wt_id, 
-    max_it = max_it, 
-    dates = dates, 
-    tmax = tmax, 
-    names = names, 
-    coordinates = coordinates, 
-    n1 = n1, 
-    n2 = n2, 
-    ax = ax, 
-    cr = cr, 
-    threshold_precip = threshold_precip
-  )
+  # Step 3-2: Estimate transition probabilities between weather types
+  transitions = estimate_transitions(cluster = wt, dates = dates, nb = 30, K = length(unique(wt)))
   
-  # Vérification que la fonction retourne une liste avec les éléments attendus
-  expect_type(result, "list")
-  expect_true("parm" %in% names(result))
-  expect_true("par_all" %in% names(result))
+  # Step 4: Transformations for each variable in each weather type
+  lmbd = estimate_lambda_transformations(data = data, wt = wt, names = names, coordinates = coordinates)
+  threshold_precip = lmbd$threshold_precip
+  lmbd = lmbd$lambda_transformations
+  data = transformations(data = data,wt = wt,names = names, coordinates = coordinates,lmbd = lmbd)
   
-  # Vérification des dimensions de la matrice de paramètres
-  # Le nombre de variables dans 'names' est 3, donc la dimension attendue est 3x3
-  expect_equal(dim(result$parm), c(3, 3))  # Les dimensions de 'parm' doivent correspondre aux variables
-  expect_equal(length(result$par_all), 100)  # La longueur de 'par_all' doit être 100 si c'est un vecteur de taille 100
+  # Step 5: Estimate parameters for the Gaussian field model
+  gf_par = estimate_gaussian_field_params(data = data, wt = wt, names = names, coordinates = coordinates, 
+                                          tmax = tmax, max_it = max_it, n1 = n1, n2 = n2, 
+                                          dates = dates, threshold_precip = threshold_precip)
+  return(gf_par)
+})
+
+saveRDS(swg, file = "estimate_gaussian_fields_params.rds")'
+
+result_estimate_gaussian_fields_params <- readRDS("/home/aboualam/MSTWeatherGen/estimate_gaussian_fields_params.rds")
+
+# --- Tests for the sub-function Estimation gf ----
+
+# 0.
+test_that("Structure of results", {
+ 
+  expect_type(result_estimate_gaussian_fields_params, "list")
+  expect_length(result_estimate_gaussian_fields_params$s1,5)
+ 
 })
