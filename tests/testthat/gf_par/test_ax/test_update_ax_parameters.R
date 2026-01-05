@@ -72,12 +72,6 @@ ax <- compute_ax(param(par_all, names), names)
 
 
 
-
-
-
-
-
-
 # ============================================================================
 # ============================================================================
 test_that("update_ax_parameters works with a valid symmetric PD matrix", {

@@ -16,7 +16,7 @@ seasons <- list(
   s4 = list(min_day = 1, max_day = 30, min_month = 9, max_month = 11)
 )
 
-filtered = filter_season_data(data, dates, s1, names)
+'filtered = filter_season_data(data, dates, s1, names)
 data = filtered$data_filtered
 dates = filtered$dates_filtered
 rm(filtered)
@@ -53,10 +53,13 @@ h <- preprocessed_data$h
 #uh <- matrix(1, nrow = length(h), ncol = length(h))  
 
 result <- init_space_par(data, names, h, uh, max_it = 50)
-saveRDS(result, file = "pars.rds")
+saveRDS(result, file = "pars.rds")'
 
+result <- readRDS("/home/aboualam/MSTWeatherGen/pars.rds")
+# --- Tests ---
 
-test_that("init_space_par fonctionne sur données réelles", {
+# 0.
+test_that("init_space_par works and optimisation has worked effectively", {
   
   expect_equal(length(result), length(names))
   

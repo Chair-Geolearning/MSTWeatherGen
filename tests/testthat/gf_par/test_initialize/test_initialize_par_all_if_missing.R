@@ -127,21 +127,3 @@ test_that("existing par_all is not overwritten", {
   expect_equal(par_all_bis[names(par_all)], par_all)
 })
 
-# 3.
-'test_that("resulting beta matrix is positive definite", {
-  
-  par_all <- initialize_par_all_if_missing(
-    par_all = NULL,
-    names = names,
-    pairs = pairs,
-    par_s = par_s,
-    ax = ax,
-    cr = cr
-  )
-  
-  parm <- param(par_all, names_vars)
-  beta <- compute_beta(parm, names_vars, cr_ok)
-  
-  expect_true(all(eigen(beta, symmetric = TRUE)$values > 0))
-})'
-
