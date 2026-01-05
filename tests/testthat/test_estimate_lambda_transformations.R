@@ -31,7 +31,6 @@ test_that("estimate_lambda_transformations returns a list with expected componen
   expect_equal(length(res$lambda_transformations), length(unique(wt)))
 })
 
-
 # 1.  
 test_that("lambda_transformations has correct internal structure", {
   ns <- dim(data)[2]
@@ -55,11 +54,11 @@ test_that("lambda_transformations has correct internal structure", {
 # 2. 
 test_that("threshold_precip is numeric and positive", {
   ns <- dim(data)[2]
-  for(k in 1:K){
-    
-    expect_equal(length(res$threshold_precip[[k]]), ns)
-  }
   
+  lapply(1:K, function(k) {
+    expect_equal(length(res$threshold_precip[[k]]), ns)
+  })
+
   expect_type(res$threshold_precip, "list")
   expect_true(all(is.finite(unlist(res$threshold_precip)))) # 3.Check of the finitude if the threshold
 })
