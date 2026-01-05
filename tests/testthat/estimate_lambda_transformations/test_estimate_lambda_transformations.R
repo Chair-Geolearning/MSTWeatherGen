@@ -1,6 +1,5 @@
 # Libraries:
 library(testthat)
-library(MSTWeatherGen)
 
 # Data :
 data("data", package = "MSTWeatherGen")
