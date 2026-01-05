@@ -8,9 +8,9 @@ par <- rep(1, 26)
 
 names <- c("Precipitation", "Wind", "Temp_max")
 
-test_that("compute_beta returns a square symmetric matrix with correct names", {
+'test_that("compute_beta returns a square symmetric matrix with correct names", {
   
-  # Matrice de corrélation empirique simple (valide)
+  # Matrice de corrélation  simple (valide)
   cr <- diag(1, length(names))
   colnames(cr) <- rownames(cr) <- names
   
@@ -23,4 +23,4 @@ test_that("compute_beta returns a square symmetric matrix with correct names", {
   expect_equal(colnames(beta), names)
   expect_equal(rownames(beta), names)
   expect_equal(beta, t(beta))
-})
+})'
