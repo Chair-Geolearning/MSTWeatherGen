@@ -151,6 +151,7 @@ init_space_par <- function(data, names, h, uh, max_it = 2000) {
   #   the set of parameters optimized for one of the variables specified in 'names'.
   
   # Perform parallel optimization for each variable using mclapply
+<<<<<<< HEAD
   par <- parallel::mclapply(
     names,
     function(v) {
@@ -166,6 +167,19 @@ init_space_par <- function(data, names, h, uh, max_it = 2000) {
     },
     mc.cores = 1
   )
+=======
+  par = parallel::mclapply(names, function(v) {
+    optim(
+      par = c(1, 1),  # Initial parameter guesses
+      fn = loglik_spatial,     # Objective function to minimize (negative log-likelihood)
+      data = data,
+      v = v,            # Current variable being optimized
+      h = h,
+      uh = uh,
+      control = list(maxit = max_it, trace = 2)  # Optimization control settings
+    )$par  # Extract the optimized parameters
+  }, mc.cores = 1)
+>>>>>>> a7668d8 (merge branche Bug fix | Resolution Plots (#26))
   
   return(par)
 }
