@@ -70,8 +70,8 @@ test_that("Rows with transitions sum to 1 on realistic data", {
   lapply(tm, function(M) {
     expect_true(anyNA(M))
   })
-})
-'
+})'
+
 # 2.
 test_that("estimate_transitions returns a list", {
   
@@ -99,5 +99,5 @@ test_that("Same experiment leads to same results", {
     expect_true(all(M >= 0))
     expect_true(all(M <= 1))
   }
-})
-'
+})'
+

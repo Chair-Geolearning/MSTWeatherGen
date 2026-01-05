@@ -8,8 +8,8 @@ names = c("Precipitation", "Wind", "Temp_max")
 dates = seq(as.Date("2012-01-01"),as.Date("2022-12-31"), by="day")
 
 # --- Test of the moving average sub-function ---
-
 # Define a moving average function
+
 moving_average <- function(x, n) {
   len <- length(x)
   avg <- rep(NA, len)
