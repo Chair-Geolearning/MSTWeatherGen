@@ -10,7 +10,7 @@ dates = seq(as.Date("2012-01-01"),as.Date("2022-12-31"), by="day")
 K <- 5
 
 # Retrieving results:
-resultperm <- readRDS("/home/aboualam/MSTWeatherGen/tests/testthat/resultperm2.rds")
+resultperm <- readRDS("saved_results/resultperm2.rds")
 wt <- resultperm$cluster
 
 # ----- Test of the sub-function estimtransition -----

@@ -8,7 +8,7 @@ names = c("Precipitation", "Wind", "Temp_max")
 dates = seq(as.Date("2018-01-01"),as.Date("2021-12-31"), by="day")
 names = c("Precipitation", "Wind", "Temp_max")
 
-resultperm <- readRDS("/home/aboualam/MSTWeatherGen/tests/testthat/resultperm2.rds")
+resultperm <- readRDS("saved_results/resultperm2.rds")
 
 set.seed(1)
 wt <- resultperm$cluster

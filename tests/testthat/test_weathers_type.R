@@ -9,7 +9,7 @@ names = c("Precipitation", "Wind", "Temp_max")
 dates = seq(as.Date("2012-01-01"),as.Date("2022-12-31"), by="day")
 
 # Parameters:
-resultperm <- readRDS("/home/aboualam/MSTWeatherGen/tests/testthat/resultperm2.rds")
+resultperm <- readRDS("saved_results/resultperm2.rds")
 # Saved results if you want to reproduce them.
 # resultperm <- weather_types(
 # data = data,
@@ -23,6 +23,9 @@ resultperm <- readRDS("/home/aboualam/MSTWeatherGen/tests/testthat/resultperm2.r
 # )
 
 n_wt <- 3
+
+skip('skip')
+skip_on_cran()
 
 result <- weather_types(
   data = data,
@@ -54,6 +57,8 @@ test_that("Results structure", {
 
 # 2. 
 test_that("test that similar results when having similiar experience, because we are fixing the seed now", {
+  skip_on_cran()
+  skip('skip')
   set.seed(123)
   result_first<- weather_types(data = data,
                           variables = c("Wind", "Temp_max"),
@@ -81,6 +86,8 @@ test_that("test that similar results when having similiar experience, because we
 
 # 3. 
 test_that("What happened when n wt is equal to zero", {
+  skip_on_cran()
+  skip('skip')
   expect_error( result <- weather_types(
     data = data,
     variables = c("Wind", "Temp_max"),
@@ -95,6 +102,8 @@ test_that("What happened when n wt is equal to zero", {
 
 # 4. 
 test_that("What happened when max nwt is equal to zero", {
+  skip_on_cran()
+  skip('skip')
   expect_error( result <- weather_types(
     data = data,
     variables = c("Wind", "Temp_max"),

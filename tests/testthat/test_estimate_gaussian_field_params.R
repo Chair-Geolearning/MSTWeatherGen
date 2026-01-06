@@ -70,7 +70,7 @@ swg <- lapply(seasons["s1"], function(season) {
 
 saveRDS(swg, file = "estimate_gaussian_fields_params.rds")'
 
-result_estimate_gaussian_fields_params <- readRDS("/home/aboualam/MSTWeatherGen/estimate_gaussian_fields_params.rds")
+result_estimate_gaussian_fields_params <- readRDS("saved_results/estimate_gaussian_fields_params.rds")
 
 # --- Tests ---
 # 0.

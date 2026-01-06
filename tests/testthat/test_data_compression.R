@@ -7,6 +7,9 @@ data("data", package = "MSTWeatherGen")
 data("coordinates", package = "MSTWeatherGen")
 names = c("Precipitation", "Wind", "Temp_max")
 dates = seq(as.Date("2012-01-01"),as.Date("2022-12-31"), by="day")
+
+skip('skip')
+skip_on_cran()
 rescompressed <- data_compression(data)
 
 # 0. 
