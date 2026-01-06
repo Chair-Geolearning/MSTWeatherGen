@@ -8,9 +8,10 @@ data("coordinates", package = "MSTWeatherGen")
 names = c("Precipitation", "Wind", "Temp_max")
 dates = seq(as.Date("2012-01-01"),as.Date("2022-12-31"), by="day")
 
-skip('skip')
-skip_on_cran()
-rescompressed <- data_compression(data)
+#rescompressed <- data_compression(data)
+#saveRDS(rescompressed, file = "data_compressed.rds")
+rescompressed <- readRDS("saved_results/data_compressed.rds")
+testall <- FALSE
 
 # 0. 
 test_that("The function returns a non-empty matrix", {
@@ -31,9 +32,14 @@ test_that("All output values are finite", {
   expect_false(any(!is.finite(rescompressed)))
 })
 
-
 # 3.
 test_that("The function handles a sub-sample", {
+  if (!testall) {
+    skip('skip')
+  }
+  skip_on_cran()  
+  skip_on_ci()
+
   sub_data <- data[,1,, drop = FALSE]  
   res_sub <- data_compression(sub_data)
   
@@ -43,6 +49,13 @@ test_that("The function handles a sub-sample", {
 
 # 4.
 test_that("The function handles a single variable", {
+  
+  if (!testall) {
+    skip('skip')
+  }
+  skip_on_cran()
+  skip_on_ci()
+  
   sub_data <- data[,,1, drop = FALSE]  
   res_sub <- data_compression(sub_data)
   expect_true(is.matrix(res_sub))

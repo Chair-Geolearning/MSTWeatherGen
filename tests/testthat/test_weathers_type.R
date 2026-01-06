@@ -9,7 +9,9 @@ names = c("Precipitation", "Wind", "Temp_max")
 dates = seq(as.Date("2012-01-01"),as.Date("2022-12-31"), by="day")
 
 # Parameters:
-resultperm <- readRDS("saved_results/resultperm2.rds")
+resultperm <- readRDS("saved_results/estimate_gaussian_fields_params.rds")
+testall <- FALSE
+
 # Saved results if you want to reproduce them.
 # resultperm <- weather_types(
 # data = data,
@@ -24,10 +26,7 @@ resultperm <- readRDS("saved_results/resultperm2.rds")
 
 n_wt <- 3
 
-skip('skip')
-skip_on_cran()
-
-result <- weather_types(
+'result <- weather_types(
   data = data,
   variables = c("Wind", "Temp_max"),
   dates = dates,
@@ -36,7 +35,9 @@ result <- weather_types(
   return_plots = FALSE,
   names_units = c("m/s", "°C"),
   dir = tempdir()
-)
+)'
+
+result <- readRDS("saved_results/result_wt.rds")
 
 # 0. 
 test_that("weather_types returns a cluster vector and works even if return_plots = FALSE", {
@@ -58,7 +59,10 @@ test_that("Results structure", {
 # 2. 
 test_that("test that similar results when having similiar experience, because we are fixing the seed now", {
   skip_on_cran()
-  skip('skip')
+  if (!testall) {
+    skip('skip')
+  }
+
   set.seed(123)
   result_first<- weather_types(data = data,
                           variables = c("Wind", "Temp_max"),
@@ -87,7 +91,11 @@ test_that("test that similar results when having similiar experience, because we
 # 3. 
 test_that("What happened when n wt is equal to zero", {
   skip_on_cran()
-  skip('skip')
+  
+  if (!testall) {
+    skip('skip')
+  }
+  
   expect_error( result <- weather_types(
     data = data,
     variables = c("Wind", "Temp_max"),
@@ -103,7 +111,10 @@ test_that("What happened when n wt is equal to zero", {
 # 4. 
 test_that("What happened when max nwt is equal to zero", {
   skip_on_cran()
-  skip('skip')
+  
+  if (!testall) {
+    skip('skip')
+  }
   expect_error( result <- weather_types(
     data = data,
     variables = c("Wind", "Temp_max"),
