@@ -23,7 +23,7 @@ testall <- FALSE
 #  dir = tempdir()
 # )
 
-resultperm <- readRDS("saved_results/estimate_gaussian_fields_params.rds")
+resultperm <- readRDS("saved_results/resultperm2.rds")
 n_wt <- 3
 
 'result <- weather_types(
