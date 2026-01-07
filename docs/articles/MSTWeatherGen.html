@@ -68,7 +68,7 @@
     <div class="page-header toc-ignore">
       <h1 data-toc-skip>Running a simple simulation</h1>
             
-            <h4 data-toc-skip class="date">2025-12-19</h4>
+            <h4 data-toc-skip class="date">2026-01-07</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/Chair-Geolearning/MSTWeatherGen/blob/main/vignettes/MSTWeatherGen.Rmd" class="external-link"><code>vignettes/MSTWeatherGen.Rmd</code></a></small>
       <div class="hidden name"><code>MSTWeatherGen.Rmd</code></div>
@@ -186,7 +186,7 @@ parameters using <code>MSTWeatherGen_Estim</code> function.</p>
 <span><span class="co">#&gt;  ---Final iteration---  1 </span></span>
 <span><span class="co">#&gt;  --Singular Value--  144.612  -- Local Percent --  56.13031 % </span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  -----Execution Time----- 3.124 </span></span>
+<span><span class="co">#&gt;  -----Execution Time----- 3.32 </span></span>
 <span><span class="co">#&gt;   Nelder-Mead direct search function minimizer</span></span>
 <span><span class="co">#&gt; function value for initial parameters = 137.498584</span></span>
 <span><span class="co">#&gt;   Scaled convergence tolerance is 2.04889e-06</span></span>
@@ -959,7 +959,7 @@ parameters using <code>MSTWeatherGen_Estim</code> function.</p>
 <span><span class="co">#&gt;  ---Final iteration---  2 </span></span>
 <span><span class="co">#&gt;  --Singular Value--  134.1718  -- Local Percent --  54.84311 % </span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  -----Execution Time----- 3.783 </span></span>
+<span><span class="co">#&gt;  -----Execution Time----- 3.606 </span></span>
 <span><span class="co">#&gt;   Nelder-Mead direct search function minimizer</span></span>
 <span><span class="co">#&gt; function value for initial parameters = 165.381007</span></span>
 <span><span class="co">#&gt;   Scaled convergence tolerance is 2.46437e-06</span></span>
@@ -1727,7 +1727,7 @@ parameters using <code>MSTWeatherGen_Estim</code> function.</p>
 <span><span class="co">#&gt;  </span></span>
 <span><span class="co">#&gt;   ++ Last 3-modes vs &lt;  0.1 % stopping this level and under ++ </span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  -----Execution Time----- 2.912 </span></span>
+<span><span class="co">#&gt;  -----Execution Time----- 2.998 </span></span>
 <span><span class="co">#&gt;   Nelder-Mead direct search function minimizer</span></span>
 <span><span class="co">#&gt; function value for initial parameters = 545.984032</span></span>
 <span><span class="co">#&gt;   Scaled convergence tolerance is 8.1358e-06</span></span>
@@ -2068,7 +2068,7 @@ parameters using <code>MSTWeatherGen_Estim</code> function.</p>
 <span><span class="co">#&gt;  </span></span>
 <span><span class="co">#&gt;   ++ Last 3-modes vs &lt;  0.1 % stopping this level and under ++ </span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  -----Execution Time----- 2.803 </span></span>
+<span><span class="co">#&gt;  -----Execution Time----- 2.843 </span></span>
 <span><span class="co">#&gt;   Nelder-Mead direct search function minimizer</span></span>
 <span><span class="co">#&gt; function value for initial parameters = 58.203157</span></span>
 <span><span class="co">#&gt;   Scaled convergence tolerance is 8.67295e-07</span></span>
@@ -2522,7 +2522,7 @@ assessing the accuracy and quality of the simulation.</p>
 <span>       y <span class="op">=</span> <span class="st">"Value"</span>,</span>
 <span>       color <span class="op">=</span> <span class="st">"Type"</span><span class="op">)</span> <span class="op">+</span> <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>plot.title <span class="op">=</span> <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>hjust <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_color_manual</a></span><span class="op">(</span><span class="st">""</span>,values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Observed"</span> <span class="op">=</span> <span class="st">"blue"</span>, <span class="st">"Simulated"</span> <span class="op">=</span> <span class="st">"red"</span><span class="op">)</span><span class="op">)</span> </span></code></pre></div>
-<p><img src="MSTWeatherGen_files/figure-html/unnamed-chunk-10-1.png" class="r-plt" width="672" style="display: block; margin: auto;"></p>
+<p><img src="MSTWeatherGen_files/figure-html/unnamed-chunk-10-1.png" class="r-plt" alt="" width="672" style="display: block; margin: auto;"></p>
 <p>We now plot the observed empirical density versus simulated weather
 variables in Marseille during the seasons considered (winter (DJF),
 spring (MAM), summer (JJA), and fall (SON)) using
@@ -2530,17 +2530,17 @@ spring (MAM), summer (JJA), and fall (SON)) using
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_observed_vs_simulated_density.html">plot_observed_vs_simulated_density</a></span><span class="op">(</span>sim <span class="op">=</span> <span class="va">sim</span>, observed <span class="op">=</span> <span class="va">data</span>, dates <span class="op">=</span> <span class="va">dates</span>, </span>
 <span>                              seasons <span class="op">=</span> <span class="va">seasons</span>, location <span class="op">=</span> <span class="va">Marseille</span> , names <span class="op">=</span> <span class="va">names</span>, names_seasons <span class="op">=</span><span class="va">names_seasons</span><span class="op">)</span></span></code></pre></div>
-<p><img src="MSTWeatherGen_files/figure-html/unnamed-chunk-11-1.png" class="r-plt" width="720" style="display: block; margin: auto;"></p>
+<p><img src="MSTWeatherGen_files/figure-html/unnamed-chunk-11-1.png" class="r-plt" alt="" width="720" style="display: block; margin: auto;"></p>
 <p>Next, we can compare the observed and simulated monthly variable
 means in Marseille using <code>plot_mean_by_month</code> function</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_mean_by_month.html">plot_mean_by_month</a></span><span class="op">(</span>sim <span class="op">=</span> <span class="va">sim</span>, observed <span class="op">=</span> <span class="va">data</span>,places <span class="op">=</span> <span class="va">Marseille</span> , names_places <span class="op">=</span> <span class="st">"Marseille "</span>, names <span class="op">=</span> <span class="va">names</span>, dates <span class="op">=</span> <span class="va">dates</span><span class="op">)</span></span></code></pre></div>
-<p><img src="MSTWeatherGen_files/figure-html/unnamed-chunk-12-1.png" class="r-plt" width="672" style="display: block; margin: auto;"></p>
+<p><img src="MSTWeatherGen_files/figure-html/unnamed-chunk-12-1.png" class="r-plt" alt="" width="672" style="display: block; margin: auto;"></p>
 <p>Then, we can compare simulated and observed frequency of wet days in
 the considered area during the considered seasons</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_wet_frequency.html">plot_wet_frequency</a></span><span class="op">(</span><span class="va">sim</span>, <span class="va">data</span>, <span class="va">dates</span>, <span class="va">seasons</span>, <span class="va">coordinates</span>, <span class="va">names_seasons</span><span class="op">)</span></span></code></pre></div>
-<p><img src="MSTWeatherGen_files/figure-html/unnamed-chunk-13-1.png" class="r-plt" width="672" style="display: block; margin: auto;"></p>
+<p><img src="MSTWeatherGen_files/figure-html/unnamed-chunk-13-1.png" class="r-plt" alt="" width="672" style="display: block; margin: auto;"></p>
 <p>Finally, we can see if our stochastic weather generator can reproduce
 the observed length of wet spells in the considered region using the
 <code>plot_dry_wet_spells_maps</code> function</p>
@@ -2548,7 +2548,7 @@ the observed length of wet spells in the considered region using the
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://lubridate.tidyverse.org" class="external-link">lubridate</a></span><span class="op">)</span></span>
 <span><span class="va">id</span> <span class="op">=</span> <span class="fu">lubridate</span><span class="fu">::</span><span class="fu"><a href="https://lubridate.tidyverse.org/reference/year.html" class="external-link">year</a></span><span class="op">(</span><span class="va">dates</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fl">2016</span><span class="op">:</span><span class="fl">2021</span></span>
 <span><span class="fu"><a href="../reference/plot_dry_wet_spells_maps.html">plot_dry_wet_spells_maps</a></span><span class="op">(</span>sim <span class="op">=</span> <span class="va">sim</span><span class="op">[</span><span class="va">id</span>,,<span class="op">]</span>, observed <span class="op">=</span> <span class="va">data</span><span class="op">[</span><span class="va">id</span>,,<span class="op">]</span>, coordinates <span class="op">=</span> <span class="va">coordinates</span>, dates <span class="op">=</span> <span class="va">dates</span><span class="op">[</span><span class="va">id</span><span class="op">]</span><span class="op">)</span></span></code></pre></div>
-<p><img src="MSTWeatherGen_files/figure-html/unnamed-chunk-14-1.png" class="r-plt" width="672" style="display: block; margin: auto;"></p>
+<p><img src="MSTWeatherGen_files/figure-html/unnamed-chunk-14-1.png" class="r-plt" alt="" width="672" style="display: block; margin: auto;"></p>
 </div>
   </div>
 
