@@ -9,7 +9,6 @@ names = c("Precipitation", "Wind", "Temp_max")
 dates = seq(as.Date("2012-01-01"),as.Date("2022-12-31"), by="day")
 
 # Parameters:
-resultperm <- readRDS("saved_results/estimate_gaussian_fields_params.rds")
 testall <- FALSE
 
 # Saved results if you want to reproduce them.
@@ -24,6 +23,7 @@ testall <- FALSE
 #  dir = tempdir()
 # )
 
+resultperm <- readRDS("saved_results/estimate_gaussian_fields_params.rds")
 n_wt <- 3
 
 'result <- weather_types(
