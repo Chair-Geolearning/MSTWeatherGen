@@ -36,6 +36,7 @@ Imports:
     geosphere (>= 1.5-18), ggpubr (>= 0.6.0), patchwork (>= 1.2.0)
 Suggests:
     knitr,
+    magrittr,
     rmarkdown,
     maps,
     testthat (>= 3.0.0)
