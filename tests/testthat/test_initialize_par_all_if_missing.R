@@ -14,11 +14,11 @@ Ns <- dim(data)[2]
 Nv <- dim(data)[3]
 
 # Parameters
-resultperm <- readRDS("tests/testthat/saved_results/resultperm2.rds")
-ax <- readRDS("tests/testthat/saved_results/ax_file.rds")
+resultperm <- readRDS("saved_results/resultperm2.rds")
+ax <- readRDS("saved_results/ax_file.rds")
 wt <- resultperm$cluster
 K <- length(unique(wt))
-par_s <- readRDS("tests/testthat/saved_results/pars.rds")
+par_s <- readRDS("saved_results/pars.rds")
 par_s <- do.call(cbind, par_s)
 ep <- generate_variable_index_pairs(names)
 pairs <- paste(ep[,1],ep[,2], sep = "-")
@@ -37,6 +37,9 @@ par_all_TEST <- initialize_par_all_if_missing(
   ax = ax,
   cr = cr
 )
+
+
+#--------Tests--------
 
 # 0.
 test_that("initialize_par_all_if_missing runs without error", {
