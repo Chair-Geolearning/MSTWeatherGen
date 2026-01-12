@@ -20,7 +20,7 @@ seasons <- list(
 test_that("The argument types are correct", {
   
   expect_type(data, "double")
-  expect_type(dates, "double")
+  expect_equal(class(dates), "Date")
   expect_type(summer, "list")
   expect_type(seasons, "list")
   
