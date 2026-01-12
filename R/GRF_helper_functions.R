@@ -175,7 +175,6 @@ init_space_par <- function(data, names, h, uh, max_it = 2000) {
       control = list(maxit = max_it, trace = 2)  # Optimization control settings
     )$par  # Extract the optimized parameters
   }, mc.cores = 1)
-
   return(par)
 }
 #' Optimize Spatial Parameters for Variable Pairs
