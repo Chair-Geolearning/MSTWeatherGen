@@ -16,7 +16,7 @@ seasons <- list(
 
 # Parameters: 
 'set.seed(1)
-resultperm <- readRDS("/home/aboualam/MSTWeatherGen/tests/testthat/resultperm2.rds")
+resultperm <- readRDS("saved_results/resultperm2.rds")
 
 wt <- resultperm$cluster
 K <- length(unique(wt))
