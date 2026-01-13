@@ -4,3 +4,6 @@
 ^_pkgdown.yml$
 ^docs$
 .Rcheck$
+^\.Renviron$
+\.rds$
+.*\.code-workspace$

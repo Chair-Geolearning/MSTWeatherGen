@@ -36,8 +36,11 @@ Imports:
     geosphere (>= 1.5-18), ggpubr (>= 0.6.0), patchwork (>= 1.2.0)
 Suggests:
     knitr,
+    magrittr,
     rmarkdown,
-    maps
+    maps,
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
 VignetteBuilder: knitr, rmarkdown, maps
 Encoding: UTF-8
 RoxygenNote: 7.3.3

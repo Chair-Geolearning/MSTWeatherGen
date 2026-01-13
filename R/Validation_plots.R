@@ -351,4 +351,3 @@ plot_wet_frequency = function(sim, observed, dates, seasons, coordinates, names_
   combined_plot = ggpubr::ggarrange(plotlist = plot_list, ncol = length(seasons), common.legend = TRUE, legend = "top")
   return(combined_plot)
 }
-
