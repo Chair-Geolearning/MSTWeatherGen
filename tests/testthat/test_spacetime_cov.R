@@ -10,7 +10,7 @@ names = c("Precipitation", "Wind", "Temp_max")
 names_bis = c("Wind", "Temp_max")
 
 # Retrieve results
-resultperm <- readRDS("saved_results/resultperm2.rds")
+resultperm <- readRDS(testthat::test_path("saved_results/resultperm2.rds"))
 
 wt <- resultperm$cluster
 K <- length(unique(wt))

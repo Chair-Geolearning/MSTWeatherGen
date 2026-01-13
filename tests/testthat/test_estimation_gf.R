@@ -120,7 +120,7 @@ ax <- vgm[vgm$lagtime==0&vgm$dist==max(vgm$dist),]'
 
 saveRDS(result_test, file = "estimation_gf_results_v1.rds")'
 
-result_test <- readRDS("saved_results/estimation_gf_results_v1.rds")
+result_test <- readRDS(testthat::test_path("saved_results/estimation_gf_results_v1.rds"))
 
 # --- Tests ---
 
