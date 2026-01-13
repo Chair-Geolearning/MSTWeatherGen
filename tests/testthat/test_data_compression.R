@@ -11,7 +11,7 @@ dates = seq(as.Date("2012-01-01"),as.Date("2022-12-31"), by="day")
 #rescompressed <- data_compression(data)
 #saveRDS(rescompressed, file = "data_compressed.rds")
 rescompressed <- readRDS("saved_results/data_compressed.rds")
-testall <- FALSE
+R_TEST_ALL <-  as.logical(Sys.getenv("R_TEST_ALL"))
 
 # 0. 
 test_that("The function returns a non-empty matrix", {
@@ -34,7 +34,7 @@ test_that("All output values are finite", {
 
 # 3.
 test_that("The function handles a sub-sample", {
-  if (!testall) {
+  if (!R_TEST_ALL) {
     skip('skip')
   }
   skip_on_cran()  
@@ -50,7 +50,7 @@ test_that("The function handles a sub-sample", {
 # 4.
 test_that("The function handles a single variable", {
   
-  if (!testall) {
+  if (!R_TEST_ALL) {
     skip('skip')
   }
   skip_on_cran()

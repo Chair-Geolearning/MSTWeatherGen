@@ -7,9 +7,9 @@ data("data", package = "MSTWeatherGen")
 data("coordinates", package = "MSTWeatherGen")
 names = c("Precipitation", "Wind", "Temp_max")
 dates = seq(as.Date("2012-01-01"),as.Date("2022-12-31"), by="day")
+R_TEST_ALL <-  as.logical(Sys.getenv("R_TEST_ALL"))
 
 # Parameters:
-testall <- FALSE
 
 # Saved results if you want to reproduce them.
 # resultperm <- weather_types(
@@ -59,7 +59,7 @@ test_that("Results structure", {
 # 2. 
 test_that("test that similar results when having similiar experience, because we are fixing the seed now", {
   skip_on_cran()
-  if (!testall) {
+  if (!R_TEST_ALL) {
     skip('skip')
   }
 
@@ -92,7 +92,7 @@ test_that("test that similar results when having similiar experience, because we
 test_that("What happened when n wt is equal to zero", {
   skip_on_cran()
   
-  if (!testall) {
+  if (!R_TEST_ALL) {
     skip('skip')
   }
   
@@ -112,7 +112,7 @@ test_that("What happened when n wt is equal to zero", {
 test_that("What happened when max nwt is equal to zero", {
   skip_on_cran()
   
-  if (!testall) {
+  if (!R_TEST_ALL) {
     skip('skip')
   }
   expect_error( result <- weather_types(
