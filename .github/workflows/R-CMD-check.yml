@@ -1,4 +1,5 @@
 name: R
+run-name: R CMD Package check 
 
 on:
   push:
