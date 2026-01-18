@@ -10,20 +10,22 @@ name: R
 
 on:
   push:
-    branches: [ "main" ]
+    branches: "main" 
   pull_request:
-    branches: [ "main" ]
+    
 
 permissions:
   contents: read
 
 jobs:
   build:
-    runs-on: macos-latest
     strategy:
       matrix:
-        r-version: ['3.6.3', '4.1.1']
-
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        r-version: ['4.1.1', '4.3.0']
+        
+    runs-on: ${{ matrix.os }}
+    
     steps:
       - uses: actions/checkout@v4
       - name: Set up R ${{ matrix.r-version }}
