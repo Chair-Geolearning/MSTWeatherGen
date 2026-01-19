@@ -1,4 +1,4 @@
-name: R-CMD-check
+"name: R-CMD-check
 run-name: R Package check 
 
 on:
@@ -24,7 +24,7 @@ jobs:
           - {os: ubuntu-latest,  r: 'devel', http-user-agent: 'release'}
           - {os: ubuntu-latest,  r: 'release'}
           - {os: ubuntu-latest,  r: 'oldrel-1'}
-          - {os: ubuntu-latest,  r: 'oldrel-2'}
+          - {os: ubuntu-latest,  r: 'oldrel-2'}'''
     
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
@@ -50,4 +50,5 @@ jobs:
         with:
           upload-snapshots: true
           error-on: 'note'  # Très strict : échoue même sur les notes
-          args: 'c("--no-manual", "--as-cran")'
+          # args: "'c("--no-manual", "--as-cran")'
+"""
