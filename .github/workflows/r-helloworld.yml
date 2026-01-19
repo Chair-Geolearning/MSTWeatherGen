@@ -7,7 +7,11 @@
 # additional example workflows available for the R community.
 
 name: hello-world
-on: push
+on:
+  push:
+    branches: "main" 
+  pull_request:
+    branches: "main" 
 jobs:
   my-job:
     runs-on: ubuntu-latest
