@@ -23,7 +23,6 @@ R_TEST_ALL <-  as.logical(Sys.getenv("R_TEST_ALL"))
 #  dir = tempdir()
 # )
 
-resultperm <- readRDS("saved_results/resultperm2.rds")
 n_wt <- 3
 
 'result <- weather_types(
@@ -37,7 +36,6 @@ n_wt <- 3
   dir = tempdir()
 )'
 
-result <- readRDS("saved_results/result_wt.rds")
 
 # 0. 
 test_that("weather_types returns a cluster vector and works even if return_plots = FALSE", {
