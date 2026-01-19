@@ -50,5 +50,5 @@ jobs:
         with:
           upload-snapshots: true
           error-on: 'note'  # Très strict : échoue même sur les notes
-          args: "'c("--no-manual", "--as-cran")
+          args: 'c("--no-manual", "--as-cran")'
 
