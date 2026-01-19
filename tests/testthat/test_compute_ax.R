@@ -18,7 +18,6 @@ resultperm <- readRDS("saved_results/resultperm2.rds")
 ax <- readRDS("saved_results/ax_file.rds")
 wt <- resultperm$cluster
 K <- length(unique(wt))
-par_s <- readRDS("saved_results/pars.rds")
 par_s <- do.call(cbind, par_s)
 ep <- generate_variable_index_pairs(names)
 pairs <- paste(ep[,1],ep[,2], sep = "-")
