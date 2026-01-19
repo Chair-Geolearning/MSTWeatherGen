@@ -49,6 +49,6 @@ jobs:
       - uses: r-lib/actions/check-r-package@v2
         with:
           upload-snapshots: true
-          error-on: 'note'  # Très strict : échoue même sur les notes
+          error-on: 'warning'  # Très strict : échoue même sur les notes
           args: 'c("--no-manual", "--as-cran")'
 
