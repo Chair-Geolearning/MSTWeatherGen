@@ -1,4 +1,4 @@
-name: R
+name: R CMD Package check fast
 run-name: R CMD Package check fast
 
 on:
