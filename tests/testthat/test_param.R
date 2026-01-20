@@ -7,7 +7,7 @@ names <- c("Precipitation", "Wind", "Temp_max")
 ep <- generate_variable_index_pairs(names)
 
 
-par_all_TEST <- readRDS("saved_results/par_all_TEST.rds")
+par_all_TEST <- par_all_TEST.rds
 names <- c("Precipitation", "Wind", "Temp_max")
 
 # ------------ TESTS --------------

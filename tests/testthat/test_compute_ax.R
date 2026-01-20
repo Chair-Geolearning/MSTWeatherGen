@@ -14,7 +14,6 @@ Ns <- dim(data)[2]
 Nv <- dim(data)[3]
 
 # Parameters
-resultperm <- readRDS("saved_results/resultperm2.rds")
 ax <- readRDS("saved_results/ax_file.rds")
 wt <- resultperm$cluster
 K <- length(unique(wt))

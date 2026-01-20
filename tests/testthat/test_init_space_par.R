@@ -55,7 +55,7 @@ h <- preprocessed_data$h
 result <- init_space_par(data, names, h, uh, max_it = 50)
 saveRDS(result, file = "pars.rds")'
 
-result <- readRDS("saved_results/pars.rds")
+result <- par_s
 # --- Tests ---
 
 # 0.

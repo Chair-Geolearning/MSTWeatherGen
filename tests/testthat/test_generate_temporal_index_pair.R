@@ -9,7 +9,6 @@ dates = seq(as.Date("2018-01-01"),as.Date("2021-12-31"), by="day")
 names = c("Precipitation", "Wind", "Temp_max")
 
 # Retrieve results:
-resultperm <- readRDS("saved_results/resultperm2.rds")
 
 # Parameters
 set.seed(1)
