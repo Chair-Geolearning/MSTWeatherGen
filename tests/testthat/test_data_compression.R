@@ -10,8 +10,8 @@ dates = seq(as.Date("2012-01-01"),as.Date("2022-12-31"), by="day")
 
 #rescompressed <- data_compression(data)
 #saveRDS(rescompressed, file = "data_compressed.rds")
-rescompressed <- readRDS("saved_results/data_compressed.rds")
-R_TEST_ALL <-  as.logical(Sys.getenv("R_TEST_ALL"))
+rescompressed <- readRDS(testthat::test_path("saved_results/data_compressed.rds"))
+R_TEST_ALL <-  Sys.getenv("R_TEST_ALL") == 'TRUE'
 
 # 0. 
 test_that("The function returns a non-empty matrix", {
