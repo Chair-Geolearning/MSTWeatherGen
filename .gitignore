@@ -2,7 +2,7 @@
 .Rhistory
 .RData
 .Ruserdata
-^docs$
+docs/
 *.Rcheck
 *.tar.gz
 MSTWeatherGen.code-workspace

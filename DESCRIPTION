@@ -26,7 +26,7 @@ Maintainer: Jean-François Rey <jean-francois.rey@inrae.fr>
 Description: Multivariate and Space-Time Weather Generator package is designed for the simulation of multivariate spatio-temporal meteorological variables. It provides tools for estimating the model parameters and generating synthetic weather data that can be used for a variety of applications, including climate research, agricultural or hydrological modeling.  
 License: GPL (>=3) | file LICENSE
 URL: https://github.com/Chair-Geolearning/MSTWeatherGen,
-     http://chair-Geolearning.github.io/MSTWeatherGen
+     https://chair-Geolearning.github.io/MSTWeatherGen
 BugReports: https://github.com/Chair-Geolearning/MSTWeatherGen/issues
 Depends: R (>= 4.0.0)
 Imports: 
