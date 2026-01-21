@@ -7,11 +7,9 @@ names <- c("Precipitation", "Wind", "Temp_max")
 ep <- generate_variable_index_pairs(names)
 
 # Parameters
-par_s <- readRDS(testthat::test_path("saved_results/pars.rds"))
 par_s <- do.call(cbind, par_s)
 variable = 'Wind'
 pairs <- c("Wind-Wind", "Wind-Temp", "Temp-Temp")
-par_all_TEST.rds <- readRDS(testthat::test_path("saved_results/par_all_TEST.rds"))
 parm <- param(par_all_TEST.rds, names)
 
 
