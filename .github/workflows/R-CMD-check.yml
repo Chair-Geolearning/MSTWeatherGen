@@ -17,7 +17,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        r-version: ['4.1.1', '4.3.0']
+        r-version: ['4.0.0']
         
     runs-on: ${{ matrix.os }}
     
