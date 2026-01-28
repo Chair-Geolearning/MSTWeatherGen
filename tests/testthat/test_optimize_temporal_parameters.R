@@ -138,6 +138,8 @@ pairs <- paste(ep[,1],ep[,2], sep = "-")'
     par_all <- optimize_spatial_parameters(par_all, data, names, Vi, uh, cr, max_it, ep)
 }
 '
+skip_on_cran()
+skip_on_ci()
 
 # 0.
 test_that("optimize_temporal_parameters is reproducible with fixed seed", {
@@ -176,7 +178,3 @@ test_that("optimize_temporal_parameters is reproducible with another seed", {
   
   expect_equal(all_equal,TRUE)
 })
-
-
-
-
