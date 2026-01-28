@@ -24,8 +24,6 @@ cr <- readRDS(testthat::test_path("saved_results/cr.rds"))
 ep <- readRDS(testthat::test_path("saved_results/ep.rds"))
 max_it <- 50
 
-par_all <- optimize_spatial_parameters(par_all, data, names, Vi, uh[uh[,1]==0,], cr, max_it, ep)
-
 # TO reproduce results
 'filtered = filter_season_data(data, dates, s1, names)
 data = filtered$data_filtered
@@ -159,7 +157,7 @@ test_that("optimize_spatial_parameters is reproducible with fixed seed", {
 })
 
 # 1.
-test_that("init_space_par is reproducible with another seed", {
+test_that("optimize_spatial_parameters is reproducible with another seed", {
   n_replications <- 50
   seed_value <- 123
   
