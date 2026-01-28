@@ -69,7 +69,6 @@ result <- readRDS(testthat::test_path("saved_results/pars.rds"))
 
 # 0.
 test_that("init_space_par works and optimisation has worked effectively", {
-  
   expect_equal(length(result), length(names))
   
   for (res in result) {
@@ -82,7 +81,6 @@ test_that("init_space_par works and optimisation has worked effectively", {
 test_that("init_space_par is reproducible with fixed seed", {
   skip_on_cran()
   skip_on_ci()
-  
   n_replications <- 50
   seed_value <- 1243
   
@@ -92,7 +90,6 @@ test_that("init_space_par is reproducible with fixed seed", {
   })
   
   reference_result <- results[[1]]
-  
   all_equal <- all(sapply(2:n_replications, function(i) {
     identical(results[[1]], results[[i]])
   }))
@@ -104,7 +101,6 @@ test_that("init_space_par is reproducible with fixed seed", {
 test_that("init_space_par is reproducible with another seed", {
   skip_on_cran()
   skip_on_ci()
-  
   n_replications <- 50
   seed_value <- 123
   
@@ -125,15 +121,8 @@ test_that("init_space_par is reproducible with another seed", {
 
 # 3.
 test_that("init_space_par is different when iterations are differents", {
-  
-  
   resultsb1 <- init_space_par(data, names, h, uh, max_it = 50)
   resultsb2 <- init_space_par(data, names, h, uh, max_it = 55)
   
   expect_equal(identical(resultsb1,resultsb2),FALSE)
 })
-
-
-
-
-
