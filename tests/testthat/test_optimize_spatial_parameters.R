@@ -19,7 +19,6 @@ s1 = list(min_day = 1, max_day = 29, min_month = 12, max_month = 2)
 par_all <-  readRDS(testthat::test_path("saved_results/par_all.rds"))
 Vi <-  readRDS(testthat::test_path("saved_results/Vi.rds"))
 uh <-  readRDS(testthat::test_path("saved_results/uh.rds"))
-uh <- uh[uh[,1]==0,]
 cr <- readRDS(testthat::test_path("saved_results/cr.rds"))
 ep <- readRDS(testthat::test_path("saved_results/ep.rds"))
 max_it <- 50
@@ -129,16 +128,32 @@ pairs <- paste(ep[,1],ep[,2], sep = "-")'
 #saveRDS(ep,'ep.rds')
 
 
-'for (v in 1:2) {
-    # Optimize temporal parameters
-    par_all <- optimize_temporal_parameters(par_all, data, names, Vi, uh, cr, max_it, ep)
-    # Optimize spatial parameters
-    par_all <- optimize_spatial_parameters(par_all, data, names, Vi, uh, cr, max_it, ep)
-}
-'
 skip_on_cran()
 skip_on_ci()
 # 0.
+test_that("The function returns something non null", {
+  
+  result <- optimize_spatial_parameters(par_all, data, names, Vi, uh[uh[,1]==0,], cr, max_it, ep)
+  expect_true(!is.null(result))
+})
+
+# 1.
+test_that("The optimization works", {
+
+  expect_no_error(
+    optimize_spatial_parameters(par_all, data, names, Vi, uh[uh[,1]==0,], cr, max_it, ep)
+  )
+})
+
+# 2.
+test_that("The functions returns a vector", {
+  
+  result <- optimize_spatial_parameters(par_all, data, names, Vi, uh[uh[,1]==0,], cr, max_it, ep)
+  
+  expect_true(is.vector(result))
+})
+
+# 3.
 test_that("optimize_spatial_parameters is reproducible with fixed seed", {
   n_replications <- 50
   seed_value <- 1243
@@ -157,7 +172,7 @@ test_that("optimize_spatial_parameters is reproducible with fixed seed", {
   expect_equal(all_equal,TRUE)
 })
 
-# 1.
+# 4.
 test_that("optimize_spatial_parameters is reproducible with another seed", {
   n_replications <- 50
   seed_value <- 123

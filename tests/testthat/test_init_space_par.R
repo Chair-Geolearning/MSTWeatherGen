@@ -29,9 +29,9 @@ tmax <- 1
 max_it <- 100
 
 # Generate spatial, temporal, and variable index pairs
-wt = weather_types(data = data, variables = names_weather_types, dates = dates,coordinates =  coordinates,
-                   max_number_wt = 6, return_plots = F)
-wt = wt$cluster # extract weather types 
+#wt = weather_types(data = data, variables = names_weather_types, dates = dates,coordinates =  coordinates,
+#max_number_wt = 6, return_plots = F)
+#wt = wt$cluster # extract weather types 
 
 #saveRDS(wt,'wt_cluster.rds')
 wt <- readRDS(testthat::test_path("saved_results/wt_cluster.rds"))
@@ -76,6 +76,7 @@ test_that("init_space_par works and optimisation has worked effectively", {
     expect_equal(length(res), 2)
   }
 })
+
 
 # 1.
 test_that("init_space_par is reproducible with fixed seed", {
