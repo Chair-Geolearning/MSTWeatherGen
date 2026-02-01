@@ -45,3 +45,4 @@ VignetteBuilder: knitr, rmarkdown, maps
 Encoding: UTF-8
 RoxygenNote: 7.3.3
 LazyData: true
+Config/Needs/website: rmarkdown

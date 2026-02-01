@@ -1,0 +1,20 @@
+---
+title: "package-dependencies"
+---
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+```{r load-libraries}
+library(MSTWeatherGen)
+library(pkgnet)
+```
+```{r create-report, echo=FALSE}
+results <- CreatePackageReport('MSTWeatherGen')
+```
+
+```
+**[Consulter le rapport pkgnet complet](../pkgnet/pkgnet-report.html)**
+
