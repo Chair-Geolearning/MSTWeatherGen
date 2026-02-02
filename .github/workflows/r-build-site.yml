@@ -34,6 +34,13 @@ jobs:
           ls -alh
       - name: Build site
         run: Rscript -e 'pkgdown::build_site()'
+      - name: Check pkgnet report location
+        run: |
+          echo "=== Contenu du dossier docs ==="
+          ls -R docs/
+          echo ""
+          echo "=== Recherche de fichiers pkgnet ==="
+          find docs/ -name "*pkgnet*" -o -name "*.html" | grep -i pkgnet || echo "Aucun fichier pkgnet trouvé"
 
       - name: Upload pkgdown site artifact
         uses: actions/upload-artifact@v4
