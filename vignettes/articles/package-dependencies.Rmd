@@ -16,8 +16,8 @@ output_dir <- file.path("docs", "articles", "pkgnet")
 if (!dir.exists(output_dir)) {
   dir.create(output_dir, recursive = TRUE)
 }
-
-results <- CreatePackageReport('MSTWeatherGen',report_path = output_dir)
+report_file <- file.path(output_dir, "pkgnet-report.html")
+results <- CreatePackageReport('MSTWeatherGen',report_path = report_file)
 ```
 
 ```
