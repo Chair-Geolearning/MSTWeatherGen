@@ -89,14 +89,12 @@ setCores <- function(n = NULL) {
   total_cores <- parallel::detectCores()
   
   if (is.null(n)) {
-    # Par défaut : total - 2, minimum 1
     .pkgenv$nbcores <- max(1, total_cores - 2)
     packageStartupMessage("Number of cores set to ", .pkgenv$nbcores, 
                           " (total: ", total_cores, ", reserved: 2)")
     packageStartupMessage("To change manually the number of cores, use: setCores(n)")
-    packageStartupMessage("To check available cores, use: getCores()")
+    packageStartupMessage("To check how many cores you are using, use: getCores()")
   } else {
-    # Validation
     if (!is.numeric(n) || n < 1) {
       stop("Number of cores must be at least 1")
     }
