@@ -76,6 +76,8 @@ getInfo <- function() {
     packageStartupMessage("Version: ", appendLF = FALSE)
     packageStartupMessage(utils::packageVersion("MSTWeatherGen"))
     packageStartupMessage("License: GPL (>= 3)")
+    packageStartupMessage(paste0("Your computer has ", parallel::detectCores()," cores"))
+    
 }
 
 # @title Things to do at package attach
@@ -86,5 +88,7 @@ getInfo <- function() {
 # @description Print package information and check dependencies
 .onAttach <- function(libname, pkgname) {
     getInfo()
+    nbcores <- parallel::detectCores()
+
 }
 
