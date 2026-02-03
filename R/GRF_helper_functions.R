@@ -163,7 +163,8 @@ init_space_par <- function(data, names, h, uh, max_it = 2000) {
   #   the set of parameters optimized for one of the variables specified in 'names'.
   
   # Perform parallel optimization for each variable using mclapply
-
+  ncores <- getCores()
+  
   par = parallel::mclapply(names, function(v) {
     optim(
       par = c(1, 1),  # Initial parameter guesses
@@ -174,7 +175,7 @@ init_space_par <- function(data, names, h, uh, max_it = 2000) {
       uh = uh,
       control = list(maxit = max_it, trace = 2)  # Optimization control settings
     )$par  # Extract the optimized parameters
-  }, mc.cores = 1)
+  }, mc.cores = ncores, mc.set.seed = FALSE )
   return(par)
 }
 #' Optimize Spatial Parameters for Variable Pairs
