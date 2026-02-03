@@ -67,17 +67,53 @@
 #'
 "_PACKAGE"
 
-# @title Print package information
-# @name getInfo
-# @description Displays some information about the package
-# @importFrom utils packageVersion
+.pkgenv <- new.env(parent = emptyenv())
+
 getInfo <- function() {
-    packageStartupMessage("Package: MSTWeatherGen | MST Weather Generator")
-    packageStartupMessage("Version: ", appendLF = FALSE)
-    packageStartupMessage(utils::packageVersion("MSTWeatherGen"))
-    packageStartupMessage("License: GPL (>= 3)")
-    packageStartupMessage(paste0("Your computer has ", parallel::detectCores()," cores"))
+  packageStartupMessage("Package: MSTWeatherGen | MST Weather Generator")
+  packageStartupMessage("Version: ", appendLF = FALSE)
+  packageStartupMessage(utils::packageVersion("MSTWeatherGen"))
+  packageStartupMessage("License: GPL (>= 3)")
+  total <- parallel::detectCores()
+  packageStartupMessage(paste0("Your computer has ", total," cores"))
+}
+
+getCores <- function() {
+  if (is.null(.pkgenv$nbcores)) {
+    setCores()
+  }
+  return(.pkgenv$nbcores)
+}
+
+setCores <- function(n = NULL) {
+  total_cores <- parallel::detectCores()
+  
+  if (is.null(n)) {
+    # Par défaut : total - 2, minimum 1
+    .pkgenv$nbcores <- max(1, total_cores - 2)
+    packageStartupMessage("Number of cores set to ", .pkgenv$nbcores, 
+                          " (total: ", total_cores, ", reserved: 2)")
+    packageStartupMessage("To change manually the number of cores, use: setCores(n)")
+    packageStartupMessage("To check available cores, use: getCores()")
+  } else {
+    # Validation
+    if (!is.numeric(n) || n < 1) {
+      stop("Number of cores must be at least 1")
+    }
     
+    n <- max(1, as.integer(n))
+    
+    if (n > total_cores) {
+      warning("Requested ", n, " cores but only ", total_cores, 
+              " available. Setting to ", total_cores)
+      n <- total_cores
+    }
+    
+    .pkgenv$nbcores <- n
+    message("Number of cores manually set to ", .pkgenv$nbcores, " out of ", total_cores, " available")
+  }
+  
+  invisible(.pkgenv$nbcores)
 }
 
 # @title Things to do at package attach
@@ -88,7 +124,7 @@ getInfo <- function() {
 # @description Print package information and check dependencies
 .onAttach <- function(libname, pkgname) {
     getInfo()
-    nbcores <- parallel::detectCores()
+    setCores()
 
 }
 
