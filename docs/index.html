@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="index.html">MSTWeatherGen</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.0.9999</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.1.9999</span>
       </span>
     </div>
 
@@ -45,10 +45,22 @@
 <li>
   <a href="reference/index.html">Reference</a>
 </li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    Articles
+
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+<li>
+      <a href="articles/package-dependencies.html">package-dependencies</a>
+    </li>
+  </ul>
+</li>
       </ul>
 <ul class="nav navbar-nav navbar-right">
 <li>
-  <a href="https://github.com/sobakrim/MSTWeatherGen">
+  <a href="https://chair-geolearning.github.io/MSTWeatherGen/" class="external-link">
     <span class="fa fa-brands fa-github"></span>
 
   </a>
@@ -84,15 +96,20 @@ Obakrim, S. <em>et al.</em> “A multivariate and space-time stochastic weather
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
-<p>You can install <a href="https://github.com/Chair-Geolearning/MSTWeatherGen" class="external-link">MSTWeatherGen</a> from GitHub as follows:</p>
+<p>You can install <a href="https://github.com/Chair-Geolearning/MSTWeatherGen">MSTWeatherGen</a> from GitHub as follows:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># install.packages("remotes")</span></span>
-<span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"sobakrim/MSTWeatherGen"</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"Chair-Geolearning/MSTWeatherGen"</span><span class="op">)</span></span></code></pre></div>
+<div class="section level3">
+<h3 id="development">Development<a class="anchor" aria-label="anchor" href="#development"></a>
+</h3>
+<p>Active all unit tests set “R_TEST_ALL” global variable to TRUE.</p>
+</div>
 </div>
 <div class="section level2">
 <h2 id="getting-started">Getting Started<a class="anchor" aria-label="anchor" href="#getting-started"></a>
 </h2>
-<p>To learn how to use the <a href="https://github.com/Chair-Geolearning/MSTWeatherGen" class="external-link">MSTWeatherGen</a> package, please refer to the detailed vignette available <a href="https://sobakrim.github.io/MSTWeatherGen/articles/MSTWeatherGen.html" class="external-link">here</a>.</p>
+<p>To learn how to use the <a href="https://github.com/Chair-Geolearning/MSTWeatherGen">MSTWeatherGen</a> package, please refer to the detailed vignette available <a href="https://sobakrim.github.io/MSTWeatherGen/articles/MSTWeatherGen.html" class="external-link">here</a>.</p>
 </div>
 <div class="section level2">
 <h2 id="funding">Funding<a class="anchor" aria-label="anchor" href="#funding"></a>
@@ -105,8 +122,9 @@ See <a href="LICENSE">LICENSE</a> file.</p>
 <h2 id="authors">Authors<a class="anchor" aria-label="anchor" href="#authors"></a>
 </h2>
 <ul>
-<li>Said Obakrim (Author and Maintainer))</li>
-<li>Jean-François Rey (Author)</li>
+<li>Ahmed Boualam (Author)</li>
+<li>Said Obakrim (Author)</li>
+<li>Jean-François Rey (Maintainer)</li>
 </ul>
 </div>
 <div class="section level2">
@@ -124,8 +142,8 @@ See <a href="LICENSE">LICENSE</a> file.</p>
     <div class="links">
 <h2 data-toc-skip>Links</h2>
 <ul class="list-unstyled">
-<li><a href="https://github.com/Chair-Geolearning/MSTWeatherGen/" class="external-link">Browse source code</a></li>
-<li><a href="https://github.com/Chair-Geolearning/MSTWeatherGen/issues" class="external-link">Report a bug</a></li>
+<li><a href="https://github.com/Chair-Geolearning/MSTWeatherGen/">Browse source code</a></li>
+<li><a href="https://github.com/Chair-Geolearning/MSTWeatherGen/issues">Report a bug</a></li>
 </ul>
 </div>
 
@@ -160,7 +178,7 @@ See <a href="LICENSE">LICENSE</a> file.</p>
 <div class="dev-status">
 <h2 data-toc-skip>Dev status</h2>
 <ul class="list-unstyled">
-<li><a href="https://github.com/sobakrim/MSTWeatherGen/actions/workflows/r-package-check.yml"><img src="https://github.com/sobakrim/MSTWeatherGen/actions/workflows/r-package-check.yml/badge.svg" alt="R-CMD-check"></a></li>
+<li><a href="https://github.com/Chair-Geolearning/MSTWeatherGen/actions/workflows/r-package-check.yml"><img src="https://github.com/Chair-Geolearning/MSTWeatherGen/actions/workflows/r-package-check.yml/badge.svg" alt="R-CMD-check"></a></li>
 <li><a href="https://cran.r-project.org/package=MSTWeatherGen" class="external-link"><img src="https://www.r-pkg.org/badges/version/MSTWeatherGen" alt="CRAN_Status_Badge"></a></li>
 </ul>
 </div>

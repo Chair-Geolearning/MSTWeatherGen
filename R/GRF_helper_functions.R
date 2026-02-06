@@ -155,7 +155,7 @@ init_space_par <- function(data, names, h, uh, max_it = 2000) {
   #   h: Vector of spatial distances used in the likelihood function.
   #   uh: Matrix containing combined spatial and temporal distances, along with additional data,
   #       used in the likelihood function.
-  #   mpar: A list or vector of model parameters that are held fixed during the optimization process.
+  #   par: A list or vector of model parameters that are held fixed during the optimization process.
   #   max_it: Maximum number of iterations for the optimization process. Default is 2000.
   
   # Returns:
@@ -163,6 +163,7 @@ init_space_par <- function(data, names, h, uh, max_it = 2000) {
   #   the set of parameters optimized for one of the variables specified in 'names'.
   
   # Perform parallel optimization for each variable using mclapply
+
   par = parallel::mclapply(names, function(v) {
     optim(
       par = c(1, 1),  # Initial parameter guesses
@@ -174,7 +175,6 @@ init_space_par <- function(data, names, h, uh, max_it = 2000) {
       control = list(maxit = max_it, trace = 2)  # Optimization control settings
     )$par  # Extract the optimized parameters
   }, mc.cores = 1)
-  
   return(par)
 }
 #' Optimize Spatial Parameters for Variable Pairs

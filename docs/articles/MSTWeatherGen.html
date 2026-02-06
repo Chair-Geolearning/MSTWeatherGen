@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">MSTWeatherGen</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.0.9999</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.1.9999</span>
       </span>
     </div>
 
@@ -45,10 +45,22 @@
 <li>
   <a href="../reference/index.html">Reference</a>
 </li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    Articles
+
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+<li>
+      <a href="../articles/package-dependencies.html">package-dependencies</a>
+    </li>
+  </ul>
+</li>
       </ul>
 <ul class="nav navbar-nav navbar-right">
 <li>
-  <a href="https://github.com/sobakrim/MSTWeatherGen">
+  <a href="https://chair-geolearning.github.io/MSTWeatherGen/" class="external-link">
     <span class="fa fa-brands fa-github"></span>
 
   </a>
@@ -68,9 +80,9 @@
     <div class="page-header toc-ignore">
       <h1 data-toc-skip>Running a simple simulation</h1>
             
-            <h4 data-toc-skip class="date">2026-01-07</h4>
+            <h4 data-toc-skip class="date">2026-02-06</h4>
       
-      <small class="dont-index">Source: <a href="https://github.com/Chair-Geolearning/MSTWeatherGen/blob/main/vignettes/MSTWeatherGen.Rmd" class="external-link"><code>vignettes/MSTWeatherGen.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/Chair-Geolearning/MSTWeatherGen/blob/v0.1.1.9999/vignettes/MSTWeatherGen.Rmd"><code>vignettes/MSTWeatherGen.Rmd</code></a></small>
       <div class="hidden name"><code>MSTWeatherGen.Rmd</code></div>
 
     </div>
@@ -93,7 +105,8 @@ of the methods considered.</p>
 </h2>
 <p>First, let’s load the <code>MSTWeatherGen</code> package.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/Chair-Geolearning/MSTWeatherGen" class="external-link">MSTWeatherGen</a></span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/Chair-Geolearning/MSTWeatherGen">MSTWeatherGen</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://magrittr.tidyverse.org" class="external-link">magrittr</a></span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="data">Data<a class="anchor" aria-label="anchor" href="#data"></a>
@@ -186,7 +199,7 @@ parameters using <code>MSTWeatherGen_Estim</code> function.</p>
 <span><span class="co">#&gt;  ---Final iteration---  1 </span></span>
 <span><span class="co">#&gt;  --Singular Value--  144.612  -- Local Percent --  56.13031 % </span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  -----Execution Time----- 3.17 </span></span>
+<span><span class="co">#&gt;  -----Execution Time----- 3.053 </span></span>
 <span><span class="co">#&gt;   Nelder-Mead direct search function minimizer</span></span>
 <span><span class="co">#&gt; function value for initial parameters = 137.498584</span></span>
 <span><span class="co">#&gt;   Scaled convergence tolerance is 2.04889e-06</span></span>
@@ -959,7 +972,7 @@ parameters using <code>MSTWeatherGen_Estim</code> function.</p>
 <span><span class="co">#&gt;  ---Final iteration---  2 </span></span>
 <span><span class="co">#&gt;  --Singular Value--  134.1718  -- Local Percent --  54.84311 % </span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  -----Execution Time----- 3.938 </span></span>
+<span><span class="co">#&gt;  -----Execution Time----- 3.706 </span></span>
 <span><span class="co">#&gt;   Nelder-Mead direct search function minimizer</span></span>
 <span><span class="co">#&gt; function value for initial parameters = 165.381007</span></span>
 <span><span class="co">#&gt;   Scaled convergence tolerance is 2.46437e-06</span></span>
@@ -1727,7 +1740,7 @@ parameters using <code>MSTWeatherGen_Estim</code> function.</p>
 <span><span class="co">#&gt;  </span></span>
 <span><span class="co">#&gt;   ++ Last 3-modes vs &lt;  0.1 % stopping this level and under ++ </span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  -----Execution Time----- 2.954 </span></span>
+<span><span class="co">#&gt;  -----Execution Time----- 2.918 </span></span>
 <span><span class="co">#&gt;   Nelder-Mead direct search function minimizer</span></span>
 <span><span class="co">#&gt; function value for initial parameters = 545.984032</span></span>
 <span><span class="co">#&gt;   Scaled convergence tolerance is 8.1358e-06</span></span>
@@ -2068,7 +2081,7 @@ parameters using <code>MSTWeatherGen_Estim</code> function.</p>
 <span><span class="co">#&gt;  </span></span>
 <span><span class="co">#&gt;   ++ Last 3-modes vs &lt;  0.1 % stopping this level and under ++ </span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  -----Execution Time----- 2.872 </span></span>
+<span><span class="co">#&gt;  -----Execution Time----- 2.799 </span></span>
 <span><span class="co">#&gt;   Nelder-Mead direct search function minimizer</span></span>
 <span><span class="co">#&gt; function value for initial parameters = 58.203157</span></span>
 <span><span class="co">#&gt;   Scaled convergence tolerance is 8.67295e-07</span></span>

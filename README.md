@@ -1,7 +1,7 @@
 # MSTWeatherGen <img src="man/figures/MSTWeatherGen.png" align="right" alt="" width="120" />
 
 <!-- badges: start -->
-[![R-CMD-check](https://github.com/sobakrim/MSTWeatherGen/actions/workflows/r-package-check.yml/badge.svg)](https://github.com/sobakrim/MSTWeatherGen/actions/workflows/r-package-check.yml) 
+[![R-CMD-check](https://github.com/Chair-Geolearning/MSTWeatherGen/actions/workflows/r-package-check.yml/badge.svg)](https://github.com/Chair-Geolearning/MSTWeatherGen/actions/workflows/r-package-check.yml) 
 [![CRAN_Status_Badge](https://www.r-pkg.org/badges/version/MSTWeatherGen)](https://cran.r-project.org/package=MSTWeatherGen)
 <!-- badges: end -->
 
@@ -24,8 +24,12 @@ For more details on the methodology, see the publication:
 You can install `{MSTWeatherGen}` from GitHub as follows:
 ```r
 # install.packages("remotes")
-remotes::install_github("sobakrim/MSTWeatherGen")
+remotes::install_github("Chair-Geolearning/MSTWeatherGen")
 ```
+
+### Development
+
+Active all unit tests set "R_TEST_ALL" global variable to TRUE.
 
 ## Getting Started
 
@@ -40,8 +44,9 @@ See [LICENSE](LICENSE) file.
 
 ## Authors
 
-- Said Obakrim  (Author and Maintainer))
-- Jean-François Rey (Author)
+- Ahmed Boualam (Author)
+- Said Obakrim  (Author)
+- Jean-François Rey (Maintainer)
 
 ## Contributors
 
