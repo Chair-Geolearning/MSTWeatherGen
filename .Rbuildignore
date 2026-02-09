@@ -5,5 +5,4 @@
 ^docs$
 .Rcheck$
 ^\.Renviron$
-\.rds$
 .*\.code-workspace$

@@ -7,7 +7,7 @@ data("data", package = "MSTWeatherGen")
 data("coordinates", package = "MSTWeatherGen")
 names = c("Precipitation", "Wind", "Temp_max")
 dates = seq(as.Date("2012-01-01"),as.Date("2022-12-31"), by="day")
-R_TEST_ALL <-  as.logical(Sys.getenv("R_TEST_ALL")) == 'TRUE'
+R_TEST_ALL <-  as.logical(Sys.getenv("R_TEST_ALL"))
 
 # Parameters:
 
@@ -23,7 +23,6 @@ R_TEST_ALL <-  as.logical(Sys.getenv("R_TEST_ALL")) == 'TRUE'
 #  dir = tempdir()
 # )
 
-resultperm <- readRDS(testthat::test_path("saved_results/resultperm2.rds"))
 n_wt <- 3
 
 'result <- weather_types(
@@ -37,7 +36,6 @@ n_wt <- 3
   dir = tempdir()
 )'
 
-result <- readRDS(testthat::test_path("saved_results/result_wt.rds"))
 
 # 0. 
 test_that("weather_types returns a cluster vector and works even if return_plots = FALSE", {
