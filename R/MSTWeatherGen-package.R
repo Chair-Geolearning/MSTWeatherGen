@@ -69,6 +69,12 @@
 
 .pkgenv <- new.env(parent = emptyenv())
 
+#' Title
+#'
+#' @returns
+#' @export
+#'
+#' @examples
 getInfo <- function() {
   packageStartupMessage("Package: MSTWeatherGen | MST Weather Generator")
   packageStartupMessage("Version: ", appendLF = FALSE)
@@ -85,6 +91,14 @@ getCores <- function() {
   return(.pkgenv$nbcores)
 }
 
+#' Title
+#'
+#' @param n 
+#'
+#' @returns
+#' @export
+#'
+#' @examples
 setCores <- function(n = NULL) {
   total_cores <- parallel::detectCores()
   
