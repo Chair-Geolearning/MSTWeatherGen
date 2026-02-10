@@ -69,12 +69,13 @@
 
 .pkgenv <- new.env(parent = emptyenv())
 
-#' Title
+#' @title Get Package and System Information
 #'
-#' @returns
-#' @export
-#'
-#' @examples
+#' @description Displays information about the MSTWeatherGen package and system configuration.
+#' This includes the package name, version, license, and the number of CPU cores 
+#' available on your computer.
+#' @seealso [setCores()], [getCores()] for configuring parallel processing cores.
+#' 
 getInfo <- function() {
   packageStartupMessage("Package: MSTWeatherGen | MST Weather Generator")
   packageStartupMessage("Version: ", appendLF = FALSE)
@@ -84,6 +85,13 @@ getInfo <- function() {
   packageStartupMessage(paste0("Your computer has ", total," cores"))
 }
 
+#' @title Get the information of number of Cores for Parallel Processing for the user.
+#' @description Retrieves the current number of cores configured for parallel computations.
+#' If no cores have been set yet, it automatically initializes them by calling 
+#' setCores().
+#' @return Integer. The number of cores currently configured for parallel processing.
+#' @seealso setCores() to configure the number of cores.
+#' 
 getCores <- function() {
   if (is.null(.pkgenv$nbcores)) {
     setCores()
@@ -91,16 +99,26 @@ getCores <- function() {
   return(.pkgenv$nbcores)
 }
 
-#' Title
-#'
-#' @param n 
-#'
-#' @returns
-#' @export
-#'
-#' @examples
+#' @title Set Number of Cores for Parallel Processing
+#' @description Function to set automatically or manually the number of cores
+#' It sets automatically the numbers of core as follows : nb_of_cores available - 2
+#' To change manually you need to call it and put the 
+#' @param n The number of cores to use. If  NULL (default), 
+#' automatically sets to total_cores - 2 (minimum 1). If specified, 
+#' must be at least 1 and will be capped by the maximum which will be at the total number of 
+#' available cores.
+#' @examples 
+#' #Automatic setting setCores()
+#' #Manual setting to 4 cores : setCores(4)
+#' @return Number of cores set (invisible)
+
 setCores <- function(n = NULL) {
   total_cores <- parallel::detectCores()
+  
+  if (is.na(total_cores)) {
+    warning("Could not detect cores. Defaulting to 1 core.")
+    total_cores <- 1
+  }
   
   if (is.null(n)) {
     .pkgenv$nbcores <- max(1, total_cores - 2)
@@ -112,8 +130,8 @@ setCores <- function(n = NULL) {
     if (!is.numeric(n) || n < 1) {
       stop("Number of cores must be at least 1")
     }
-    
-    n <- max(1, as.integer(n))
+
+    n  <- max(1, as.integer(n))
     
     if (n > total_cores) {
       warning("Requested ", n, " cores but only ", total_cores, 
@@ -127,13 +145,13 @@ setCores <- function(n = NULL) {
   
   invisible(.pkgenv$nbcores)
 }
-
-# @title Things to do at package attach
-# @name .onAttach
-# @param libname a character string giving the library directory where
-#  the package defining the namespace was found.
-# @param pkgname a character string giving the name of the package.
-# @description Print package information and check dependencies
+  
+#' @title Things to do at package attach
+#' @name .onAttach
+#' @param libname a character string giving the library directory where
+#'  the package defining the namespace was found.
+#' @param pkgname a character string giving the name of the package.
+#' @description Print package information and check dependencies
 .onAttach <- function(libname, pkgname) {
     getInfo()
     setCores()
