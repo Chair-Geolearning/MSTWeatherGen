@@ -452,55 +452,58 @@ loglik <- function(par, parms, par_all, data, names, Vi, h, u, uh, ep, cr) {
     u = uh[,1]
     h = uh[,2]
     
-    # Parallel computation of log-likelihood for each pair using mclapply (if multicore is intended, else lapply).
-    ll = parallel::mclapply(1:nrow(Vi), function(v) {
-      # Initialize log-likelihood components for the current pair.
-      l1 = l2 = l3 = l4 = 0
-      par = parmm[[v]]  # Parameters for the current pair.
-      # Validate parameter constraints; return a large penalty if violated.
-      if (any(par[c(1:25)] < 0) | any(par[c(7:21)] > 1)) {
-        return(-abs(rnorm(1)) * 1e+20)
-      } else {
-        # Calculate pairwise log-likelihood using Gneiting function and parameter adjustments.
-        cij = Gneiting(h = h, u = u, par = par, dij = beta[Vi[v,1], Vi[v,2]])
-        delta = 1 - cij^2
-        v1 = data[,,Vi[v,1]]; v1 = v1[cbind(uh[,3], uh[,5])]
-        v2 = data[,,Vi[v,2]]; v2 = v2[cbind(uh[,4], uh[,6])]
-        dz = !(h == 0 & u == 0 & Vi[v,1] == Vi[v,2])
-        cij = cij[dz]; delta = delta[dz]; v1 = v1[dz]; v2 = v2[dz]; uh = uh[dz,]
-        
-        # Detailed computations for log-likelihood components based on variable presence and types.
-        id1 = (v1 == 0)&(!v2 == 0)&( Vi[v,1]=="Precipitation"); id2 = (!v1 == 0)&(v2 == 0)&( Vi[v,2]=="Precipitation")
-        id4 = (!v1 == 0)&(!v2 == 0) ; id3 = (v1 == 0)&(v2 == 0)&( Vi[v,1]=="Precipitation")&( Vi[v,2]=="Precipitation")
-        uh[,8][which(uh[,8]==-Inf)] = -2.282295
-        uh[,7][which(uh[,7]==-Inf)] = -2.282295
-        
-        # l1: Case where the first variable is zero and the second is non-zero 
-        # where the first variable is "Precipitation"
-        if (!length(which(id1 == TRUE)) == 0) {
-          l1 = sum(log(pnorm((uh[id1, 7] - cij[id1] * v2[id1]) / sqrt(delta[id1]))))
+    ncores <- getCores()
+    if (.Platform$OS.type == "windows") {}
+    else {
+      # Parallel computation of log-likelihood for each pair using mclapply (if multicore is intended, else lapply).
+      ll = parallel::mclapply(1:nrow(Vi), function(v) {
+        # Initialize log-likelihood components for the current pair.
+        l1 = l2 = l3 = l4 = 0
+        par = parmm[[v]]  # Parameters for the current pair.
+        # Validate parameter constraints; return a large penalty if violated.
+        if (any(par[c(1:25)] < 0) | any(par[c(7:21)] > 1)) {
+          return(-abs(rnorm(1)) * 1e+20)
+        } else {
+          # Calculate pairwise log-likelihood using Gneiting function and parameter adjustments.
+          cij = Gneiting(h = h, u = u, par = par, dij = beta[Vi[v,1], Vi[v,2]])
+          delta = 1 - cij^2
+          v1 = data[,,Vi[v,1]]; v1 = v1[cbind(uh[,3], uh[,5])]
+          v2 = data[,,Vi[v,2]]; v2 = v2[cbind(uh[,4], uh[,6])]
+          dz = !(h == 0 & u == 0 & Vi[v,1] == Vi[v,2])
+          cij = cij[dz]; delta = delta[dz]; v1 = v1[dz]; v2 = v2[dz]; uh = uh[dz,]
+          
+          # Detailed computations for log-likelihood components based on variable presence and types.
+          id1 = (v1 == 0)&(!v2 == 0)&( Vi[v,1]=="Precipitation"); id2 = (!v1 == 0)&(v2 == 0)&( Vi[v,2]=="Precipitation")
+          id4 = (!v1 == 0)&(!v2 == 0) ; id3 = (v1 == 0)&(v2 == 0)&( Vi[v,1]=="Precipitation")&( Vi[v,2]=="Precipitation")
+          uh[,8][which(uh[,8]==-Inf)] = -2.282295
+          uh[,7][which(uh[,7]==-Inf)] = -2.282295
+          
+          # l1: Case where the first variable is zero and the second is non-zero 
+          # where the first variable is "Precipitation"
+          if (!length(which(id1 == TRUE)) == 0) {
+            l1 = sum(log(pnorm((uh[id1, 7] - cij[id1] * v2[id1]) / sqrt(delta[id1]))))
+          }
+          
+          # l2: Case where the first variable is non-zero and the second is zero
+          # where the second variable is "Precipitation"
+          if (!length(which(id2 == TRUE)) == 0) {
+            l2 = sum(log(pnorm((uh[id2, 8] - cij[id2] * v1[id2]) / sqrt(delta[id2]))))
+          }
+          
+          # l3: Case where both variables are zero and both are "Precipitation"
+          if (!length(which(id3 == TRUE)) == 0) {
+            l3 = sum(log(pbinorm(uh[id3, 7], uh[id3, 8], var1 = 1, var2 = 1, cov12 = cij[id3])))
+          }
+          
+          # l4: Case where both variables have non-zero values
+          if (!length(which(id4 == TRUE)) == 0) {
+            l4 = sum((-1 / 2) * (log(delta[id4]) + (v1[id4]^2 - (2 * cij[id4] * v1[id4] * v2[id4]) + v2[id4]^2) / delta[id4]))
+          }
+          
+          return(l1 + l2 + l3 + l4)
         }
-        
-        # l2: Case where the first variable is non-zero and the second is zero
-        # where the second variable is "Precipitation"
-        if (!length(which(id2 == TRUE)) == 0) {
-          l2 = sum(log(pnorm((uh[id2, 8] - cij[id2] * v1[id2]) / sqrt(delta[id2]))))
-        }
-        
-        # l3: Case where both variables are zero and both are "Precipitation"
-        if (!length(which(id3 == TRUE)) == 0) {
-          l3 = sum(log(pbinorm(uh[id3, 7], uh[id3, 8], var1 = 1, var2 = 1, cov12 = cij[id3])))
-        }
-        
-        # l4: Case where both variables have non-zero values
-        if (!length(which(id4 == TRUE)) == 0) {
-          l4 = sum((-1 / 2) * (log(delta[id4]) + (v1[id4]^2 - (2 * cij[id4] * v1[id4] * v2[id4]) + v2[id4]^2) / delta[id4]))
-        }
-        
-        return(l1 + l2 + l3 + l4)
-      }
-    }, mc.cores = 1)
-    
+      }, mc.cores = ncores, mc.set.seed = FALSE)
+    }
     # Sum and negate the log-likelihood contributions from all pairs.
     return(-sum(unlist(ll)))
   } else {
