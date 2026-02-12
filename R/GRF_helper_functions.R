@@ -164,14 +164,17 @@ init_space_par <- function(data, names, h, uh, max_it = 2000) {
   
   # Perform parallel optimization for each variable using mclapply
   ncores <- getCores()
+
   if (.Platform$OS.type == "windows") {
 
     cl <- parallel::makeCluster(ncores)
     on.exit(parallel::stopCluster(cl), add = TRUE)
     
     parallel::clusterExport(cl, c("loglik_spatial"), envir = environment())
+    parent_seed <- .Random.seed
     
     par <- parallel::parLapply(cl, names, function(v) {
+      assign(".Random.seed",parent_seed, envir = .GlobalEnv)
       optim(
         par = c(1, 1),
         fn = loglik_spatial,
