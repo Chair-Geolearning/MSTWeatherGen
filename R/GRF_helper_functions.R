@@ -187,7 +187,6 @@ init_space_par <- function(data, names, h, uh, max_it = 2000) {
     })
     
   } else {
-    print(.Platform$OS.type )
     # Fonctionne sur Linux/Mac :  mclapply     
     par <- parallel::mclapply(names, function(v) {
       optim(
