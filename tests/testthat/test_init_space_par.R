@@ -63,8 +63,7 @@ h <- preprocessed_data$h
 
 #saveRDS(result, file = "pars.rds")
 
-result <- readRDS(testthat::test_path("saved_results/pars.rds"))
-
+result <- par_s
 # --- Tests ---
 
 # 0.

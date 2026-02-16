@@ -1,6 +1,6 @@
 Package: MSTWeatherGen
 Title: Multivariate Space-Time Weather Generator
-Version: 0.1.0.9999
+Version: 0.1.1.9999
 Date: 2025-12-02
 Authors@R: c(
     person(given = "Said",
@@ -37,6 +37,7 @@ Suggests:
     knitr,
     magrittr,
     rmarkdown,
+    pkgnet,
     maps,
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
@@ -44,3 +45,4 @@ VignetteBuilder: knitr, rmarkdown, maps
 Encoding: UTF-8
 RoxygenNote: 7.3.3
 LazyData: true
+Config/Needs/website: rmarkdown

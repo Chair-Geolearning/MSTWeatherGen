@@ -1,5 +1,4 @@
 library(testthat)
-library(MSTWeatherGen)
 
 
 #1.

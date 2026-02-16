@@ -10,7 +10,6 @@ dates = seq(as.Date("2012-01-01"),as.Date("2022-12-31"), by="day")
 K <- 5
 
 # Retrieving results:
-resultperm <- readRDS(testthat::test_path("saved_results/resultperm2.rds"))
 wt <- resultperm$cluster
 
 # ----- Test of the sub-function estimtransition -----

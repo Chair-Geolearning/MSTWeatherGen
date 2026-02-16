@@ -9,7 +9,6 @@ dates = seq(as.Date("2018-01-01"),as.Date("2021-12-31"), by="day")
 names = c("Precipitation", "Wind", "Temp_max")
 
 # Retrieving results:
-resultperm <- readRDS(testthat::test_path("saved_results/resultperm2.rds"))
 set.seed(1)
 wt <- resultperm$cluster
 K <- length(unique(wt))

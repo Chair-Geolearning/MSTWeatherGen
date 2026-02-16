@@ -14,11 +14,10 @@ Ns <- dim(data)[2]
 Nv <- dim(data)[3]
 
 # Parameters
-resultperm <- readRDS(testthat::test_path("saved_results/resultperm2.rds"))
-ax <- readRDS(testthat::test_path("saved_results/ax_file.rds"))
+resultperm <- readRDS("saved_results/resultperm2.rds")
+ax <- ax_file
 wt <- resultperm$cluster
 K <- length(unique(wt))
-par_s <- readRDS(testthat::test_path("saved_results/pars.rds"))
 par_s <- do.call(cbind, par_s)
 ep <- generate_variable_index_pairs(names)
 pairs <- paste(ep[,1],ep[,2], sep = "-")

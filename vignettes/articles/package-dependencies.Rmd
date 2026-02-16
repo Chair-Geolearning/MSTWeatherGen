@@ -1,0 +1,32 @@
+---
+title: "package-dependencies"
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+```{r load-libraries}
+library(MSTWeatherGen)
+library(pkgnet)
+library(here)
+
+```
+```{r create-report, echo=FALSE}
+
+# Crée le dossier final dans docs/articles/pkgnet depuis la racine du projet
+output_dir <- here("docs", "articles", "pkgnet")
+dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
+
+# Chemin complet du fichier HTML
+report_path <- file.path(output_dir, "pkgnet-report.html")
+
+# Génération du rapport pkgnet
+results <- CreatePackageReport("MSTWeatherGen", report_path = report_path)
+
+```
+
+```
+**[Consulter le rapport pkgnet complet](../articles/pkgnet/pkgnet-report.html)**
