@@ -24,7 +24,6 @@ jobs:
           - {os: ubuntu-latest,  r: 'devel', http-user-agent: 'release'}
           - {os: ubuntu-latest,  r: 'release'}
           - {os: ubuntu-latest,  r: 'oldrel-1'}
-          - {os: ubuntu-latest,  r: 'oldrel-2'}
 
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
@@ -41,7 +40,8 @@ jobs:
           use-public-rspm: true
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          r-version: ${{ matrix.config.r }}
+          needs: check
+          cache: true
       - uses: r-lib/actions/check-r-package@v2
         with:
           args: 'c("--no-manual", "--no-build-vignettes","--ignore-vignettes")'
