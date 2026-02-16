@@ -1,6 +1,6 @@
 name: Release R package
 
-on: tags
+on: tag
 
 permissions:
   contents: write
