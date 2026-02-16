@@ -1,9 +1,6 @@
 name: Release R package
 
-on:
-  pull_request:
-    tags:
-      - 'release'
+on: tags
 
 permissions:
   contents: write
