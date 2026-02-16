@@ -456,7 +456,7 @@ loglik <- function(par, parms, par_all, data, names, Vi, h, u, uh, ep, cr) {
     if (.Platform$OS.type == "windows") {
       
 
-      ll = parallel::lapply(1:nrow(Vi), function(v) {
+      ll = lapply(1:nrow(Vi), function(v) {
         # Initialize log-likelihood components for the current pair.
         l1 = l2 = l3 = l4 = 0
         par = parmm[[v]]  # Parameters for the current pair.
