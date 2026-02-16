@@ -455,8 +455,8 @@ loglik <- function(par, parms, par_all, data, names, Vi, h, u, uh, ep, cr) {
     ncores <- getCores()
     if (.Platform$OS.type == "windows") {
       
-      # Parallel computation of log-likelihood for each pair using mclapply (if multicore is intended, else lapply).
-      ll = parallel::mclapply(1:nrow(Vi), function(v) {
+
+      ll = parallel::lapply(1:nrow(Vi), function(v) {
         # Initialize log-likelihood components for the current pair.
         l1 = l2 = l3 = l4 = 0
         par = parmm[[v]]  # Parameters for the current pair.
