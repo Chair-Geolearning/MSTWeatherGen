@@ -1,7 +1,7 @@
 Package: MSTWeatherGen
 Title: Multivariate Space-Time Weather Generator
-Version: 0.1.1.9999
-Date: 2025-12-02
+Version: 1.0.0
+Date: 2026-17-02
 Authors@R: c(
     person(given = "Said",
            family = "Obakrim",

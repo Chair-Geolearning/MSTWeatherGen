@@ -11,7 +11,7 @@ permissions:
 jobs:
 
   build:
-    name: Build source and Windows binary
+    name: Build package source and binary
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
@@ -19,12 +19,16 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+      - uses: r-lib/actions/setup-pandoc@v2
+      - uses: r-lib/actions/setup-tinytex@v2
       - uses: r-lib/actions/setup-r@v2
         with:
           r-version: release
+          use-public-rspm: true
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          needs: check
+          needs: install
+          cache: true
       - name: Build package source
         run: R CMD build .
       - name: Build package binary
