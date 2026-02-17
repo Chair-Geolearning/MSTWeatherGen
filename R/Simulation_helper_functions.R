@@ -90,7 +90,7 @@ calculate_AR_coefficients_matrices <- function(parm, coordinates, AR_lag){
     })
     return(bk)
   })
-  for(s in 1:length(parm$swg)){s
+  for(s in 1:length(parm$swg)){
     K = length(parm$swg[[s]]$gf_par)
     for(k in 1:K){
       j = k-1
