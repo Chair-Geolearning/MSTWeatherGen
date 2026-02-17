@@ -62,7 +62,9 @@ jobs:
           name: MSTWeatherGen_ubuntu-latest
       - name: Build package binary
         if: runner.os != 'Linux'
-        run: R CMD INSTALL --build **/*.tar.gz
+        run: |
+          pkg=$(ls *.tar.gz)
+          R CMD INSTALL --build "$pkg"
         shell: bash
 
       - uses: actions/upload-artifact@v4
