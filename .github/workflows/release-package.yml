@@ -30,10 +30,13 @@ jobs:
           needs: install
           cache: true
       - name: Build package source
+        if: runner.os == 'Linux'
         run: R CMD build .
+        shell: bash
       - name: Build package binary
         if: runner.os != 'Linux'
-        run: R CMD INSTALL --build *.tar.gz
+        run: R CMD INSTALL --build .
+        shell: bash
 
       - uses: actions/upload-artifact@v4
         with:
