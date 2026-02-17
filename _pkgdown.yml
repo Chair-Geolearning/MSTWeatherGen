@@ -1,4 +1,4 @@
-url: https://github.com/Chair-Geolearning/MSTWeatherGen
+url: https://chair-geolearning.github.io/MSTWeatherGen/
 template:
   bootstrap: 3
   bootswatch: cosmo
@@ -18,4 +18,4 @@ navbar:
   components:
     github:
       icon: fa-brands fa-github
-      href: https://chair-geolearning.github.io/MSTWeatherGen/
+      href: https://github.com/Chair-Geolearning/MSTWeatherGen
