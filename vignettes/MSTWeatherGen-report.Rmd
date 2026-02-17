@@ -13,8 +13,9 @@ editor_options:
 
 ```{r, echo=FALSE, results='hide', message=FALSE, warning=FALSE}
 library("pkgnet")
-# Crée le dossier final dans docs/articles/pkgnet depuis la racine du projet
-output_dir <- "../docs/articles/"
+# Crée le dossier final dans docs/articles depuis la racine du projet
+output_dir <- normalizePath(paste0(getwd(),"/docs/articles"))
+#output_dir <- "../docs/articles/"
 dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
 
 # Chemin complet du fichier HTML
