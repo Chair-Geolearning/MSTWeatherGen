@@ -29,13 +29,14 @@ jobs:
         with:
           needs: install
           cache: true
+          extra-packages: local::., any::pkgdown, any::pkgnet   
       - name: Build package source
-        if: runner.os == 'Linux'
+        #if: runner.os == 'Linux'
         run: R CMD build .
         shell: bash
       - name: Build package binary
         if: runner.os != 'Linux'
-        run: R CMD INSTALL --build .
+        run: R CMD INSTALL --build *.tar.gz
         shell: bash
 
       - uses: actions/upload-artifact@v4
