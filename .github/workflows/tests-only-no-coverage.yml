@@ -4,7 +4,8 @@ on:
   pull_request:
     branches: main
 
-name: tests only no coverage.
+name: tests only no coverage
+run-name: Tests
 
 permissions:
   contents: read

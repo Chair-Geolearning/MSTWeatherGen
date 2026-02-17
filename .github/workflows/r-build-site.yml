@@ -8,6 +8,7 @@ on:
   workflow_dispatch:
 
 name: pkgdown-build-site
+run-name: Package build website
 
 jobs:
   pkgdown:

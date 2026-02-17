@@ -1,5 +1,5 @@
-name: R-CMD-check Complete
-run-name: R Package check Complete 
+name: R-CMD-check Full
+run-name: R Package check Full
 
 on:
   push:
