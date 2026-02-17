@@ -44,6 +44,8 @@ jobs:
           cache: true
           extra-packages: any::rcmdcheck
       - uses: r-lib/actions/check-r-package@v2
+        env:
+          _R_CHECK_FORCE_SUGGESTS_: false
         with:
           args: 'c("--no-manual", "--no-build-vignettes","--ignore-vignettes")'
           error-on: '"error"'

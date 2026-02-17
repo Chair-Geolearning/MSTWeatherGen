@@ -25,15 +25,11 @@ jobs:
           use-public-rspm: true
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          extra-packages: |
-            any::pkgdown
-            any::here
-            local::.
-            any:pkgnet     
+          extra-packages: local::., any::pkgdown, any::pkgnet   
+          needs: |
+            website  
       - name: Build site
         run: Rscript -e 'pkgdown::build_site()'
-        shell: Rscript {0}
-
       - name: Deploy to GitHub pages 🚀
         if: github.event_name != 'pull_request'
         uses: JamesIves/github-pages-deploy-action@v4.5.0
