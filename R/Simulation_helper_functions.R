@@ -99,6 +99,9 @@ calculate_AR_coefficients_matrices <- function(parm, coordinates, AR_lag){
         bk[[s]][[k]]$bk$bk = list(try(bk[[s]][[j]]$bk$Bk, silent = T))
         bk[[s]][[k]]$cov0 = try(bk[[s]][[k]]$cov0, silent = T)
         j = k+1
+        
+        if (inherits(bk[[s]][[k]]$bk, "try-error") || is.character(bk[[s]][[k]]$bk)) {
+          break
       }
     }
   }
