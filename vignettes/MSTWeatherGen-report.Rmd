@@ -1,0 +1,30 @@
+---
+title: "Package Report"
+description: "MSTWeatherGen Package Report"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+    %\VignetteIndexEntry{Running a simple simulation}
+    %\VignetteEncoding{UTF-8}
+    %\VignetteEngine{knitr::rmarkdown}
+editor_options:
+    chunk_output_type: console
+---
+
+```{r, echo=FALSE, results='hide', message=FALSE, warning=FALSE}
+library("pkgnet")
+# Crée le dossier final dans docs/articles/pkgnet depuis la racine du projet
+output_dir <- "../docs/articles/"
+dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
+
+# Chemin complet du fichier HTML
+report_path <- file.path(output_dir, "pkgnet-report.html")
+
+# Génération du rapport pkgnet
+results <- CreatePackageReport("MSTWeatherGen", report_path = report_path)
+
+```
+
+**[Consulter le rapport pkgnet complet](pkgnet-report.html)**
+
+<iframe src="pkgnet-report.html" style="border-style: none; height: 1000px; width:100%; overflow: auto"/>

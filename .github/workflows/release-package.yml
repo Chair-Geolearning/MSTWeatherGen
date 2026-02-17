@@ -19,23 +19,21 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-
       - uses: r-lib/actions/setup-r@v2
-
+        with:
+          r-version: release
       - uses: r-lib/actions/setup-r-dependencies@v2
-
-      - name: Build package
-        run: |
-          if (Sys.info()[["sysname"]] != "Linux") {
-            system("R CMD build .")
-          } else {
-            system("R CMD INSTALL --build .")
-          }
-        shell: Rscript {0}
+        with:
+          needs: check
+      - name: Build package source
+        run: R CMD build .
+      - name: Build package binary
+        if: runner.os != 'Linux'
+        run: R CMD INSTALL --build *.tar.gz
 
       - uses: actions/upload-artifact@v4
         with:
-          name: MSTWeatherGen-${{ matrix.os }}
+          name: MSTWeatherGen_${{ matrix.os }}
           path: |
             *.tar.gz
             *.zip
@@ -48,15 +46,14 @@ jobs:
 
     steps:
       - uses: actions/download-artifact@v4
-
       - name: Create release and upload files
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref_name }}
           name: Release ${{ github.ref_name }}
           files: |
-            MSTWeatherGen-ubuntu-latest/*.tar.gz
-            MSTWeatherGen-macos-latest/*.tgz
-            MSTWeatherGen-windows-latest/*.zip
+            **/*.tar.gz
+            **/*.tgz
+            **/*.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

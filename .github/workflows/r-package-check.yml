@@ -42,9 +42,11 @@ jobs:
         with:
           needs: check
           cache: true
+          extra-packages: any::rcmdcheck
       - uses: r-lib/actions/check-r-package@v2
         with:
           args: 'c("--no-manual", "--no-build-vignettes","--ignore-vignettes")'
           error-on: '"error"'
           check-dir: '"check"'
+          upload-snapshot: true
 
