@@ -4,7 +4,7 @@ description: "MSTWeatherGen Package Report"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-    %\VignetteIndexEntry{Running a simple simulation}
+    %\VignetteIndexEntry{package report}
     %\VignetteEncoding{UTF-8}
     %\VignetteEngine{knitr::rmarkdown}
 editor_options:
