@@ -45,10 +45,10 @@ jobs:
           extra-packages: any::rcmdcheck
       - uses: r-lib/actions/check-r-package@v2
         env:
-          _R_CHECK_FORCE_SUGGESTS_: false
+          _R_CHECK_FORCE_SUGGESTS_: true
         with:
-          args: 'c("--no-manual", "--no-build-vignettes","--ignore-vignettes")'
+          args: 'c("--no-manual","--ignore-vignettes")'
+          build_args: 'c("--no-manual", "--no-build-vignettes")'
           error-on: '"error"'
           check-dir: '"check"'
-          upload-snapshot: true
 
