@@ -163,18 +163,44 @@ init_space_par <- function(data, names, h, uh, max_it = 2000) {
   #   the set of parameters optimized for one of the variables specified in 'names'.
   
   # Perform parallel optimization for each variable using mclapply
+  ncores <- getCores()
 
-  par = parallel::mclapply(names, function(v) {
-    optim(
-      par = c(1, 1),  # Initial parameter guesses
-      fn = loglik_spatial,     # Objective function to minimize (negative log-likelihood)
-      data = data,
-      v = v,            # Current variable being optimized
-      h = h,
-      uh = uh,
-      control = list(maxit = max_it, trace = 2)  # Optimization control settings
-    )$par  # Extract the optimized parameters
-  }, mc.cores = 1)
+  if (.Platform$OS.type == "windows") {
+
+    cl <- parallel::makeCluster(ncores)
+    on.exit(parallel::stopCluster(cl), add = TRUE)
+    
+    parallel::clusterExport(cl, c("loglik_spatial"), envir = environment())
+    parent_seed <- .Random.seed
+    
+    par <- parallel::parLapply(cl, names, function(v) {
+      assign(".Random.seed",parent_seed, envir = .GlobalEnv)
+      optim(
+        par = c(1, 1),
+        fn = loglik_spatial,
+        data = data,
+        v = v,
+        h = h,
+        uh = uh,
+        control = list(maxit = max_it, trace = 2)
+      )$par
+    })
+    
+  } else {
+    # Fonctionne sur Linux/Mac :  mclapply     
+    par <- parallel::mclapply(names, function(v) {
+      optim(
+        par = c(1, 1),
+        fn = loglik_spatial,
+        data = data,
+        v = v,
+        h = h,
+        uh = uh,
+        control = list(maxit = max_it, trace = 2)
+      )$par
+    }, mc.cores = ncores, mc.set.seed = FALSE)
+  }
+  
   return(par)
 }
 #' Optimize Spatial Parameters for Variable Pairs
