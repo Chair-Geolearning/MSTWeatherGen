@@ -95,7 +95,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref_name }}
-          name: Release ${{ github.ref_name }}
+          name: MSTWeatherGen ${{ github.ref_name }}
           body: "Automated release of MSTWeaherGen ${{ github.ref_name }}." 
           token: ${{ secrets.GITHUB_TOKEN }}
           files: |

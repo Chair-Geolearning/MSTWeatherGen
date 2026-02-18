@@ -38,7 +38,11 @@ Disable vignette building (that can take to much time) use : ```--no-build-vigne
 To learn how to use the `{MSTWeatherGen}` package, please refer to the detailed vignette available [here](https://sobakrim.github.io/MSTWeatherGen/articles/MSTWeatherGen.html).
 
 ## Funding
-This work was supported by funding from the French National Research Agency (ANR) as part of the BEYOND project (Contract No. 20-PCPA-0002). We acknowledge their support for enabling the development of this package.
+This work was made possible thanks to the Geolearning Chair (Lien: ) funded by Andra, BNP-Paribas, CCR and the SCOR Foundation for Science. A preliminary version was supported by funding from the French National Research Agency (ANR) as part of the BEYOND project (Contract No. 20-PCPA-0002).
+
+<img alt="Chair Geolearning" src="man/figures/GL-logo-vertical-baseline@4x-100.jpg"  width="120"/> <img alt="Chair Geolearning" src="man/figures/geolearning_andra_logo_W.png"  width="120"/> <img alt="Chair Geolearning" src="man/figures/geolearning_bnp_logo_W.png"  width="120"/> <img alt="Chair Geolearning" src="man/figures/geolearning_ccr_logo_W.png"  width="120"/> 
+<img alt="Chair Geolearning" src="man/figures/geolearning_scor_logo_W.png"  width="120"/>
+
 ## License
 
 The package MSTWeatherGen is under GNU GPL V3.   
