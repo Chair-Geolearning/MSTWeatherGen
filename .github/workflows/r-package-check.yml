@@ -1,4 +1,4 @@
-name: R-CMD-check Full
+name: Check
 run-name: R Package check Full
 
 on:

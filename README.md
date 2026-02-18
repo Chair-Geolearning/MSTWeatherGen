@@ -1,8 +1,8 @@
 # MSTWeatherGen <img src="man/figures/MSTWeatherGen.png" align="right" alt="" width="120" />
 
 <!-- badges: start -->
-[![R-CMD-check](https://github.com/Chair-Geolearning/MSTWeatherGen/actions/workflows/r-package-check.yml/badge.svg)](https://github.com/Chair-Geolearning/MSTWeatherGen/actions/workflows/r-package-check.yml) 
-[![CRAN_Status_Badge](https://www.r-pkg.org/badges/version/MSTWeatherGen)](https://cran.r-project.org/package=MSTWeatherGen)
+[![Check](https://github.com/Chair-Geolearning/MSTWeatherGen/actions/workflows/r-package-check.yml/badge.svg)](https://github.com/Chair-Geolearning/MSTWeatherGen/actions/workflows/r-package-check.yml)  
+[![GitHub Release](https://img.shields.io/github/v/release/Chair-Geolearning/MSTWeatherGen)]( https://github.com/Chair-Geolearning/MSTWeatherGen/releases)
 <!-- badges: end -->
 
 ## Overview
@@ -26,6 +26,11 @@ You can install `{MSTWeatherGen}` from GitHub as follows:
 # install.packages("remotes")
 remotes::install_github("Chair-Geolearning/MSTWeatherGen")
 ```
+
+> The __main__ branch (default branch) is stable.
+
+Download a special release : [![GitHub Release](https://img.shields.io/github/v/release/Chair-Geolearning/MSTWeatherGen)]( https://github.com/Chair-Geolearning/MSTWeatherGen/releases)
+
 
 ### Development
 
