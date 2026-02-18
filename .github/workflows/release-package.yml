@@ -86,11 +86,11 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: MSTWeatherGen_windows-latest
-          continue-on-error: true
+        continue-on-error: true
       - uses: actions/download-artifact@v4
         with:
           name: MSTWeatherGen_macos-latest
-          continue-on-error: true
+        continue-on-error: true
       - name: Create release and upload files
         uses: softprops/action-gh-release@v2
         with:
