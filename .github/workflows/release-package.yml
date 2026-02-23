@@ -26,7 +26,7 @@ jobs:
         with:
           needs: install
           cache: true
-          extra-packages: local::., any::pkgdown, any::pkgnet   
+          extra-packages: local::., any::pkgdown, any::pkgnet, any::roxygen2
       - name: Build package source
         run: R CMD build .
         shell: bash
