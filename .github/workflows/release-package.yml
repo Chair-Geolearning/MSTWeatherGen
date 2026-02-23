@@ -28,8 +28,8 @@ jobs:
           cache: true
           extra-packages: local::., any::pkgdown, any::pkgnet, any::roxygen2
       - name: Documentation roxygen
-        run: Rscript -e 'roxygen::roxygenize()'
-      
+        run: Rscript -e 'roxygen2::roxygenize()'
+        
       - name: Build package source
         run: R CMD build .
         shell: bash
