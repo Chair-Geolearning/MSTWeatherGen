@@ -6,3 +6,4 @@
 .Rcheck$
 ^\.Renviron$
 .*\.code-workspace$
+^\.github$
