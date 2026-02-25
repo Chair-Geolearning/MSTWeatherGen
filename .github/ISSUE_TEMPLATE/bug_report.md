@@ -14,7 +14,7 @@ assignees: []
 
 ### Caractérisation du bug
 
-- **Fichier et Fonction dans laquelle vous avez trouvez le bug**  
+- **Fichier et/ou Fonction dans laquelle vous avez trouvez le bug**  
 
 ---
 
@@ -42,16 +42,24 @@ assignees: []
 
 ### Informations sur l'environnement d'apparition du bug
 
-- **Système d'exploitation de votre machine (Linux, macOS, Windows), Machine Virtuelle ou Réelle:**
+- Système d'exploitation (local et machine virtuelle) :
+- Version de R utiliséé : 
+- Version du package : 
+- Environnement d'exécution : Rstudio, shell, positron
+- options : Liste et version des dépendances (output de _sessionInfo()_)
+
 
 ---
 
 ### Informations supplémentaires
 
-Si nécessaire
+Si nécessaire  
+* Capture d'ecran, logs, données ou tout autre détail pertinant.
 ---
 
 ## Partie réservée aux développeurs
+
+@ahboualam @MechantRouquin
 
 - **À discuter avant d’ouvrir une branche/PR :**
 
@@ -67,5 +75,9 @@ Si nécessaire
   - Est-ce qu’il y a besoin d’écrire de nouvelles fonctions ou d’en modifier certaines par rapport au code original?  
     - Si oui, écrire dès maintenant la signature de la nouvelle fonction ou les modifications apportées à une signature existante.
   
-  - Est-ce qu’il est possible d’écrire du code permettant de reproduire le bug ?  
+  - Est-ce qu’il est possible d’écrire du code permettant de reproduire le bug ?   
+  - Y a-t-il des testunitires qui couvrent déjà cette partie du code ?  
+    - si oui, lesquels ?  
+  - Besoin de test supplémentaires ?  
+    - Faut-il ajouter des tests pour valider la correction ?  
   

@@ -2,62 +2,72 @@
 name: "Feature Request"
 about: "Proposer une nouvelle fonctionnalité ou amélioration"
 title: "Feature : [Titre de la fonctionnalité]"
-labels: ["enhancement"]
+labels: ["feature"]
 assignees: []
 ---
 
 ### Description de la fonctionnalité
 
-- **Objectif / But de cette fonctionnalité :**  
+-   **Objectif / But de cette fonctionnalité :**
 
-- **Fichier et/ou fonction concerné :**  
+-   **Fichier(s) et/ou fonction(s) concerné(s) :**
 
----
+    ## **Contexte (pourquoi cette fonctionnalité est-elle nécessaire ?) :**
 
 ### Comportement attendu
 
-- **Décrire ce que la fonctionnalité doit accomplir :**  
+-   **Décrire ce que la fonctionnalité doit accomplir (comportement, entrées/sorties) :**
 
-- **Résultat attendu pour l'utilisateur ou le système :**  
+-   **Résultat attendu pour l'utilisateur ou le package :**
 
----
+-   **Exemple de code d’utilisation (si applicable) :**  
+
+------------------------------------------------------------------------
 
 ### Cas d'utilisation / Scénarios
 
-- **Exemple d'utilisation :**  
-  1. Étape 1
-- **Variantes possibles ou conditions spéciales :**  
+-   **Exemple d'utilisation :**  
 
----
+    1.  Étape 1\
+    2.  Étape 2\
+
+-   **Variantes ou cas particuliers:**  
+
+-   **Exemples concrets (si possible)**  
+
+-   **Comment tester cette fonctionnalité ?**  
+
+------------------------------------------------------------------------
 
 ### Contraintes ou considérations techniques
 
-- **Performance attendue :**  
+-   **Performance attendue (temps d’exécution, mémoire, etc.):**  
 
-- **Compatibilité / environnement cible (OS, VM…) :**
+-   **Compatibilité / environnement cible (versions de R, OS, environnements d'execution) :**  
 
-- **Librairies ou dépendances en plus nécessaires :**  
+-   **Dépendances supplémentaires nécessaires :**  
 
----
+-   **Impact sur le code existant (modifications, refactoring) :**  
+
+------------------------------------------------------------------------
 
 ### Informations supplémentaires
 
-- Si nécessaire.
----
+-   Si nécessaire.  
+
+> Capture d'ecran, logs, données ou tout autre détail pertinant.
 
 ## Partie réservée aux développeurs
 
-- 
-  - Est-ce qu’il y a un besoin de découper la feature en sous-tâches ou sous-issues ?  
-    - Si oui, créer les issues correspondantes.
-  
-  - Est-ce qu’il y a besoin de planifier la mise en œuvre ?  
-    - Si oui, proposer un planning détaillé.
-  
-  - Est-ce qu’il y a besoin de se former ou de se renseigner pour implémenter la fonctionnalité ?  
-    - Si oui, identifier les ressources pédagogiques nécessaires.
-  
-  - Est-ce qu’il faut modifier des fonctions existantes ?  
-    - Si oui, préciser les signatures ou modifications nécessaires.
+-   
 
----
+    -   Est-ce qu’il y a un besoin de découper la feature en sous-tâches ou sous-issues ?
+        -   Si oui, créer les issues correspondantes.
+    -   Est-ce qu’il y a besoin de planifier la mise en œuvre ?
+        -   Si oui, proposer un planning détaillé.
+    -   Est-ce qu’il y a besoin de se former ou de se renseigner pour implémenter la fonctionnalité ?
+        -   Si oui, identifier les ressources pédagogiques nécessaires.
+    -   Est-ce qu’il faut modifier des fonctions existantes ?
+        -   Si oui, préciser les signatures ou modifications nécessaires.
+
+------------------------------------------------------------------------
