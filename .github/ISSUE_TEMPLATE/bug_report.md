@@ -6,6 +6,9 @@ labels: ["bug"]
 assignees: []
 ---
 
+### Comportement lors du bug
+
+- **Que se passe-t-il au moment de l'apparition du bug ?**
 
 ---
 
@@ -17,9 +20,9 @@ assignees: []
 
 ### Comment reproduire le bug
 
-- **Fréquence d'apparition du bug (systématiquement, fréquemment, de temps en temps) :**  
+- **Fréquence d'apparition du bug (systématiquement, de temps en temps) :**  
 
-- **L'erreur telle qu'elle apparait dans le log:**  
+- **L'erreur telle qu'elle apparait dans le log ou la console:**  
 
 - **Comment le reproduire :**  
   1. Action 1
@@ -34,9 +37,6 @@ assignees: []
 
 ---
 
-### Comportement lors du bug
-
-- **Que se passe-t-il au moment de l'apparition du bug ?**
 
 ---
 
@@ -69,15 +69,3 @@ Si nécessaire
   
   - Est-ce qu’il est possible d’écrire du code permettant de reproduire le bug ?  
   
-  
-- **Une fois le bug résolu:**
-
-
-  - Y'a-t-il eu besoin d’utiliser de nouvelles librairies à ajouter au package ?  
-    - Si oui, quelles sont elles.
-  
-  - Quelles fonctions ont été modifiées ou/et ajoutées?  
-    - Si oui, écrire dès maintenant la signature de la nouvelle fonction ou les modifications apportées à une signature existante.
-  
-  - Est-ce qu’il est possible d’écrire du code permettant de reproduire le bug ?  
-    - Si oui, proposer des scénarios de test permettant de faire du TDD pour la résolution du bug.
