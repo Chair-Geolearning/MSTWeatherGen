@@ -1,20 +1,73 @@
 ---
-name: Feature request
-about: Suggest an idea for this project
-title: ''
-labels: ''
-assignees: ''
+name: "Feature Request"
+about: "Proposer une nouvelle fonctionnalité ou amélioration"
+title: "Feature : [Titre de la fonctionnalité]"
+labels: ["enhancement"]
+assignees: []
+---
+
+### Description de la fonctionnalité
+
+- **Fichier et/ou fonction concerné :**  
+- **Objectif / But de cette fonctionnalité :**  
 
 ---
 
-**Is your feature request related to a problem? Please describe.**
-A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
+### Comportement attendu
 
-**Describe the solution you'd like**
-A clear and concise description of what you want to happen.
+- **Décrire ce que la fonctionnalité doit accomplir :**  
 
-**Describe alternatives you've considered**
-A clear and concise description of any alternative solutions or features you've considered.
+- **Résultat attendu pour l'utilisateur ou le système :**  
 
-**Additional context**
-Add any other context or screenshots about the feature request here.
+---
+
+### Cas d'utilisation / Scénarios
+
+- **Exemple d'utilisation :**  
+  1. Étape 1
+  2. Étape 2
+  3. Étape 3
+- **Variantes possibles ou conditions spéciales :**  
+
+---
+
+### Contraintes ou considérations techniques
+
+- **Performance attendue :**  
+
+- **Compatibilité / environnement cible (OS, VM…) :**
+
+- **Librairies ou dépendances en plus nécessaires :**  
+
+---
+
+### Informations supplémentaires
+
+- Si nécessaire.
+---
+
+## Partie réservée aux développeurs
+
+- **À discuter avant d’ouvrir une branche/PR :**
+
+  - Est-ce qu’il y a un besoin de découper la feature en sous-tâches ou sous-issues ?  
+    - Si oui, créer les issues correspondantes.
+  
+  - Est-ce qu’il y a besoin de planifier la mise en œuvre ?  
+    - Si oui, proposer un planning détaillé.
+  
+  - Est-ce qu’il y a besoin de se former ou de se renseigner pour implémenter la fonctionnalité ?  
+    - Si oui, identifier les ressources pédagogiques nécessaires.
+  
+  - Est-ce qu’il faut modifier des fonctions existantes ?  
+    - Si oui, préciser les signatures ou modifications nécessaires.
+
+---
+
+### Une fois la fonctionnalité implémentée
+
+- **Nouvelles librairies ajoutées :**  
+  - Si oui, lesquelles et pourquoi.  
+
+- **Fonctions ajoutées ou modifiées :**  
+  - Décrire les signatures et modifications apportées.  

@@ -2,14 +2,14 @@
 name: "Pull Request"
 about: "Décrire ce qui a été fait dans cette PR"
 title: "[PR] Titre de la fonctionnalité ou correction"
-labels: []
+labels: ["PR"]
 assignees: []
 ---
 
 ## Type
 
-- [ ] Bug
-- [ ] Feature
+- [ ] Bug(s)
+- [ ] Feature(s)
 
 ## Description
 Merci de décrire brièvement ce qui a été fait dans cette Pull Request. Explique le but principal cette PR.
@@ -44,7 +44,7 @@ Merci de décrire brièvement ce qui a été fait dans cette Pull Request. Expli
 - **De Nouvelles librairies ou dépendances ajoutées?**  
   - Si oui, mentionner les librairies et justifier leur ajout.
   
-- **A -t-on modifié le code original ?**  
+- **A-t-on modifié le code original ?**  
   - Si oui, spécifier les fonctions et le fichier dans lequel il se trouve.
 
 ---
