@@ -41,11 +41,11 @@ Merci de décrire brièvement ce qui a été fait dans cette Pull Request. Expli
 
 ## À discuter avant la fusion
 
-- **Des Nouvelles librairies ou dépendances ajoutée?**  
+- **De Nouvelles librairies ou dépendances ajoutées?**  
   - Si oui, mentionner les librairies et justifier leur ajout.
   
-- **Nécessité de modifications dans la base de données ?**  
-  - Si oui, spécifier les changements dans la base de données.
+- **A -t-on modifié le code original ?**  
+  - Si oui, spécifier les fonctions et le fichier dans lequel il se trouve.
 
 ---
 
