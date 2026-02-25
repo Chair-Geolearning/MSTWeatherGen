@@ -8,8 +8,9 @@ assignees: []
 
 ### Description de la fonctionnalité
 
-- **Fichier et/ou fonction concerné :**  
 - **Objectif / But de cette fonctionnalité :**  
+
+- **Fichier et/ou fonction concerné :**  
 
 ---
 
@@ -25,8 +26,6 @@ assignees: []
 
 - **Exemple d'utilisation :**  
   1. Étape 1
-  2. Étape 2
-  3. Étape 3
 - **Variantes possibles ou conditions spéciales :**  
 
 ---
@@ -48,8 +47,7 @@ assignees: []
 
 ## Partie réservée aux développeurs
 
-- **À discuter avant d’ouvrir une branche/PR :**
-
+- 
   - Est-ce qu’il y a un besoin de découper la feature en sous-tâches ou sous-issues ?  
     - Si oui, créer les issues correspondantes.
   
@@ -63,11 +61,3 @@ assignees: []
     - Si oui, préciser les signatures ou modifications nécessaires.
 
 ---
-
-### Une fois la fonctionnalité implémentée
-
-- **Nouvelles librairies ajoutées :**  
-  - Si oui, lesquelles et pourquoi.  
-
-- **Fonctions ajoutées ou modifiées :**  
-  - Décrire les signatures et modifications apportées.  
