@@ -10,8 +10,11 @@ assignees: []
 
 - [ ] Bug(s)
 - [ ] Feature(s)
+- [ ] Autre
+
 
 ## Description
+
 Merci de décrire brièvement ce qui a été fait dans cette Pull Request. Explique le but principal cette PR.
 
 ---
@@ -54,3 +57,4 @@ Merci de décrire brièvement ce qui a été fait dans cette Pull Request. Expli
 - [ ] Code testé et validé.
 - [ ] Documentation mise à jour (si nécessaire).
 - [ ] Aucune erreur de compilation ou de tests.
+- [ ] CI/CD
