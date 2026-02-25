@@ -19,7 +19,9 @@ assignees: []
 
 - **Fréquence d'apparition du bug (systématiquement, fréquemment, de temps en temps) :**  
 
-- **Comment reproduire le bug :**  
+- **L'erreur telle qu'elle apparait dans le log:**  
+
+- **Comment le reproduire :**  
   1. Action 1
   2. Action 2
   3. ...
@@ -40,18 +42,18 @@ assignees: []
 
 ### Informations sur l'environnement d'apparition du bug
 
-- **Système d'exploitation de votre machine (Linux, macOS, Windows), Machine Virtuelle ou Reelle:**
+- **Système d'exploitation de votre machine (Linux, macOS, Windows), Machine Virtuelle ou Réelle:**
 
 ---
 
 ### Informations supplémentaires
 
-Si necessaire
+Si nécessaire
 ---
 
 ## Partie réservée aux développeurs
 
-- **À discuter avant d’ouvrir une branche/MR :**
+- **À discuter avant d’ouvrir une branche/PR :**
 
   - Est-ce qu’il y a un besoin de découper l’issue en sous-problèmes ?  
     - Si oui, ouvrir d’autres issues.
@@ -59,13 +61,22 @@ Si necessaire
   - Est-ce qu’il y a besoin de planifier la résolution de l’issue?  
     - Si oui, faire un planning détaillé.
   
-  - Est-ce qu’il y a besoin d’utiliser de nouvelles librairies ?  
-    - Si oui, évaluer celles qui sont les plus appropriées.
-  
   - Est-ce qu’il y a besoin de se former pour résoudre l’issue ?  
     - Si oui, trouver des ressources pédagogiques adaptées.
   
   - Est-ce qu’il y a besoin d’écrire de nouvelles fonctions ou d’en modifier certaines par rapport au code original?  
+    - Si oui, écrire dès maintenant la signature de la nouvelle fonction ou les modifications apportées à une signature existante.
+  
+  - Est-ce qu’il est possible d’écrire du code permettant de reproduire le bug ?  
+  
+  
+- **Une fois le bug résolu:**
+
+
+  - Y'a-t-il eu besoin d’utiliser de nouvelles librairies à ajouter au package ?  
+    - Si oui, quelles sont elles.
+  
+  - Quelles fonctions ont été modifiées ou/et ajoutées?  
     - Si oui, écrire dès maintenant la signature de la nouvelle fonction ou les modifications apportées à une signature existante.
   
   - Est-ce qu’il est possible d’écrire du code permettant de reproduire le bug ?  
