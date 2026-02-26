@@ -16,11 +16,11 @@ seasons <- list(
 )
 s1 = list(min_day = 1, max_day = 29, min_month = 12, max_month = 2)
 
-par_all <-  readRDS(testthat::test_path("saved_results/par_all.rds"))
-Vi <-  readRDS(testthat::test_path("saved_results/Vi.rds"))
-uh <-  readRDS(testthat::test_path("saved_results/uh.rds"))
-cr <- readRDS(testthat::test_path("saved_results/cr.rds"))
-ep <- readRDS(testthat::test_path("saved_results/ep.rds"))
+par_all <-  par_all
+Vi <-  Vi
+uh <-  uh
+cr <- cr
+ep <- ep
 max_it <- 50
 
 par_all <- optimize_spatial_parameters(par_all, data, names, Vi, uh[uh[,1]==0,], cr, max_it, ep)

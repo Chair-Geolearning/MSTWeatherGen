@@ -7,3 +7,12 @@ par_all_TEST.rds <- readRDS(test_path("saved_results/par_all_TEST.rds"))
 rescompressed <- readRDS(test_path("saved_results/data_compressed.rds"))
 result_estimate_gaussian_fields_params <- readRDS(test_path("saved_results/estimate_gaussian_fields_params.rds"))
 result_test <- readRDS(test_path("saved_results/estimation_gf_results_v1.rds"))
+
+par_all <-  readRDS(testthat::test_path("saved_results/par_all.rds"))
+Vi <-  readRDS(testthat::test_path("saved_results/Vi.rds"))
+uh <-  readRDS(testthat::test_path("saved_results/uh.rds"))
+cr <- readRDS(testthat::test_path("saved_results/cr.rds"))
+ep <- readRDS(testthat::test_path("saved_results/ep.rds"))
+h <- readRDS(testthat::test_path("saved_results/h.rds")) 
+
+wt_cluster <- readRDS(testthat::test_path("saved_results/wt_cluster.rds"))
