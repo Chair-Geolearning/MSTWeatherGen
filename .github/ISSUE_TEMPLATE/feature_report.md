@@ -61,13 +61,14 @@ assignees: []
 
 -   
 
-    -   Est-ce qu’il y a un besoin de découper la feature en sous-tâches ou sous-issues ?
+    -   Est-ce qu’il y a un besoin de découper la feature en sous-issues ?
         -   Si oui, créer les issues correspondantes.
     -   Est-ce qu’il y a besoin de planifier la mise en œuvre ?
         -   Si oui, proposer un planning détaillé.
     -   Est-ce qu’il y a besoin de se former ou de se renseigner pour implémenter la fonctionnalité ?
         -   Si oui, identifier les ressources pédagogiques nécessaires.
     -   Est-ce qu’il faut modifier des fonctions existantes ?
-        -   Si oui, préciser les signatures ou modifications nécessaires.
-
+        -   Si oui, préciser les modifications nécessaires.
+    -   Est-ce qu’il faut ajouter de nouvelles fonctions aux package ?
+        -   Si oui, préciser les signatures de ces fonctions
 ------------------------------------------------------------------------

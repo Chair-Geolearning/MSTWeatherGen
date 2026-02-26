@@ -6,7 +6,7 @@ labels: ["bug"]
 assignees: []
 ---
 
-### Comportement lors du bug
+### Description du bug
 
 - **Que se passe-t-il au moment de l'apparition du bug ?**
 
@@ -14,13 +14,15 @@ assignees: []
 
 ### Caractérisation du bug
 
-- **Fichier et/ou Fonction dans laquelle vous avez trouvez le bug**  
+- **Fichier(s) et/ou Fonction(s) dans laquelle vous avez trouvez le bug**  
 
 ---
 
 ### Comment reproduire le bug
 
-- **Fréquence d'apparition du bug (systématiquement, de temps en temps) :**  
+- **Fréquence d'apparition du bug (systématiquement, de temps en temps) :** 
+
+- **Est-ce un bug reproductible ou qui arrive de maniere aleatoire (erreur sur optim, erreur de convergence, seed spéciale):**  
 
 - **L'erreur telle qu'elle apparait dans le log ou la console:**  
 
@@ -75,9 +77,9 @@ Si nécessaire
   - Est-ce qu’il y a besoin d’écrire de nouvelles fonctions ou d’en modifier certaines par rapport au code original?  
     - Si oui, écrire dès maintenant la signature de la nouvelle fonction ou les modifications apportées à une signature existante.
   
-  - Est-ce qu’il est possible d’écrire du code permettant de reproduire le bug ?   
-  - Y a-t-il des testunitires qui couvrent déjà cette partie du code ?  
-    - si oui, lesquels ?  
+  - Y a-t-il des tests unitaires qui couvrent déjà cette partie du code ?  
+    - Si oui, lesquels ?  
+    
   - Besoin de test supplémentaires ?  
     - Faut-il ajouter des tests pour valider la correction ?  
   
