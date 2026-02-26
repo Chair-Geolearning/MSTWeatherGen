@@ -63,7 +63,7 @@ Si nécessaire
 
 - **À discuter avant d’ouvrir une branche/PR :**
 
-  - Est-ce qu’il y a un besoin de découper l’issue en sous-problèmes ?  
+  - Est-ce qu’il y a un besoin de découper l’issue en sous-issues ?  
     - Si oui, ouvrir d’autres issues.
   
   - Est-ce qu’il y a besoin de planifier la résolution de l’issue?  
