@@ -95,6 +95,7 @@ Si nécessaire
   - [ ] Découpage en sous-issues nécessaire ?  
   - [ ] Planification nécessaire pour résoudre l’issue ?  
   - [ ] Formation ou ressources nécessaires pour résoudre l’issue ?  
+    - Si oui, identifier les ressources pédagogiques nécessaires.
   - [ ] Modifications de code requises :
     - Nouvelles fonctions à créer : signatures et objectifs
     - Fonctions existantes à modifier : préciser les changements
