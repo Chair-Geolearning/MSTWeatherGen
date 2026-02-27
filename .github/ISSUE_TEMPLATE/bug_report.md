@@ -12,11 +12,26 @@ assignees: []
 
 ---
 
+## Gravité et priorité
+
+- **Importance :**
+
+  - [ ] Critique (bloque l’usage complet)
+  - [ ] Majeur (fonctionnalité importante impactée)
+  - [ ] Mineur (bug  peu gênant)
+  
+- **Priorité de correction :**
+
+  - [ ] Urgente
+  - [ ] Normale
+  - [ ] Basse
+
 ### Caractérisation du bug
 
 - **Fichier(s) et/ou Fonction(s) dans laquelle vous avez trouvez le bug**  
 
 ---
+
 
 ### Comment reproduire le bug
 
@@ -39,6 +54,9 @@ assignees: []
 
 ---
 
+## Historique
+
+- Changement récent ou PR qui pourrait l’avoir introduit ?
 
 ---
 
@@ -48,7 +66,7 @@ assignees: []
 - Version de R utilisée : 
 - Version du package : 
 - Environnement d'exécution : Rstudio, shell, positron
-- Branche Git où le problème surgit si hors du main :
+- Branche Git  (si ce n’est pas main) :
 - options : Liste et version des dépendances (output de _sessionInfo()_)
 
 
@@ -60,27 +78,25 @@ Si nécessaire
 * Capture d'ecran, logs, données ou tout autre détail pertinant.
 ---
 
+## Tests 
+- Tests unitaires existants couvre le bug? :
+  - [ ] Oui
+  - [ ] Non
+- Si oui, pourquoi il ne l'a pas détecté?
+
+---
+
 ## Organisation
 
 @ahboualam @MechantRouquin
 
 - **À discuter avant d’ouvrir une branche/PR :**
-
-  - Est-ce qu’il y a un besoin de découper l’issue en sous-issues ?  
-    - Si oui, ouvrir d’autres issues.
-  
-  - Est-ce qu’il y a besoin de planifier la résolution de l’issue?  
-    - Si oui, faire un planning détaillé.
-  
-  - Est-ce qu’il y a besoin de se former pour résoudre l’issue ?  
-    - Si oui, trouver des ressources pédagogiques adaptées.
-  
-  - Est-ce qu’il y a besoin d’écrire de nouvelles fonctions ou d’en modifier certaines par rapport au code original?  
-    - Si oui, écrire dès maintenant la signature de la nouvelle fonction ou les modifications apportées à une signature existante.
-  
-  - Y a-t-il des tests unitaires qui couvrent déjà cette partie du code ?  
-    - Si oui, lesquels et ces tests ont-ils detecté le bug, sinon les rajouter ?  
     
-  - Besoin de test supplémentaires ?  
-    - Faut-il ajouter des tests pour valider la correction ?  
+  - [ ] Découpage en sous-issues nécessaire ?  
+  - [ ] Planification nécessaire pour résoudre l’issue ?  
+  - [ ] Formation ou ressources nécessaires pour résoudre l’issue ?  
+  - [ ] Modifications de code requises :
+    - Nouvelles fonctions à créer : signatures et objectifs
+    - Fonctions existantes à modifier : préciser les changements
+  - [ ] Tests supplémentaires à ajouter pour valider la correction ?
   
