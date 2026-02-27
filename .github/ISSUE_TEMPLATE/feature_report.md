@@ -1,7 +1,7 @@
 ---
 name: "Feature Request"
 about: "Proposer une nouvelle fonctionnalité ou amélioration"
-title: "Feature : [Titre de la fonctionnalité]"
+title: "Draft : [Titre de la fonctionnalité]"
 labels: ["feature"]
 assignees: []
 ---
@@ -21,6 +21,10 @@ assignees: []
 -   **Résultat attendu pour l'utilisateur ou le package :**
 
 -   **Exemple de code d’utilisation (si applicable) :**  
+
+### Ressources disponibles  
+
+
 
 ------------------------------------------------------------------------
 
