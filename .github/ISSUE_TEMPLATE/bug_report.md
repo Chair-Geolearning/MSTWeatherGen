@@ -79,7 +79,7 @@ Si nécessaire
 ---
 
 ## Tests 
-- Tests unitaires existants couvre le bug? :
+- Tests unitaires existants qui couvrent le bug? :
   - [ ] Oui
   - [ ] Non
 - Si oui, pourquoi il ne l'a pas détecté?
