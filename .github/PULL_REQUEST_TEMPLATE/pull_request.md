@@ -61,24 +61,20 @@ Cette PR introduit-elle des changements cassants ? Si oui, les décrire.
 
 ## À discuter avant la fusion
 
-- **De Nouvelles librairies ou dépendances ajoutées?**  
+- [ ] De nouvelles librairies ou dépendances ajoutées ?  
   - Si oui, mentionner les librairies et justifier leur ajout.
-  
-- **A-t-on modifié le code original ?**  
-  - Si oui, spécifier les fonctions et le fichier dans lequel il se trouve.
 
-- **Impact sur les utilisateurs :**
+- [ ] A-t-on modifié le code original ?  
+  - Si oui, spécifier les fonctions et le fichier concerné.
 
+- [ ] Impact sur les utilisateurs :  
   - Cette PR nécessite-t-elle une communication spécifique (ex: note de version) ?
 
-- **Compatibilité :**
-
+- [ ] Compatibilité :  
   - Les modifications sont-elles rétrocompatibles ?
 
-- **Performance :**
-
+- [ ] Performance :  
   - Y a-t-il un impact sur les performances ? Si oui, le décrire.
-
 ---
 
 ### Instructions pour la revue
