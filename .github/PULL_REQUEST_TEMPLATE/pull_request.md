@@ -42,10 +42,9 @@ Si la PR est liée à une issue, mentionnez-la (ex: "Closes #123").
 - [ ] J’ai testé manuellement les modifications (OS :  - Version de R :).
 - [ ] J’ai exécuté les tests unitaires locaux (`devtools::test()`) et ils passent.
 - [ ] J’ai vérifié que le package se build et et check correctement (`devtools::build()` et `devtools::check()`).
-- [ ] J’ai vérifié que le package se build et et check s’installe correctement (`devtools::install()`).
+- [ ] J’ai vérifié que le package se build et et s’installe correctement (`devtools::install()`).
 - [ ] J’ai vérifié que le CI/CD passe (lien vers les résultats : [ex: GitHub CI](#)).
 - [ ] J’ai mis à jour la documentation (vignettes, help, README) si nécessaire ((`devtools::document()`)).
-- [ ] J’ai vérifié que le package se build et s’installe correctement (`devtools::install()`).
 
 ---
 
@@ -99,3 +98,4 @@ Si la PR est liée à une issue, mentionnez-la (ex: "Closes #123").
 - [ ] Le code suit les conventions du projet (style, naming)
 - [ ] Les dépendances sont minimales et justifiées
 - [ ] Le comportement correspond à la description
+- [ ] J'ai bien vérifier que les conflits avec la branche main sont résolus
