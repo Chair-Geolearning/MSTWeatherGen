@@ -16,6 +16,10 @@ assignees: []
 
 Merci de décrire brièvement ce qui a été fait dans cette Pull Request. Expliquez le but principal cette PR.  
 Si la PR est liée à une issue, mentionnez-la (ex: "Closes #123").
+
+Cette PR introduit-elle des changements cassants ? Si oui, les décrire.
+
+
 ---
 
 ## Changement effectué
@@ -45,6 +49,7 @@ Si la PR est liée à une issue, mentionnez-la (ex: "Closes #123").
 - [ ] J’ai vérifié que le package se build et et s’installe correctement (`devtools::install()`).
 - [ ] J’ai vérifié que le CI/CD passe (lien vers les résultats : [ex: GitHub CI](#)).
 - [ ] J’ai mis à jour la documentation (vignettes, help, README) si nécessaire ((`devtools::document()`)).
+- [ ] J'ai vérifié que les conventions de style sont respectées (lintr / styleR).
 
 ---
 
@@ -98,4 +103,4 @@ Si la PR est liée à une issue, mentionnez-la (ex: "Closes #123").
 - [ ] Le code suit les conventions du projet (style, naming)
 - [ ] Les dépendances sont minimales et justifiées
 - [ ] Le comportement correspond à la description
-- [ ] J'ai bien vérifier que les conflits avec la branche main sont résolus
+- [ ] Les conflits avec la branche main sont résolus
