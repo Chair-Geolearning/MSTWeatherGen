@@ -15,12 +15,12 @@ seasons <- list(
 )
 
 # Parameters:
-par_all <- readRDS(testthat::test_path("saved_results/par_all.rds"))
-Vi <- readRDS(testthat::test_path("saved_results/Vi.rds"))
-uh <- readRDS(testthat::test_path("saved_results/uh.rds"))
+par_all <- par_all
+Vi <- Vi
+uh <- uh
 uh <- uh[uh[,1]==0,]
-cr <- readRDS(testthat::test_path("saved_results/cr.rds"))
-ep <- readRDS(testthat::test_path("saved_results/ep.rds"))
+cr <- cr
+ep <- ep
 max_it <- 50
 parms <- c("a1", "d1", "g1", "a2", "d2", "g2",
            "b1", "e1", "l1", "b2", "e2", "l2", "c", "f", "m",

@@ -15,9 +15,9 @@ seasons <- list(
 )
 
 # Parameters:
-uh <- readRDS(testthat::test_path("saved_results/uh.rds"))
+uh <- uh
 par = c(1, 1)
-h <- readRDS(testthat::test_path("saved_results/h.rds")) 
+h <- h
 
 # -------------------------------------------------Tests -----------------------------------------------------------
 result <- loglik_spatial(par = c(1, 1), data = data, 

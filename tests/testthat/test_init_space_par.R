@@ -34,7 +34,7 @@ max_it <- 100
 #wt = wt$cluster # extract weather types 
 
 #saveRDS(wt,'wt_cluster.rds')
-wt <- readRDS(testthat::test_path("saved_results/wt_cluster.rds"))
+wt <- wt_cluster
 
 wt_id <- which(wt == 1)
 wt_id <- wt_id[wt_id > tmax + 1]  
