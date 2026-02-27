@@ -43,7 +43,7 @@ assignees: []
 
 -   **Performance attendue (temps d’exécution, mémoire, etc.):**  
 
--   **Compatibilité / environnement cible (versions de R, OS, environnements d'execution) :**  
+-   **Compatibilité / environnement cible (versions de R, OS, environnements d'exécution) :**  
 
 -   **Dépendances supplémentaires nécessaires :**  
 
@@ -55,19 +55,19 @@ assignees: []
 
 -   Si nécessaire.  
 
-> Capture d'ecran, logs, données ou tout autre détail pertinant.
+> Logs, données ou tout autre détail pertinant.
 
-## Partie réservée aux développeurs
+## Organisation
 
 -   
 
-    -   Est-ce qu’il y a un besoin de découper la feature en sous-issues ?
+    -   Est-ce qu’il y a un besoin de découper la feature issue en sous-issues ?
         -   Si oui, créer les issues correspondantes.
     -   Est-ce qu’il y a besoin de planifier la mise en œuvre ?
         -   Si oui, proposer un planning détaillé.
     -   Est-ce qu’il y a besoin de se former ou de se renseigner pour implémenter la fonctionnalité ?
         -   Si oui, identifier les ressources pédagogiques nécessaires.
-    -   Est-ce qu’il faut modifier des fonctions existantes ?
+    -   Est-ce qu’il faut modifier ou supprimer des fonctions existantes ?
         -   Si oui, préciser les modifications nécessaires.
     -   Est-ce qu’il faut ajouter de nouvelles fonctions aux package ?
         -   Si oui, préciser les signatures de ces fonctions

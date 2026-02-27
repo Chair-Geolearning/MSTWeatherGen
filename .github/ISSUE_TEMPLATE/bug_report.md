@@ -22,7 +22,7 @@ assignees: []
 
 - **Fréquence d'apparition du bug (systématiquement, de temps en temps) :** 
 
-- **Est-ce un bug reproductible ou qui arrive de maniere aleatoire (erreur sur optim, erreur de convergence, seed spéciale):**  
+- **Est-ce un bug reproductible ou qui arrive de maniere aléatoire (erreur sur optim, erreur de convergence, seed spéciale):**  
 
 - **L'erreur telle qu'elle apparait dans le log ou la console:**  
 
@@ -45,9 +45,10 @@ assignees: []
 ### Informations sur l'environnement d'apparition du bug
 
 - Système d'exploitation (local et machine virtuelle) :
-- Version de R utiliséé : 
+- Version de R utilisée : 
 - Version du package : 
 - Environnement d'exécution : Rstudio, shell, positron
+- Branche Git où le problème surgit si hors du main :
 - options : Liste et version des dépendances (output de _sessionInfo()_)
 
 
@@ -59,7 +60,7 @@ Si nécessaire
 * Capture d'ecran, logs, données ou tout autre détail pertinant.
 ---
 
-## Partie réservée aux développeurs
+## Organisation
 
 @ahboualam @MechantRouquin
 
@@ -78,7 +79,7 @@ Si nécessaire
     - Si oui, écrire dès maintenant la signature de la nouvelle fonction ou les modifications apportées à une signature existante.
   
   - Y a-t-il des tests unitaires qui couvrent déjà cette partie du code ?  
-    - Si oui, lesquels ?  
+    - Si oui, lesquels et ces tests ont-ils detecté le bug, sinon les rajouter ?  
     
   - Besoin de test supplémentaires ?  
     - Faut-il ajouter des tests pour valider la correction ?  
