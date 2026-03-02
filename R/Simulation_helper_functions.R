@@ -94,14 +94,12 @@ calculate_AR_coefficients_matrices <- function(parm, coordinates, AR_lag){
     K = length(parm$swg[[s]]$gf_par)
     for(k in 1:K){
       j = k-1
-      while (is.character(bk[[s]][[k]]$bk$Bk_0)) {
+      while (is.list(bk[[s]][[k]]$bk) && is.character(bk[[s]][[k]]$bk$Bk_0)) {
         bk[[s]][[k]]$bk$Bk_0 = try(bk[[s]][[j]]$bk$Bk_0, silent = T)
         bk[[s]][[k]]$bk$bk = list(try(bk[[s]][[j]]$bk$Bk, silent = T))
         bk[[s]][[k]]$cov0 = try(bk[[s]][[k]]$cov0, silent = T)
         j = k+1
-        
-        if (inherits(bk[[s]][[k]]$bk, "try-error") || is.character(bk[[s]][[k]]$bk)) {
-          break}
+      
       }
     }
   }
