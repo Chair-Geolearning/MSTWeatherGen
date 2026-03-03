@@ -492,7 +492,8 @@ loglik <- function(par, parms, par_all, data, names, Vi, h, u, uh, ep, cr) {
           
           # l3: Case where both variables are zero and both are "Precipitation"
           if (!length(which(id3 == TRUE)) == 0) {
-            l3 = sum(log(pbinorm(uh[id3, 7], uh[id3, 8], var1 = 1, var2 = 1, cov12 = cij[id3])))
+            rho_bound <- pmin(pmax(cij[id3], -0.99999999), 0.99999999)
+            l3 = sum(log(pbinorm(uh[id3, 7], uh[id3, 8], var1 = 1, var2 = 1, cov12 = rho_bound)))
           }
           
           # l4: Case where both variables have non-zero values
@@ -543,7 +544,8 @@ loglik <- function(par, parms, par_all, data, names, Vi, h, u, uh, ep, cr) {
           
           # l3: Case where both variables are zero and both are "Precipitation"
           if (!length(which(id3 == TRUE)) == 0) {
-            l3 = sum(log(pbinorm(uh[id3, 7], uh[id3, 8], var1 = 1, var2 = 1, cov12 = cij[id3])))
+            rho_bound <- pmin(pmax(cij[id3], -0.99999999), 0.99999999)
+            l3 = sum(log(pbinorm(uh[id3, 7], uh[id3, 8], var1 = 1, var2 = 1, cov12 = rho_bound)))
           }
           
           # l4: Case where both variables have non-zero values
