@@ -114,6 +114,8 @@ Côté négatif (gauche) — indique la mémoire libérée, c'est-à-dire les ob
 Attention .La memoire negative peut depasser la memoire positive car la mémoire libérée et la mémoire allouée ne concernent pas forcément les mêmes objets.
 
 Il y a ensuite le temps ecoule en ms a droite pour chaque fonction et sous-fonction.
+Attention, le calcul est fait en echantillage, il est donc impossible d'obtenir deux fois le meme resultat.
+profvis fonctionne par échantillonnage : toutes les 10 millisecondes environ, R prend une "photo" de ce qu'il est en train de faire. Ce n'est donc pas une mesure continue et exhaustive, ce qui signifie qu'il est impossible d'obtenir exactement les mêmes résultats deux fois. Les chiffres varient légèrement d'une exécution à l'autre et doivent être interprétés comme de grandes tendances plutôt que comme des mesures absolues et précises. Et donc les resultats sont aussi differents de ceux des autres mesures de temps de profiling par exemple estim prend 567.50 s dans Rprof mais prend 637.0 s dans Profvis.
 
 
 
