@@ -40,9 +40,11 @@ elapsed est le temps réel écoulé, c'est-à-dire le temps que l'on a effective
 
 Il existe une méthode de profilage un peu plus détaillée. Il faut utiliser Rprof() avant le code que l'on veut profiler et Rprof(NULL) juste après. Cela permet de profiler un bloc de code complet ou une partie de code spécifique. On obtient alors un fichier Rprof.out qui est difficile à interpréter directement. Il faut ensuite appeler summaryRprof() pour pouvoir interpréter les résultats de ce fichier.
 
-##  Comment interpreter les resultats ? et exemple de resultats : 
+## Comment interpréter les résultats ? Exemple de résultats :
 
-"by.total" — montre le pourcentage du temps total passé dans chaque fonction, en incluant le temps des sous-fonctions appelées. C'est trompeur : MSTWeatherGen_Estim affiche 100% car tout se passe en elle, même si elle délègue immédiatement le travail à d'autres fonctions.
+Voici un exemple de résultats de Rprof()
+
+"by.total" — montre le pourcentage du temps total passé dans chaque fonction, en incluant le temps des sous-fonctions appelées ce qui est trompeur : MSTWeatherGen_Estim affiche 100% car tout se passe en elle, même si elle délègue immédiatement le travail à d'autres fonctions.
 
 "by.self" est un plus utile : il ne compte que le temps propre à chaque fonction, en excluant le temps passé dans les fonctions qu'elle appelle. 
 
@@ -71,7 +73,7 @@ $sampling.time
 567.5
 
 
-##  Troisieme et derniere methode : PRovis :
+##  Troisième et dernière méthode : profvis
 
 profvis est un outil de visualisation du profileur R qui permet d'identifier les goulots d'étranglement dans le code.
 
@@ -84,7 +86,7 @@ MSTWeatherGen_Estim(data = data, seasons = seasons,dates = dates, names = names,
 })
 
 
-## Analyse et interpretation des resultats : 
+## Analyse et interprétation des résultats : 
 
 Les résultats sont présentés sous deux onglets. Une fenêtre s'ouvre avec le nom Profile.
 Le premier, Flame Graph, affiche une représentation visuelle de la pile d'appels au fil du temps : chaque bloc correspond à une fonction, et sa largeur est proportionnelle au temps qu'elle consomme — on peut ainsi voir d'un coup d'œil quelles fonctions dominent l'exécution. Les piles sont de couleur jaune et comportent plusieurs étages : la première couche est la première fonction appelée, ensuite d'autres étages s'additionnent, correspondant aux fonctions appelées par la suite ou aux fonctions imbriquées dans la fonction appelée. Ainsi, une pile jaune peut contenir plusieurs fonctions appelées sur le même intervalle de temps. En passant la souris sur chaque bloc, on obtient le nom de la fonction concernée, le temps passé, et la mémoire utilisée par celle-ci.
@@ -92,7 +94,7 @@ Le second onglet, Data, présente les mêmes informations sous forme de tableau 
 Dans l'onglet Data, la colonne mémoire est représentée avec deux côtés :
 
 Côté positif (droite) — indique la mémoire allouée, c'est-à-dire la quantité de mémoire que R a réservée pour créer de nouveaux objets à cette ligne.
-Côté négatif (gauche) — indique la mémoire libérée, c'est-à-dire les objets qui ne sont plus nécessaires et que le garbage collector a récupérés.
+Côté négatif (gauche) — indique la mémoire libérée, c'est-à-dire les objets qui ne sont plus nécessaires et que le garbage collector a récupéré.
 
 Attention. La mémoire négative peut dépasser la mémoire positive car la mémoire libérée et la mémoire allouée ne concernent pas forcément les mêmes objets. Il y a ensuite le temps écoulé en ms à droite pour chaque fonction et sous-fonction.
 Enfin, le calcul étant fait par échantillonnage, il est impossible d'obtenir deux fois le même résultat. profvis prend en effet une "photo" de ce que R est en train de faire toutes les 10 millisecondes environ — ce n'est donc pas une mesure continue et exhaustive. Les chiffres varient légèrement d'une exécution à l'autre et doivent être interprétés comme de grandes tendances plutôt que comme des mesures absolues et précises. C'est pourquoi les résultats diffèrent également d'un outil de profilage à l'autre : par exemple, Estim prend 567,50 s dans Rprof, 637,0 s dans profvis et 1160,0 s dans system.time.
