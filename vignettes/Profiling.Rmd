@@ -29,8 +29,8 @@ system.time(MSTWeatherGen_Estim(data = data, seasons = seasons,dates = dates, na
 
 Voici un exemple de résultat :
 
->     user       system      elapsed 
-      231.460    2491.254    1160.792 
+>   user       system      elapsed 
+ 231.460    2491.254    1160.792 
 
 
 elapsed est le temps réel écoulé, c'est-à-dire le temps que l'on a effectivement passé à attendre devant l'ordinateur. user et elapsed sont généralement proches, mais le temps écoulé peut dépasser le user si le CPU met du temps à charger des ressources. À l'inverse, elapsed peut être inférieur à user dans le cas de calculs multicœurs, où plusieurs tâches sont effectuées en parallèle, réduisant ainsi le temps d'attente réel. C'est la méthode la plus basique de profilage, qui permet simplement d'obtenir le temps écoulé d'une fonction ou d'une portion de code.
@@ -116,12 +116,28 @@ Couleurs : différentes couleurs sont utilisées pour distinguer les différente
 
 Largeur des barres : la largeur de chaque barre correspond au temps passé à exécuter la fonction. Des barres plus larges indiquent que plus de temps a été passé dans cette fonction particulière.
 
-Note 1: les bandes noires peuvent disparaître en zoomant dans le flame graph. En changeant d'échelle, on affine la résolution temporelle et les fonctions intermédiaires jusqu'alors invisibles peuvent alors apparaître.
+Note 1 : les bandes noires peuvent disparaître en zoomant dans le flame graph. En changeant d'échelle, on affine la résolution temporelle et les fonctions intermédiaires jusqu'alors invisibles peuvent alors apparaître.
 
 Note 2 : FUN qui apparaît souvent dans la liste de fonctions désigne simplement la fonction passée en argument à des fonctions comme lapply ou apply — c'est le nom générique utilisé en interne par R pour désigner cette fonction callback.
 
-# Détection de Bottleneck avec profvis :
+# Détection de Bottleneck avec Profvis :
 
+Analyse du Flame Graph :
+
+Identifier les goulots d'étranglement : repérer les sections avec les barres les plus larges. Celles-ci représentent les fonctions qui consomment le plus de temps d'exécution et sont des goulots d'étranglement potentiels.
+  
+Comprendre la pile d'appels : remonter le chemin depuis le bas vers le haut pour identifier la séquence d'appels de fonctions menant au goulot d'étranglement.
+Zoomer : zoomer sur des sections spécifiques afin d'examiner de plus près les appels de fonctions imbriquées.
+
+Comparer les exécutions : il est possible de comparer les flame graphs de différentes versions du code pour identifier des améliorations ou des régressions de performance.
+
+Interprétation des informations :
+
+Temps passé dans les fonctions : la largeur d'une barre à un niveau donné révèle le temps passé à exécuter cette fonction particulière.
+
+Temps propre vs. temps total : certaines implémentations de profvis distinguent le "temps propre" (temps passé dans la fonction elle-même) et le "temps total" (incluant le temps passé dans les fonctions qu'elle appelle). Cela permet d'identifier les fonctions qui contribuent significativement aux goulots d'étranglement via des appels imbriqués.
+
+Optimisation du code : en se concentrant sur les fonctions avec les barres les plus larges, il est possible de prioriser les efforts d'optimisation en restructurant le code, en utilisant la vectorisation ou en explorant des algorithmes alternatifs.
 
 
 
