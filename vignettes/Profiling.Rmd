@@ -120,7 +120,7 @@ Note 1 : les bandes noires peuvent disparaître en zoomant dans le flame graph. 
 
 Note 2 : FUN qui apparaît souvent dans la liste de fonctions désigne simplement la fonction passée en argument à des fonctions comme lapply ou apply — c'est le nom générique utilisé en interne par R pour désigner cette fonction callback.
 
-# Détection de Bottleneck avec Profvis :
+# Détection de Bottleneck avec Profvis et Rprof :
 
 Analyse du Flame Graph :
 
@@ -135,7 +135,7 @@ Interprétation des informations :
 
 Temps passé dans les fonctions : la largeur d'une barre à un niveau donné révèle le temps passé à exécuter cette fonction particulière.
 
-Temps propre vs. temps total : certaines implémentations de profvis distinguent le "temps propre" (temps passé dans la fonction elle-même) et le "temps total" (incluant le temps passé dans les fonctions qu'elle appelle). Cela permet d'identifier les fonctions qui contribuent significativement aux goulots d'étranglement via des appels imbriqués.
+Temps propre vs. temps total : Rprof distinguent le "temps propre" (temps passé dans la fonction elle-même) et le "temps total" (incluant le temps passé dans les fonctions qu'elle appelle). Cela permet d'identifier les fonctions qui contribuent significativement aux goulots d'étranglement via des appels imbriqués.
 
 Optimisation du code : en se concentrant sur les fonctions avec les barres les plus larges, il est possible de prioriser les efforts d'optimisation en restructurant le code, en utilisant la vectorisation ou en explorant des algorithmes alternatifs.
 
