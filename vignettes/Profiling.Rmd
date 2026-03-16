@@ -13,41 +13,32 @@ knitr::opts_chunk$set(
 
 ## Introduction
 
-Cette vignette a pour but de montrer comment faire du profiling de code R.
+Cette vignette a pour but de montrer comment effectuer du profilage de code R.
 
-## La methode la plus basique
-
+## La méthode la plus basique
 
 La méthode la plus simple est system.time(), où il faut mettre entre les parenthèses la partie du code que l'on veut profiler. On obtient en résultat trois valeurs : user, system et elapsed.
+Exemple d'utilisation pour profiler la fonction MSTWeatherGen_Estim :
 
-Exemple d'utilisation : 
-
-system.time(MSTWeatherGen_Sim(dates_sim = dates, dates_original = dates, 
-                                data = data, seasons = seasons, parm = swg, AR_lag = AR_lag, bk = bk))
+system.time(MSTWeatherGen_Estim(data = data, seasons = seasons,dates = dates, names = names, by_season = T, scale = T, 
+                                                          precipitation = T,names_weather_types = names_weather_types,
+                                                          coordinates= coordinates, max_it=100, tmax=1, n1=3, n2=3))
                                 
 
+## Comment interpréter les résultats ?
 
-##  Comment interpreter les resultats ? : 
+Voici un exemple de résultat :
 
-Voici un exemple de resultat : 
-
-> utilisateur     système      écoulé 
-      5.280        0.000       5.284 
-
-
-ecoule est le temps écoulé exact que l'on a passé à attendre derriere l'ordinateur. 
-User time et elapsed time sont proches, et le temps ecoule peut dépasser le user time si le CPU met du temps à charger, et normalement il se passe l'inverse s'il y a du calcul multicœur qui rend les taches plus rapides.
-C'est la méthode la plus basique de profilage qui permet juste d'avoir le temps ecoule d'une fonction ou d'une partie de code.
+>     user       system      elapsed 
+      231.460    2491.254    1160.792 
 
 
-## Une methode plus avancee
+elapsed est le temps réel écoulé, c'est-à-dire le temps que l'on a effectivement passé à attendre devant l'ordinateur. user et elapsed sont généralement proches, mais le temps écoulé peut dépasser le user si le CPU met du temps à charger des ressources. À l'inverse, elapsed peut être inférieur à user dans le cas de calculs multicœurs, où plusieurs tâches sont effectuées en parallèle, réduisant ainsi le temps d'attente réel. C'est la méthode la plus basique de profilage, qui permet simplement d'obtenir le temps écoulé d'une fonction ou d'une portion de code.
 
-Sinon, il existe une methode pour le profilage un peu plus detaillee :
 
-Il faut utiliser Rprof() avant le code que l'on veut profiler et Rprof(NULL) après le code. Cela nous permet de profiler du code complet ou une partie de code specifique. 
-On obtient alors un fichier Rprof.out qui est difficile à interpréter.
+## Une méthode plus avancée
 
-Il faut ensuite appeler summaryRprof() pour pouvoir interpréter les résultats de ce fichier 
+Il existe une méthode de profilage un peu plus détaillée. Il faut utiliser Rprof() avant le code que l'on veut profiler et Rprof(NULL) juste après. Cela permet de profiler un bloc de code complet ou une partie de code spécifique. On obtient alors un fichier Rprof.out qui est difficile à interpréter directement. Il faut ensuite appeler summaryRprof() pour pouvoir interpréter les résultats de ce fichier.
 
 ##  Comment interpreter les resultats ? et exemple de resultats : 
 
@@ -92,30 +83,20 @@ MSTWeatherGen_Estim(data = data, seasons = seasons,dates = dates, names = names,
                         coordinates= coordinates, max_it=100, tmax=1, n1=3, n2=3)
 })
 
-## Analyse et interpretation des resultats
 
-Les résultats sont sous deux onglets. Une fenetre s'ouvre avec le nom Profile.
+## Analyse et interpretation des resultats : 
 
-Le premier, Flame Graph, affiche une représentation visuelle de la pile d'appels au fil du temps : chaque bloc correspond à une fonction, et sa largeur est proportionnelle au temps qu'elle consomme — on peut ainsi voir d'un coup d'œil quelles fonctions dominent l'exécution. 
-Les piles sont de couleurs jaunes et il y a plusieurs etages jaunes, la premiere couche est la premiere fonction appellee, 
-ensuite il y a d'autres etages qui s'additionnent qui sont les fonctions appellees par la suite ou les fonctions imbriquees dans la fonction appellee, parfait une pile de couleur jaune peux contenir plusieurs fonctions appellee sur la meme pile de temps.
-En passant la souris sur chaque bloc, on obtient la fonction concernee le temps passee, et la memoire utilisee par la fonction.
-
-Le second onglet, Data, présente les mêmes informations sous forme de tableau chiffré, avec le temps passé dans chaque fonction (en millisecondes), ce qui permet une lecture plus précise. En plus du temps CPU, profvis affiche également la consommation mémoire : on peut voir les allocations et libérations de mémoire ligne par ligne, notamment grâce aux blocs gris <GC> (garbage collection) qui signalent les moments où R libère de la mémoire devenue inutile. Cette double lecture — temps et mémoire — permet d'identifier non seulement les fonctions lentes, mais aussi celles qui sollicitent excessivement la mémoire, deux causes fréquentes de lenteur en R.
-
-Quand a l'onglet data, celui-ci est assez explicite et permet de profiler la memoire et le temps ecoule, par fonction avec une arborescence detaillee, 
-Par exemple dans le cas de la fonction MSTWeatherGen_Estim
-
-Dans l'onglet Data de profvis, la colonne mémoire est représentée avec deux côtés :
+Les résultats sont présentés sous deux onglets. Une fenêtre s'ouvre avec le nom Profile.
+Le premier, Flame Graph, affiche une représentation visuelle de la pile d'appels au fil du temps : chaque bloc correspond à une fonction, et sa largeur est proportionnelle au temps qu'elle consomme — on peut ainsi voir d'un coup d'œil quelles fonctions dominent l'exécution. Les piles sont de couleur jaune et comportent plusieurs étages : la première couche est la première fonction appelée, ensuite d'autres étages s'additionnent, correspondant aux fonctions appelées par la suite ou aux fonctions imbriquées dans la fonction appelée. Ainsi, une pile jaune peut contenir plusieurs fonctions appelées sur le même intervalle de temps. En passant la souris sur chaque bloc, on obtient le nom de la fonction concernée, le temps passé, et la mémoire utilisée par celle-ci.
+Le second onglet, Data, présente les mêmes informations sous forme de tableau chiffré, avec le temps passé dans chaque fonction (en millisecondes), ce qui permet une lecture plus précise. En plus du temps CPU, profvis affiche également la consommation mémoire : on peut voir les allocations et libérations de mémoire ligne par ligne, notamment grâce aux blocs gris <GC> (garbage collection) qui signalent les moments où R libère de la mémoire devenue inutile. Cette double lecture — temps et mémoire — permet d'identifier non seulement les fonctions lentes, mais aussi celles qui sollicitent excessivement la mémoire, deux causes fréquentes de lenteur en R. Cet onglet permet de profiler la mémoire et le temps écoulé par fonction, avec une arborescence détaillée, par exemple dans le cas de la fonction MSTWeatherGen_Estim.
+Dans l'onglet Data, la colonne mémoire est représentée avec deux côtés :
 
 Côté positif (droite) — indique la mémoire allouée, c'est-à-dire la quantité de mémoire que R a réservée pour créer de nouveaux objets à cette ligne.
 Côté négatif (gauche) — indique la mémoire libérée, c'est-à-dire les objets qui ne sont plus nécessaires et que le garbage collector a récupérés.
 
-Attention .La memoire negative peut depasser la memoire positive car la mémoire libérée et la mémoire allouée ne concernent pas forcément les mêmes objets.
+Attention. La mémoire négative peut dépasser la mémoire positive car la mémoire libérée et la mémoire allouée ne concernent pas forcément les mêmes objets. Il y a ensuite le temps écoulé en ms à droite pour chaque fonction et sous-fonction.
+Enfin, le calcul étant fait par échantillonnage, il est impossible d'obtenir deux fois le même résultat. profvis prend en effet une "photo" de ce que R est en train de faire toutes les 10 millisecondes environ — ce n'est donc pas une mesure continue et exhaustive. Les chiffres varient légèrement d'une exécution à l'autre et doivent être interprétés comme de grandes tendances plutôt que comme des mesures absolues et précises. C'est pourquoi les résultats diffèrent également d'un outil de profilage à l'autre : par exemple, Estim prend 567,50 s dans Rprof, 637,0 s dans profvis et 1160,0 s dans system.time.
 
-Il y a ensuite le temps ecoule en ms a droite pour chaque fonction et sous-fonction.
-Attention, le calcul est fait en echantillage, il est donc impossible d'obtenir deux fois le meme resultat.
-profvis fonctionne par échantillonnage : toutes les 10 millisecondes environ, R prend une "photo" de ce qu'il est en train de faire. Ce n'est donc pas une mesure continue et exhaustive, ce qui signifie qu'il est impossible d'obtenir exactement les mêmes résultats deux fois. Les chiffres varient légèrement d'une exécution à l'autre et doivent être interprétés comme de grandes tendances plutôt que comme des mesures absolues et précises. Et donc les resultats sont aussi differents de ceux des autres mesures de temps de profiling par exemple estim prend 567.50 s dans Rprof mais prend 637.0 s dans Profvis.
 
 
 
