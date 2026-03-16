@@ -101,5 +101,14 @@ Attention. La mémoire négative peut dépasser la mémoire positive car la mém
 Enfin, le calcul étant fait par échantillonnage, il est impossible d'obtenir deux fois le même résultat. profvis prend en effet une "photo" de ce que R est en train de faire toutes les 10 millisecondes environ — ce n'est donc pas une mesure continue et exhaustive. Les chiffres varient légèrement d'une exécution à l'autre et doivent être interprétés comme de grandes tendances plutôt que comme des mesures absolues et précises. C'est pourquoi les résultats diffèrent également d'un outil de profilage à l'autre : par exemple, Estim prend 567,50 s dans Rprof, 637,0 s dans profvis et 1160,0 s dans system.time.
 
 
+# Explication des bandes noires sur le graphe : 
+
+Les bandes noires qui sont tout en haut de la pile et entre certaines fonctions des couches en dessous sur le flame graph de profvis représentent en fait le temps et des moments où R exécute des fonctions internes ou intermédiaires qui ne remontent pas dans le profileur car trop rapides en éxecution. 
+C'est le cas par exemple de fonctions comme $, [.data.frame, ou d'autres fonctions internes de R. 
+Ces fonctions sont bien exécutées, mais elles créent ces zones noires dans le graphe. Cela ne signifie donc pas que R ne fait rien à ces moments-là, mais simplement que les fonctions en cours d'exécution sont invisibles pour le profileur d'ou des bandes noires.
+
+NB : FUN qui apparaît souvent dans la liste de focntions désigne simplement la fonction passée en argument à des fonctions comme lapply ou apply — c'est le nom générique utilisé en interne par R pour désigner cette fonction callback.
+
+
 
 
