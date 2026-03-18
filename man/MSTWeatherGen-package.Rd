@@ -53,6 +53,6 @@ Denis Allard \email{denis.allard@inrae.fr}
 
 Lionel Benoit \email{lionel.benoit@inrae.fr}
 
-Maintainer: Jean-FRançois Rey \email{jean-francois.rey@inrae.fr}
+Maintainer: Jean-François Rey \email{jean-francois.rey@inrae.fr}
 }
 \keyword{internal}
