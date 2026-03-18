@@ -85,37 +85,49 @@ utils::globalVariables(c("r", "y", "v", "lon", "lat", "n"))
 #' @import viridis
 #' @export
 plot_dry_wet_spells_maps = function(sim, observed, coordinates, dates){
+  has_names <- !is.null(colnames(coordinates))
+  cn <- if (has_names) tolower(colnames(coordinates)) else NULL
+  
+  if (has_names) {
+    lon_col <- which(cn %in% c("lon", "longitude"))[1]
+    lat_col <- which(cn %in% c("lat", "latitude"))[1]
+    if (is.na(lon_col)) lon_col <- 1
+    if (is.na(lat_col)) lat_col <- 2
+    lon_vec <- coordinates[, lon_col]
+    lat_vec <- coordinates[, lat_col]
+  } else {
+    lon_vec <- coordinates[, 1]
+    lat_vec <- coordinates[, 2]
+  }
+  
   df = lapply(1:nrow(coordinates), function(j){
-    
+    # Extraction des series precipitations obs/sim pour la station j
     prec_obs = observed[,j,"Precipitation"]
     prec_sim = sim[,j,"Precipitation"]
-    qx = 0
+        
+    # Binarisation (0/1) > 0 => 1, sinon 0
+    prec_obs <- as.integer(prec_obs > 0)
+    prec_sim <- as.integer(prec_sim > 0)
     
-    prec_obs[prec_obs>qx] = 1
-    prec_sim[prec_sim>qx] = 1
-    
+    # Runs de jours humides (==1)
     ro = rle(prec_obs)
     rs = rle(prec_sim)
-    if(length(ro$lengths[ro$values==0])==0){
-      dfo=NULL
-    }else{
-      dfo = data.frame(r = ro$lengths[ro$values==1], y = "Observed")
-    }
-    if(length(rs$lengths[rs$values==0])==0){
-      dfs=NULL
-    }else{
-      dfs = data.frame(r = rs$lengths[rs$values==1], y = "Simulated")
-    }
+
+    dfo <- if (any(ro$values == 1)) data.frame(r = ro$lengths[ro$values == 1], y = "Observed") else NULL
+    dfs <- if (any(rs$values == 1)) data.frame(r = rs$lengths[rs$values == 1], y = "Simulated") else NULL
+    
+     if (is.null(dfo) && is.null(dfs)) stop("Error : no precipitations")
+
     df = rbind(dfo,dfs)
     df_sum <- df %>%
       dplyr::group_by(r, y) %>%
       dplyr::tally() %>%
       dplyr::mutate(v = dplyr::case_when(
-        r > 1 & r < 4 ~ 1,
-        r >= 4 & r < 7 ~ 2,
-        r >= 7 & r < 10 ~ 3,
-        r >= 10 ~ 4,
-        TRUE ~ 0
+        r > 1 & r < 4 ~ 1L,
+        r >= 4 & r < 7 ~ 2L,
+        r >= 7 & r < 10 ~ 3L,
+        r >= 10 ~ 4L,
+        TRUE ~ 0L
       )) %>%
       dplyr::group_by(y, v) %>%
       dplyr::summarise(n = sum(n), .groups = 'drop') %>%
@@ -125,13 +137,18 @@ plot_dry_wet_spells_maps = function(sim, observed, coordinates, dates){
         v == 3 ~ "7 <= NC < 10",
         v == 4 ~ "NC >= 10",
         TRUE ~ "Other"
+        )
       )
-      )
-    df_sum$lon = coordinates[j,1]
-    df_sum$lat = coordinates[j,2]
+    df_sum$lon = lon_vec[j]
+    df_sum$lat = lat_vec[j]
     return(df_sum)
   })
+  
   df = do.call(rbind, df)
+  if (nrow(df) == 0) {
+    stop("Aucune classe 'v > 0' disponible pour l'affichage.")
+  }
+
   p <- ggplot(df, aes(lon, lat)) +
     ggplot2::geom_polygon(
       data = ggplot2::map_data("world"),
