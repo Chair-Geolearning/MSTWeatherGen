@@ -116,7 +116,7 @@ plot_dry_wet_spells_maps = function(sim, observed, coordinates, dates){
     dfo <- if (any(ro$values == 1)) data.frame(r = ro$lengths[ro$values == 1], y = "Observed") else NULL
     dfs <- if (any(rs$values == 1)) data.frame(r = rs$lengths[rs$values == 1], y = "Simulated") else NULL
     
-     if (is.null(dfo) && is.null(dfs)) stop("Error : no precipitations")
+    if (is.null(dfo) && is.null(dfs)) stop("Error : no precipitations")
 
     df = rbind(dfo,dfs)
     df_sum <- df %>%
@@ -145,23 +145,40 @@ plot_dry_wet_spells_maps = function(sim, observed, coordinates, dates){
   })
   
   df = do.call(rbind, df)
+  if (is.null(df) || nrow(df) == 0) {
+    stop("Aucune sequence de jours humides detected pour construire la carte.")
+  }
+
+  # On garde les classes v > 0
+  df <- dplyr::filter(df, v > 0)
   if (nrow(df) == 0) {
     stop("Aucune classe 'v > 0' disponible pour l'affichage.")
   }
 
-  p <- ggplot(df, aes(lon, lat)) +
-    ggplot2::geom_polygon(
-      data = ggplot2::map_data("world"),
+  region <- ggplot2::map_data("world") %>%  
+    dplyr::filter(
+      long >= min(df$lon) & long <= max(df$lon) &
+        lat  >= min(df$lat) & lat  <= max(df$lat)
+    )
+  
+  p <- ggplot2::ggplot(df, ggplot2::aes(lon, lat)) +
+    ggplot2::geom_path(
+      data = region,
       ggplot2::aes(x=.data$long, y=.data$lat, group = .data$group),
-      fill = "NA",
       color = "black",
       inherit.aes = FALSE
     ) +
-    ggplot2::coord_quickmap(xlim = range(df$lon), ylim = range(df$lat)) +
-    ggplot2::geom_point(aes(color = n), size = 7, shape = 15, alpha = 0.8) +
-    ggplot2::scale_color_viridis_c(option = "magma") +
-    ggplot2::scale_color_viridis_c(name = "Number of consecutive wet days (NC)", option = "magma", direction = -1) +
+    #ggplot2::coord_cartesian(xlim = range(df$lon), ylim = range(df$lat)) +
+    # ecrase l'echelle de projection
+    #ggplot2::coord_sf(xlim = range(df$lon), ylim = range(df$lat)) +
+    # ou
+    #ggplot2::coord_quickmap(xlim = range(df$lon), ylim = range(df$lat)) +
+    ggplot2::geom_point(
+      ggplot2::aes(color = n, group = 1),
+      size = 7, shape = 15, alpha = 0.8) +
+    ggplot2::scale_color_gradientn("Number of consecutive wet days (NC)", colours = rev(viridis::viridis(10, option="magma"))) +
     ggplot2::facet_grid(y ~ v_label) +
+    #facet_wrap(y ~ v_label, scales = "free", ncol = 4) +
     ggplot2::theme_bw() +
     ggplot2::xlab("Longitude (degree)") + 
     ggplot2::ylab("Latitude (degree)") +
@@ -344,16 +361,29 @@ plot_wet_frequency = function(sim, observed, dates, seasons, coordinates, names_
     prec_sim = ifelse(prec_sim <= 0, 0, 1)
     
     # Combine into one data frame
-    df_obs = data.frame(Type = "Observed", lon = coordinates$longitude, lat = coordinates$latitude, Frequency = 100 * colSums(prec_obs) / nrow(prec_obs))
-    df_sim = data.frame(Type = "Simulated", lon = coordinates$longitude, lat = coordinates$latitude, Frequency = 100 * colSums(prec_sim) / nrow(prec_sim))
+    df_obs = data.frame(Type = "Observed", lon = coordinates$longitude, lat = coordinates$latitude, Frequency = as.integer(100 * colSums(prec_obs) / nrow(prec_obs)))
+    df_sim = data.frame(Type = "Simulated", lon = coordinates$longitude, lat = coordinates$latitude, Frequency = as.integer(100 * colSums(prec_sim) / nrow(prec_sim)))
     df = rbind(df_obs, df_sim)
     
     # Create the plot
+    region <- ggplot2::map_data("world") %>%  
+      dplyr::filter(
+        long >= min(df$lon) & long <= max(df$lon) &
+          lat  >= min(df$lat) & lat  <= max(df$lat)
+      )
+  
+
     p = ggplot2::ggplot(df, ggplot2::aes(lon, lat )) + 
-      ggplot2::annotation_borders("world", colour="black",fill= "grey",xlim=range(df$lon), ylim = range(df$lat)) +
-      ggplot2::coord_cartesian(xlim=range(df$lon), ylim = range(df$lat))+
+      ggplot2::geom_path(
+        data = region,
+        ggplot2::aes(x=.data$long, y=.data$lat, group = .data$group),
+        colour = "black",
+        inherit.aes = FALSE
+      ) +
+      #ggplot2::annotation_borders("world", colour="black",fill= "grey",xlim=range(df$lon), ylim = range(df$lat)) +
+      #ggplot2::coord_cartesian(xlim=range(df$lon), ylim = range(df$lat))+
       ggplot2::scale_color_gradientn(name = "Frequency of wet days (%)", colours = rev(viridis::viridis(10, option = "magma"))) +
-      ggplot2::geom_point(ggplot2::aes(color = Frequency),size=7, shape=15)+
+      ggplot2::geom_point(ggplot2::aes(color = Frequency, group = 1),size=7, shape=15, alpha=0.8)+
       ggplot2::facet_wrap(vars("Type"), scales = "free", ncol = 1) +
       ggplot2::theme_light() +
       ggplot2::theme(plot.title = ggplot2::element_text(size = 15, hjust = 0.5), 
