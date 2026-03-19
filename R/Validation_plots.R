@@ -21,50 +21,50 @@ utils::globalVariables(c("y", "type"))
 #' @import ggplot2
 #' @import patchwork
 #' @export
-plot_observed_vs_simulated_density = function(sim, observed, dates, seasons, location, names, names_seasons=NULL) {
-  
-  id = which(sim==0, arr.ind = T)
-  id = id[id[,3]==5,]
-  sim[id] = NaN
-  
-  id = which(observed==0, arr.ind = T)
-  id = id[id[,3]==5,]
-  observed[id] = NaN
-  
-  combined_plot = NULL
-  names_seasons = if(is.null(names_seasons)){
+plot_observed_vs_simulated_density <- function(sim, observed, dates, seasons, location, names, names_seasons = NULL) {
+  id <- which(sim == 0, arr.ind = T)
+  id <- id[id[, 3] == 5, ]
+  sim[id] <- NaN
+
+  id <- which(observed == 0, arr.ind = T)
+  id <- id[id[, 3] == 5, ]
+  observed[id] <- NaN
+
+  combined_plot <- NULL
+  names_seasons <- if (is.null(names_seasons)) {
     names(seasons)
-  }else{names_seasons}
+  } else {
+    names_seasons
+  }
   for (s in 1:length(seasons)) {
-    season_indice = season_indices(dates, seasons[[s]])
-    
-    combined_data = lapply(names, function(v) {
-      sim_data = data.frame(y = sim[season_indice, location, v], type = 'Simulated', variable = v)
-      obs_data = data.frame(y = observed[season_indice, location, v], type = 'Observed', variable = v)
+    season_indice <- season_indices(dates, seasons[[s]])
+
+    combined_data <- lapply(names, function(v) {
+      sim_data <- data.frame(y = sim[season_indice, location, v], type = "Simulated", variable = v)
+      obs_data <- data.frame(y = observed[season_indice, location, v], type = "Observed", variable = v)
       rbind(sim_data, obs_data)
     })
-    
-    df = do.call(rbind, combined_data)
-    
-    p = ggplot2::ggplot(df, ggplot2::aes(x = y, color = type)) +
+
+    df <- do.call(rbind, combined_data)
+
+    p <- ggplot2::ggplot(df, ggplot2::aes(x = y, color = type)) +
       ggplot2::geom_density() +
-      ggplot2::facet_wrap(~variable, scales = "free") + 
+      ggplot2::facet_wrap(~variable, scales = "free") +
       ggplot2::theme_bw() +
       ggplot2::labs(x = "Value", y = "Density", color = "Type", title = names_seasons[s]) +
-      ggplot2::scale_color_manual("",values = c("Simulated" = "blue", "Observed" = "red")) +
+      ggplot2::scale_color_manual("", values = c("Simulated" = "blue", "Observed" = "red")) +
       ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5))
-    
-    if(is.null(combined_plot)) {
-      combined_plot = p
+
+    if (is.null(combined_plot)) {
+      combined_plot <- p
     } else {
-      combined_plot = combined_plot + p
+      combined_plot <- combined_plot + p
     }
   }
-  
-  combined_plot = combined_plot + patchwork::plot_layout(guides = 'collect')
-  
+
+  combined_plot <- combined_plot + patchwork::plot_layout(guides = "collect")
+
   return(combined_plot)
-  
 }
 
 utils::globalVariables(c("r", "y", "v", "lon", "lat", "n"))
@@ -84,10 +84,10 @@ utils::globalVariables(c("r", "y", "v", "lon", "lat", "n"))
 #' @importFrom dplyr group_by tally mutate case_when summarise
 #' @import viridis
 #' @export
-plot_dry_wet_spells_maps = function(sim, observed, coordinates, dates){
+plot_dry_wet_spells_maps <- function(sim, observed, coordinates, dates) {
   has_names <- !is.null(colnames(coordinates))
   cn <- if (has_names) tolower(colnames(coordinates)) else NULL
-  
+
   if (has_names) {
     lon_col <- which(cn %in% c("lon", "longitude"))[1]
     lat_col <- which(cn %in% c("lat", "latitude"))[1]
@@ -99,26 +99,26 @@ plot_dry_wet_spells_maps = function(sim, observed, coordinates, dates){
     lon_vec <- coordinates[, 1]
     lat_vec <- coordinates[, 2]
   }
-  
-  df = lapply(1:nrow(coordinates), function(j){
+
+  df <- lapply(1:nrow(coordinates), function(j) {
     # Extraction des series precipitations obs/sim pour la station j
-    prec_obs = observed[,j,"Precipitation"]
-    prec_sim = sim[,j,"Precipitation"]
-        
+    prec_obs <- observed[, j, "Precipitation"]
+    prec_sim <- sim[, j, "Precipitation"]
+
     # Binarisation (0/1) > 0 => 1, sinon 0
     prec_obs <- as.integer(prec_obs > 0)
     prec_sim <- as.integer(prec_sim > 0)
-    
+
     # Runs de jours humides (==1)
-    ro = rle(prec_obs)
-    rs = rle(prec_sim)
+    ro <- rle(prec_obs)
+    rs <- rle(prec_sim)
 
     dfo <- if (any(ro$values == 1)) data.frame(r = ro$lengths[ro$values == 1], y = "Observed") else NULL
     dfs <- if (any(rs$values == 1)) data.frame(r = rs$lengths[rs$values == 1], y = "Simulated") else NULL
-    
+
     if (is.null(dfo) && is.null(dfs)) stop("Error : no precipitations")
 
-    df = rbind(dfo,dfs)
+    df <- rbind(dfo, dfs)
     df_sum <- df %>%
       dplyr::group_by(r, y) %>%
       dplyr::tally() %>%
@@ -130,21 +130,20 @@ plot_dry_wet_spells_maps = function(sim, observed, coordinates, dates){
         TRUE ~ 0L
       )) %>%
       dplyr::group_by(y, v) %>%
-      dplyr::summarise(n = sum(n), .groups = 'drop') %>%
+      dplyr::summarise(n = sum(n), .groups = "drop") %>%
       dplyr::mutate(v_label = dplyr::case_when(
         v == 1 ~ "1 < NC < 4",
         v == 2 ~ "4 <= NC < 7",
         v == 3 ~ "7 <= NC < 10",
         v == 4 ~ "NC >= 10",
         TRUE ~ "Other"
-        )
-      )
-    df_sum$lon = lon_vec[j]
-    df_sum$lat = lat_vec[j]
+      ))
+    df_sum$lon <- lon_vec[j]
+    df_sum$lat <- lat_vec[j]
     return(df_sum)
   })
-  
-  df = do.call(rbind, df)
+
+  df <- do.call(rbind, df)
   if (is.null(df) || nrow(df) == 0) {
     stop("Aucune sequence de jours humides detected pour construire la carte.")
   }
@@ -155,35 +154,36 @@ plot_dry_wet_spells_maps = function(sim, observed, coordinates, dates){
     stop("Aucune classe 'v > 0' disponible pour l'affichage.")
   }
 
-  region <- ggplot2::map_data("world") %>%  
+  region <- ggplot2::map_data("world") %>%
     dplyr::filter(
       long >= min(df$lon) & long <= max(df$lon) &
-        lat  >= min(df$lat) & lat  <= max(df$lat)
+        lat >= min(df$lat) & lat <= max(df$lat)
     )
-  
+
   p <- ggplot2::ggplot(df, ggplot2::aes(lon, lat)) +
     ggplot2::geom_path(
       data = region,
-      ggplot2::aes(x=.data$long, y=.data$lat, group = .data$group),
+      ggplot2::aes(x = .data$long, y = .data$lat, group = .data$group),
       color = "black",
       inherit.aes = FALSE
     ) +
-    #ggplot2::coord_cartesian(xlim = range(df$lon), ylim = range(df$lat)) +
+    # ggplot2::coord_cartesian(xlim = range(df$lon), ylim = range(df$lat)) +
     # ecrase l'echelle de projection
-    #ggplot2::coord_sf(xlim = range(df$lon), ylim = range(df$lat)) +
+    # ggplot2::coord_sf(xlim = range(df$lon), ylim = range(df$lat)) +
     # ou
-    #ggplot2::coord_quickmap(xlim = range(df$lon), ylim = range(df$lat)) +
+    # ggplot2::coord_quickmap(xlim = range(df$lon), ylim = range(df$lat)) +
     ggplot2::geom_point(
       ggplot2::aes(color = n, group = 1),
-      size = 7, shape = 15, alpha = 0.8) +
-    ggplot2::scale_color_gradientn("Number of consecutive wet days (NC)", colours = rev(viridis::viridis(10, option="magma"))) +
+      size = 7, shape = 15, alpha = 0.8
+    ) +
+    ggplot2::scale_color_gradientn("Number of consecutive wet days (NC)", colours = rev(viridis::viridis(10, option = "magma"))) +
     ggplot2::facet_grid(y ~ v_label) +
-    #facet_wrap(y ~ v_label, scales = "free", ncol = 4) +
+    # facet_wrap(y ~ v_label, scales = "free", ncol = 4) +
     ggplot2::theme_bw() +
-    ggplot2::xlab("Longitude (degree)") + 
+    ggplot2::xlab("Longitude (degree)") +
     ggplot2::ylab("Latitude (degree)") +
     ggplot2::theme(legend.position = "top")
-  
+
   return(p)
 }
 utils::globalVariables(c("mu", "x"))
@@ -203,56 +203,72 @@ utils::globalVariables(c("mu", "x"))
 #' @import ggplot2
 #' @importFrom lubridate month year
 #' @export
-plot_mean_by_month = function(sim, observed,places,names_places, names, dates){
-  if(length(places) == 1){
-    df = lapply(names, function(variable){
-      months = unique(month(dates))
-      years = unique(year(dates))
-      df = lapply(months, function(m){
-        df = lapply(years, function(y){
-          month_indices = which(month(dates) %in% m & year(dates) %in% y)
-          xt = observed[month_indices,places,variable]
-          xs = sim[month_indices,places,variable]
-          df = data.frame(month = m, mu = mean(xt), x = "Observed", variable = variable, 
-                          som = "mean", location = names_places)
-          df = rbind(df,data.frame(month = m, mu = mean(xs), x = "Simulated", variable= variable,
-                                   som = "mean", location = names_places))
+plot_mean_by_month <- function(sim, observed, places, names_places, names, dates) {
+  if (length(places) == 1) {
+    df <- lapply(names, function(variable) {
+      months <- unique(month(dates))
+      years <- unique(year(dates))
+      df <- lapply(months, function(m) {
+        df <- lapply(years, function(y) {
+          month_indices <- which(month(dates) %in% m & year(dates) %in% y)
+          xt <- observed[month_indices, places, variable]
+          xs <- sim[month_indices, places, variable]
+          df <- data.frame(
+            month = m, mu = mean(xt), x = "Observed", variable = variable,
+            som = "mean", location = names_places
+          )
+          df <- rbind(df, data.frame(
+            month = m, mu = mean(xs), x = "Simulated", variable = variable,
+            som = "mean", location = names_places
+          ))
           return(df)
         })
         return(do.call(rbind, df))
       })
-      df = do.call(rbind, df)
+      df <- do.call(rbind, df)
     })
-    df = do.call(rbind, df)
-    p = ggplot2::ggplot(df, ggplot2::aes(x=factor(month), y=mu, fill=x)) + ggplot2::scale_fill_discrete("")+
-      ggplot2::geom_boxplot(position="dodge", width=0.4)+ggplot2::theme_bw()+ ggplot2::xlab("Month")+ ggplot2::ylab("Mean")+
-      ggplot2::facet_wrap(~variable,  scales = "free")
-  }else{
-    df = lapply(1:length(places), function(j){
-      df = lapply(names, function(variable){
-        months = unique(month(dates))
-        years = unique(year(dates))
-        df = lapply(months, function(m){
-          df = lapply(years, function(y){
-            month_indices = which(month(dates) %in% m & year(dates) %in% y)
-            xt = observed[month_indices,places[j],variable]
-            xs = sim[month_indices,places[j],variable]
-            df = data.frame(month = m, mu = mean(xt), x = "Observed", variable = variable, 
-                            som = "mean", location = names_places[j])
-            df = rbind(df,data.frame(month = m, mu = mean(xs), x = "Simulated", variable= variable,
-                                     som = "mean", location = names_places[j]))
+    df <- do.call(rbind, df)
+    p <- ggplot2::ggplot(df, ggplot2::aes(x = factor(month), y = mu, fill = x)) +
+      ggplot2::scale_fill_discrete("") +
+      ggplot2::geom_boxplot(position = "dodge", width = 0.4) +
+      ggplot2::theme_bw() +
+      ggplot2::xlab("Month") +
+      ggplot2::ylab("Mean") +
+      ggplot2::facet_wrap(~variable, scales = "free")
+  } else {
+    df <- lapply(1:length(places), function(j) {
+      df <- lapply(names, function(variable) {
+        months <- unique(month(dates))
+        years <- unique(year(dates))
+        df <- lapply(months, function(m) {
+          df <- lapply(years, function(y) {
+            month_indices <- which(month(dates) %in% m & year(dates) %in% y)
+            xt <- observed[month_indices, places[j], variable]
+            xs <- sim[month_indices, places[j], variable]
+            df <- data.frame(
+              month = m, mu = mean(xt), x = "Observed", variable = variable,
+              som = "mean", location = names_places[j]
+            )
+            df <- rbind(df, data.frame(
+              month = m, mu = mean(xs), x = "Simulated", variable = variable,
+              som = "mean", location = names_places[j]
+            ))
             return(df)
           })
           return(do.call(rbind, df))
         })
-        df = do.call(rbind, df)
+        df <- do.call(rbind, df)
       })
-      df = do.call(rbind, df)
+      df <- do.call(rbind, df)
     })
-    df = do.call(rbind, df)
-    p = ggplot2::ggplot(df, ggplot2::aes(x=factor(month), y=mu, fill=x)) + ggplot2::scale_fill_discrete("")+ 
-      ggplot2::geom_boxplot(position="dodge", width=0.4)+ggplot2::theme_bw()+ ggplot2::xlab("Month")+ ggplot2::ylab("Mean") +
-      ggplot2::facet_wrap(~location+variable,  scales = "free")
+    df <- do.call(rbind, df)
+    p <- ggplot2::ggplot(df, ggplot2::aes(x = factor(month), y = mu, fill = x)) +
+      ggplot2::scale_fill_discrete("") +
+      ggplot2::geom_boxplot(position = "dodge", width = 0.4) +
+      ggplot2::theme_bw() +
+      ggplot2::xlab("Month") +
+      ggplot2::ylab("Mean") +
+      ggplot2::facet_wrap(~ location + variable, scales = "free")
   }
   return(p)
 }
@@ -266,60 +282,63 @@ utils::globalVariables(c("v1", "v2", "lagtime", "vgmsim"))
 #' @import patchwork
 #' @import ggpubr
 #' @keywords internal
-plot_multivariate_st_covariances = function(vgm, names){
-  
+plot_multivariate_st_covariances <- function(vgm, names) {
   # Create an empty plot placeholder for upper triangle
-  empty_plot <- ggplot2::ggplot() + ggplot2::theme_void()
-  
+  empty_plot <- ggplot2::ggplot() +
+    ggplot2::theme_void()
+
   # Initialize an empty plot matrix
   plot_matrix <- matrix(list(empty_plot), nrow = length(names), ncol = length(names))
-  
+
   # Fill the matrix with plots, lower triangle and diagonal
   for (i in 1:length(names)) {
     for (j in 1:i) {
       variable1 <- names[i]
       variable2 <- names[j]
       filtered_vgm <- subset(vgm, v1 == variable1 & v2 == variable2 | v1 == variable2 & v2 == variable1)
-      
+
       p <- ggplot2::ggplot(filtered_vgm, ggplot2::aes(x = dist, color = factor(lagtime))) +
         ggplot2::geom_line(ggplot2::aes(y = vgmsim)) +
         ggplot2::geom_point(ggplot2::aes(y = cov)) +
         ggplot2::labs(title = paste(variable1, "vs", variable2), x = "", y = "") +
         ggplot2::theme_minimal() +
-        ggplot2::theme(plot.title = ggplot2::element_text(size = 8),
-                       legend.position = "none")
-      last_row = length(names)
-      mid_col = round(length(names)/2)
+        ggplot2::theme(
+          plot.title = ggplot2::element_text(size = 8),
+          legend.position = "none"
+        )
+      last_row <- length(names)
+      mid_col <- round(length(names) / 2)
       # Add xlab to the bottom middle plot
       if (i == last_row && j == mid_col) {
-        p <- p + ggplot2::labs(x = "Distance (degree)") + 
+        p <- p + ggplot2::labs(x = "Distance (degree)") +
           ggplot2::theme(axis.text.x = ggplot2::element_text(), axis.ticks.x = ggplot2::element_line())
       }
-      
+
       # Add ylab to the middle left plot
       if (i == mid_col && j == 1) {
-        p <- p + ggplot2::labs(y = "Covariance") + 
+        p <- p + ggplot2::labs(y = "Covariance") +
           ggplot2::theme(axis.text.y = ggplot2::element_text(), axis.ticks.y = ggplot2::element_line())
       }
       plot_matrix[j, i] <- list(p)
     }
   }
   # Print the arranged plot layout
-  
+
   legend_plot <- ggplot2::ggplot(filtered_vgm, ggplot2::aes(x = dist, color = factor(lagtime))) +
     ggplot2::geom_line(ggplot2::aes(y = vgmsim)) +
     ggplot2::geom_point(ggplot2::aes(y = cov)) +
     ggplot2::labs(title = paste(variable1, "vs", variable2), x = "", y = "") +
-    ggplot2::theme_minimal() + ggplot2::scale_color_discrete("Time lag (day)") + 
+    ggplot2::theme_minimal() +
+    ggplot2::scale_color_discrete("Time lag (day)") +
     ggplot2::theme(plot.title = ggplot2::element_text(size = 8))
-  leg = ggpubr::get_legend(legend_plot)
+  leg <- ggpubr::get_legend(legend_plot)
   num_vars <- length(names)
-  
-  plot_matrix[length(names),1] <- list(leg)
-  
+
+  plot_matrix[length(names), 1] <- list(leg)
+
   # Convert matrix to patchwork layout
   plot_layout <- patchwork::wrap_plots(plot_matrix)
-  
+
   return(plot_layout)
 }
 
@@ -336,65 +355,69 @@ utils::globalVariables(c("lon", "lat", "Frequency"))
 #' @param names_seasons (Optional) A vector of names corresponding to the seasons defined in the `seasons` list. If `NULL`, the names are derived from the `seasons` list itself.
 #'
 #' @return A combined `ggplot` object that includes the plots for all seasons, arranged side-by-side, each comparing the wet day frequency between observed and simulated data for the specified locations.
-#' 
+#'
 #' @import ggplot2
 #' @import viridis
 #' @import ggpubr
 #' @export
 
-plot_wet_frequency = function(sim, observed, dates, seasons, coordinates, names_seasons){
-  
-  names_seasons = if(is.null(names_seasons)){
+plot_wet_frequency <- function(sim, observed, dates, seasons, coordinates, names_seasons) {
+  names_seasons <- if (is.null(names_seasons)) {
     names(seasons)
-  }else{names_seasons}
-  plot_list = list()
-  
+  } else {
+    names_seasons
+  }
+  plot_list <- list()
+
   for (s in 1:length(seasons)) {
-    season_indices = season_indices(dates, seasons[[s]])
-    
+    season_indices <- season_indices(dates, seasons[[s]])
+
     # Preprocess observed data
-    prec_obs = observed[season_indices, , "Precipitation"]
-    prec_obs = ifelse(prec_obs <= 0, 0, 1)
-    
+    prec_obs <- observed[season_indices, , "Precipitation"]
+    prec_obs <- ifelse(prec_obs <= 0, 0, 1)
+
     # Preprocess simulated data
-    prec_sim = sim[season_indices, , "Precipitation"]
-    prec_sim = ifelse(prec_sim <= 0, 0, 1)
-    
+    prec_sim <- sim[season_indices, , "Precipitation"]
+    prec_sim <- ifelse(prec_sim <= 0, 0, 1)
+
     # Combine into one data frame
-    df_obs = data.frame(Type = "Observed", lon = coordinates$longitude, lat = coordinates$latitude, Frequency = as.integer(100 * colSums(prec_obs) / nrow(prec_obs)))
-    df_sim = data.frame(Type = "Simulated", lon = coordinates$longitude, lat = coordinates$latitude, Frequency = as.integer(100 * colSums(prec_sim) / nrow(prec_sim)))
-    df = rbind(df_obs, df_sim)
-    
+    df_obs <- data.frame(Type = "Observed", lon = coordinates$longitude, lat = coordinates$latitude, Frequency = as.integer(100 * colSums(prec_obs) / nrow(prec_obs)))
+    df_sim <- data.frame(Type = "Simulated", lon = coordinates$longitude, lat = coordinates$latitude, Frequency = as.integer(100 * colSums(prec_sim) / nrow(prec_sim)))
+    df <- rbind(df_obs, df_sim)
+
     # Create the plot
-    region <- ggplot2::map_data("world") %>%  
+    region <- ggplot2::map_data("world") %>%
       dplyr::filter(
         long >= min(df$lon) & long <= max(df$lon) &
-          lat  >= min(df$lat) & lat  <= max(df$lat)
+          lat >= min(df$lat) & lat <= max(df$lat)
       )
-  
 
-    p = ggplot2::ggplot(df, ggplot2::aes(lon, lat )) + 
+
+    p <- ggplot2::ggplot(df, ggplot2::aes(lon, lat)) +
       ggplot2::geom_path(
         data = region,
-        ggplot2::aes(x=.data$long, y=.data$lat, group = .data$group),
+        ggplot2::aes(x = .data$long, y = .data$lat, group = .data$group),
         colour = "black",
         inherit.aes = FALSE
       ) +
-      #ggplot2::annotation_borders("world", colour="black",fill= "grey",xlim=range(df$lon), ylim = range(df$lat)) +
-      #ggplot2::coord_cartesian(xlim=range(df$lon), ylim = range(df$lat))+
+      # ggplot2::annotation_borders("world", colour="black",fill= "grey",xlim=range(df$lon), ylim = range(df$lat)) +
+      # ggplot2::coord_cartesian(xlim=range(df$lon), ylim = range(df$lat))+
       ggplot2::scale_color_gradientn(name = "Frequency of wet days (%)", colours = rev(viridis::viridis(10, option = "magma"))) +
-      ggplot2::geom_point(ggplot2::aes(color = Frequency, group = 1),size=7, shape=15, alpha=0.8)+
+      ggplot2::geom_point(ggplot2::aes(color = Frequency, group = 1), size = 7, shape = 15, alpha = 0.8) +
       ggplot2::facet_wrap(vars("Type"), scales = "free", ncol = 1) +
       ggplot2::theme_light() +
-      ggplot2::theme(plot.title = ggplot2::element_text(size = 15, hjust = 0.5), 
-                     panel.spacing = ggplot2::unit(1, "lines"), aspect.ratio = 0.9, legend.position = "top") +
-      ggplot2::xlab("Longitude (degree)") + ggplot2::ylab("Latitude (degree)") +
+      ggplot2::theme(
+        plot.title = ggplot2::element_text(size = 15, hjust = 0.5),
+        panel.spacing = ggplot2::unit(1, "lines"), aspect.ratio = 0.9, legend.position = "top"
+      ) +
+      ggplot2::xlab("Longitude (degree)") +
+      ggplot2::ylab("Latitude (degree)") +
       ggplot2::ggtitle(names_seasons[s])
-    
-    plot_list[[s]] = p
+
+    plot_list[[s]] <- p
   }
-  
+
   # Combine all plots into one with a common legend
-  combined_plot = ggpubr::ggarrange(plotlist = plot_list, ncol = length(seasons), common.legend = TRUE, legend = "top")
+  combined_plot <- ggpubr::ggarrange(plotlist = plot_list, ncol = length(seasons), common.legend = TRUE, legend = "top")
   return(combined_plot)
 }
