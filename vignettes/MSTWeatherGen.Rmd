@@ -37,7 +37,7 @@ library(MSTWeatherGen)
 
 For our simulation, we will need historical weather data of multiple variables and geographic coordinates. Below, we load these datasets stored within the package.
 
-The data considered here is the meteorological dataset SAFRAN, developed by Météo-France (strating in 2011/01/01 and ending in 2021/12/31). We only consider a small region in the south of France for the period 2018-2021. We consider 3 variables: precipitation, wind, and maximum temperature.
+The data considered here is the meteorological dataset SAFRAN, developed by Météo-France (starting in 2011/01/01 and ending in 2021/12/31). We only consider a small region in the south of France for the period 2018-2021 (to reduce computation time). We consider 3 variables: precipitation, wind, and maximum temperature.
 
 ```{r echo=TRUE}
 data("data", package = "MSTWeatherGen")
@@ -81,7 +81,7 @@ If the considered data does not exhibit seasonality one can use the whole period
 
 All the data being ready, we can now proceed to the estimation of the parameters using `MSTWeatherGen_Estim` function.
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=true, message=FALSE, warning=FALSE, results= 'hide'}
 names_weather_types = names
 swg = MSTWeatherGen_Estim(data = data, seasons = seasons,dates = dates, names = names, by_season = T, scale = T, 
                         precipitation = T,names_weather_types = names_weather_types,
