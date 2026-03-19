@@ -16,6 +16,7 @@ a 3-dimensional array [days,coordinates,variables] as index
 SAFRAN meteorological data for a region in southern France for precipitation, wind and maximum temperature.
 }
 \examples{
+\dontrun{
 data("data", package="MSTWeatherGen")
 data("coordinates", package = "MSTWeatherGen")
 variables = c("Precipitation", "Wind", "Temp_max")
@@ -24,7 +25,7 @@ days = seq(as.Date("2011-01-01"),as.Date("2021-12-31"), by="day")
 data[1,1,]
 Precipitation          Wind      Temp_max 
          0.0           0.8           7.7 
-
+}
 }
 \references{
 \url{https://www.umr-cnrm.fr/spip.php?article788}
