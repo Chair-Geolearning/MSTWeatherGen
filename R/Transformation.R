@@ -169,7 +169,7 @@ predict.orderNormTransf <- function(object,
 #' @param warn Logical indicating whether to issue warnings for transformations outside the observed domain. Default is FALSE.
 #'
 #' @return Estimated original data values corresponding to the transformed data points.
-#'
+#' @importFrom stats approx
 #' @keywords internal
 inv_orderNorm_Transf <- function(orderNorm_obj, new_points_x_t, left, warn = FALSE) {
 
@@ -227,7 +227,7 @@ inv_orderNorm_Transf <- function(orderNorm_obj, new_points_x_t, left, warn = FAL
 #' @param left Parameter affecting the normalization method used in the original transformation.
 #'
 #' @return Transformed data points based on the fitted model.
-#'
+#' @importFrom stats approx
 #' @keywords internal
 orderNormTransf <- function(orderNorm_obj, new_points, warn, left) {
 
