@@ -2,7 +2,7 @@
 name: "Feature Request"
 about: "Proposer une nouvelle fonctionnalité ou amélioration"
 title: "Draft : [Titre de la fonctionnalité]"
-labels: ["feature"]
+labels: ["enhancement"]
 assignees: []
 ---
 
