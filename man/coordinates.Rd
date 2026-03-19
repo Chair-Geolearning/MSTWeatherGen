@@ -11,13 +11,8 @@ a data-frame with 108 rows as coordinates points and 2 columns as c("longitude",
 Geographical coordinates of locations included in the meteorological data (a region in southern France).
 }
 \examples{
-\dontrun{
 data("coordinates",package="MSTWeatherGen")
-str(coordinate)
-'data.frame':	108 obs. of  2 variables:
-$ longitude: num  5.08 5.18 5.27 5.37 5.47 ...
-$ latitude : num  44 44 44 44 44 ...
-}
+str(coordinates)
 }
 \references{
 \url{https://www.umr-cnrm.fr/spip.php?article788}

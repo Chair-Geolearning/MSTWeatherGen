@@ -358,6 +358,7 @@ utils::globalVariables(c("lon", "lat", "Frequency"))
 #'
 #' @import ggplot2
 #' @import viridis
+#' @importFrom dplyr filter
 #' @import ggpubr
 #' @export
 
