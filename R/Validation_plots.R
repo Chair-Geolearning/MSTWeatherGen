@@ -81,7 +81,7 @@ utils::globalVariables(c("r", "y", "v", "lon", "lat", "n"))
 #'
 #' @import ggplot2
 #' @import patchwork
-#' @importFrom dplyr group_by tally mutate case_when summarise
+#' @importFrom dplyr group_by tally mutate case_when summarise filter
 #' @import viridis
 #' @export
 plot_dry_wet_spells_maps <- function(sim, observed, coordinates, dates) {
@@ -402,9 +402,9 @@ plot_wet_frequency <- function(sim, observed, dates, seasons, coordinates, names
       ) +
       # ggplot2::annotation_borders("world", colour="black",fill= "grey",xlim=range(df$lon), ylim = range(df$lat)) +
       # ggplot2::coord_cartesian(xlim=range(df$lon), ylim = range(df$lat))+
-      ggplot2::scale_color_gradientn(name = "Frequency of wet days (%)", colours = rev(viridis::viridis(10, option = "magma"))) +
+      ggplot2::scale_color_gradientn(name = "Frequency of wet days (%) ", colours = rev(viridis::viridis(10, option = "magma"))) +
       ggplot2::geom_point(ggplot2::aes(color = Frequency, group = 1), size = 7, shape = 15, alpha = 0.8) +
-      ggplot2::facet_wrap(vars("Type"), scales = "free", ncol = 1) +
+      ggplot2::facet_wrap(~Type, scales = "free", ncol = 1) +
       ggplot2::theme_light() +
       ggplot2::theme(
         plot.title = ggplot2::element_text(size = 15, hjust = 0.5),
