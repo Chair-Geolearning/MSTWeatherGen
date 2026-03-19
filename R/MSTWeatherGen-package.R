@@ -26,7 +26,7 @@
 #' @author Denis Allard \email{denis.allard@@inrae.fr}
 #' @author Lionel Benoit \email{lionel.benoit@@inrae.fr}
 #'
-#' Maintainer: Jean-FRançois Rey \email{jean-francois.rey@@inrae.fr}
+#' Maintainer: Jean-François Rey \email{jean-francois.rey@@inrae.fr}
 #' @docType package
 #' @name MSTWeatherGen-package
 #' @details \tabular{ll}{
@@ -91,7 +91,7 @@ getInfo <- function() {
 #' setCores().
 #' @return Integer. The number of cores currently configured for parallel processing.
 #' @seealso setCores() to configure the number of cores.
-#' 
+#' @export
 getCores <- function() {
   if (is.null(.pkgenv$nbcores)) {
     setCores()
@@ -111,7 +111,7 @@ getCores <- function() {
 #' #Automatic setting setCores()
 #' #Manual setting to 4 cores : setCores(4)
 #' @return Number of cores set (invisible)
-
+#' @export
 setCores <- function(n = NULL) {
   total_cores <- parallel::detectCores()
   

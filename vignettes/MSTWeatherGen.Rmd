@@ -37,13 +37,17 @@ library(MSTWeatherGen)
 
 For our simulation, we will need historical weather data of multiple variables and geographic coordinates. Below, we load these datasets stored within the package.
 
-The data considered here is the meteorological dataset SAFRAN, developed by Météo-France. We only consider a small region in the south of France for the period 2017-2021. We consider 3 variables: precipitation, wind, and maximum temperature.
+The data considered here is the meteorological dataset SAFRAN, developed by Météo-France (strating in 2011/01/01 and ending in 2021/12/31). We only consider a small region in the south of France for the period 2018-2021. We consider 3 variables: precipitation, wind, and maximum temperature.
 
 ```{r echo=TRUE}
 data("data", package = "MSTWeatherGen")
 data("coordinates", package = "MSTWeatherGen")
 names = c("Precipitation", "Wind", "Temp_max")
-dates = seq(as.Date("2018-01-01"),as.Date("2021-12-31"), by="day")
+real_dates = seq(as.Date("2011-01-01"),as.Date("2021-12-31"), by="day")
+
+dates <- seq(as.Date("2018-01-01"),as.Date("2021-12-31"), by="day")
+index_dates <- real_dates %in% dates
+data <- data[index_dates,,]
 ```
 
 ### Note on data needed for `MSTWeatherGen`
@@ -169,6 +173,6 @@ Finally, we can see if our stochastic weather generator can reproduce the observ
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE, fig.height = 5, fig.width = 7, fig.align = "center"}
 library(lubridate)
-id = lubridate::year(dates) %in% 2016:2021
+id = lubridate::year(dates) %in% 2018:2021
 plot_dry_wet_spells_maps(sim = sim[id,,], observed = data[id,,], coordinates = coordinates, dates = dates[id])
 ```
