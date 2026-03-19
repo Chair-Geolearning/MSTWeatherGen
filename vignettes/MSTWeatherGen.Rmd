@@ -81,7 +81,7 @@ If the considered data does not exhibit seasonality one can use the whole period
 
 All the data being ready, we can now proceed to the estimation of the parameters using `MSTWeatherGen_Estim` function.
 
-```{r echo=true, message=FALSE, warning=FALSE, results= 'hide'}
+```{r echo=TRUE, message=FALSE, warning=FALSE, results='hide'}
 names_weather_types = names
 swg = MSTWeatherGen_Estim(data = data, seasons = seasons,dates = dates, names = names, by_season = T, scale = T, 
                         precipitation = T,names_weather_types = names_weather_types,

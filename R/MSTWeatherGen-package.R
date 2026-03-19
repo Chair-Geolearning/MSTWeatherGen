@@ -51,7 +51,6 @@
 #'
 #' }
 
-#' @import stats
 #' @importFrom Matrix nearPD
 #' @import lubridate
 #' @import ggplot2
