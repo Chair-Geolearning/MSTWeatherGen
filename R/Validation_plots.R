@@ -156,8 +156,8 @@ plot_dry_wet_spells_maps <- function(sim, observed, coordinates, dates) {
 
   region <- ggplot2::map_data("world") %>%
     dplyr::filter(
-      long >= min(df$lon) & long <= max(df$lon) &
-        lat >= min(df$lat) & lat <= max(df$lat)
+      .data$long >= min(df$lon) & .data$long <= max(df$lon) &
+        .data$lat >= min(df$lat) & .data$lat <= max(df$lat)
     )
 
   p <- ggplot2::ggplot(df, ggplot2::aes(lon, lat)) +
@@ -388,8 +388,8 @@ plot_wet_frequency <- function(sim, observed, dates, seasons, coordinates, names
     # Create the plot
     region <- ggplot2::map_data("world") %>%
       dplyr::filter(
-        long >= min(df$lon) & long <= max(df$lon) &
-          lat >= min(df$lat) & lat <= max(df$lat)
+        .data$long >= min(df$lon) & .data$long <= max(df$lon) &
+          .data$lat >= min(df$lat) & .data$lat <= max(df$lat)
       )
 
 
