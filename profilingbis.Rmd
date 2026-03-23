@@ -25,7 +25,7 @@ system.time(MSTWeatherGen_Estim(data = data, seasons = seasons,dates = dates, na
 Voici un exemple de résultat :
 
 >   user       system      elapsed 
- 231.460    2491.254    1160.792 
+ 231.460     2491.254    1160.792 
 
 
 elapsed est le temps réel écoulé, c'est-à-dire le temps que l'on a effectivement passé à attendre devant l'ordinateur. user et elapsed sont généralement proches, mais le temps écoulé peut dépasser le user si le CPU met du temps à charger des ressources. À l'inverse, elapsed peut être inférieur à user dans le cas de calculs multicœurs, où plusieurs tâches sont effectuées en parallèle, réduisant ainsi le temps d'attente réel. C'est la méthode la plus basique de profilage, qui permet simplement d'obtenir le temps écoulé d'une fonction ou d'une portion de code.
@@ -87,7 +87,17 @@ MSTWeatherGen_Estim(data = data, seasons = seasons,dates = dates, names = names,
 })
 ```
 
+L’intervalle de profiling est de 10 ms et, comme les résultats sont parfois complexes et difficiles à interpréter, il est souvent plus judicieux d’augmenter cet intervalle afin d’éviter de faire apparaître dans les résultats des fonctions peu importantes comme .data.frame.
 
+Voici un exemple où l’on passe l’intervalle de profiling à 15 secondes au lieu de 0,01 s (soit 10 ms) : on obtient ainsi des résultats plus clairs et moins bruités.
+
+
+```{r, eval = FALSE}
+profvis({
+MSTWeatherGen_Estim(data = data, seasons = seasons,dates = dates, names = names, by_season = T, scale = T, 
+                        precipitation = T,names_weather_types = names_weather_types,
+                        coordinates= coordinates, max_it=100, tmax=1, n1=3, n2=3)}, interval = 15)
+```
 
 ## Analyse et interprétation des résultats : 
 
@@ -142,6 +152,18 @@ Temps propre vs. temps total : Rprof distinguent le "temps propre" (temps passé
 
 Optimisation du code : en se concentrant sur les fonctions avec les barres les plus larges, il est possible de prioriser les efforts d'optimisation en restructurant le code, en utilisant la vectorisation ou en explorant des algorithmes alternatifs.
 
+# Profiling sur la memoire : 
 
+Il existe une fonction pour faire du profiling de memoire d'objet il existe une fonction qui s'appelle, object.size().
+Ceci nmous permet d'obtenir la difference de taille entre un objet avec une fonction et apres la fonction : 
+
+Exemple :
+
+> object.size(swg)
+246842192 bytes
+> object.size(data)
+10679496 bytes
+
+Il a un rapport de 23 entre swg et data.
 
 
