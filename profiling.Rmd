@@ -169,3 +169,18 @@ On constate que le résultat swg occupe beaucoup plus de mémoire que la donnée
 Le rapport est d’environ 23 entre swg (le résultat de l’estimation) et data (la donnée initiale).
 
 L’idéal est d’essayer de trouver une relation mathématique entre la taille de l’entrée et la taille de sortie d’un objet, afin de mesurer l’impact de la fonction elle-même.
+
+# Librairei pryr : 
+
+La fonction mem_change() du package pryr permet de mesurer l’évolution de la mémoire lors de l’exécution d’un bloc de code. Par exemple :
+
+mem_change({
+  bk <- calculate_AR_coefficients_matrices(parm = swg, 
+                                           coordinates = coordinates, 
+                                           AR_lag = AR_lag)
+})
+
+Ici, on observe que la création de l’objet bk consomme 736 octets de mémoire. Cela permet de suivre précisément l’impact mémoire de chaque étape, utile pour optimiser des calculs lourds.
+
+Pour utiliser mem_change(), il faut installer le package pryr depuis GitHub avec Remotes (s’il n’est pas déjà disponible sur CRAN) :
+
