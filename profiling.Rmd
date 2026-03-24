@@ -170,7 +170,7 @@ Le rapport est d’environ 23 entre swg (le résultat de l’estimation) et data
 
 L’idéal est d’essayer de trouver une relation mathématique entre la taille de l’entrée et la taille de sortie d’un objet, afin de mesurer l’impact de la fonction elle-même.
 
-# Librairei pryr : 
+# Librairie pryr : 
 
 La fonction mem_change() du package pryr permet de mesurer l’évolution de la mémoire lors de l’exécution d’un bloc de code. Par exemple :
 
