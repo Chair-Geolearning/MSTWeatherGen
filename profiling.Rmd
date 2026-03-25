@@ -35,6 +35,16 @@ elapsed est le temps réel écoulé, c'est-à-dire le temps que l'on a effective
 
 Il existe une méthode de profilage un peu plus détaillée. Il faut utiliser Rprof() avant le code que l'on veut profiler et Rprof(NULL) juste après. Cela permet de profiler un bloc de code complet ou une partie de code spécifique. On obtient alors un fichier Rprof.out qui est difficile à interpréter directement. Il faut ensuite appeler summaryRprof() pour pouvoir interpréter les résultats de ce fichier.
 
+Exemple : 
+```{r, eval = FALSE}
+
+Rprof("profilingEstim.out")
+swg = MSTWeatherGen_Estim(data = data, seasons = seasons,dates = dates, names = names, by_season = T, scale = T, 
+                        precipitation = T,names_weather_types = names_weather_types,
+                        coordinates= coordinates, max_it=100, tmax=1, n1=3, n2=3)
+Rprof(NULL)
+```
+
 ## Comment interpréter les résultats ? Exemple de résultats :
 
 Voici un exemple de résultats de Rprof()
@@ -170,17 +180,33 @@ Le rapport est d’environ 23 entre swg (le résultat de l’estimation) et data
 
 L’idéal est d’essayer de trouver une relation mathématique entre la taille de l’entrée et la taille de sortie d’un objet, afin de mesurer l’impact de la fonction elle-même.
 
+# Profiling de la RAM
+
+Dans R, ajouter l’option memory.profiling = TRUE à la fonction Rprof() permet d’activer le suivi des allocations mémoire pendant l’exécution du code. Contrairement au profiling standard qui mesure uniquement le temps CPU, cette option enregistre la quantité de mémoire (RAM) allouée par les différentes fonctions. Le rapport obtenu avec summaryRprof(..., memory = "both") permet ainsi d’identifier les parties du code qui consomment le plus de RAM, en complément de l’analyse des performances en temps d’exécution.
+
+Exemple : 
+```{r, eval = FALSE}
+
+Rprof("profilingEstim.out", memory.profiling = TRUE))
+swg = MSTWeatherGen_Estim(data = data, seasons = seasons,dates = dates, names = names, by_season = T, scale = T, 
+                        precipitation = T,names_weather_types = names_weather_types,
+                        coordinates= coordinates, max_it=100, tmax=1, n1=3, n2=3)
+Rprof(NULL)
+```
+
 # Librairie pryr : 
 
 La fonction mem_change() du package pryr permet de mesurer l’évolution de la mémoire lors de l’exécution d’un bloc de code. Par exemple :
 
+```{r, eval = FALSE}
 mem_change({
   bk <- calculate_AR_coefficients_matrices(parm = swg, 
                                            coordinates = coordinates, 
                                            AR_lag = AR_lag)
 })
+```
 
-Ici, on observe que la création de l’objet bk consomme 736 octets de mémoire. Cela permet de suivre précisément l’impact mémoire de chaque étape, utile pour optimiser des calculs lourds.
+Ici, on observe que la création de l’objet bk consomme 736 octets de mémoire RAM. Cela permet de suivre précisément l’impact mémoire de chaque étape, utile pour optimiser des calculs lourds.
 
-Pour utiliser mem_change(), il faut installer le package pryr depuis GitHub avec Remotes (s’il n’est pas déjà disponible sur CRAN) :
+Pour utiliser mem_change(), il faut installer le package pryr depuis GitHub avec Remotes (s’il n’est pas déjà disponible sur CRAN).
 
