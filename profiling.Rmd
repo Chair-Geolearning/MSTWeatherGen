@@ -194,7 +194,7 @@ Dans R, ajouter l’option memory.profiling = TRUE à la fonction Rprof() permet
 Exemple : 
 ```{r, eval = FALSE}
 
-Rprof("profilingEstim.out", memory.profiling = TRUE))
+Rprof("profilingEstim.out", memory.profiling = TRUE)
 swg = MSTWeatherGen_Estim(data = data, seasons = seasons,dates = dates, names = names, by_season = T, scale = T, 
                         precipitation = T,names_weather_types = names_weather_types,
                         coordinates= coordinates, max_it=100, tmax=1, n1=3, n2=3)
@@ -203,7 +203,7 @@ Rprof(NULL)
 
 # Librairie pryr : 
 
-La fonction mem_change() du package pryr permet de mesurer l’évolution de la mémoire lors de l’exécution d’un bloc de code. Par exemple :
+La fonction mem_change() du package pryr permet de mesurer l’évolution de la mémoire RAM lors de l’exécution d’un bloc de code. Par exemple :
 
 ```{r, eval = FALSE}
 library('pryr')
@@ -214,7 +214,7 @@ mem_change({
 })
 ```
 
-Ici, on observe que la création de l’objetconsomme 6.22 MBoctets de mémoire RAM. Cela permet de suivre précisément l’impact mémoire de chaque étape, utile pour optimiser des calculs lourds.
+Ici, on observe que la création de l’objet consomme 6.22 MB octets de mémoire RAM. Cela permet de suivre précisément l’impact mémoire RAM de chaque étape, utile pour optimiser des calculs lourds.
 
 Pour utiliser mem_change(), il faut installer le package pryr depuis GitHub avec Remotes (s’il n’est pas déjà disponible sur CRAN).
 
