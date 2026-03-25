@@ -8,7 +8,7 @@ Les fonctions a surveiller :
 -optimize_temporal_parameter
 -weather_type : data_compression
 -estimate_lambda_transformation
--
+
 
 ## 2. Partie Simulation : 
 
@@ -29,7 +29,15 @@ Les fonctions a surveiller :
 -regularize.values
 
 
-# Ressources nécessaires
+# Ressources nécessaires en mémoire stockée
+
+## Plage de dates utilisée
+
+Le test a été réalisé sur la plage globale de dates suivante :
+
+```r
+dates = seq(as.Date("2011-01-01"), as.Date("2021-12-31"), by = "day")
+```
 
 ## Paramètres du système de test
 
@@ -37,6 +45,7 @@ Les fonctions a surveiller :
 - **CPU** : Intel© Core™ Ultra 7 165H × 16  
 - **RAM** : 30 Go  
 - **OS** : Linux Mint 22.2  
+
 
 Les mesures CPU ont été réalisées avec `Rprof()` sur des appels complets des fonctions principales.  
 La mémoire a été mesurée avec `mem_change()` du package **pryr**.
@@ -48,21 +57,32 @@ La mémoire a été mesurée avec `mem_change()` du package **pryr**.
 | `data`        | 10 679 496             | 10.69 MB            |
 | `coordinates` | 3 016                  | 3.02 kB             |
 | `dates`       | 16 344                 | 16.34 kB            |
+| `seasons`     | 3 440                  | 2.50 kB             |
 
-Estimation : 
-> object.size(swg)
-246842192 bytes
+## Estimation et simulation
 
-> object.size(seasons)
-3440 bytes
+| Catégorie           | Objet | Taille (`object.size`) | Taille (`obj_size`) |
+|---------------------|--------|------------------------|---------------------|
+| Estimation          | `swg`  | 246 842 192            | 64.24 MB            |
+| Simulation (matrices) | `bk`   | 60 500 432             | 60.49 MB            |
+| Simulation (résultats) | `sim`  | 10 679 496             | 10.67 MB            |
 
-Simulation : 
-Matrices bk
-> object.size(bk)
-60500432 bytes
 
-Simulation results
-> object.size(sim)
-10679496 bytes
+## Tableau récapitulatif global
+
+| Catégorie              | Objet         | Taille (`object.size`) | Taille (`obj_size`) | % du total |
+|------------------------|---------------|------------------------|---------------------|------------|
+| Données d'entrée       | `data`        | 10 679 496             | 10.69 MB            | 7.19 %     |
+| Données d'entrée       | `coordinates` | 3 016                  | 3.02 kB             | ~0.00 %    |
+| Données d'entrée       | `dates`       | 16 344                 | 16.34 kB            | 0.01 %     |
+| Données d'entrée       | `seasons`     | 3 440                  | 2.50 kB             | ~0.00 %    |
+| Estimation             | `swg`         | 246 842 192            | 64.24 MB            | 43.23 %    |
+| Simulation (matrices)  | `bk`          | 60 500 432             | 60.49 MB            | 40.71 %    |
+| Simulation (résultats) | `sim`         | 10 679 496             | 10.67 MB            | 7.18 %     |
+
+On constate que ce sont principalement les matrices bk et l’estimation swg qui occupent le plus de mémoire.
+
+# Profilage en RAM : 
+
 
 
