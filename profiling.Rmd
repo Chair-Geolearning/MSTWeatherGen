@@ -185,7 +185,7 @@ Il existe un package plus efficace pour les structures de données : le package 
 > obj_size(swg)
 64.23 MB
 
-Avec le package lobstr, la fonction obj_size() indique que l’objet utilise 64,23 Mo de RAM, alors que object.size() renvoie 235,4 Mo. Cela montre que lobstr fournit une estimation plus réaliste de la mémoire réellement utilisée, en tenant compte du partage interne des données et en évitant de compter plusieurs fois les mêmes blocs en mémoire.
+Avec le package lobstr, la fonction obj_size() indique que l’objet utilise 64,23 Mb de RAM, alors que object.size() renvoie 235,4 Mb. Cela montre que lobstr fournit une estimation plus réaliste de la mémoire réellement utilisée, en tenant compte du partage interne des données et en évitant de compter plusieurs fois les mêmes blocs en mémoire.
 
 # Profiling de la RAM
 
@@ -206,14 +206,15 @@ Rprof(NULL)
 La fonction mem_change() du package pryr permet de mesurer l’évolution de la mémoire lors de l’exécution d’un bloc de code. Par exemple :
 
 ```{r, eval = FALSE}
+library('pryr')
 mem_change({
-  bk <- calculate_AR_coefficients_matrices(parm = swg, 
-                                           coordinates = coordinates, 
-                                           AR_lag = AR_lag)
+  swg = MSTWeatherGen_Estim(data = data, seasons = seasons,dates = dates, names = names, by_season = T, scale = T, 
+                        precipitation = T,names_weather_types = names_weather_types,
+                        coordinates= coordinates, max_it=100, tmax=1, n1=3, n2=3)
 })
 ```
 
-Ici, on observe que la création de l’objet bk consomme 736 octets de mémoire RAM. Cela permet de suivre précisément l’impact mémoire de chaque étape, utile pour optimiser des calculs lourds.
+Ici, on observe que la création de l’objetconsomme 6.22 MBoctets de mémoire RAM. Cela permet de suivre précisément l’impact mémoire de chaque étape, utile pour optimiser des calculs lourds.
 
 Pour utiliser mem_change(), il faut installer le package pryr depuis GitHub avec Remotes (s’il n’est pas déjà disponible sur CRAN).
 
