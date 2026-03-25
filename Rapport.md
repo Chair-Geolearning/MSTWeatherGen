@@ -27,7 +27,7 @@
 - `regularize.values`
 
 
-# Ressources nécessaires en mémoire stockée
+# Ressources nécessaires en mémoire stockée ROM
 
 ## Plage de dates utilisée
 
