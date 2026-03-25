@@ -1,32 +1,30 @@
-# Analyse des Bottlenecks à partir de Rprof et profVis : 
+# Analyse des Bottlenecks à partir de Rprof et profVis
 
-## 1. Partie Estimation : 
+## 1. Partie Estimation
 
-Les fonctions a surveiller : 
+**Fonctions à surveiller :**
+- `optimize_spatial_parameter`
+- `optimize_temporal_parameter`
+- `weather_type : data_compression`
+- `estimate_lambda_transformation`
 
--optimize_spatial_parameter
--optimize_temporal_parameter
--weather_type : data_compression
--estimate_lambda_transformation
+## 2. Partie Simulation
 
+### 2.1 Matrices / Covariances
+**Fonctions à surveiller :**
+- `covmatrice`
+- `besselK`
+- `Gneiting`
+- `Matern`
 
-## 2. Partie Simulation : 
-
-Les fonctions a surveiller : 
-
--covmatrice
--besselK
--Gneiting
--Matern
-
-Les fonctions a surveiller : 
-
--apply_inverse_transformations
--inv_orderNorm_Transf
--stats::approx
--withCallingHandlers
--as.vector
--regularize.values
+### 2.2 Résultats / Transformations
+**Fonctions à surveiller :**
+- `apply_inverse_transformations`
+- `inv_orderNorm_Transf`
+- `stats::approx`
+- `withCallingHandlers`
+- `as.vector`
+- `regularize.values`
 
 
 # Ressources nécessaires en mémoire stockée
