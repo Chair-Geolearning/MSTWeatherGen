@@ -87,12 +87,12 @@ On constate que ce sont principalement les matrices bk et l’estimation swg qui
 | Fonction         | Temps self (s) | % self | Temps total (s) | % total | Commentaire                 |
 | ---------------- | -------------- | ------ | --------------- | ------- | --------------------------- |
 | `mcfork`         | 1289.32        | 70.89% | 1298.30         | 71.38%  | Parallelisation majeure     |
-| `selectChildren` | 171.30         | 9.42%  | 172.10          | 9.46%   | Sélection des sous-éléments |
+| `selectChildren` | 171.30         | 9.42%  | 172.10          | 9.46%   | Parallelisation |
 | `La.svd`         | 17.68          | 0.97%  | 17.76           | 0.98%   | Calcul SVD                  |
 | `[.data.frame`   | 16.40          | 0.90%  | 65.94           | 3.63%   | Sous-ensemble data frame    |
 | `$<-.data.frame` | 15.08          | 0.83%  | 17.70           | 0.97%   | Modification colonne        |
 | `paste`          | 14.38          | 0.79%  | 20.58           | 1.13%   | Concaténation de chaînes    |
-| `FUN`            | 12.74          | 0.70%  | 1818.54         | 99.99%  | Appel principal du workflow |
+| `FUN`            | 12.74          | 0.70%  | 1818.54         | 99.99%  | Parallelisationdu workflow |
 | `param`          | 12.44          | 0.68%  | 123.64          | 6.80%   | Paramètres internes         |
 | `[[.data.frame`  | 11.12          | 0.61%  | 31.72           | 1.74%   | Accès aux colonnes          |
 | `structure`      | 8.76           | 0.48%  | 12.98           | 0.71%   | Gestion de structure        |
@@ -112,9 +112,9 @@ On constate que ce sont principalement les matrices bk et l’estimation swg qui
 
 | Fonction           | Self time | % self  | Commentaire                        |
 |-------------------|-----------|---------|-------------------------------------|
-| `FUN`              | 13.36 s   | 17.82%  | Logique itérative principale       |
+| `FUN`              | 13.36 s   | 17.82%  | Logique itérative principale sim_seasons|
 | `mean.default`     | 9.00 s    | 12.01%  | Calculs de moyennes                |
-| `lapply`           | 6.70 s    | 8.94%   | Gestion des listes                 |
+| `lapply`           | 6.70 s    | 8.94%   | Gestion des listes sim_seasons     |
 | `isTRUE`           | 3.62 s    | 4.83%   | Tests logiques fréquents           |
 | `stopifnot`        | 3.02 s    | 4.03%   | Vérifications coûteuses            |
 | `data.frame`       | 2.38 s    | 3.18%   | Création d’objets                  |
@@ -128,7 +128,7 @@ On constate que ce sont principalement les matrices bk et l’estimation swg qui
 | Phase                     | Temps total CPU (s) | % total workflow | Commentaire principal              |
 |---------------------------|------------------|----------------|------------------------------------------|
 | Estimation                | 1818.54          | 96.6%          | Workflow principal + parallélisation     |
-| Simulation (matrices / bk)| 10.80            | 0.57%          | Accès colonnes, BesselK, Gneiting       |
+| Simulation (matrices / bk)| 10.80            | 0.57%          | Accès colonnes, BesselK, Gneiting         |
 | Simulation (résultats)    | 53.44            | 2.84%          | Logique itérative sim_seasons et calculs de moyennes|
 
 # Profiliage RAM: 
@@ -140,6 +140,6 @@ globale de la mémoire.
 
 | Phase                     | Variation mémoire (kB) | Type d'opération        | Commentaire principal                          |
 |---------------------------|------------------------|--------------------------|-----------------------------------------------|
-| Estimation (estim)        | +10.4  à +20.5         | Allocations + libération | rien de spécial ni d’anormal      |
-| Simulation (matrices / bk)| +23.9 à +43.6          | Allocations  + libération| rien de spécial ni d’anormal     |
-| Simulation (résultats)    | +23.3 / -32.9          | Allocations + libération | rien de spécial ni d’anormal|
+| Estimation (estim)        | +10.4  à +20.5         | Allocations + libération | rien de spécial ni d’anormal                  |
+| Simulation (matrices / bk)| +23.9 à +43.6          | Allocations  + libération| rien de spécial ni d’anormal                  |
+| Simulation (résultats)    | +23.3 / -32.9          | Allocations + libération | rien de spécial ni d’anormal                  |
