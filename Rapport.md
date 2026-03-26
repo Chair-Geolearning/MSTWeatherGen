@@ -129,6 +129,17 @@ On constate que ce sont principalement les matrices bk et l’estimation swg qui
 |---------------------------|------------------|----------------|------------------------------------------|
 | Estimation                | 1818.54          | 96.6%          | Workflow principal + parallélisation     |
 | Simulation (matrices / bk)| 10.80            | 0.57%          | Accès colonnes, BesselK, Gneiting       |
-| Simulation (résultats)    | 53.44            | 2.84%          | Logique itérative et calculs de moyennes|
+| Simulation (résultats)    | 53.44            | 2.84%          | Logique itérative sim_seasons et calculs de moyennes|
 
+# Profiliage RAM: 
 
+Le profiling mémoire a été réalisé avec la fonction mem_change() du package pryr. Les résultats montrent de faibles variations de mémoire 
+(de l’ordre de quelques kilooctets) au cours des différentes étapes (estim, bk, sim), avec des allocations et libérations cohérentes avec 
+le fonctionnement normal de R. Toutefois, ces résultats restent difficiles à interpréter finement, car mem_change() ne fournit qu’une variation 
+globale de la mémoire.
+
+| Phase                     | Variation mémoire (kB) | Type d'opération        | Commentaire principal                          |
+|---------------------------|------------------------|--------------------------|-----------------------------------------------|
+| Estimation (estim)        | +10.4  à +20.5         | Allocations + libération | rien de spécial ni d’anormal      |
+| Simulation (matrices / bk)| +23.9 à +43.6          | Allocations  + libération| rien de spécial ni d’anormal     |
+| Simulation (résultats)    | +23.3 / -32.9          | Allocations + libération | rien de spécial ni d’anormal|
