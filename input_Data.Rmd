@@ -1,0 +1,45 @@
+---
+title: "Profiling"
+output: html_document
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+    collapse = TRUE,
+    comment = "#>"
+)
+```
+
+
+## Introduction
+
+Cette vignette a pour but d'expliquer le format de la donnee en entree pour le package MSTWeatherGen.
+
+## Format du fichier data
+
+```{r, include = FALSE}
+data("data", package = "MSTWeatherGen")
+
+premiere_couche <- data[ , 1, 2,drop = FALSE] 
+deuxieme_couche <- data[1, , 2,drop = FALSE] 
+troisieme_couche <- data[1,1, ,drop = FALSE] 
+```
+                                
+data est un array de trois dimension dont la premiere represent la composante temporelle ici de taille 4018, la deuxieme represente la composante spatiale ici de taille 108 et la troisieme composante represente les variables a etudier ici elles sont au nombre de trois : precipitation, wind et temp_max.
+NB : S'il y a presence de precipitation, qui contient beacoup de zeros, il faudra la mettre en premier dans l'ordre pour le pacakge. 
+Precipitation sera toujours en premiere position par rapport aux autres variables.
+
+## Que representent les valeurs de ces couches?  : 
+
+Premierement il faut noter que les trois couches sont des listes numerotees en partant et qui va jusqu'a le nombre d'elements.
+
+Cas de la composante temporelle : 
+- il y a 4018 dans ce cas d'exemple il faut ensuite adosser a cela un frame de dates qui fait la taille 
+
+
+```{r, echo=FALSE, results='hide', message=FALSE, warning=FALSE}
+real_dates = seq(as.Date("2011-01-01"),as.Date("2021-12-31"), by="day")
+#length(real_dates) = dim(data)[1]
+```
+
+Par contre, si on veut 
