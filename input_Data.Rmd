@@ -71,3 +71,5 @@ Wrapper 2 ?
 
 ## Conclusion 
 
+Le format des données est assez simple à utiliser, sans transformation particulière. Il faudra vérifier comment les données sont directement récupérées depuis SAFRAN et voir s’il est possible de créer un wrapper simple qui transforme automatiquement les données SAFRAN en array, comme c’est le cas pour data.
+
