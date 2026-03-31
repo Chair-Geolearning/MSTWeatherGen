@@ -43,6 +43,7 @@ dates = seq(as.Date("2011-01-01"), as.Date("2021-12-31"), by = "day")
 - **CPU** : Intel© Core™ Ultra 7 165H × 16  
 - **RAM** : 30 Go  
 - **OS** : Linux Mint 22.2  
+- **MSTWeatherGen** : V1.0.0  
 
 
 Les mesures CPU ont été réalisées avec `Rprof()` sur des appels complets des fonctions principales.  
