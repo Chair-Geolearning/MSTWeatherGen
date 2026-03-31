@@ -49,7 +49,11 @@ calculate_Bk_matrices <- function(C_k_matrices, Bk_0) {
   for (i in 1:M) {
     Bk_0_rhs <- Bk_0_rhs - Bk_matrices_list[[i]] %*% C_k_matrices[[i + 1]]  # Adjust for contributions from Bk_i matrices
   }
+  
+  is_positive_definite(Bk_0_rhs)
+  
   Bk_0 <- try(t(chol(Bk_0_rhs)), silent = T) # Perform Cholesky decomposition to obtain Bk_0
+  
   if(is.character(Bk_0)) Bk_0 = Bk_0
   Bk_matrices_list <- list(Bk_0 = Bk_0, bk = Bk_matrices_list)
   
@@ -114,7 +118,8 @@ calculate_AR_coefficients_matrices <- function(parm, coordinates, AR_lag){
       ik_list[[s]][k] <- ik   
     }
   }
-  print(ik_list)
+  print(i)
+  #'print(ik_list)
   return(bk)
 }
 #' Simulate AR Process
