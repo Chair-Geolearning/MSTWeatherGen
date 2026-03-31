@@ -7,3 +7,5 @@
 ^\.Renviron$
 .*\.code-workspace$
 ^\.github$
+profiling.Rmd
+Rapport.md

@@ -180,7 +180,7 @@ Le rapport est d’environ 23 entre swg (le résultat de l’estimation) et data
 
 L’idéal est d’essayer de trouver une relation mathématique entre la taille de l’entrée et la taille de sortie d’un objet, afin de mesurer l’impact de la fonction elle-même.
 
-Il existe un package plus efficace pour les structures de données : le package lobstr offre une mesure plus précise de la mémoire que object.size(), car il prend en compte le partage interne des objets en mémoire et évite de compter plusieurs fois les mêmes données, ce qui donne une estimation plus réaliste de la RAM réellement utilisée.
+Il existe un package plus efficace pour les structures de données : le package {lobstr} offre une mesure plus précise de la mémoire que object.size(), car il prend en compte le partage interne des objets en mémoire et évite de compter plusieurs fois les mêmes données, ce qui donne une estimation plus réaliste de la RAM réellement utilisée.
 
 > obj_size(swg)
 64.23 MB
