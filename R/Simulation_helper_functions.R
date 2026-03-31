@@ -92,20 +92,29 @@ calculate_AR_coefficients_matrices <- function(parm, coordinates, AR_lag){
   })
   # check there are no error in bk[[s]][[k]]$bk$Bk_0
   # if so (character error message) get value for k-1 or k+1
+  i = 0
+  ik_list <- vector("list", length(parm$swg))
   for(s in 1:length(parm$swg)){
     K = length(parm$swg[[s]]$gf_par)
+    ik_list[[s]] <- vector("numeric", K) 
+    
     for(k in 1:K){
       j = k-1
-      while (is.list(bk[[s]][[k]]$bk) && is.character(bk[[s]][[k]]$bk$Bk_0)) {
+      ik = 0
+      
+      while (is.list(bk[[s]][[k]]$bk)) {
         bk[[s]][[k]]$bk$Bk_0 = try(bk[[s]][[j]]$bk$Bk_0, silent = T)
         bk[[s]][[k]]$bk$bk = list(try(bk[[s]][[j]]$bk$Bk, silent = T))
         bk[[s]][[k]]$cov0 = try(bk[[s]][[k]]$cov0, silent = T)
         if(j == k+1) break;
         j = k+1
-      
+        i = i + 1 
+        ik = ik +1
       }
+      ik_list[[s]][k] <- ik   
     }
   }
+  print(ik_list)
   return(bk)
 }
 #' Simulate AR Process
