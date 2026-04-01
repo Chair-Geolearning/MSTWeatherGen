@@ -107,7 +107,7 @@ calculate_AR_coefficients_matrices <- function(parm, coordinates, AR_lag){
   
   for(s in 1:length(parm$swg)){
     K = length(parm$swg[[s]]$gf_par)
-    ik_list[[s]] <- vector("numeric", K) 
+    #ik_list[[s]] <- vector("numeric", K) 
     
     for(k in 1:K){
       j = k-1
