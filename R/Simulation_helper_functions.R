@@ -50,7 +50,13 @@ calculate_Bk_matrices <- function(C_k_matrices, Bk_0) {
     Bk_0_rhs <- Bk_0_rhs - Bk_matrices_list[[i]] %*% C_k_matrices[[i + 1]]  # Adjust for contributions from Bk_i matrices
   }
   
-  is_positive_definite(Bk_0_rhs)
+  is_semi_positive <- function(M) {
+    eigenvalues <- eigen(M, symmetric = TRUE)$values
+    return(all(eigenvalues >= -1e-10))   
+  }
+  
+  print(is_semi_positive(Bk_0_rhs))
+  
   
   Bk_0 <- try(t(chol(Bk_0_rhs)), silent = T) # Perform Cholesky decomposition to obtain Bk_0
   
@@ -96,8 +102,9 @@ calculate_AR_coefficients_matrices <- function(parm, coordinates, AR_lag){
   })
   # check there are no error in bk[[s]][[k]]$bk$Bk_0
   # if so (character error message) get value for k-1 or k+1
-  i = 0
-  ik_list <- vector("list", length(parm$swg))
+  #i = 0
+  #ik_list <- vector("list", length(parm$swg))
+  
   for(s in 1:length(parm$swg)){
     K = length(parm$swg[[s]]$gf_par)
     ik_list[[s]] <- vector("numeric", K) 
@@ -106,20 +113,23 @@ calculate_AR_coefficients_matrices <- function(parm, coordinates, AR_lag){
       j = k-1
       ik = 0
       
-      while (is.list(bk[[s]][[k]]$bk)) {
+      while (is.list(bk[[s]][[k]]$bk) && is.character(bk[[s]][[k]]$bk$Bk_0)) {
+        print(paste("s =", s, ", k =", k))        
         bk[[s]][[k]]$bk$Bk_0 = try(bk[[s]][[j]]$bk$Bk_0, silent = T)
         bk[[s]][[k]]$bk$bk = list(try(bk[[s]][[j]]$bk$Bk, silent = T))
         bk[[s]][[k]]$cov0 = try(bk[[s]][[k]]$cov0, silent = T)
         if(j == k+1) break;
         j = k+1
-        i = i + 1 
-        ik = ik +1
+        #i = i + 1 
+        
+        
+        #ik = ik +1
       }
-      ik_list[[s]][k] <- ik   
+      #ik_list[[s]][k] <- ik   
     }
   }
-  print(i)
-  #'print(ik_list)
+  #print(i)
+  #print(ik_list)
   return(bk)
 }
 #' Simulate AR Process
