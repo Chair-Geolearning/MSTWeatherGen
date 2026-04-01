@@ -1,0 +1,220 @@
+---
+title: "Profiling"
+output: html_document
+---
+
+## Introduction
+
+Cette vignette a pour but de montrer comment effectuer du profilage de code R.
+
+## La méthode la plus basique
+
+La méthode la plus simple est system.time(), où il faut mettre entre les parenthèses la partie du code que l'on veut profiler. On obtient en résultat trois valeurs : user, system et elapsed.
+
+Exemple d'utilisation pour profiler la fonction MSTWeatherGen_Estim :
+
+```{r, eval = FALSE}
+system.time(MSTWeatherGen_Estim(data = data, seasons = seasons,dates = dates, names = names, by_season = T, scale = T, 
+                                                          precipitation = T,names_weather_types = names_weather_types,
+                                                          coordinates= coordinates, max_it=100, tmax=1, n1=3, n2=3))
+```
+
+
+## Comment interpréter les résultats ?
+
+Voici un exemple de résultat :
+
+>   user       system      elapsed 
+ 231.460     2491.254    1160.792 
+
+
+elapsed est le temps réel écoulé, c'est-à-dire le temps que l'on a effectivement passé à attendre devant l'ordinateur. user et elapsed sont généralement proches, mais le temps écoulé peut dépasser le user si le CPU met du temps à charger des ressources. À l'inverse, elapsed peut être inférieur à user dans le cas de calculs multicœurs, où plusieurs tâches sont effectuées en parallèle, réduisant ainsi le temps d'attente réel. C'est la méthode la plus basique de profilage, qui permet simplement d'obtenir le temps écoulé d'une fonction ou d'une portion de code.
+
+
+## Une méthode plus avancée
+
+Il existe une méthode de profilage un peu plus détaillée. Il faut utiliser Rprof() avant le code que l'on veut profiler et Rprof(NULL) juste après. Cela permet de profiler un bloc de code complet ou une partie de code spécifique. On obtient alors un fichier Rprof.out qui est difficile à interpréter directement. Il faut ensuite appeler summaryRprof() pour pouvoir interpréter les résultats de ce fichier.
+
+Exemple : 
+```{r, eval = FALSE}
+
+Rprof("profilingEstim.out")
+swg = MSTWeatherGen_Estim(data = data, seasons = seasons,dates = dates, names = names, by_season = T, scale = T, 
+                        precipitation = T,names_weather_types = names_weather_types,
+                        coordinates= coordinates, max_it=100, tmax=1, n1=3, n2=3)
+Rprof(NULL)
+```
+
+## Comment interpréter les résultats ? Exemple de résultats :
+
+Voici un exemple de résultats de Rprof()
+
+"by.total" — montre le pourcentage du temps total passé dans chaque fonction, en incluant le temps des sous-fonctions appelées ce qui est trompeur : MSTWeatherGen_Estim affiche 100% car tout se passe en elle, même si elle délègue immédiatement le travail à d'autres fonctions.
+
+"by.self" est un plus utile : il ne compte que le temps propre à chaque fonction, en excluant le temps passé dans les fonctions qu'elle appelle. 
+
+Exemple :  
+
+```{}
+$by.total
+                                  total.time total.pct self.time self.pct
+"FUN"                                 567.50    100.00      2.78     0.49
+"lapply"                              567.50    100.00      1.76     0.31
+"MSTWeatherGen_Estim_season"          567.50    100.00      0.00     0.00
+"MSTWeatherGen_Estim"                 567.50    100.00      0.00     0.00
+"estimate_gaussian_field_params"      546.76     96.35      0.00     0.00
+"estimation_gf"                       540.60     95.26      0.00     0.00
+
+$by.self
+                               self.time self.pct total.time total.pct
+"mcfork"                           384.36    67.73     386.02     68.02
+"selectChildren"                    23.32     4.11      23.32      4.11
+"$<-.data.frame"                     8.60     1.52      10.06      1.77
+"paste"                              7.44     1.31      10.90      1.92
+"[.data.frame"                       6.96     1.23      29.80      5.25
+"FUN"                                2.78     0.49     567.50    100.00
+```
+
+
+Ici "FUN" ne prend que 0.49 pc du temps total.
+On obtient aussi le temps total de calcul final : 
+
+$sampling.time
+567.5
+
+
+##  Troisième et dernière méthode : profvis
+
+profvis est un outil de visualisation du profileur R qui permet d'identifier les goulots d'étranglement dans le code.
+
+##  Exemple d'utilisation : 
+
+```{r, eval = FALSE}
+profvis({
+MSTWeatherGen_Estim(data = data, seasons = seasons,dates = dates, names = names, by_season = T, scale = T, 
+                        precipitation = T,names_weather_types = names_weather_types,
+                        coordinates= coordinates, max_it=100, tmax=1, n1=3, n2=3)
+})
+```
+
+L’intervalle de profiling est de 10 ms et, comme les résultats sont parfois complexes et difficiles à interpréter, il est souvent plus judicieux d’augmenter cet intervalle afin d’éviter de faire apparaître dans les résultats des fonctions peu importantes comme .data.frame.
+
+Voici un exemple où l’on passe l’intervalle de profiling à 15 secondes au lieu de 0,01 s (soit 10 ms) : on obtient ainsi des résultats plus clairs et moins bruités.
+
+
+```{r, eval = FALSE}
+profvis({
+MSTWeatherGen_Estim(data = data, seasons = seasons,dates = dates, names = names, by_season = T, scale = T, 
+                        precipitation = T,names_weather_types = names_weather_types,
+                        coordinates= coordinates, max_it=100, tmax=1, n1=3, n2=3)}, interval = 15)
+```
+
+## Analyse et interprétation des résultats : 
+
+Les résultats sont présentés sous deux onglets. Une fenêtre s'ouvre avec le nom Profile.
+
+Le premier, Flame Graph, affiche une représentation visuelle de la pile d'appels au fil du temps : chaque bloc correspond à une fonction, et sa largeur est proportionnelle au temps qu'elle consomme — on peut ainsi voir d'un coup d'œil quelles fonctions dominent l'exécution. Les piles sont de couleur jaune et comportent plusieurs étages : la première couche est la première fonction appelée, ensuite d'autres étages s'additionnent, correspondant aux fonctions appelées par la suite ou aux fonctions imbriquées dans la fonction appelée. Ainsi, une pile jaune peut contenir plusieurs fonctions appelées sur le même intervalle de temps. En passant la souris sur chaque bloc, on obtient le nom de la fonction concernée, le temps passé, et la mémoire utilisée par celle-ci.
+Le second onglet, Data, présente les mêmes informations sous forme de tableau chiffré, avec le temps passé dans chaque fonction (en millisecondes), ce qui permet une lecture plus précise. En plus du temps CPU, profvis affiche également la consommation mémoire : on peut voir les allocations et libérations de mémoire ligne par ligne, notamment grâce aux blocs gris <GC> (garbage collection) qui signalent les moments où R libère de la mémoire devenue inutile. Cette double lecture — temps et mémoire — permet d'identifier non seulement les fonctions lentes, mais aussi celles qui sollicitent excessivement la mémoire, deux causes fréquentes de lenteur en R. Cet onglet permet de profiler la mémoire et le temps écoulé par fonction, avec une arborescence détaillée, par exemple dans le cas de la fonction MSTWeatherGen_Estim.
+Dans l'onglet Data, la colonne mémoire est représentée avec deux côtés :
+
+Côté positif (droite) — indique la mémoire allouée, c'est-à-dire la quantité de mémoire que R a réservée pour créer de nouveaux objets à cette ligne.
+Côté négatif (gauche) — indique la mémoire libérée, c'est-à-dire les objets qui ne sont plus nécessaires et que le garbage collector a récupéré.
+
+Attention. La mémoire négative peut dépasser la mémoire positive car la mémoire libérée et la mémoire allouée ne concernent pas forcément les mêmes objets. Il y a ensuite le temps écoulé en ms à droite pour chaque fonction et sous-fonction.
+Enfin, le calcul étant fait par échantillonnage, il est impossible d'obtenir deux fois le même résultat. profvis prend en effet une "photo" de ce que R est en train de faire toutes les 10 millisecondes environ — ce n'est donc pas une mesure continue et exhaustive. Les chiffres varient légèrement d'une exécution à l'autre et doivent être interprétés comme de grandes tendances plutôt que comme des mesures absolues et précises. C'est pourquoi les résultats diffèrent également d'un outil de profilage à l'autre : par exemple, Estim prend 567,50 s dans Rprof, 637,0 s dans profvis et 1160,0 s dans system.time.
+
+
+# Explication des bandes noires sur le graphe : 
+
+Les bandes noires qui sont tout en haut de la pile et entre certaines fonctions des couches en dessous sur le flame graph de profvis représentent en fait le temps et des moments où R exécute des fonctions internes ou intermédiaires qui ne remontent pas dans le profileur car trop rapides en éxecution. 
+C'est le cas par exemple de fonctions comme $, [.data.frame ou  %in%, ou d'autres fonctions internes de R qui prennent un temps infime par rapport aux autres fonctions telles que optim et qui apparaissent ainsi comme des bandes mais tres fines comparee aux autres qui apparaissent comme des blocs car ils prennent plus de temps.
+
+Ces fonctions sont bien exécutées, mais elles créent ces zones noires dans le graphe. Cela ne signifie donc pas que R ne fait rien à ces moments-là, mais simplement que les fonctions en cours d'exécution sont invisibles pour le profileur d'où la présence de bandes noires.
+
+Pour rappel voici une petite explication des piles dans le Flame Graph : 
+
+Les barres verticales : chaque barre verticale dans le flame graph représente une pile d'appels de fonctions dans votre code. La hauteur de la barre indique la profondeur de la pile d'appels, la barre la plus haute représentant l'appel de fonction le plus externe.
+
+Couleurs : différentes couleurs sont utilisées pour distinguer les différentes fonctions ou blocs de code. Les couleurs représentent souvent différentes catégories de code (par exemple : code utilisateur, fonctions R de base).
+
+Largeur des barres : la largeur de chaque barre correspond au temps passé à exécuter la fonction. Des barres plus larges indiquent que plus de temps a été passé dans cette fonction particulière.
+
+Note 1 : les bandes noires peuvent disparaître en zoomant dans le flame graph. En changeant d'échelle, on affine la résolution temporelle et les fonctions intermédiaires jusqu'alors invisibles peuvent alors apparaître.
+
+Note 2 : FUN qui apparaît souvent dans la liste de fonctions désigne simplement la fonction passée en argument à des fonctions comme lapply ou apply — c'est le nom générique utilisé en interne par R pour désigner cette fonction callback.
+
+# Détection de Bottleneck avec Profvis et Rprof :
+
+Analyse du Flame Graph :
+
+Identifier les goulots d'étranglement : repérer les sections avec les barres les plus larges. Celles-ci représentent les fonctions qui consomment le plus de temps d'exécution et sont des goulots d'étranglement potentiels.
+  
+Comprendre la pile d'appels : remonter le chemin depuis le bas vers le haut pour identifier la séquence d'appels de fonctions menant au goulot d'étranglement.
+Zoomer : zoomer sur des sections spécifiques afin d'examiner de plus près les appels de fonctions imbriquées.
+
+Comparer les exécutions : il est possible de comparer les flame graphs de différentes versions du code pour identifier des améliorations ou des régressions de performance.
+
+Interprétation des informations :
+
+Temps passé dans les fonctions : la largeur d'une barre à un niveau donné révèle le temps passé à exécuter cette fonction particulière.
+
+Temps propre vs. temps total : Rprof distinguent le "temps propre" (temps passé dans la fonction elle-même) et le "temps total" (incluant le temps passé dans les fonctions qu'elle appelle). Cela permet d'identifier les fonctions qui contribuent significativement aux goulots d'étranglement via des appels imbriqués.
+
+Optimisation du code : en se concentrant sur les fonctions avec les barres les plus larges, il est possible de prioriser les efforts d'optimisation en restructurant le code, en utilisant la vectorisation ou en explorant des algorithmes alternatifs.
+
+# Profiling de la mémoire
+
+Il est possible d’effectuer un profiling de la mémoire des objets en utilisant la fonction object.size().
+Cette fonction permet de connaître la taille en mémoire d’un objet. On peut ainsi comparer la mémoire utilisée avant et après l’exécution d’une fonction.
+
+Exemple :
+
+> object.size(swg)
+246842192 bytes
+
+> object.size(data)
+10679496 bytes
+
+On constate que le résultat swg occupe beaucoup plus de mémoire que la donnée d’entrée data.
+Le rapport est d’environ 23 entre swg (le résultat de l’estimation) et data (la donnée initiale).
+
+L’idéal est d’essayer de trouver une relation mathématique entre la taille de l’entrée et la taille de sortie d’un objet, afin de mesurer l’impact de la fonction elle-même.
+
+Il existe un package plus efficace pour les structures de données : le package {lobstr} offre une mesure plus précise de la mémoire que object.size(), car il prend en compte le partage interne des objets en mémoire et évite de compter plusieurs fois les mêmes données, ce qui donne une estimation plus réaliste de la RAM réellement utilisée.
+
+> obj_size(swg)
+64.23 MB
+
+Avec le package lobstr, la fonction obj_size() indique que l’objet utilise 64,23 Mb de RAM, alors que object.size() renvoie 235,4 Mb. Cela montre que lobstr fournit une estimation plus réaliste de la mémoire réellement utilisée, en tenant compte du partage interne des données et en évitant de compter plusieurs fois les mêmes blocs en mémoire.
+
+# Profiling de la RAM
+
+Dans R, ajouter l’option memory.profiling = TRUE à la fonction Rprof() permet d’activer le suivi des allocations mémoire pendant l’exécution du code. Contrairement au profiling standard qui mesure uniquement le temps CPU, cette option enregistre la quantité de mémoire (RAM) allouée par les différentes fonctions. Le rapport obtenu avec summaryRprof(..., memory = "both") permet ainsi d’identifier les parties du code qui consomment le plus de RAM, en complément de l’analyse des performances en temps d’exécution.
+
+Exemple : 
+```{r, eval = FALSE}
+
+Rprof("profilingEstim.out", memory.profiling = TRUE)
+swg = MSTWeatherGen_Estim(data = data, seasons = seasons,dates = dates, names = names, by_season = T, scale = T, 
+                        precipitation = T,names_weather_types = names_weather_types,
+                        coordinates= coordinates, max_it=100, tmax=1, n1=3, n2=3)
+Rprof(NULL)
+```
+
+# Librairie pryr : 
+
+La fonction mem_change() du package pryr permet de mesurer l’évolution de la mémoire RAM lors de l’exécution d’un bloc de code. Par exemple :
+
+```{r, eval = FALSE}
+library('pryr')
+mem_change({
+  swg = MSTWeatherGen_Estim(data = data, seasons = seasons,dates = dates, names = names, by_season = T, scale = T, 
+                        precipitation = T,names_weather_types = names_weather_types,
+                        coordinates= coordinates, max_it=100, tmax=1, n1=3, n2=3)
+})
+```
+
+Ici, on observe que la création de l’objet consomme 6.22 MB octets de mémoire RAM. Cela permet de suivre précisément l’impact mémoire RAM de chaque étape, utile pour optimiser des calculs lourds.
+
+Pour utiliser mem_change(), il faut installer le package pryr depuis GitHub avec Remotes (s’il n’est pas déjà disponible sur CRAN).
+
