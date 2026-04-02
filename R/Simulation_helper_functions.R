@@ -50,13 +50,35 @@ calculate_Bk_matrices <- function(C_k_matrices, Bk_0) {
     Bk_0_rhs <- Bk_0_rhs - Bk_matrices_list[[i]] %*% C_k_matrices[[i + 1]]  # Adjust for contributions from Bk_i matrices
   }
   
-  is_semi_positive <- function(M) {
+  is_positive_definite <- function(M) {
     eigenvalues <- eigen(M, symmetric = TRUE)$values
+    #valeurs_negatives <- eigenvalues[eigenvalues <= -1e-10]
+    #print(valeurs_negatives)
     return(all(eigenvalues >= -1e-10))   
   }
   
-  print(is_semi_positive(Bk_0_rhs))
+  #print(paste('Avant' ,is_positive_definite(Bk_0_rhs)))
   
+  make_positive_definite <- function(M, epsilon = 1e-9) {
+    # Spectral decomposition
+    eigen_decomp <- eigen(M, symmetric = TRUE)
+    values <- eigen_decomp$values
+    vectors <- eigen_decomp$vectors
+    
+    # Replace negative or too small eigenvalues
+    corrected_values <- pmax(values, epsilon)
+    
+    # Reconstruct the matrix
+    M_corrected <- vectors %*% diag(corrected_values) %*% t(vectors)
+    return(M_corrected)
+  }
+  
+  if (!is_positive_definite(Bk_0_rhs)) {
+    Bk_0_rhs <- make_positive_definite(Bk_0_rhs)
+  }
+
+  Bk_0_rhs1 = make_positive_definite_svd(Bk_0_rhs)
+  #print(paste('Apres' ,is_positive_definite(Bk_0_rhs)))
   
   Bk_0 <- try(t(chol(Bk_0_rhs)), silent = T) # Perform Cholesky decomposition to obtain Bk_0
   
@@ -102,7 +124,7 @@ calculate_AR_coefficients_matrices <- function(parm, coordinates, AR_lag){
   })
   # check there are no error in bk[[s]][[k]]$bk$Bk_0
   # if so (character error message) get value for k-1 or k+1
-  #i = 0
+  i = 0
   #ik_list <- vector("list", length(parm$swg))
   
   for(s in 1:length(parm$swg)){
@@ -111,24 +133,22 @@ calculate_AR_coefficients_matrices <- function(parm, coordinates, AR_lag){
     
     for(k in 1:K){
       j = k-1
-      ik = 0
+      #ik = 0
       
       while (is.list(bk[[s]][[k]]$bk) && is.character(bk[[s]][[k]]$bk$Bk_0)) {
-        print(paste("s =", s, ", k =", k))        
+        #print(paste("s =", s, ", k =", k))        
         bk[[s]][[k]]$bk$Bk_0 = try(bk[[s]][[j]]$bk$Bk_0, silent = T)
         bk[[s]][[k]]$bk$bk = list(try(bk[[s]][[j]]$bk$Bk, silent = T))
         bk[[s]][[k]]$cov0 = try(bk[[s]][[k]]$cov0, silent = T)
         if(j == k+1) break;
         j = k+1
-        #i = i + 1 
-        
-        
+        i = i + 1 
         #ik = ik +1
       }
       #ik_list[[s]][k] <- ik   
     }
   }
-  #print(i)
+  print(i)
   #print(ik_list)
   return(bk)
 }
