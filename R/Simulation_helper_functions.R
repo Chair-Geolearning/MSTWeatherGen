@@ -123,7 +123,7 @@ calculate_AR_coefficients_matrices <- function(parm, coordinates, AR_lag){
   })
   # check there are no error in bk[[s]][[k]]$bk$Bk_0
   # if so (character error message) get value for k-1 or k+1
-  i = 0
+  #i = 0
   #ik_list <- vector("list", length(parm$swg))
   
   for(s in 1:length(parm$swg)){
@@ -141,7 +141,7 @@ calculate_AR_coefficients_matrices <- function(parm, coordinates, AR_lag){
         bk[[s]][[k]]$cov0 = try(bk[[s]][[k]]$cov0, silent = T)
         if(j == k+1) break;
         j = k+1
-        i = i + 1 
+        #i = i + 1 
         #ik = ik +1
       }
       #ik_list[[s]][k] <- ik   
