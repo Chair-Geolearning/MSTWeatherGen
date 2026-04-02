@@ -2,9 +2,9 @@
 #'
 #' Function for ordered normalization using Ordered Quantile Normalizing transformation.
 #' Function inspired from "bestNormalize" package and adapted for truncated normal distributions.
-#' 
+#'
 #'  This function implements the methods described in Section 3.2 in Equations 14, 15 and 16 of the article
-#' *Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8). 
+#' *Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8).
 #'
 #' @param x Numeric vector to be normalized.
 #' @param left Numeric value specifying the left truncation.
@@ -18,33 +18,34 @@
 #' @importFrom stats glm rnorm pnorm
 #'
 #' @keywords internal
-orderNorm <- function(x,left, n_logit_fit = min(length(x), 100000), ..., warn = TRUE) {
-  
+orderNorm <- function(x, left, n_logit_fit = min(length(x), 100000), ..., warn = TRUE) {
   stopifnot(is.numeric(x))
   ties_status <- 0
   nunique <- length(unique(x))
   na_idx <- is.na(x)
-  
+
   if (nunique < length(x)) {
     ties_status <- 1
   }
-  if(length(unique(x))==1) x = x + rnorm(length(x), sd = 1e-7)
-  n = length(x) 
-  qc = 0.5
-  q.x <- (rank(x)-qc) / ((1/(1-pnorm(left)))*n) + pnorm(left) 
-  x.t <- crch::qcnorm(q.x,left = left)
-  
+  if (length(unique(x)) == 1) x <- x + rnorm(length(x), sd = 1e-7)
+  n <- length(x)
+  qc <- 0.5
+  q.x <- (rank(x) - qc) / ((1 / (1 - pnorm(left))) * n) + pnorm(left)
+  x.t <- crch::qcnorm(q.x, left = left)
+
   # fit model for future extrapolation
   # create "reduced" x with n_logit_fit equally spaced observations
   keep_idx <- round(seq(1, length(x), length.out = min(length(x), n_logit_fit)))
   x_red <- x[order(x[!na_idx])[keep_idx]]
-  n_red = length(x_red)
-  q_red <- (rank(x_red, na.last = 'keep', ties.method = "min")) / n_red
-  
+  n_red <- length(x_red)
+  q_red <- (rank(x_red, na.last = "keep", ties.method = "min")) / n_red
+
   # fit model for future extrapolation
   fit <- suppressWarnings(
-    stats::glm(q_red ~ x_red , family = 'binomial', 
-               weights = rep(n_red, n_red))
+    stats::glm(q_red ~ x_red,
+      family = "binomial",
+      weights = rep(n_red, n_red)
+    )
   )
   fit <- list(coef = fit$coefficients, x_red = x_red)
   val <- list(
@@ -52,8 +53,8 @@ orderNorm <- function(x,left, n_logit_fit = min(length(x), 100000), ..., warn = 
     x = x,
     fit = fit
   )
-  
-  class(val) <- 'orderNorm'
+
+  class(val) <- "orderNorm"
   val
 }
 #' Predict Binomial
@@ -61,7 +62,7 @@ orderNorm <- function(x,left, n_logit_fit = min(length(x), 100000), ..., warn = 
 #' Function to predict binomial probabilities using a fitted model object.
 #'
 #'  This function implements the methods described in Section 3.2 in Equation 16 of the article
-#' *Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8). 
+#' *Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8).
 #'
 #' @param fit Fitted model object containing coefficients.
 #' @param newdata New data for prediction.
@@ -69,59 +70,57 @@ orderNorm <- function(x,left, n_logit_fit = min(length(x), 100000), ..., warn = 
 #' @return Predicted binomial probabilities.
 #'
 #' @keywords internal
-predict_binomial = function(fit, newdata){
-
-  if(missing(newdata)) newdata = fit$x_red
-  pred = fit$coef[1]+fit$coef[2]*newdata
-  return(1/(1+exp(-pred)))
+predict_binomial <- function(fit, newdata) {
+  if (missing(newdata)) newdata <- fit$x_red
+  pred <- fit$coef[1] + fit$coef[2] * newdata
+  return(1 / (1 + exp(-pred)))
 }
 #' Order Normalization for All Variables
 #'
-#' Function to perform normalization on a selected variable 'j' from 'data', considering spatial information 
-#' from 'coordinates' and a threshold 'left' for the transformation. This is particularly useful for variables with 
+#' Function to perform normalization on a selected variable 'j' from 'data', considering spatial information
+#' from 'coordinates' and a threshold 'left' for the transformation. This is particularly useful for variables with
 #' many zero values, ensuring robust normalization across spatially correlated variables.
 #'
 #' This function implements the methods described in Section 3.2 (Eqs. 14–16) together with the
 #' zero-inflated data formulations in Section 2.3 (Eq. 5) and Section 2.1 (Eq. 1) of the article
 #' *Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8).
 #'
-#' @param data A matrix or data frame containing the variables to be normalized. Rows represent observations, 
+#' @param data A matrix or data frame containing the variables to be normalized. Rows represent observations,
 #'             and columns represent different variables.
 #' @param j The index of the variable within 'data' to be normalized.
-#' @param coordinates A matrix or data frame of spatial coordinates corresponding to each 
+#' @param coordinates A matrix or data frame of spatial coordinates corresponding to each
 #'                    variable in 'data'. It is used to calculate spatial distances and determine proximity.
 #' @param left A parameter for the orderNorm function, specifying the transformation threshold.
 #'
-#' @return The result of applying the orderNorm function to the selected variable 'j', considering spatial proximity 
+#' @return The result of applying the orderNorm function to the selected variable 'j', considering spatial proximity
 #'         and handling variables with a high proportion of zero values.
 #'
 #' @keywords internal
 #' @importFrom stats dist
 
 orderNorm_all <- function(data, j, coordinates, left) {
-  
-  D = as.matrix(dist(coordinates))
-  kn = order(D[j,])
-  j = kn[1]
-  x = data[,j]
-  j = 2
-  if(length(which(x==0))/length(x)<0.8){
-    return(orderNorm(x[!x==0],left = left))
-  }else{
-    while ((length(which(x!=0))<50)) {
-      x = c(x,data[,kn[j]])
-      j = j + 1
+  D <- as.matrix(dist(coordinates))
+  kn <- order(D[j, ])
+  j <- kn[1]
+  x <- data[, j]
+  j <- 2
+  if (length(which(x == 0)) / length(x) < 0.8) {
+    return(orderNorm(x[!x == 0], left = left))
+  } else {
+    while ((length(which(x != 0)) < 50)) {
+      x <- c(x, data[, kn[j]])
+      j <- j + 1
     }
-    return(orderNorm(x[!x==0],left = left))
+    return(orderNorm(x[!x == 0], left = left))
   }
 }
 #' Predict Method for orderNormTransf Objects
 #'
-#' Function to predict the normalized values for new data using a fitted orderNormTransf object or 
+#' Function to predict the normalized values for new data using a fitted orderNormTransf object or
 #' to perform inverse transformation.
 #'
 #'  This function implements the methods described in Sections 2.3 and 2.1 in Equation 1 of the article
-#' *Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8). 
+#' *Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8).
 #'
 #' @param object Fitted orderNormTransf object.
 #' @param newdata Numeric vector of new data to be transformed. If NULL, transformation is applied to the original data.
@@ -134,28 +133,29 @@ orderNorm_all <- function(data, j, coordinates, left) {
 #' @keywords internal
 predict.orderNormTransf <- function(object,
                                     newdata = NULL,
-                                    inverse = FALSE, 
+                                    inverse = FALSE,
                                     warn = TRUE,
                                     ...) {
-
   stopifnot(is.null(newdata) || is.numeric(newdata))
-  
+
   # Perform transformation
-  if(!inverse) {
-    if(is.null(newdata)) newdata <- object$x
+  if (!inverse) {
+    if (is.null(newdata)) newdata <- object$x
     na_idx <- is.na(newdata)
-    
-    newdata[!na_idx] <- orderNormTransf(orderNorm_obj = object, new_points = newdata[!na_idx],
-                                        warn = warn, left = object$q)
+
+    newdata[!na_idx] <- orderNormTransf(
+      orderNorm_obj = object, new_points = newdata[!na_idx],
+      warn = warn, left = object$q
+    )
     return(newdata)
-  } 
-  
+  }
+
   # Perform reverse transformation
   if (is.null(newdata)) newdata <- object$x.t
-  
+
   na_idx <- is.na(newdata)
   newdata[!na_idx] <- inv_orderNorm_Transf(object, newdata[!na_idx], warn)
-  
+
   return(newdata)
 }
 #' Inverse Transformation for orderNorm Objects
@@ -163,7 +163,7 @@ predict.orderNormTransf <- function(object,
 #' Function to perform inverse transformation or normalization applied by the orderNorm function.
 #'
 #'  This function implements the methods described in Sections 2.1, 2.3 and 3.2 of the article
-#' *Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8). 
+#' *Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8).
 #'
 #' @param orderNorm_obj Fitted orderNorm object containing details of the original normalization or transformation including the transformed and original data points and the fitting model.
 #' @param new_points_x_t Transformed data points for which the original values are to be estimated.
@@ -174,49 +174,47 @@ predict.orderNormTransf <- function(object,
 #' @importFrom stats approx
 #' @keywords internal
 inv_orderNorm_Transf <- function(orderNorm_obj, new_points_x_t, left, warn = FALSE) {
-
   # Extract transformed and original data points from the orderNorm object.
   x_t <- orderNorm_obj$x.t
   old_points <- orderNorm_obj$x
-  
-  if(min(old_points)>0){
+
+  if (min(old_points) > 0) {
     vals <- suppressWarnings(
       stats::approx(x_t, old_points, xout = new_points_x_t, rule = 2:1)
     )
-  }else{
+  } else {
     vals <- suppressWarnings(
       stats::approx(x_t, old_points, xout = new_points_x_t, rule = 1)
     )
   }
   # If predictions have been made outside observed domain
   if (any(is.na(vals$y))) {
-    
     fit <- orderNorm_obj$fit
     p <- crch::qcnorm(predict_binomial(fit), left = left)
-    if(min(old_points)>0){
-      l_idx = FALSE
-    }else{
+    if (min(old_points) > 0) {
+      l_idx <- FALSE
+    } else {
       l_idx <- vals$x < min(x_t, na.rm = TRUE)
     }
     h_idx <- vals$x > max(x_t, na.rm = TRUE)
     if (any(l_idx)) {
       # Solve algebraically from original transformation
-      pp = crch::pcnorm(vals$x[l_idx]+ min(p, na.rm = TRUE) - min(x_t, na.rm = TRUE) , left = left)
-      pp[pp==1] = 0.99999
+      pp <- crch::pcnorm(vals$x[l_idx] + min(p, na.rm = TRUE) - min(x_t, na.rm = TRUE), left = left)
+      pp[pp == 1] <- 0.99999
       logits <- log(pp / (1 - pp))
-      vals$y[l_idx] <- 
-        unname((logits - fit$coef[1] ) / fit$coef[2])
+      vals$y[l_idx] <-
+        unname((logits - fit$coef[1]) / fit$coef[2])
     }
-    
+
     if (any(h_idx)) {
-      pp = crch::pcnorm(vals$x[h_idx]+ max(p, na.rm = TRUE) - max(x_t, na.rm = TRUE) , left = left)
-      pp[pp==1] = 0.99999
+      pp <- crch::pcnorm(vals$x[h_idx] + max(p, na.rm = TRUE) - max(x_t, na.rm = TRUE), left = left)
+      pp[pp == 1] <- 0.99999
       logits <- log(pp / (1 - pp))
-      vals$y[h_idx] <- 
-        unname((logits - fit$coef[1] ) / fit$coef[2])
+      vals$y[h_idx] <-
+        unname((logits - fit$coef[1]) / fit$coef[2])
     }
   }
-  
+
   return(vals$y)
 }
 #' Transforms New Data Points using orderNorm Object
@@ -232,37 +230,35 @@ inv_orderNorm_Transf <- function(orderNorm_obj, new_points_x_t, left, warn = FAL
 #' @importFrom stats approx
 #' @keywords internal
 orderNormTransf <- function(orderNorm_obj, new_points, warn, left) {
-
   # Extract transformed and original data points from the orderNorm object.
   x_t <- orderNorm_obj$x.t
   old_points <- orderNorm_obj$x
   vals <- suppressWarnings(
     stats::approx(old_points, x_t, xout = new_points, rule = 1)
   )
-  
+
   # If predictions have been made outside observed domain
   if (any(is.na(vals$y))) {
     fit <- orderNorm_obj$fit
     p <- crch::qcnorm(predict_binomial(fit), left = left)
     l_idx <- vals$x < min(old_points, na.rm = TRUE)
     h_idx <- vals$x > max(old_points, na.rm = TRUE)
-    
-    # Check 
+
+    # Check
     if (any(l_idx)) {
       xx <- data.frame(x_red = vals$x[l_idx])
-      q <- predict_binomial(fit, newdata = xx)$x_red 
-      vals$y[l_idx] <- crch::qcnorm(q, left = left) - 
+      q <- predict_binomial(fit, newdata = xx)$x_red
+      vals$y[l_idx] <- crch::qcnorm(q, left = left) -
         (min(p, na.rm = TRUE) - min(x_t, na.rm = TRUE))
-      
     }
     if (any(h_idx)) {
       xx <- data.frame(x_red = vals$x[h_idx])
-      q <- predict_binomial(fit, newdata = xx)$x_red 
-      vals$y[h_idx] <- crch::qcnorm(q, left = left) - 
+      q <- predict_binomial(fit, newdata = xx)$x_red
+      vals$y[h_idx] <- crch::qcnorm(q, left = left) -
         (max(p, na.rm = TRUE) - max(x_t, na.rm = TRUE))
     }
   }
-  
+
   return(vals$y)
 }
 
@@ -271,7 +267,7 @@ orderNormTransf <- function(orderNorm_obj, new_points, warn, left) {
 #' Function to scale the input data based on daily mean and standard deviation, and optionally smooth them using a moving average.
 #'
 #'  This function implements the methods described in Sections 3.5 and 5 of the article
-#' *Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8). 
+#' *Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8).
 #'
 #' @param data Input weather data, organized as a 3D array where the dimensions are [time, locations, variables].
 #' @param names Names of the variables in the data.
@@ -282,52 +278,51 @@ orderNormTransf <- function(orderNorm_obj, new_points, warn, left) {
 #' @importFrom lubridate year
 #' @keywords internal
 scale_data <- function(data, names, dates, window_size = 30) {
-  
-  if(length(unique(lubridate::year(dates))) > 5){
+  if (length(unique(lubridate::year(dates))) > 5) {
     # Initialize scale parameters storage
     scale_parm <- list(mu = list(), sd = list())
-    
+
     # Convert dates to a consistent format for day extraction
     days <- substr(as.Date(dates), 6, 11)
-    
+
     # Define a moving average function
     moving_average <- function(x, n) {
       len <- length(x)
       avg <- rep(NA, len)
-      
+
       for (i in 1:len) {
         lower <- max(1, i - n %/% 2)
         upper <- min(len, i + n %/% 2)
         window <- x[lower:upper]
         avg[i] <- mean(window, na.rm = TRUE)
       }
-      
+
       return(avg)
     }
-    
+
     # Iterate over each variable except "Precipitation"
     for (v in names[!names %in% "Precipitation"]) {
       # Calculate daily mean and standard deviation for each variable
       mu <- sapply(unique(days), function(day) colMeans(data[days == day, , v], na.rm = TRUE))
       sd <- sapply(unique(days), function(day) apply(data[days == day, , v], 2, sd, na.rm = TRUE))
-      
+
       # Smooth mu and sd using the moving average
       mu_smooth <- apply(mu, 1, function(x) moving_average(x, window_size))
       sd_smooth <- apply(sd, 1, function(x) moving_average(x, window_size))
-      
+
       # Store smoothed parameters
       scale_parm$mu[[v]] <- mu_smooth
       scale_parm$sd[[v]] <- sd_smooth
-      
+
       # Standardize data using smoothed parameters
       for (i in 1:nrow(data)) {
         day_index <- which(unique(days) == days[i])
-        data[i, , v] <- (data[i, , v] - mu_smooth[day_index,]) / sd_smooth[day_index,]
+        data[i, , v] <- (data[i, , v] - mu_smooth[day_index, ]) / sd_smooth[day_index, ]
       }
     }
-  }else{
-    warning('No scale is used. The number of years considered is too small to estimate the seasonal means and standard deviations.')
-    scale_parm = NULL
+  } else {
+    warning("No scale is used. The number of years considered is too small to estimate the seasonal means and standard deviations.")
+    scale_parm <- NULL
   }
   # Return the standardized data and scale parameters
   return(list(data = data, scale_parm = scale_parm))
@@ -337,7 +332,7 @@ scale_data <- function(data, names, dates, window_size = 30) {
 #' Function to estimate lambda transformations for each variable, location, and weather type based on the data.
 #'
 #'  This function implements the methods described in Sections 2.3 and 3.2 of the article
-#' *Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8). 
+#' *Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8).
 #'
 #' @param data Input weather data, organized as a 3D array where the dimensions are [time, locations, variables].
 #' @param wt Vector indicating the weather type for each observation.
@@ -348,9 +343,8 @@ scale_data <- function(data, names, dates, window_size = 30) {
 #' @importFrom stats qnorm
 #' @keywords internal
 estimate_lambda_transformations <- function(data, wt, names, coordinates) {
-  
-  ns = dim(data)[2]
-  K = length(unique(wt))
+  ns <- dim(data)[2]
+  K <- length(unique(wt))
   # Iterate over each weather type
   lambda_transformations <- lapply(1:K, function(k) {
     # For each variable
@@ -360,26 +354,26 @@ estimate_lambda_transformations <- function(data, wt, names, coordinates) {
         # Extract data for the current weather type, location, and variable
         x <- data[wt == k, j, v]
         # Calculate the proportion of zeros and its corresponding normal quantile
-        if(v=="Precipitation"){
+        if (v == "Precipitation") {
           proportion_zeros <- length(which(x == 0)) / length(x)
           q <- qnorm(proportion_zeros)
-        }else{
+        } else {
           q <- -Inf
         }
-        
+
         # Apply the transformation, assuming orderNorm_all is defined elsewhere
         bx <- orderNorm_all(data = data[wt == k, , v], j = j, coordinates = coordinates, left = q)
-        bx$q <- q  # Store the quantile in the result
-        
+        bx$q <- q # Store the quantile in the result
+
         return(bx)
       })
-      
+
       return(location_transforms)
     })
-    return( variable_transforms)
+    return(variable_transforms)
   })
-  threshold_precip = lapply(1:K, function(k){
-    sapply(1:ns, function(j) lambda_transformations[[k]][[which(names=="Precipitation")]][[j]]$q)
+  threshold_precip <- lapply(1:K, function(k) {
+    sapply(1:ns, function(j) lambda_transformations[[k]][[which(names == "Precipitation")]][[j]]$q)
   })
   return(list(lambda_transformations = lambda_transformations, threshold_precip = threshold_precip))
 }
@@ -388,8 +382,8 @@ estimate_lambda_transformations <- function(data, wt, names, coordinates) {
 #' Function to transform data using lambda transformations based on the provided lambda parameters.
 #'
 #'  This function implements the methods described in Sections 2.3 and 3.2 of the article
-#' *Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8). 
-#'                            
+#' *Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8).
+#'
 #' @param data Input weather data, organized as a 3D array where the dimensions are [time, locations, variables].
 #' @param wt Vector indicating the weather type for each observation.
 #' @param names Names of the variables in the data.
@@ -400,9 +394,8 @@ estimate_lambda_transformations <- function(data, wt, names, coordinates) {
 #'
 #' @keywords internal
 transformations <- function(data, wt, names, coordinates, lmbd) {
-
-  ns = dim(data)[2]
-  K = length(unique(wt))
+  ns <- dim(data)[2]
+  K <- length(unique(wt))
   # Iterate over each weather type
   for (k in 1:K) {
     # Iterate over each variable
@@ -411,35 +404,35 @@ transformations <- function(data, wt, names, coordinates, lmbd) {
       for (j in 1:ns) {
         # Identify indices for the current weather type and non-zero values
         ind <- which(wt == k & data[, j, v] != 0)
-        
+
         # Retrieve the lambda transformation parameters for the current combination
         m <- lmbd[[k]][[which(names == v)]][[j]]
         # Check if the second coefficient of the fit is NA; find an alternative if necessary
-        i = 1
-        while(is.na(m$fit$coef[2])) {
+        i <- 1
+        while (is.na(m$fit$coef[2])) {
           # Find an index of a location with a valid second coefficient
           valid_indices <- which(!sapply(1:ns, function(x) is.na(lmbd[[k]][[which(names == v)]][[x]]$fit$coef[2])))
-          valid_indices <- order(apply(coordinates[valid_indices,], 1, function(point) {
-            sqrt(sum((point - coordinates[j,])^2))
+          valid_indices <- order(apply(coordinates[valid_indices, ], 1, function(point) {
+            sqrt(sum((point - coordinates[j, ])^2))
           }))
           if (length(valid_indices) > 0) {
             # Use the first valid transformation parameters found
             m$fit <- lmbd[[k]][[which(names == v)]][[valid_indices[i]]]$fit
           } else {
-            next  # Skip if no valid transformation parameters are found
+            next # Skip if no valid transformation parameters are found
           }
-          i = i+1
+          i <- i + 1
         }
-        
+
         # Apply the transformation to the data
         # Assuming predict.orderNormTransf is defined elsewhere and applies the transformation
-        if (length(ind) > 0) {  # Check if there are indices to update
+        if (length(ind) > 0) { # Check if there are indices to update
           data[ind, j, v] <- predict.orderNormTransf(m, newdata = data[ind, j, v], inverse = FALSE)
         }
       }
     }
   }
-  
+
   return(data)
 }
 
@@ -449,8 +442,8 @@ transformations <- function(data, wt, names, coordinates, lmbd) {
 #' Function to apply inverse transformations to the simulated data, reversing the lambda transformations applied during simulation for each weather type and variable.
 #'
 #'  This function implements the methods described in Sections 2.3 and 3.2 of the article
-#' *Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8). 
-#'                                         
+#' *Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8).
+#'
 #' @param sim Simulated weather data, organized as a 3D array where the dimensions are [time, locations, variables].
 #' @param wt Vector indicating the weather type for each time step.
 #' @param parm Parameters object containing lambda transformations and other model parameters.
@@ -461,40 +454,39 @@ transformations <- function(data, wt, names, coordinates, lmbd) {
 #' @keywords internal
 
 apply_inverse_transformations <- function(sim, wt, parm, names) {
-  
-  lmbd = parm$lmbd
-  nt = dim(sim)[1]
-  ns = dim(sim)[2]
-  for(k in unique(wt)){
-    for(v in names) {
-      for(j in 1:ns){
-        if(v == "Precipitation"){
-          q = lmbd[[k]][[which(names==v)]][[j]]$q
-        }else{
-          q = -Inf
+  lmbd <- parm$lmbd
+  nt <- dim(sim)[1]
+  ns <- dim(sim)[2]
+  for (k in unique(wt)) {
+    for (v in names) {
+      for (j in 1:ns) {
+        if (v == "Precipitation") {
+          q <- lmbd[[k]][[which(names == v)]][[j]]$q
+        } else {
+          q <- -Inf
         }
-        m = lmbd[[k]][[which(names==v)]][[j]] 
-        if(is.na(m$fit$coef[2])){
-          m = lmbd[[k]][[which(names==v)]][[which(!is.na(sapply(1:ns, function(j) lmbd[[k]][[which(names==v)]][[j]]$fit$coefficients[[2]])))[1]]]
+        m <- lmbd[[k]][[which(names == v)]][[j]]
+        if (is.na(m$fit$coef[2])) {
+          m <- lmbd[[k]][[which(names == v)]][[which(!is.na(sapply(1:ns, function(j) lmbd[[k]][[which(names == v)]][[j]]$fit$coefficients[[2]])))[1]]]
         }
-        ind = wt==k & sim[,j,v]  > q
-        sim[wt==k & sim[,j,v]  <= q,j,v] = 0
-        if(!length(which(ind))==0){
-          sim[ind,j,v] = inv_orderNorm_Transf(m ,new_points_x_t=sim[ind,j,v], left =q)
-        } 
+        ind <- wt == k & sim[, j, v] > q
+        sim[wt == k & sim[, j, v] <= q, j, v] <- 0
+        if (!length(which(ind)) == 0) {
+          sim[ind, j, v] <- inv_orderNorm_Transf(m, new_points_x_t = sim[ind, j, v], left = q)
+        }
       }
     }
   }
-  
+
   return(sim)
 }
 #' Rescale Simulated Data
 #'
-#' Function to rescale simulated weather data for variables other than "Precipitation" to their original scale.                                                     
+#' Function to rescale simulated weather data for variables other than "Precipitation" to their original scale.
 #'
 #'  This function implements the methods described in Sections 5 of the article
-#' *Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8). 
-#'                                                                
+#' *Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8).
+#'
 #' @param sim Simulated weather data, organized as a 3D array where the dimensions are [time, locations, variables].
 #' @param parm Parameters object containing model parameters, including scale parameters (mu and sd) for each variable.
 #' @param names Names of the variables included in the simulation.
@@ -504,20 +496,18 @@ apply_inverse_transformations <- function(sim, wt, parm, names) {
 #'
 #' @keywords internal
 rescale_data <- function(sim, parm, names, dates) {
-  
-  nt <- dim(sim)[1]  # Number of time steps
-  ns <- dim(sim)[2]  # Number of spatial locations
+  nt <- dim(sim)[1] # Number of time steps
+  ns <- dim(sim)[2] # Number of spatial locations
   # Extract day identifiers from dates to match with scale parameters
   days <- substr(dates, 6, 11)
   dayso <- substr(parm$dates, 6, 11)
-  for (v in names[!names=="Precipitation"]) {
-    mu = parm$scale_parm$mu[[v]]
-    sd = parm$scale_parm$sd[[v]]
+  for (v in names[!names == "Precipitation"]) {
+    mu <- parm$scale_parm$mu[[v]]
+    sd <- parm$scale_parm$sd[[v]]
     for (i in 1:nt) {
-      sim[i,,v] = (sim[i,,v]*sd[which(unique(dayso)==days[i]),])+mu[which(unique(dayso)==days[i]),]
+      sim[i, , v] <- (sim[i, , v] * sd[which(unique(dayso) == days[i]), ]) + mu[which(unique(dayso) == days[i]), ]
     }
   }
-  
+
   return(sim)
 }
-

@@ -1,4 +1,3 @@
-
 #' @title Estimate Parameters for Multivariate Space-Time Stochastic Weather Generator
 #'
 #' @description This function estimates parameters for a Multivariate Space-Time Stochastic Weather Generator (MSTWeatherGen),
@@ -8,20 +7,20 @@
 #'
 #' @details
 #' The MSTWeatherGen model operates in three stages: Initially, weather types are determined through
-#' a clustering algorithm. Subsequently, for each identified weather type, the weather data undergo transformations 
-#' into residuals that adhere to a normal distribution via a specific transformation function. In the final stage, 
+#' a clustering algorithm. Subsequently, for each identified weather type, the weather data undergo transformations
+#' into residuals that adhere to a normal distribution via a specific transformation function. In the final stage,
 #' a multivariate space-time Gaussian random field is fitted to these transformed variables for each weather type.
 #' The user has the option to configure the model to fit data for each season, with the seasons defined by the user.
-#' 
+#'
 #' This function implements the methods described in Sections 3.1–3.3 of the article
-#' \strong{Stochastic Environmental Research and Risk Assessment, 2025} (DOI: 10.1007/s00477-024-02897-8). 
-#' 
+#' \strong{Stochastic Environmental Research and Risk Assessment, 2025} (DOI: 10.1007/s00477-024-02897-8).
+#'
 #' @param data A multi-dimensional array of weather data, encompassing time, location, and various weather variables.
 #' @param dates A vector of dates corresponding to the time dimension in the data array, used for temporal analysis.
 #' @param by_season Logical flag indicating whether to perform the estimation seasonally (`TRUE`) or annually (`FALSE`).
 #' @param seasons A list defining the seasons, each with start and end days and months, required if `by_season` is `TRUE`.
 #' @param scale Logical, indicating if the data needs to be standardized (`TRUE`) or not (`FALSE`). If `scale` is `TRUE` each meteorological variable
-#' is standardized at each location using smoothed mean and standard deviation. 
+#' is standardized at each location using smoothed mean and standard deviation.
 #' @param precipitation Logical, indicating if precipitation should be considered as a primary variable for analysis. Defaults to `TRUE`.
 #' @param names Optionally, names of the variables in the data array to be used for analysis. If `precipitation` is `TRUE`
 #' and `names` is not provided, "Precipitation" is assumed to be the first variable, with other variables numerically named.
@@ -34,12 +33,11 @@
 #' @return A list containing the results of the `MSTWeatherGen_Estim_season` function for each season (or for the entire year if `by_season` is `FALSE`),
 #' including estimated parameters and other outputs relevant to weather generation, such as weather type classifications and spatial dependencies.
 #' @export
-MSTWeatherGen_Estim = function(data, dates, by_season = TRUE,  seasons, scale = FALSE, precipitation = T, names = NULL, 
-                               names_weather_types = NULL, coordinates,
-                               max_it, tmax, n1, n2){
-  
+MSTWeatherGen_Estim <- function(data, dates, by_season = TRUE, seasons, scale = FALSE, precipitation = T, names = NULL,
+                                names_weather_types = NULL, coordinates,
+                                max_it, tmax, n1, n2) {
   # Validate input parameters, especially the requirement for 'seasons' when 'by_season' is TRUE
-  if(by_season & missing(seasons)){
+  if (by_season & missing(seasons)) {
     stop("Please provide a list of seasons that cover all the year in following format: seasons <- list(
           s1 = list(min_day = 1, max_day = 29, min_month = 12, max_month = 2),
           s2 = list(min_day = 1, max_day = 31, min_month = 3, max_month = 5),
@@ -47,44 +45,46 @@ MSTWeatherGen_Estim = function(data, dates, by_season = TRUE,  seasons, scale = 
           s4 = list(min_day = 1, max_day = 30, min_month = 9, max_month = 11)
           )")
   }
-  
+
   # If not analyzing by season, create a default season that spans the entire year
   if (!by_season) {
     seasons <- list(s1 = list(min_day = 1, max_day = 31, min_month = 1, max_month = 12))
   }
   # Check names
-  if(is.null(names)&precipitation){
-    names = c("Precipitation", paste0("v",2:dim(data)[3]))
-  }else{
-    if(is.null(names)&!precipitation){
-      names = paste0("v",1:dim(data)[3])
-    }else{
-      if(!is.null(names)&precipitation){
-        names[1] = "Precipitation"
+  if (is.null(names) & precipitation) {
+    names <- c("Precipitation", paste0("v", 2:dim(data)[3]))
+  } else {
+    if (is.null(names) & !precipitation) {
+      names <- paste0("v", 1:dim(data)[3])
+    } else {
+      if (!is.null(names) & precipitation) {
+        names[1] <- "Precipitation"
       }
     }
   }
-  if(is.null(names_weather_types)){
-    names_weather_types = names
+  if (is.null(names_weather_types)) {
+    names_weather_types <- names
   }
   # Perform the estimation for each season or for the entire year, based on 'by_season' flag
   swg <- lapply(seasons, function(season) {
-    MSTWeatherGen_Estim_season(data = data, dates = dates, scale = scale, precipitation = precipitation, 
-                               names = names, names_weather_types = names_weather_types, 
-                               coordinates = coordinates, season = season, max_it = max_it, tmax = tmax, 
-                               n1 = n1, n2 = n2)
+    MSTWeatherGen_Estim_season(
+      data = data, dates = dates, scale = scale, precipitation = precipitation,
+      names = names, names_weather_types = names_weather_types,
+      coordinates = coordinates, season = season, max_it = max_it, tmax = tmax,
+      n1 = n1, n2 = n2
+    )
   })
-  
+
   return(list(swg = swg, by_season = by_season, names = names, names_weather_types = names_weather_types))
 }
 
 #' @title Simulate Weather Data Using MSTWeatherGen
 #'
 #' @description This function simulates weather data over specified dates using the Multivariate Space-Time Stochastic Weather Generator (MSTWeatherGen). The simulation can be conducted on either a seasonal basis or for the entire period, depending on the provided parameters and the structure of the historical data. It utilizes autoregressive models and specified parameters to generate realistic weather variables.
-#' 
+#'
 #' @details
 #'  This function implements the methods described in Section 4 of the article
-#' \strong{Stochastic Environmental Research and Risk Assessment, 2025} (DOI: 10.1007/s00477-024-02897-8). 
+#' \strong{Stochastic Environmental Research and Risk Assessment, 2025} (DOI: 10.1007/s00477-024-02897-8).
 #'
 #' @param dates_sim Dates for which to simulate weather data, specifying the target period for simulation.
 #' @param dates_original The original dates corresponding to the historical weather data, used for aligning and deriving simulation parameters.
@@ -97,51 +97,58 @@ MSTWeatherGen_Estim = function(data, dates, by_season = TRUE,  seasons, scale = 
 #' @importFrom abind abind
 #' @export
 
-MSTWeatherGen_Sim = function(dates_sim, dates_original, data, seasons = NULL, parm, AR_lag=1, bk) {
-  
-  by_season = parm$by_season # Flag indicating whether to simulate data by season.
-  names = parm$names
-  names_weather_types = parm$names_weather_types
-  parm = parm$swg  # Extract simulation parameters.
+MSTWeatherGen_Sim <- function(dates_sim, dates_original, data, seasons = NULL, parm, AR_lag = 1, bk) {
+  by_season <- parm$by_season # Flag indicating whether to simulate data by season.
+  names <- parm$names
+  names_weather_types <- parm$names_weather_types
+  parm <- parm$swg # Extract simulation parameters.
   if (by_season) {
     # If simulation is to be performed seasonally, assign seasons to the simulation dates.
     seasons_assigned <- assign_seasons(dates_sim, seasons)
     wt_seasons <- lapply(1:length(seasons), function(s) parm[[s]]$wt)
-    
+
     # Identify indices where the season changes.
     change_season_indices <- c(which(diff(seasons_assigned) != 0) + 1, length(seasons_assigned) + 1)
-    
+
     # Find centroids for weather types in each season.
     centroids <- find_centroids(data, dates_original, seasons, wt_seasons, names_weather_types)
-    
+
     # Simulate weather data for the first season.
-    sm <- MSTWeatherGen_Sim_season(dates = dates_sim[1:(change_season_indices[1]-1)], names = names, 
-                                   parm = parm[[seasons_assigned[1]]], AR_lag = AR_lag, bk = bk[[seasons_assigned[1]]])
+    sm <- MSTWeatherGen_Sim_season(
+      dates = dates_sim[1:(change_season_indices[1] - 1)], names = names,
+      parm = parm[[seasons_assigned[1]]], AR_lag = AR_lag, bk = bk[[seasons_assigned[1]]]
+    )
     sim <- sm$sim
     Z_initial <- sm$Z_initial_next
-    
+
     # Iterate over each season change and simulate weather data.
-    for (s in 1:(length(change_season_indices)-1)) {
+    for (s in 1:(length(change_season_indices) - 1)) {
       # Determine the most probable initial weather type for the next season.
-      first_state <- most_probable_weather_type(sim = sim[dim(sim)[1], , ],
-                                                centroids = centroids[[seasons_assigned[change_season_indices[s]]]], 
-                                                transitions = parm[[seasons_assigned[change_season_indices[s]]]]$transitions, 
-                                                names_weather_types = names_weather_types)
-      
+      first_state <- most_probable_weather_type(
+        sim = sim[dim(sim)[1], , ],
+        centroids = centroids[[seasons_assigned[change_season_indices[s]]]],
+        transitions = parm[[seasons_assigned[change_season_indices[s]]]]$transitions,
+        names_weather_types = names_weather_types
+      )
+
       # Simulate weather data for the current season segment.
-      sm <- MSTWeatherGen_Sim_season(dates = dates_sim[change_season_indices[s]:(change_season_indices[s+1]-1)], 
-                                     Z_initial = Z_initial, first_state = first_state, names = names,
-                                     parm = parm[[seasons_assigned[change_season_indices[s]]]], 
-                                     AR_lag = AR_lag, bk = bk[[seasons_assigned[change_season_indices[s]]]])
+      sm <- MSTWeatherGen_Sim_season(
+        dates = dates_sim[change_season_indices[s]:(change_season_indices[s + 1] - 1)],
+        Z_initial = Z_initial, first_state = first_state, names = names,
+        parm = parm[[seasons_assigned[change_season_indices[s]]]],
+        AR_lag = AR_lag, bk = bk[[seasons_assigned[change_season_indices[s]]]]
+      )
       Z_initial <- sm$Z_initial_next
-      sim <- abind::abind(sim, sm$sim, along = 1)  # Append the new simulation data to the overall simulation.
+      sim <- abind::abind(sim, sm$sim, along = 1) # Append the new simulation data to the overall simulation.
     }
   } else {
     # For non-seasonal simulation, simply simulate weather data for the entire period.
-    sim <- MSTWeatherGen_Sim_season(dates = dates_sim, names = names, 
-                                    parm = parm, AR_lag = AR_lag, bk = bk)$sim
+    sim <- MSTWeatherGen_Sim_season(
+      dates = dates_sim, names = names,
+      parm = parm, AR_lag = AR_lag, bk = bk
+    )$sim
   }
-  
+
   return(sim)
 }
 #' @title Seasonal Estimation for MSTWeatherGen
@@ -151,13 +158,13 @@ MSTWeatherGen_Sim = function(dates_sim, dates_original, data, seasons = NULL, pa
 #' of parameters for the Gaussian field model.
 #'
 #' @details This function implements the methods described in Sections 3.1–3.3 of the article
-#' \strong{Stochastic Environmental Research and Risk Assessment, 2025} (DOI: 10.1007/s00477-024-02897-8). 
-#'                         
+#' \strong{Stochastic Environmental Research and Risk Assessment, 2025} (DOI: 10.1007/s00477-024-02897-8).
+#'
 #' @param data Array of weather data with dimensions [time, location, variable].
 #' @param dates Vector of dates corresponding to the time dimension of the data.
 #' @param precipitation Logical indicating if precipitation is to be considered as a primary variable.
 #' @param scale Logical, indicating if the data needs to be standardized (`TRUE`) or not (`FALSE`). If `scale` is `TRUE` each meteorological variable
-#' is standardized at each location using smoothed mean and standard deviation. 
+#' is standardized at each location using smoothed mean and standard deviation.
 #' @param names Names of the variables in the data array to be used for analysis.
 #' @param names_weather_types Subset of 'names', variables to be used for weather type classification.
 #' @param coordinates Matrix with columns for the coordinates of each location.
@@ -178,72 +185,78 @@ MSTWeatherGen_Sim = function(dates_sim, dates_original, data, seasons = NULL, pa
 #' }
 #'
 #' @keywords internal
-MSTWeatherGen_Estim_season = function(data, dates, precipitation = T, scale = FALSE, names = NULL, 
-                                      names_weather_types = NULL, coordinates,
-                                      season, max_it, tmax, n1, n2) {
+MSTWeatherGen_Estim_season <- function(data, dates, precipitation = T, scale = FALSE, names = NULL,
+                                       names_weather_types = NULL, coordinates,
+                                       season, max_it, tmax, n1, n2) {
   # Check names
-  if(is.null(names)&precipitation){
-    names = c("Precipitation", paste0("v",2:dim(data)[3]))
-  }else{
-    if(is.null(names)&!precipitation){
-      names = paste0("v",1:dim(data)[3])
-    }else{
-      if(!is.null(names)&precipitation){
-        names[1] = "Precipitation"
+  if (is.null(names) & precipitation) {
+    names <- c("Precipitation", paste0("v", 2:dim(data)[3]))
+  } else {
+    if (is.null(names) & !precipitation) {
+      names <- paste0("v", 1:dim(data)[3])
+    } else {
+      if (!is.null(names) & precipitation) {
+        names[1] <- "Precipitation"
       }
     }
   }
-  if(is.null(names_weather_types)){
-    names_weather_types = names
+  if (is.null(names_weather_types)) {
+    names_weather_types <- names
   }
   # Step 1: Filter the input data and dates for the specified season
-  filtered = filter_season_data(data, dates, season, names)
-  data = filtered$data_filtered
-  dates = filtered$dates_filtered
+  filtered <- filter_season_data(data, dates, season, names)
+  data <- filtered$data_filtered
+  dates <- filtered$dates_filtered
   rm(filtered)
-  
-  if(scale){
+
+  if (scale) {
     # Step 2: Scale the data
-    scale = scale_data(data, names, dates, window_size = 10)
-    scale_parm = scale$scale_parm  # Scaling parameters for reverting the scaling if needed
-    data = scale$data  # Scaled data
+    scale <- scale_data(data, names, dates, window_size = 10)
+    scale_parm <- scale$scale_parm # Scaling parameters for reverting the scaling if needed
+    data <- scale$data # Scaled data
     rm(scale)
-  }else{
-    scale_parm = NULL 
+  } else {
+    scale_parm <- NULL
   }
-  
+
   # Step 3-1: Identify weather types for the season
-  wt = weather_types(data = data, variables = names_weather_types, dates = dates,coordinates =  coordinates,
-                     max_number_wt = 6, return_plots = F)
-  wt = wt$cluster # extract weather types 
-  
+  wt <- weather_types(
+    data = data, variables = names_weather_types, dates = dates, coordinates = coordinates,
+    max_number_wt = 6, return_plots = F
+  )
+  wt <- wt$cluster # extract weather types
+
   # Step 3-2: Estimate transition probabilities between weather types
-  transitions = estimate_transitions(cluster = wt, dates = dates, nb = 30, K = length(unique(wt)))
-  
+  transitions <- estimate_transitions(cluster = wt, dates = dates, nb = 30, K = length(unique(wt)))
+
   # Step 4: Transformations for each variable in each weather type
-  lmbd = estimate_lambda_transformations(data = data, wt = wt, names = names, coordinates = coordinates)
-  threshold_precip = lmbd$threshold_precip
-  lmbd = lmbd$lambda_transformations
-  data = transformations(data = data,wt = wt,names = names, coordinates = coordinates,lmbd = lmbd)
-  
+  lmbd <- estimate_lambda_transformations(data = data, wt = wt, names = names, coordinates = coordinates)
+  threshold_precip <- lmbd$threshold_precip
+  lmbd <- lmbd$lambda_transformations
+  data <- transformations(data = data, wt = wt, names = names, coordinates = coordinates, lmbd = lmbd)
+
   # Step 5: Estimate parameters for the Gaussian field model
-  gf_par = estimate_gaussian_field_params(data = data, wt = wt, names = names, coordinates = coordinates, 
-                                          tmax = tmax, max_it = max_it, n1 = n1, n2 = n2, 
-                                          dates = dates, threshold_precip = threshold_precip)
-  
+  gf_par <- estimate_gaussian_field_params(
+    data = data, wt = wt, names = names, coordinates = coordinates,
+    tmax = tmax, max_it = max_it, n1 = n1, n2 = n2,
+    dates = dates, threshold_precip = threshold_precip
+  )
+
   # Return the analysis results
-  return(list(dates = dates, wt = wt, scale_parm = scale_parm,
-              transitions = transitions, lmbd = lmbd, gf_par = gf_par))
+  return(list(
+    dates = dates, wt = wt, scale_parm = scale_parm,
+    transitions = transitions, lmbd = lmbd, gf_par = gf_par
+  ))
 }
 #' @title Seasonal Simulation in MSTWeatherGen
 #'
 #' @description Simulates seasonal weather data using the Multivariate Space-Time Stochastic Weather Generator (MSTWeatherGen).
-#' This function is designed to generate synthetic weather data for a specified season, leveraging an autoregressive model 
+#' This function is designed to generate synthetic weather data for a specified season, leveraging an autoregressive model
 #' and predefined parameters to accurately reflect weather type transitions and spatial-temporal correlations.
 #'
 #' @details This function implements the methods described in Section 5 of the article
-#' \strong{Stochastic Environmental Research and Risk Assessment, 2025} (DOI: 10.1007/s00477-024-02897-8). 
-#'                         
+#' \strong{Stochastic Environmental Research and Risk Assessment, 2025} (DOI: 10.1007/s00477-024-02897-8).
+#'
 #' @param dates Vector of dates for which to simulate weather data.
 #' @param names Names of weather variables to be simulated.
 #' @param first_state Optional initial state (weather type) for the simulation. If not provided, it is determined based on state frequencies.
@@ -260,15 +273,15 @@ MSTWeatherGen_Estim_season = function(data, dates, precipitation = T, scale = FA
 #' }
 #' @keywords internal
 
-MSTWeatherGen_Sim_season = function(dates, names, first_state = NULL, Z_initial = NULL, parm, AR_lag = 1, bk) {    
+MSTWeatherGen_Sim_season <- function(dates, names, first_state = NULL, Z_initial = NULL, parm, AR_lag = 1, bk) {
   # Determine the number of weather types (K) and their relative frequencies (fr)
   K <- length(unique(parm$wt))
   fr <- sapply(1:K, function(k) length(which(parm$wt == k)) / length(parm$wt))
   parm$wt <- factor(parm$wt, levels = 1:K)
-  
+
   # Estimate transition probabilities if not provided
-  #parm$transitions <- estimate_transitions(parm$wt, parm$dates, nb = 20, K)
-  
+  # parm$transitions <- estimate_transitions(parm$wt, parm$dates, nb = 20, K)
+
   # Simulate weather types for the given dates
   wt <- if (is.null(first_state)) {
     first_state <- sample(1:K, 1, prob = fr)
@@ -277,30 +290,30 @@ MSTWeatherGen_Sim_season = function(dates, names, first_state = NULL, Z_initial 
     simulate_weathertypes(first_state, dates, parm$dates, parm$transitions, K)
   }
   wt <- as.numeric(wt)
-  
+
   # Generate initial conditions for the AR process if not provided
   if (is.null(Z_initial)) {
     Z_initial <- generate_initial_conditions(AR_lag, bk, wt)
   }
-  
+
   # Simulate the AR process to generate synthetic weather data
   Y <- simulate_Z(bk, AR_lag, length(dates), Z_initial, wt)
-  
+
   # Convert the list of matrices Y to a 3D array 'sim'
   sim <- list_to_array(Y, names, dates)
-  
+
   # Apply inverse transformations to the simulated data
-  
+
   sim <- apply_inverse_transformations(sim = sim, wt = wt, parm = parm, names = names)
-  
-  
-  if(!is.null(parm$scale_parm)){
+
+
+  if (!is.null(parm$scale_parm)) {
     # Rescale the simulated data for variables other than "Precipitation" if required
     sim <- rescale_data(sim, parm, names, dates)
   }
-  
+
   # Prepare initial conditions for the next simulation
-  Z_initial_next <- sapply(1:AR_lag, function(m) Y[[length(Y)-m+1]])
-  
+  Z_initial_next <- sapply(1:AR_lag, function(m) Y[[length(Y) - m + 1]])
+
   return(list(sim = sim, wt = wt, Z_initial_next = Z_initial_next))
 }

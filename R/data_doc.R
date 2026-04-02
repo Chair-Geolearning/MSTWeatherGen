@@ -1,8 +1,8 @@
-#' SAFRAN meteorological data for a region in southern France for precipitation, wind and maximum temperature. 
+#' SAFRAN meteorological data for a region in southern France for precipitation, wind and maximum temperature.
 #'
 #' @name data
 #' @docType data
-#' @author Said Obakrim 
+#' @author Said Obakrim
 #' @references \url{https://www.umr-cnrm.fr/spip.php?article788}
 #' @keywords data
 #' @format a 3-dimensional array [days,coordinates,variables] as index
@@ -12,22 +12,22 @@
 #'   \item{variables index}{third dimension : 3 variables index precipitation, wind and maximum temperature}
 #' }
 #' @examples
-#' data("data", package="MSTWeatherGen")
+#' data("data", package = "MSTWeatherGen")
 #' data("coordinates", package = "MSTWeatherGen")
-#' variables = c("Precipitation", "Wind", "Temp_max")
-#' days = seq(as.Date("2011-01-01"),as.Date("2021-12-31"), by="day")
+#' variables <- c("Precipitation", "Wind", "Temp_max")
+#' days <- seq(as.Date("2011-01-01"), as.Date("2021-12-31"), by = "day")
 #' str(data)
 NULL
 
-#' Geographical coordinates of locations included in the meteorological data (a region in southern France). 
+#' Geographical coordinates of locations included in the meteorological data (a region in southern France).
 #'
 #' @name coordinates
 #' @docType data
-#' @author Said Obakrim 
+#' @author Said Obakrim
 #' @references \url{https://www.umr-cnrm.fr/spip.php?article788}
 #' @keywords data
 #' @format a data-frame with 108 rows as coordinates points and 2 columns as c("longitude","latitude") WGS84 (epsg:4326) projection
 #' @examples
-#' data("coordinates",package="MSTWeatherGen")
+#' data("coordinates", package = "MSTWeatherGen")
 #' str(coordinates)
 NULL
