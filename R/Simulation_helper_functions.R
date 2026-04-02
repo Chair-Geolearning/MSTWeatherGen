@@ -77,7 +77,6 @@ calculate_Bk_matrices <- function(C_k_matrices, Bk_0) {
     Bk_0_rhs <- make_positive_definite(Bk_0_rhs)
   }
 
-  Bk_0_rhs1 = make_positive_definite_svd(Bk_0_rhs)
   #print(paste('Apres' ,is_positive_definite(Bk_0_rhs)))
   
   Bk_0 <- try(t(chol(Bk_0_rhs)), silent = T) # Perform Cholesky decomposition to obtain Bk_0
