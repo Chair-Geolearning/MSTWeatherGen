@@ -304,6 +304,7 @@ extract_beta <- function(parm, names) {
 #' @return The log-likelihood value for the given pair of variables based on the current model parameters.
 #'
 #' @importFrom VGAM pbinorm
+#' @importFrom stats rnorm pnorm
 #' @keywords internal
 
 loglik_pair <- function(par, parms, pair, par_all, data, names, Vi, h, u, uh, ep, cr) {
@@ -423,10 +424,8 @@ loglik_pair <- function(par, parms, pair, par_all, data, names, Vi, h, u, uh, ep
 #'
 #' @importFrom VGAM pbinorm
 #' @importFrom parallel mclapply
+#' @importFrom stats rnorm pnorm
 #' @keywords internal
-
-
-
 loglik <- function(par, parms, par_all, data, names, Vi, h, u, uh, ep, cr) {
   
   J = length(names)  # Number of variables in the analysis.
@@ -582,8 +581,8 @@ loglik <- function(par, parms, par_all, data, names, Vi, h, u, uh, ep, cr) {
 #' @return Log-likelihood value for the spatial data under the Matérn covariance model.
 #'
 #' @importFrom VGAM pbinorm
+#' @importFrom stats rnorm pnorm
 #' @keywords internal
-
 loglik_spatial <- function(par, data, h, uh, v) {
   
   # Penalize negative parameters to enforce model constraints.
@@ -648,6 +647,7 @@ loglik_spatial <- function(par, data, h, uh, v) {
 #'
 #' @return Data frame containing computed covariances for specified spatial distances and time lags, facilitating the analysis of spatial and temporal patterns in the data.
 #'
+#' @importFrom stats cov
 #' @keywords internal
 spacetime_cov <- function(data, wt_id, locations, ds = NULL, dates, lagstime, dist, covgm = TRUE) {
   

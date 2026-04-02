@@ -49,29 +49,8 @@ calculate_Bk_matrices <- function(C_k_matrices, Bk_0) {
   for (i in 1:M) {
     Bk_0_rhs <- Bk_0_rhs - Bk_matrices_list[[i]] %*% C_k_matrices[[i + 1]]  # Adjust for contributions from Bk_i matrices
   }
-  
-  is_positive_definite <- function(M) {
-    eigenvalues <- eigen(M, symmetric = TRUE)$values
-    #valeurs_negatives <- eigenvalues[eigenvalues <= -1e-10]
-    #print(valeurs_negatives)
-    return(all(eigenvalues >= -1e-10))   
-  }
-  
+    
   #print(paste('Avant' ,is_positive_definite(Bk_0_rhs)))
-  
-  make_positive_definite <- function(M, epsilon = 1e-9) {
-    # Spectral decomposition
-    eigen_decomp <- eigen(M, symmetric = TRUE)
-    values <- eigen_decomp$values
-    vectors <- eigen_decomp$vectors
-    
-    # Replace negative or too small eigenvalues
-    corrected_values <- pmax(values, epsilon)
-    
-    # Reconstruct the matrix
-    M_corrected <- vectors %*% diag(corrected_values) %*% t(vectors)
-    return(M_corrected)
-  }
   
   if (!is_positive_definite(Bk_0_rhs)) {
     Bk_0_rhs <- make_positive_definite(Bk_0_rhs)
@@ -147,7 +126,7 @@ calculate_AR_coefficients_matrices <- function(parm, coordinates, AR_lag){
       #ik_list[[s]][k] <- ik   
     }
   }
-  print(i)
+  #print(i)
   #print(ik_list)
   return(bk)
 }
@@ -166,6 +145,7 @@ calculate_AR_coefficients_matrices <- function(parm, coordinates, AR_lag){
 #'
 #' @return A list containing the simulated values of Z for each time step.
 #'
+#' @importFrom stats rnorm
 #' @keywords internal
 simulate_Z <- function(Bk, M, num_steps, Z_initial,wt) {
   n <- nrow(Bk[[1]]$bk$Bk_0)  # Assuming Bk0 is square and represents the dimension of Z
@@ -201,7 +181,7 @@ simulate_Z <- function(Bk, M, num_steps, Z_initial,wt) {
 #' @param wt The initial weather type (state) for the simulation.
 #'
 #' @return Z_initial : A matrix representing the initial conditions for the AR process simulation.
-#'
+#' @importFrom stats rnorm
 #' @keywords internal
 generate_initial_conditions <- function(AR_lag, bk, wt) {  
   

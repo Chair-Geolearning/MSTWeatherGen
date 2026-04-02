@@ -40,8 +40,8 @@ generate_variable_index_pairs <- function(names) {
 #' @return Updated `par_all` vector with all model parameters, including default and specified values.
 #'
 #' @keywords internal
+#' @importFrom stats setNames
 #' @noRd
-
 initialize_par_all_if_missing <- function(par_all, names, pairs, par_s, ax, cr) {
   # Initialize the `par_all` vector if it is missing, with default values or using `par_s`
   if (is.null(par_all)) {
@@ -143,6 +143,7 @@ update_ax_parameters <- function(par_all, names, ax) {
 #'         optimized for the spatial structure of the corresponding variable.
 #' @keywords internal
 #' @importFrom parallel mclapply
+#' @importFrom stats optim
 init_space_par <- function(data, names, h, uh, max_it = 2000) {
   # Initializes spatial parameters for each variable
   # by optimizing an initial log-likelihood function (loglik0)
@@ -231,6 +232,7 @@ init_space_par <- function(data, names, h, uh, max_it = 2000) {
 #'
 #' @keywords internal
 #' @importFrom stringr str_split
+#' @importFrom stats optim
 optimize_spatial_parameters <- function(par_all, data, names, Vi, uh, cr, max_it, ep) {
 
   pairs <- paste(ep[,1],ep[,2], sep = "-")
@@ -276,6 +278,7 @@ optimize_spatial_parameters <- function(par_all, data, names, Vi, uh, cr, max_it
 #'
 #' @keywords internal
 #' @importFrom stringr str_split
+#' @importFrom stats optim
 optimize_pairs_spatiotemporal <- function(par_all, data, names, Vi, uh, cr, max_it, ep) {
   
   pairs <- paste(ep[,1],ep[,2], sep = "-")
@@ -339,6 +342,7 @@ optimize_pairs_spatiotemporal <- function(par_all, data, names, Vi, uh, cr, max_
 #'         essential for applying the model to new data or further analysis.
 #'
 #' @keywords internal
+#' @importFrom stats optim
 optimize_temporal_parameters <- function(par_all, data, names, Vi, uh, cr, max_it, ep) {
   # Final optimization step for the subset of parameters across all variable pairs
   parms <- c("a1", "d1", "g1", "a2", "d2", "g2",
@@ -531,6 +535,7 @@ selectPoints <- function(coordinates, betaIndex, v) {
 #'
 #' @keywords internal
 #' @importFrom stringr str_split
+#' @importFrom stats dist
 generate_spatial_index_pairs <- function(coordinates,n1, n2) {
 
   D = as.matrix(dist(coordinates))
@@ -664,6 +669,7 @@ preprocess_data <- function(Ti, Si, coordinates) {
 #'
 #' @keywords internal
 #' @importFrom geosphere distHaversine
+#' @importFrom stats cor
 estimate_gaussian_field_params <- function(data, wt, names, coordinates, tmax, max_it, n1, n2, dates, threshold_precip) {
 
   K = length(unique(wt))

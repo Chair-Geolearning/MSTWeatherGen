@@ -15,7 +15,7 @@
 #' @return A list with class 'orderNorm' containing the normalized data (x.t), the original data (x), and a fitted model object (fit) for future extrapolation.
 #'
 #' @importFrom crch qcnorm
-#' @importFrom stats glm
+#' @importFrom stats glm rnorm pnorm
 #'
 #' @keywords internal
 orderNorm <- function(x,left, n_logit_fit = min(length(x), 100000), ..., warn = TRUE) {
@@ -96,6 +96,8 @@ predict_binomial = function(fit, newdata){
 #'         and handling variables with a high proportion of zero values.
 #'
 #' @keywords internal
+#' @importFrom stats dist
+
 orderNorm_all <- function(data, j, coordinates, left) {
   
   D = as.matrix(dist(coordinates))
@@ -343,7 +345,7 @@ scale_data <- function(data, names, dates, window_size = 30) {
 #' @param coordinates Spatial coordinates corresponding to each location in the data.
 #'
 #' @return A list containing lambda transformations for each variable, location, and weather type, along with the thresholds for precipitation.
-#'
+#' @importFrom stats qnorm
 #' @keywords internal
 estimate_lambda_transformations <- function(data, wt, names, coordinates) {
   
