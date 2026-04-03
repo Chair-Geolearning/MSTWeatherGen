@@ -10,7 +10,7 @@
 #' @param tol tolerance (default 1e-10)
 #'
 #' @return a boolean
-is_positive_definite <- function(M, tol = -1e-10) {
+is_positive_definite <- function(M, tol = 1e-6) {
   # Retrieve eigenvalues only .
   eigenvalues <- eigen(M, symmetric = TRUE)$values
   
@@ -37,7 +37,7 @@ is_positive_definite <- function(M, tol = -1e-10) {
 #' epsilon before reconstructing the matrix.
 #' The result is numerically close to the original matrix M when the
 #' original matrix is already near positive definite.
-make_positive_definite <- function(M, epsilon = 1e-9) {
+make_positive_definite <- function(M, epsilon = 1e-6) {
   # Decompose M into eigenvalues and eigenvectors (exploiting symmetry)
   eigen_decomp <- eigen(M, symmetric = TRUE)
   values <- eigen_decomp$values  # numeric vector of eigenvalues
