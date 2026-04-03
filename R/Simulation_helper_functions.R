@@ -49,14 +49,10 @@ calculate_Bk_matrices <- function(C_k_matrices, Bk_0) {
     Bk_0_rhs <- Bk_0_rhs - Bk_matrices_list[[i]] %*% C_k_matrices[[i + 1]] # Adjust for contributions from Bk_i matrices
   }
 
-  # print(paste('Avant' ,is_positive_definite(Bk_0_rhs)))
-
   if (!is_positive_definite(Bk_0_rhs)) {
     Bk_0_rhs <- make_positive_definite(Bk_0_rhs)
   }
-
-  # print(paste('Apres' ,is_positive_definite(Bk_0_rhs)))
-
+  
   Bk_0 <- try(t(chol(Bk_0_rhs)), silent = T) # Perform Cholesky decomposition to obtain Bk_0
 
   if (is.character(Bk_0)) Bk_0 <- Bk_0
