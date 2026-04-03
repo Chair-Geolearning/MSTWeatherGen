@@ -10,7 +10,7 @@
 #' @param tol tolerance (default 1e-10)
 #'
 #' @return a boolean
-is_positive_definite <- function(M, tol = 1e-9) {
+is_positive_definite <- function(M, tol = -1e-10) {
   # Retrieve eigenvalues only .
   eigenvalues <- eigen(M, symmetric = TRUE)$values
   
