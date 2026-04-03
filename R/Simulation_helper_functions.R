@@ -113,7 +113,6 @@ calculate_AR_coefficients_matrices <- function(parm, coordinates, AR_lag) {
       j <- k - 1
 
       while (is.list(bk[[s]][[k]]$bk) && is.character(bk[[s]][[k]]$bk$Bk_0)) {
-        # print(paste("s =", s, ", k =", k))
         bk[[s]][[k]]$bk$Bk_0 <- try(bk[[s]][[j]]$bk$Bk_0, silent = T)
         bk[[s]][[k]]$bk$bk <- list(try(bk[[s]][[j]]$bk$Bk, silent = T))
         bk[[s]][[k]]$cov0 <- try(bk[[s]][[k]]$cov0, silent = T)
