@@ -7,9 +7,9 @@
 setCores(n = NULL)
 }
 \arguments{
-\item{n}{The number of cores to use. If  NULL (default), 
-automatically sets to total_cores - 2 (minimum 1). If specified, 
-must be at least 1 and will be capped by the maximum which will be at the total number of 
+\item{n}{The number of cores to use. If  NULL (default),
+automatically sets to total_cores - 2 (minimum 1). If specified,
+must be at least 1 and will be capped by the maximum which will be at the total number of
 available cores.}
 }
 \value{
@@ -21,6 +21,6 @@ It sets automatically the numbers of core as follows : nb_of_cores available - 2
 To change manually you need to call it and put the
 }
 \examples{
-#Automatic setting setCores()
-#Manual setting to 4 cores : setCores(4)
+# Automatic setting setCores()
+# Manual setting to 4 cores : setCores(4)
 }

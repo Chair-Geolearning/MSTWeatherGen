@@ -7,7 +7,7 @@
 #' as a covariance or correlation matrix.
 #' 
 #' @param M a square, symmetric numeric matrix
-#' @param tol tolerance (default 1e-10)
+#' @param tol tolerance (default 1e-6)
 #'
 #' @return a boolean
 is_positive_definite <- function(M, tol = 1e-6) {
@@ -27,9 +27,7 @@ is_positive_definite <- function(M, tol = 1e-6) {
 #'
 #' @param M a square, symmetric numeric matrix.
 #' @param epsilon a small positive numeric threshold below which eigenvalues
-#' are replaced(default -1e-9).
-#' @return a symmetric positive definite corrected matrix of the 
-#' same dimensions as the original 
+#' are replaced(default 1e-6).
 #' @details
 #' The correction relies on the eigendecomposition M = V . D . V',
 #' where V is the matrix of eigenvectors and D the diagonal matrix of
@@ -37,6 +35,9 @@ is_positive_definite <- function(M, tol = 1e-6) {
 #' epsilon before reconstructing the matrix.
 #' The result is numerically close to the original matrix M when the
 #' original matrix is already near positive definite.
+#' 
+#' @return a symmetric positive definite corrected matrix of the 
+#' same dimensions as the original 
 make_positive_definite <- function(M, epsilon = 1e-6) {
   # Decompose M into eigenvalues and eigenvectors (exploiting symmetry)
   eigen_decomp <- eigen(M, symmetric = TRUE)

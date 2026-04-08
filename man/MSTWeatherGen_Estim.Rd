@@ -61,8 +61,8 @@ with special consideration for precipitation if indicated.
 }
 \details{
 The MSTWeatherGen model operates in three stages: Initially, weather types are determined through
-a clustering algorithm. Subsequently, for each identified weather type, the weather data undergo transformations 
-into residuals that adhere to a normal distribution via a specific transformation function. In the final stage, 
+a clustering algorithm. Subsequently, for each identified weather type, the weather data undergo transformations
+into residuals that adhere to a normal distribution via a specific transformation function. In the final stage,
 a multivariate space-time Gaussian random field is fitted to these transformed variables for each weather type.
 The user has the option to configure the model to fit data for each season, with the seasons defined by the user.
 
