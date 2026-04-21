@@ -120,13 +120,11 @@ filter_season_data <- function(data, dates, season, names) {
   season_indices <- season_indices(dates, season)
   
   # Filter data and dates based on season indices
-  data_filtered <- data[season_indices,,, drop = FALSE]
+  data_filtered <- data[season_indices,,]
   dates_filtered <- dates[season_indices]
-  cat("dimnames[[3]] de data_filtered :", dimnames(data_filtered)[[3]], "\n")
-  cat("names reçu dans la fonction    :", names, "\n")
-  cat("class(names)                   :", class(names), "\n")
+ 
   # Further filter data to include only the specified variables (names)
-  data_filtered <- data_filtered[,,names, drop = FALSE]
+  data_filtered <- data_filtered[,,names]
   
   # Order the filtered data by dates
   data_filtered <- data_filtered[order(dates_filtered),,, drop = FALSE]
