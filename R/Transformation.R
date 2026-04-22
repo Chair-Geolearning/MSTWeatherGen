@@ -99,17 +99,17 @@ predict_binomial <- function(fit, newdata) {
 #' @importFrom stats dist
 
 orderNorm_all <- function(data, j, coordinates, left) {
-  D <- as.matrix(dist(coordinates))
-  kn <- order(D[j, ])
-  j <- kn[1]
-  x <- data[, j]
-  j <- 2
-  if (length(which(x == 0)) / length(x) < 0.8) {
-    return(orderNorm(x[!x == 0], left = left))
-  } else {
-    while ((length(which(x != 0)) < 50)) {
-      x <- c(x, data[, kn[j]])
-      j <- j + 1
+  D = as.matrix(dist(coordinates))
+  kn = order(D[j,])
+  j = kn[1]
+  x = data[,j]
+  j = 2
+  if(length(which(x==0))/length(x)<0.8){
+    return(orderNorm(x[!x==0],left = left))
+  }else{
+    while ((length(which(x != 0)) < 50) && (j <= length(kn))) {
+      x = c(x, data[, kn[j]])
+      j = j + 1
     }
     return(orderNorm(x[!x == 0], left = left))
   }
