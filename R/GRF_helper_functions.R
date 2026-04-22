@@ -107,9 +107,15 @@ update_ax_parameters <- function(par_all, names, ax) {
         return(ax)
       })
     })
+    a <- matrix(a, nrow = length(names), ncol = length(names))
+    rownames(a) <- colnames(a) <- names
     ax = Matrix::nearPD(a)$mat
   }else{
-    ax = Matrix::nearPD(ax)$mat
+    ax = if (nrow(ax) == 1) {
+      Matrix::Matrix(max(as.numeric(ax), 1e-6), nrow = 1, ncol = 1, dimnames = dimnames(ax))
+    } else {
+      Matrix::nearPD(ax)$mat
+    }
   }
   colnames(ax) = rownames(ax) = names
   for (v1 in names) {
