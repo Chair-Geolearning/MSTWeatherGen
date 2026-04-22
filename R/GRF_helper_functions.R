@@ -697,7 +697,19 @@ estimate_gaussian_field_params <- function(data, wt, names, coordinates, tmax, m
       mean(sapply(1:dim(data)[2], function(j) cor(data[, j, v1], data[, j, v2], use = "complete.obs")), na.rm = TRUE)
     })
   })
+  cat("=== cr avant matrix() ===\n")
+  cat("class(cr)  :", class(cr), "\n")
+  cat("dim(cr)    :", dim(cr), "\n")
+  cat("length(cr) :", length(cr), "\n")
+  cat("cr         :", cr, "\n")
+  
+  
+  cr <- matrix(cr, nrow = length(names), ncol = length(names))
+  cat("=== cr après matrix() ===\n")
+  cat("class(cr)  :", class(cr), "\n")
+  cat("dim(cr)    :", dim(cr), "\n")
   colnames(cr) <- rownames(cr) <- names
+
   # For each weather type, estimate Gaussian field parameters
   for (k in 1:K) {
     wt_id <- which(wt == k)
