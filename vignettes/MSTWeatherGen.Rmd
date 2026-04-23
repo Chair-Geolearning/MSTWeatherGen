@@ -47,7 +47,8 @@ real_dates <- seq(as.Date("2011-01-01"), as.Date("2021-12-31"), by = "day")
 
 dates <- seq(as.Date("2018-01-01"), as.Date("2021-12-31"), by = "day")
 index_dates <- real_dates %in% dates
-data <- data[index_dates, , ]
+data <- data[index_dates,,]
+data  <- data[, , names, drop = FALSE]
 ```
 
 ### Note on data needed for `MSTWeatherGen`
@@ -181,6 +182,6 @@ Finally, we can see if our stochastic weather generator can reproduce the observ
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE, fig.height = 5, fig.width = 7, fig.align = "center"}
 library(lubridate)
-id <- lubridate::year(dates) %in% 2018:2021
-plot_dry_wet_spells_maps(sim = sim[id, , ], observed = data[id, , ], coordinates = coordinates, dates = dates[id])
+id = lubridate::year(dates) %in% 2018:2021
+plot_dry_wet_spells_maps(sim = sim[id,,,drop=FALSE], observed = data[id,,,drop=FALSE], coordinates = coordinates, dates = dates[id])
 ```
