@@ -1,0 +1,75 @@
+---
+title: "Input Data"
+output: html_document
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+    collapse = TRUE,
+    comment = "#>"
+)
+```
+
+
+## Introduction
+
+Cette vignette a pour but d'expliquer le format de la donnée en entrée pour le package MSTWeatherGen.
+
+## Format du fichier data
+
+```{r, include = FALSE}
+data("data", package = "MSTWeatherGen")
+
+premiere_couche <- data[ , 1, 2, drop = FALSE] 
+deuxieme_couche <- data[1, , 2, drop = FALSE] 
+troisieme_couche <- data[1, 1, , drop = FALSE] 
+
+```
+                                
+data est un array de trois dimensions dont la première représente la composante temporelle, ici de taille 4018 ; la deuxième représente la composante spatiale, ici de taille 108 ; et la troisième composante représente les variables à étudier. Ici, elles sont au nombre de trois : precipitation, wind et temp_max.
+
+NB : S'il y a présence de precipitation, qui contient beaucoup de zéros, il faudra la mettre en premier dans l'ordre pour le package.
+Precipitation sera toujours en première position par rapport aux autres variables.
+
+## Que représentent les valeurs de ces couches ? :
+
+Premièrement, il faut noter que les trois couches sont des listes numérotées en partant de 1 et allant jusqu'au nombre d'éléments.
+
+Cas de la composante temporelle :
+
+il y a 4018 éléments dans ce cas d'exemple ; il faut ensuite adosser à cela un frame de dates qui fait la même taille
+
+```{r, echo=FALSE, results='hide', message=FALSE, warning=FALSE}
+real_dates = seq(as.Date("2011-01-01"),as.Date("2021-12-31"), by="day")
+#length(real_dates) = dim(data)[1]
+```
+
+Par contre, si on veut faire une analyse sur un sous-ensemble de la plage de données, par exemple :
+
+```{r, echo=FALSE, results='hide', message=FALSE, warning=FALSE}
+dates_bis = seq(as.Date("2017-01-01"),as.Date("2029-12-31"), by="day")
+```
+
+Il faut créer un wrapper qui permet de faire la bonne association des indices, sinon une mauvaise plage de dates sera sélectionnée.
+Nécessite de faire un wrapper.
+
+Wrapper 1?
+
+## Format du fichier coordinates : 
+
+```{r, include = FALSE}
+data("coordinates", package = "MSTWeatherGen")
+```
+
+Il s'agit ici d'un objet avec deux colonnes : la première correspond à la longitude et la seconde à la latitude. Le nombre de stations dans cet objet correspond exactement au nombre de stations présentes dans le fichier data.
+
+La deuxième colonne est numérotée de 1 jusqu'au nombre total de stations, ce qui crée une correspondance directe entre les stations du fichier data et celles du fichier coordinates. Par exemple, si l’on souhaite obtenir les coordonnées (latitude et longitude) de la station 43 dans data, il suffit de consulter la ligne 43 dans coordinates pour obtenir les informations nécessaires.
+
+En revanche, si l’on souhaite accéder à un ensemble plus large de stations, il faudra créer un wrapper permettant de maintenir cette correspondance exacte entre les indices représentant les stations dans data (deuxième colonne) et les indices dans data("coordinates", package = "MSTWeatherGen").
+
+Wrapper 2 ?
+
+## Conclusion 
+
+Le format des données est assez simple à utiliser, sans transformation particulière. Il faudra vérifier comment les données sont directement récupérées depuis SAFRAN et voir s’il est possible de créer un wrapper simple qui transforme automatiquement les données SAFRAN en array, comme c’est le cas pour data.
+
