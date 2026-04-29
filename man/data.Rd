@@ -16,10 +16,10 @@ a 3-dimensional array [days,coordinates,variables] as index
 SAFRAN meteorological data for a region in southern France for precipitation, wind and maximum temperature.
 }
 \examples{
-data("data", package="MSTWeatherGen")
+data("data", package = "MSTWeatherGen")
 data("coordinates", package = "MSTWeatherGen")
-variables = c("Precipitation", "Wind", "Temp_max")
-days = seq(as.Date("2011-01-01"),as.Date("2021-12-31"), by="day")
+variables <- c("Precipitation", "Wind", "Temp_max")
+days <- seq(as.Date("2011-01-01"), as.Date("2021-12-31"), by = "day")
 str(data)
 }
 \references{

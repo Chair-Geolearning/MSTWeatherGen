@@ -16,7 +16,7 @@ A data frame where each row corresponds to a pair of variables (including self-p
 and their associated spatio-temporal covariance parameters.
 }
 \description{
-Creates a data frame of covariance parameters for all possible pairs of variables. This function is 
+Creates a data frame of covariance parameters for all possible pairs of variables. This function is
 designed for internal use, facilitating the organization of parameters for spatio-temporal modeling.
 }
 \details{

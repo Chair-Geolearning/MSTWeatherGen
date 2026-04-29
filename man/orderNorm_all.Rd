@@ -7,23 +7,23 @@
 orderNorm_all(data, j, coordinates, left)
 }
 \arguments{
-\item{data}{A matrix or data frame containing the variables to be normalized. Rows represent observations, 
+\item{data}{A matrix or data frame containing the variables to be normalized. Rows represent observations,
 and columns represent different variables.}
 
 \item{j}{The index of the variable within 'data' to be normalized.}
 
-\item{coordinates}{A matrix or data frame of spatial coordinates corresponding to each 
+\item{coordinates}{A matrix or data frame of spatial coordinates corresponding to each
 variable in 'data'. It is used to calculate spatial distances and determine proximity.}
 
 \item{left}{A parameter for the orderNorm function, specifying the transformation threshold.}
 }
 \value{
-The result of applying the orderNorm function to the selected variable 'j', considering spatial proximity 
+The result of applying the orderNorm function to the selected variable 'j', considering spatial proximity
         and handling variables with a high proportion of zero values.
 }
 \description{
-Function to perform normalization on a selected variable 'j' from 'data', considering spatial information 
-from 'coordinates' and a threshold 'left' for the transformation. This is particularly useful for variables with 
+Function to perform normalization on a selected variable 'j' from 'data', considering spatial information
+from 'coordinates' and a threshold 'left' for the transformation. This is particularly useful for variables with
 many zero values, ensuring robust normalization across spatially correlated variables.
 }
 \details{

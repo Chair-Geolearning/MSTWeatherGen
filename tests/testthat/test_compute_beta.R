@@ -8,7 +8,7 @@ ep <- generate_variable_index_pairs(names)
 
 # Parameters
 par_s <- do.call(cbind, par_s)
-variable = 'Wind'
+variable <- "Wind"
 pairs <- c("Wind-Wind", "Wind-Temp", "Temp-Temp")
 parm <- param(par_all_TEST.rds, names)
 
@@ -22,7 +22,7 @@ cr <- sapply(names, function(v1) {
 # 0.
 test_that("compute_beta returns a symmetric matrix", {
   result <- compute_beta(parm, names, cr)
-  
+
   expect_true(is.matrix(result))
   expect_equal(nrow(result), ncol(result))
   expect_equal(result, t(result))
@@ -31,7 +31,7 @@ test_that("compute_beta returns a symmetric matrix", {
 # 1.
 test_that("compute_beta dimensions", {
   result <- compute_beta(parm, names, cr)
-  
+
   expect_equal(nrow(result), length(names))
   expect_equal(ncol(result), length(names))
 })
@@ -39,7 +39,7 @@ test_that("compute_beta dimensions", {
 # 2.
 test_that("compute_beta names", {
   result <- compute_beta(parm, names, cr)
-  
+
   expect_equal(rownames(result), names)
   expect_equal(colnames(result), names)
 })
@@ -47,8 +47,7 @@ test_that("compute_beta names", {
 # 3.
 test_that("compute_beta retourne des valeurs numériques", {
   result <- compute_beta(parm, names, cr)
-  
+
   expect_true(all(is.numeric(result)))
   expect_true(all(is.finite(result)))
 })
-

@@ -21,7 +21,7 @@
 Transformed or inverse-transformed data based on the specified operation.
 }
 \description{
-Function to predict the normalized values for new data using a fitted orderNormTransf object or 
+Function to predict the normalized values for new data using a fitted orderNormTransf object or
 to perform inverse transformation.
 }
 \details{

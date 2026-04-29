@@ -281,6 +281,7 @@ utils::globalVariables(c("v1", "v2", "lagtime", "vgmsim"))
 #' @import ggplot2
 #' @import patchwork
 #' @import ggpubr
+#' @importFrom stats cov dist
 #' @keywords internal
 plot_multivariate_st_covariances <- function(vgm, names) {
   # Create an empty plot placeholder for upper triangle

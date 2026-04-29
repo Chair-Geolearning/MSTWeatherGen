@@ -11,7 +11,7 @@ a data-frame with 108 rows as coordinates points and 2 columns as c("longitude",
 Geographical coordinates of locations included in the meteorological data (a region in southern France).
 }
 \examples{
-data("coordinates",package="MSTWeatherGen")
+data("coordinates", package = "MSTWeatherGen")
 str(coordinates)
 }
 \references{
