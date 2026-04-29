@@ -372,9 +372,15 @@ estimate_lambda_transformations <- function(data, wt, names, coordinates) {
     })
     return(variable_transforms)
   })
-  threshold_precip <- lapply(1:K, function(k) {
-    sapply(1:ns, function(j) lambda_transformations[[k]][[which(names == "Precipitation")]][[j]]$q)
-  })
+  threshold_precip <- if ("Precipitation" %in% names) {
+    lapply(1:K, function(k){
+      sapply(1:ns, function(j) lambda_transformations[[k]][[which(names=="Precipitation")]][[j]]$q)
+    })
+  } else {
+    lapply(1:K, function(k){
+      matrix(0, nrow = 1, ncol = ns)  # même structure que le cas normal mais rempli de 0
+    })
+  }
   return(list(lambda_transformations = lambda_transformations, threshold_precip = threshold_precip))
 }
 #' Transform Data using Lambda Transformations
