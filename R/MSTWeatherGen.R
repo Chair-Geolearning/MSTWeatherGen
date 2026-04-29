@@ -123,7 +123,7 @@ MSTWeatherGen_Sim = function(dates_sim, dates_original, data, seasons = NULL, pa
     # Iterate over each season change and simulate weather data.
     for (s in 1:(length(change_season_indices)-1)) {
       # Determine the most probable initial weather type for the next season.
-      first_state <- most_probable_weather_type(sim = sim[dim(sim)[1], , ],
+      first_state <- most_probable_weather_type(sim = sim[dim(sim)[1], , , drop = FALSE],
                                                 centroids = centroids[[seasons_assigned[change_season_indices[s]]]], 
                                                 transitions = parm[[seasons_assigned[change_season_indices[s]]]]$transitions, 
                                                 names_weather_types = names_weather_types)
