@@ -1,11 +1,3 @@
----
-name: "Pull Request"
-about: "Décrire ce qui a été fait dans cette PR"
-title: "[PR] Titre de la fonctionnalité ou correction"
-labels: ["PR"]
-assignees: []
----
-
 ## Type
 
 - [ ] Bug(s)
