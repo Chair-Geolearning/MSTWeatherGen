@@ -107,9 +107,15 @@ update_ax_parameters <- function(par_all, names, ax) {
         return(ax)
       })
     })
+    a <- matrix(a, nrow = length(names), ncol = length(names))
+    rownames(a) <- colnames(a) <- names
     ax = Matrix::nearPD(a)$mat
   }else{
-    ax = Matrix::nearPD(ax)$mat
+    ax = if (nrow(ax) == 1) {
+      Matrix::Matrix(max(as.numeric(ax), 1e-6), nrow = 1, ncol = 1, dimnames = dimnames(ax))
+    } else {
+      Matrix::nearPD(ax)$mat
+    }
   }
   colnames(ax) = rownames(ax) = names
   for (v1 in names) {
@@ -697,7 +703,11 @@ estimate_gaussian_field_params <- function(data, wt, names, coordinates, tmax, m
       mean(sapply(1:dim(data)[2], function(j) cor(data[, j, v1], data[, j, v2], use = "complete.obs")), na.rm = TRUE)
     })
   })
+
+  cr <- matrix(cr, nrow = length(names), ncol = length(names))
+
   colnames(cr) <- rownames(cr) <- names
+
   # For each weather type, estimate Gaussian field parameters
   for (k in 1:K) {
     wt_id <- which(wt == k)

@@ -251,6 +251,8 @@ compute_ax <- function(parm, names) {
       return(ax)
     })
   })
+  ax <- matrix(ax, nrow = length(names), ncol = length(names))  # ← forcer matrice
+  rownames(ax) <- colnames(ax) <- names
   return(ax)
 }
 #' @title Extract Beta Coefficients Matrix
