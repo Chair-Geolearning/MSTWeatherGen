@@ -120,11 +120,11 @@ filter_season_data <- function(data, dates, season, names) {
   season_indices <- season_indices(dates, season)
   
   # Filter data and dates based on season indices
-  data_filtered <- data[season_indices,,]
+  data_filtered <- data[season_indices,,, drop = FALSE]
   dates_filtered <- dates[season_indices]
   
   # Further filter data to include only the specified variables (names)
-  data_filtered <- data_filtered[,,names]
+  data_filtered <- data_filtered[,,names,drop = FALSE]
   
   # Order the filtered data by dates
   data_filtered <- data_filtered[order(dates_filtered),,, drop = FALSE]

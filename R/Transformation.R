@@ -106,8 +106,8 @@ orderNorm_all <- function(data, j, coordinates, left) {
   if(length(which(x==0))/length(x)<0.8){
     return(orderNorm(x[!x==0],left = left))
   }else{
-    while ((length(which(x!=0))<50)) {
-      x = c(x,data[,kn[j]])
+    while ((length(which(x != 0)) < 50) && (j <= length(kn))) {
+      x = c(x, data[, kn[j]])
       j = j + 1
     }
     return(orderNorm(x[!x==0],left = left))

@@ -219,10 +219,9 @@ most_probable_weather_type = function(sim, centroids, transitions, names_weather
 
   # Determine the number of weather types from the length of the centroids list
   K = length(centroids)
-  
   # Find the previous weather type by identifying the centroid closest to the current simulated weather data
   previous_wt = which.min(sapply(1:K, function(k) {
-    mean((c(sim[, names_weather_types]) - centroids[[k]])^2)
+    mean((c(sim[,, names_weather_types, drop = FALSE]) - centroids[[k]])^2)
   }))
   
   # Predict the next weather type by sampling from the distribution defined by transition probabilities from the previous weather type
@@ -252,7 +251,7 @@ find_centroids = function(data, dates, seasons, wt_seasons, names_weather_types)
     # Identify the indices for the current season
     season_indices = season_indices(dates, seasons[[s]])
     # Subset the data for the current season and relevant weather variables
-    season_data = data[season_indices, , names_weather_types]
+    season_data = data[season_indices, , names_weather_types, drop = FALSE]
     
     # Determine the number of unique weather types in the current season
     K = length(unique(wt_seasons[[s]]))
