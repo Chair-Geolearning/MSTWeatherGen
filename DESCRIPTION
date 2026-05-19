@@ -34,6 +34,7 @@ Imports:
     stringr (>= 1.5.1), dplyr (>= 1.1.4), VGAM (>= 1.1-10), crch (>= 1.1-2),
     geosphere (>= 1.5-18), ggpubr (>= 0.6.0), patchwork (>= 1.2.0)
 Suggests:
+    pkgnet,
     knitr,
     magrittr,
     rmarkdown,
