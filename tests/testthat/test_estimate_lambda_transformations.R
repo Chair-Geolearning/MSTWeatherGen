@@ -8,6 +8,10 @@ names = c("Precipitation", "Wind", "Temp_max")
 dates = seq(as.Date("2018-01-01"),as.Date("2021-12-31"), by="day")
 names = c("Precipitation", "Wind", "Temp_max")
 
+# Data without precipitation :
+names_no_prec <- c("Wind", "Temp_max")
+data_no_prec  <- data[, , 2:3, drop = FALSE]
+
 # Retrieving results:
 set.seed(1)
 wt <- resultperm$cluster
@@ -21,6 +25,17 @@ res <- estimate_lambda_transformations(
   coordinates = coordinates
 )
 
+# Cas SANS précipitation (nouveaux tests)
+res_no_prec <- estimate_lambda_transformations(
+  data        = data_no_prec,
+  wt          = wt,
+  names       = names_no_prec,
+  coordinates = coordinates
+)
+
+ns <- dim(data)[2]
+
+# ── AVEC Précipitation ────────────────────────────────────────────────────────
 # 0. 
 test_that("estimate_lambda_transformations returns a list with expected components", {
   
@@ -61,4 +76,48 @@ test_that("threshold_precip is numeric and positive", {
   expect_type(res$threshold_precip, "list")
   expect_true(all(is.finite(unlist(res$threshold_precip)))) # 3.Check of the finitude if the threshold
 })
+
+# ── SANS Précipitation ────────────────────────────────────────────────────────
+# 5.
+test_that("sans Precipitation : même structure de sortie globale", {
+  expect_type(res_no_prec, "list")
+  expect_equal(length(res_no_prec), 2)
+  expect_true(all(c("lambda_transformations", "threshold_precip") %in% names(res_no_prec)))
+  expect_equal(length(res_no_prec$lambda_transformations), K)
+})
+
+# 6.
+test_that("sans Precipitation : threshold_precip est une liste de matrices nulles (1 x ns)", {
+  expect_type(res_no_prec$threshold_precip, "list")
+  expect_length(res_no_prec$threshold_precip, K)
+  
+  lapply(seq_len(K), function(k) {
+    expect_equal(
+      dim(res_no_prec$threshold_precip[[k]]),
+      c(1L, ns),
+      info = paste("shape incorrecte pour k =", k)
+    )
+    expect_true(
+      all(res_no_prec$threshold_precip[[k]] == 0),
+      info = paste("valeurs non nulles pour k =", k)
+    )
+  })
+})
+
+# 7.
+test_that("sans Precipitation : lambda_transformations contient exactement 2 variables", {
+  nv_no_prec <- length(names_no_prec)
+  
+  lapply(seq_len(K), function(k) {
+    expect_equal(
+      length(res_no_prec$lambda_transformations[[k]]),
+      nv_no_prec,
+      info = paste("mauvais nombre de variables pour k =", k)
+    )
+    lapply(seq_len(nv_no_prec), function(v) {
+      expect_equal(length(res_no_prec$lambda_transformations[[k]][[v]]), ns)
+    })
+  })
+})
+
 
