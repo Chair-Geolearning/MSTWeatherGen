@@ -13,7 +13,7 @@ s1 = list(min_day = 1, max_day = 29, min_month = 12, max_month = 2)
 names_no_prec <- c("Wind", "Temp_max")
 data_no_prec  <- data[, , 2:3, drop = FALSE]
 
-test_that("[smoke] Estim_season tourne sans erreur sans Precipitation", {
+test_that("Estim_season tourne sans erreur sans Precipitation", {
   expect_no_error(
     MSTWeatherGen_Estim_season(
       data                = data_no_prec,
@@ -21,8 +21,8 @@ test_that("[smoke] Estim_season tourne sans erreur sans Precipitation", {
       precipitation       = FALSE,
       names               = names_no_prec,
       coordinates         = coordinates,
-      season              = s1,   # hiver : sous-ensemble court → rapide
-      max_it              = 3,       # minimum pour que ça tourne
+      season              = s1,  
+      max_it              = 3,       
       tmax                = 2,
       n1                  = 3,
       n2                  = 3
