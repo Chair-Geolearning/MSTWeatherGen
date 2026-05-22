@@ -8,7 +8,7 @@ names = c("Precipitation", "Wind", "Temp_max")
 dates = seq(as.Date("2018-01-01"),as.Date("2021-12-31"), by="day")
 names = c("Precipitation", "Wind", "Temp_max")
 
-# Data without precipitation :
+# Data without precipitation cas bivarie :
 names_no_prec <- c("Wind", "Temp_max")
 data_no_prec  <- data[, , 2:3, drop = FALSE]
 
@@ -60,7 +60,30 @@ res_no_prec <- estimate_lambda_transformations(
 
 ns <- dim(data)[2]
 
-# ── AVEC Précipitation ────────────────────────────────────────────────────────
+
+# ── Données trivariées sans précipitation et une variable creee factice ─────────────────────────────────────
+data_triv   <- data
+data("data", package = "MSTWeatherGen")
+data("coordinates", package = "MSTWeatherGen")
+dimnames(data_triv)[[3]][1] <- "Temp_min"
+data_triv[, , "Temp_min"] <- rnorm(prod(dim(data_triv)[1:2]))
+names_triv  <- c("Temp_min", "Wind", "Temp_max")
+data_triv   <- data_triv[, , names_triv, drop = FALSE]
+
+set.seed(1)
+wt <- resultperm$cluster
+K  <- length(unique(wt))
+ns <- dim(data_triv)[2]
+nv <- length(names_triv)   # 3
+
+res_triv <- estimate_lambda_transformations(
+  data        = data_triv,
+  wt          = wt,
+  names       = names_triv,
+  coordinates = coordinates
+)
+
+# ── AVEC Précipitation Cas trivarie ────────────────────────────────────────────────────────
 # 0. 
 test_that("estimate_lambda_transformations returns a list with expected components", {
   
@@ -102,7 +125,96 @@ test_that("threshold_precip is numeric and positive", {
   expect_true(all(is.finite(unlist(res$threshold_precip)))) # 3.Check of the finitude if the threshold
 })
 
-# ── SANS Précipitation ────────────────────────────────────────────────────────
+# ── SANS Précipitation Cas TRivarie ────────────────────────────────────────────────────────
+
+# 1.
+test_that("[triv] sortie contient les deux composantes attendues", {
+  expect_type(res_triv, "list")
+  expect_named(res_triv, c("lambda_transformations", "threshold_precip"),
+               ignore.order = TRUE)
+})
+
+# 2.
+test_that("[triv] lambda_transformations : exactement 3 variables par weather type", {
+  lapply(seq_len(K), function(k) {
+    expect_equal(
+      length(res_triv$lambda_transformations[[k]]), nv,
+      info = paste("k =", k)
+    )
+  })
+})
+
+# 3.
+test_that("[triv] lambda_transformations : exactement ns transformations par variable", {
+  lapply(seq_len(K), function(k) {
+    lapply(seq_len(nv), function(v) {
+      expect_equal(
+        length(res_triv$lambda_transformations[[k]][[v]]), ns,
+        info = paste("k =", k, "v =", v)
+      )
+    })
+  })
+})
+
+# 4.
+test_that("[triv] chaque transformation possède un champ q", {
+  lapply(seq_len(K), function(k) {
+    lapply(seq_len(nv), function(v) {
+      lapply(seq_len(ns), function(j) {
+        expect_true(
+          "q" %in% names(res_triv$lambda_transformations[[k]][[v]][[j]]),
+          info = paste("k =", k, "v =", v, "j =", j)
+        )
+      })
+    })
+  })
+})
+
+# 5.
+test_that("[triv] threshold_precip : liste de K matrices nulles (1 x ns)", {
+  expect_type(res_triv$threshold_precip, "list")
+  expect_length(res_triv$threshold_precip, K)
+  
+  lapply(seq_len(K), function(k) {
+    expect_equal(
+      dim(res_triv$threshold_precip[[k]]), c(1L, ns),
+      info = paste("shape incorrecte k =", k)
+    )
+    expect_true(
+      all(res_triv$threshold_precip[[k]] == 0),
+      info = paste("valeurs non nulles k =", k)
+    )
+  })
+})
+
+# 6.
+test_that("[triv] q == -Inf pour toutes les variables (aucune n'est Precipitation)", {
+  lapply(seq_len(K), function(k) {
+    lapply(seq_len(nv), function(v) {
+      lapply(seq_len(ns), function(j) {
+        expect_equal(
+          res_triv$lambda_transformations[[k]][[v]][[j]]$q, -Inf,
+          info = paste("k =", k, "v =", names_triv[v], "j =", j)
+        )
+      })
+    })
+  })
+})
+
+# 7.
+test_that("[triv] Precipitation est absente des variables transformees", {
+  lapply(seq_len(K), function(k) {
+    expect_equal(
+      length(res_triv$lambda_transformations[[k]]), 3
+    )
+    expect_false(
+      "Precipitation" %in% names_triv,
+      info = "Precipitation ne doit pas figurer dans les variables"
+    )
+  })
+})
+
+# ── SANS Précipitation Cas Bivarie ────────────────────────────────────────────────────────
 # 5.
 test_that("sans Precipitation : même structure de sortie globale", {
   expect_type(res_no_prec, "list")
