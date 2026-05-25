@@ -100,3 +100,8 @@ test_that("compute_ax univarié (length(names)==1) retourne une matrice", {
   expect_false(anyNA(result))
 })
 
+#6.
+test_that("compute_ax univarié : la valeur est préservée", {
+  result <- compute_ax(parm_univ, names_univ)
+  expect_equal(result[1, 1], parm_univ$ax)
+})
