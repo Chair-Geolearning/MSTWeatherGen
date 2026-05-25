@@ -8,6 +8,9 @@ names = c("Precipitation", "Wind", "Temp_max")
 dates = seq(as.Date("2018-01-01"),as.Date("2021-12-31"), by="day")
 names = c("Precipitation", "Wind", "Temp_max")
 
+names_univ  <- "Temp_max"
+data_univ   <- data[, , 3, drop = FALSE]
+
 # Dimensions
 Nt <- dim(data)[1]
 Ns <- dim(data)[2]
@@ -37,6 +40,8 @@ par_all_TEST <- initialize_par_all_if_missing(
 )
 par_all_TEST_updated <- update_ax_parameters(par_all_TEST, names, compute_ax(param(par_all_TEST, names), names))
 parm <- param(par_all_TEST_updated, names)
+
+parm_univ <- parm[parm$v1 == names_univ & parm$v2 == names_univ, ]
 
 #--------Tests--------
 
@@ -83,5 +88,15 @@ test_that("function is deterministic", {
   result2 <- compute_ax(parm, names)
   
   expect_identical(result1, result2)
+})
+
+#5.
+test_that("compute_ax univarié (length(names)==1) retourne une matrice", {
+  result <- compute_ax(parm_univ, names_univ)
+  expect_true(is.matrix(result))
+  expect_equal(dim(result), c(1L, 1L))
+  expect_equal(rownames(result), names_univ)
+  expect_equal(colnames(result), names_univ)
+  expect_false(anyNA(result))
 })
 
