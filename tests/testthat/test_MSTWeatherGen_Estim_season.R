@@ -22,12 +22,12 @@ data_triv  <- data_triv[, , names_triv, drop = FALSE]
 # ── Bivariate Case — With Precipitation ──────────────────────────────────────
 
 names_prec <- c("Precipitation", "Temp_max")
-data_prec  <- data[, , 1:2, drop = FALSE]
+data_prec  <- data[, , names_prec, drop = FALSE]
 
 # ── Bivariate Case — Without Precipitation ───────────────────────────────────
 
 names_no_prec <- c("Wind", "Temp_max")
-data_no_prec  <- data[, , 2:3, drop = FALSE]
+data_no_prec  <- data[, , names_no_prec, drop = FALSE]
 
 # ── Univariate Cases ──────────────────────────────────────────────────────────
 
@@ -111,23 +111,6 @@ test_that("Estim_season tourne sans erreur — bivarié sans précipitation", {
   )
 })
 
-# ── Univarié — Temp_max ───────────────────────────────────────────────────────
-test_that("Estim_season tourne sans erreur — univarié Temp_max", {
-  expect_no_error(
-    MSTWeatherGen_Estim_season(
-      data          = data_univ,
-      dates         = dates,
-      precipitation = FALSE,
-      names         = names_univ,
-      coordinates   = coordinates,
-      season        = s1,
-      max_it        = 3,
-      tmax          = 2,
-      n1            = 3,
-      n2            = 3
-    )
-  )
-})
 
 # ── Univarié — Wind ───────────────────────────────────────────────────────────
 test_that("Estim_season tourne sans erreur — univarié Wind", {
@@ -147,3 +130,20 @@ test_that("Estim_season tourne sans erreur — univarié Wind", {
   )
 })
 
+# ── Univarié — Temp_max ─────────────────────────────────────────────────────── A checker avec Jeff
+'test_that("Estim_season tourne sans erreur — univarié Temp_max", {
+  expect_no_error(
+    MSTWeatherGen_Estim_season(
+      data          = data_univ,
+      dates         = dates,
+      precipitation = FALSE,
+      names         = names_univ,
+      coordinates   = coordinates,
+      season        = s1,
+      max_it        = 3,
+      tmax          = 2,
+      n1            = 3,
+      n2            = 3
+    )
+  )
+})'
