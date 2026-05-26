@@ -147,7 +147,7 @@ test_that("function is deterministic with same inputs", {
 })
 
 
-#------------------------- Setup univarié
+#-------------------------Setup univarié---------------------------------
 
 #1.
 test_that("update_ax_parameters univarié : tourne sans erreur", {
