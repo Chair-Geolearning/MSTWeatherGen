@@ -39,20 +39,19 @@ par_all_TEST_updated <- update_ax_parameters(par_all_TEST, names, compute_ax(par
 
 # Setup univarié
 names_univ   <- "Temp_max"
-par_all_univ <- par_all_TEST[par_all_TEST$v1 == names_univ & par_all_TEST$v2 == names_univ, ]
-
-ax_univ <- {
-  row <- ax_file[ax_file$v1 == names_univ & ax_file$v2 == names_univ, ]
-  matrix(row$cov, nrow = 1, ncol = 1,
-         dimnames = list(names_univ, names_univ))
-}
-
 par_all_univ <- par_all_TEST[
   grepl("^Temp_max-Temp_max:|^Temp_max:", names(par_all_TEST)) |
     names(par_all_TEST) %in% c("a1","d1","g1","a2","d2","g2",
                                "b1","e1","l1","b2","e2","l2",
                                "c","f","m")
 ]
+ax_univ <- {
+  row <- ax_file[ax_file$v1 == names_univ & ax_file$v2 == names_univ, ]
+  matrix(row$cov, nrow = 1, ncol = 1,
+         dimnames = list(names_univ, names_univ))
+}
+
+
 #--------Tests--------
 
 #0.
