@@ -15,7 +15,7 @@ a 3D array or a list of spatial observations for multiple variables.}
 \item{h}{Vector of spatial distances used in the likelihood function, representing
 the spatial relationship between observation points.}
 
-\item{uh}{Matrix containing additional data required by the likelihood function, 
+\item{uh}{Matrix containing additional data required by the likelihood function,
 typically combining spatial and temporal distances with other relevant information.}
 
 \item{max_it}{Maximum number of iterations for the optimization process, defaulting to 2000.

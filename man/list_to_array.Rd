@@ -14,7 +14,7 @@ list_to_array(Y, names, dates)
 \item{dates}{Vector of dates representing the time steps.}
 }
 \value{
-A 3D array where the first dimension corresponds to time steps, the second dimension corresponds 
+A 3D array where the first dimension corresponds to time steps, the second dimension corresponds
 to spatial locations, and the third dimension corresponds to variables.
 }
 \description{

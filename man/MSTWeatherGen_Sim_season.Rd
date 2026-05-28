@@ -39,7 +39,7 @@ A list containing:
 }
 \description{
 Simulates seasonal weather data using the Multivariate Space-Time Stochastic Weather Generator (MSTWeatherGen).
-This function is designed to generate synthetic weather data for a specified season, leveraging an autoregressive model 
+This function is designed to generate synthetic weather data for a specified season, leveraging an autoregressive model
 and predefined parameters to accurately reflect weather type transitions and spatial-temporal correlations.
 }
 \details{

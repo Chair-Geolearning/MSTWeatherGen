@@ -25,11 +25,13 @@ This function implements the methods described in Section 4 of the article
 }
 \examples{
 \dontrun{
-  # Assuming `fitted_parms` contains the fitted model parameters and
-  # `site_coordinates` contains the geographic coordinates for your locations:
-  AR_coeffs = calculate_AR_coefficients_matrices(parm = fitted_parms,
-                                                 coordinates = site_coordinates,
-                                                 AR_lag = 1)
+# Assuming `fitted_parms` contains the fitted model parameters and
+# `site_coordinates` contains the geographic coordinates for your locations:
+AR_coeffs <- calculate_AR_coefficients_matrices(
+  parm = fitted_parms,
+  coordinates = site_coordinates,
+  AR_lag = 1
+)
 }
 
 }

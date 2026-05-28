@@ -8,7 +8,7 @@ getInfo()
 }
 \description{
 Displays information about the MSTWeatherGen package and system configuration.
-This includes the package name, version, license, and the number of CPU cores 
+This includes the package name, version, license, and the number of CPU cores
 available on your computer.
 }
 \seealso{

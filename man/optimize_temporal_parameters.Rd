@@ -37,9 +37,9 @@ Updated `par_all` vector with optimized temporal parameters, representing an
         essential for applying the model to new data or further analysis.
 }
 \description{
-Performs a final optimization step to refine the temporal parameters of the model, 
-considering interactions across all variable pairs. This function aims to enhance the 
-model's temporal dynamics by optimizing a subset of parameters that influence temporal 
+Performs a final optimization step to refine the temporal parameters of the model,
+considering interactions across all variable pairs. This function aims to enhance the
+model's temporal dynamics by optimizing a subset of parameters that influence temporal
 relationships.
 }
 \details{

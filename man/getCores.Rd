@@ -11,7 +11,7 @@ Integer. The number of cores currently configured for parallel processing.
 }
 \description{
 Retrieves the current number of cores configured for parallel computations.
-If no cores have been set yet, it automatically initializes them by calling 
+If no cores have been set yet, it automatically initializes them by calling
 setCores().
 }
 \seealso{

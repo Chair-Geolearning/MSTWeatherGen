@@ -4,9 +4,9 @@ library(testthat)
 # Data:
 data("data", package = "MSTWeatherGen")
 data("coordinates", package = "MSTWeatherGen")
-names = c("Precipitation", "Wind", "Temp_max")
-dates = seq(as.Date("2018-01-01"),as.Date("2021-12-31"), by="day")
-names = c("Precipitation", "Wind", "Temp_max")
+names <- c("Precipitation", "Wind", "Temp_max")
+dates <- seq(as.Date("2018-01-01"), as.Date("2021-12-31"), by = "day")
+names <- c("Precipitation", "Wind", "Temp_max")
 seasons <- list(
   s1 = list(min_day = 1, max_day = 29, min_month = 12, max_month = 2),
   s2 = list(min_day = 1, max_day = 31, min_month = 3, max_month = 5),
@@ -14,7 +14,7 @@ seasons <- list(
   s4 = list(min_day = 1, max_day = 30, min_month = 9, max_month = 11)
 )
 
-# Parameters: 
+# Parameters:
 'set.seed(1)
 resultperm <- readRDS("saved_results/resultperm2.rds")
 
@@ -44,41 +44,41 @@ vgm <-spacetime_cov(
 
 ax <- vgm[vgm$lagtime==0&vgm$dist==max(vgm$dist),]'
 
-# Generating a full result on one season and one 
+# Generating a full result on one season and one
 'result_test <- lapply(seasons["s1"], function(season) {
-  
+
   n1 <- 3
-  n2 <- 4  
-  tmax <- 1  
+  n2 <- 4
+  tmax <- 1
   max_it <- 100
-  
+
   # Step 1: Filter the input data and dates for the specified season
   filtered = filter_season_data(data, dates, season, names)
   data = filtered$data_filtered
   dates = filtered$dates_filtered
   rm(filtered)
-  
+
   # Step 3-1: Identify weather types for the season
   wt = weather_types(data = data, variables = names_weather_types, dates = dates,coordinates =  coordinates,
                      max_number_wt = 6, return_plots = F)
-  wt = wt$cluster # extract weather types 
-  
+  wt = wt$cluster # extract weather types
+
   # Step 3-2: Estimate transition probabilities between weather types
   transitions = estimate_transitions(cluster = wt, dates = dates, nb = 30, K = length(unique(wt)))
-  
+
   # Step 4: Transformations for each variable in each weather type
   lmbd = estimate_lambda_transformations(data = data, wt = wt, names = names, coordinates = coordinates)
   threshold_precip = lmbd$threshold_precip
   lmbd = lmbd$lambda_transformations
   data = transformations(data = data,wt = wt,names = names, coordinates = coordinates,lmbd = lmbd)
-  
+
   K = length(unique(wt))
-  
+
   # Initialize the Gaussian field parameters storage
   gf_par <- vector(mode = "list", length = K)
-  
+
   ep <- generate_variable_index_pairs(names)
-  # Estimate spatial covariance structures for each pair of variables 
+  # Estimate spatial covariance structures for each pair of variables
   dst = sapply(1:nrow(coordinates), function(i){
     sapply(1:nrow(coordinates), function(j){
       geosphere::distHaversine(coordinates[i,], coordinates[j,])/1000
@@ -93,7 +93,7 @@ ax <- vgm[vgm$lagtime==0&vgm$dist==max(vgm$dist),]'
     vgm$v = paste(variable[1], variable[2], sep = "-")
     vgm$v1 = variable[1]
     vgm$v2 = variable[2]
-    
+
     return(vgm)
   })
   vgm = do.call(rbind, vgm)
@@ -104,18 +104,18 @@ ax <- vgm[vgm$lagtime==0&vgm$dist==max(vgm$dist),]'
   })
   colnames(cr) <- rownames(cr) <- names
   # For each weather type, estimate Gaussian field parameters
-  
+
   k <- 3
- 
+
   wt_id <- which(wt == k)
-  wt_id <- wt_id[wt_id > tmax + 1]  
-    
+  wt_id <- wt_id[wt_id > tmax + 1]
+
   #Estimate Gaussian field parameters
-  result_test <- estimation_gf(data = data, wt_id = wt_id, max_it = max_it, dates = dates, 
-                                 tmax = tmax, names = names, coordinates = coordinates, n1 = n1, 
-                                 n2 = n2, ax = vgm[vgm$lagtime==0&vgm$dist==max(vgm$dist),], 
+  result_test <- estimation_gf(data = data, wt_id = wt_id, max_it = max_it, dates = dates,
+                                 tmax = tmax, names = names, coordinates = coordinates, n1 = n1,
+                                 n2 = n2, ax = vgm[vgm$lagtime==0&vgm$dist==max(vgm$dist),],
                                  cr = cr, threshold_precip = threshold_precip[[k]])
-  
+
 })
 
 saveRDS(result_test, file = "estimation_gf_results_v1.rds")'
@@ -126,57 +126,46 @@ result_test <- readRDS(testthat::test_path("saved_results/estimation_gf_results_
 
 # 0.
 test_that("Structure of results", {
-
   expect_type(result_test, "list")
   expect_named(result_test, c("s1"))
   expect_length(result_test, 1)
-  
 })
 
 # 1.
 test_that("All parameters are right in the results", {
-  
   expect_type(result_test$s1, "list")
   expect_length(result_test$s1, 2)
-  expect_named(result_test$s1, c("parm","par_all"))
-  
+  expect_named(result_test$s1, c("parm", "par_all"))
 })
 
 # 2.
 test_that("Dimension of results", {
-  
   expect_type(result_test$s1, "list")
   expect_length(result_test$s1, 2)
-  expect_named(result_test$s1, c("parm","par_all"))
-  
+  expect_named(result_test$s1, c("parm", "par_all"))
 })
 
 # 3.
 test_that("parm is a list with correct dimensions", {
-
-  expect_type(result_test$s1$parm,'list')
-  expect_equal(length(dim(result_test$s1$parm)),2)
+  expect_type(result_test$s1$parm, "list")
+  expect_equal(length(dim(result_test$s1$parm)), 2)
 })
 
 # 4.
 test_that("par_all structure", {
-  
-  expect_type(result_test$s1$par_all,'double')
+  expect_type(result_test$s1$par_all, "double")
   expect_true(length(result_test$s1$par_all) > 0)
 })
 
 # 5.
 test_that("All numerical values are finite and no NA", {
-  
-    expect_true(all(!is.na(unlist(result_test$s1$par_all))))
-    expect_true(all(is.finite(unlist(result_test$s1$par_all))))
-    
-    num <- result_test$s1$parm[sapply(result_test$s1$parm, is.numeric)]
-    
-    expect_true(all(!is.na(unlist(num))))
-    expect_true(all(is.finite(unlist(num))))
+  expect_true(all(!is.na(unlist(result_test$s1$par_all))))
+  expect_true(all(is.finite(unlist(result_test$s1$par_all))))
 
+  num <- result_test$s1$parm[sapply(result_test$s1$parm, is.numeric)]
+
+  expect_true(all(!is.na(unlist(num))))
+  expect_true(all(is.finite(unlist(num))))
 })
 
 # Add reproducibility test with seed ??
-
