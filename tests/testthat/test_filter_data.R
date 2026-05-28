@@ -73,3 +73,4 @@ test_that("filter_season_data bivarié : data_filtered reste un tableau 3D", {
   expect_equal(dim(result$data_filtered)[3], 2L)
   expect_equal(dimnames(result$data_filtered)[[3]], names_biv)
 })
+
