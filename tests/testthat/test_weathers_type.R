@@ -5,9 +5,9 @@ library(mclust)
 # Data :
 data("data", package = "MSTWeatherGen")
 data("coordinates", package = "MSTWeatherGen")
-names = c("Precipitation", "Wind", "Temp_max")
-dates = seq(as.Date("2012-01-01"),as.Date("2022-12-31"), by="day")
-R_TEST_ALL <-  as.logical(Sys.getenv("R_TEST_ALL"))
+names <- c("Precipitation", "Wind", "Temp_max")
+dates <- seq(as.Date("2012-01-01"), as.Date("2022-12-31"), by = "day")
+R_TEST_ALL <- as.logical(Sys.getenv("R_TEST_ALL"))
 
 # Parameters:
 
@@ -37,64 +37,65 @@ n_wt <- 3
 )'
 
 
-# 0. 
+# 0.
 test_that("weather_types returns a cluster vector and works even if return_plots = FALSE", {
-  expect_type(result$cluster, "double")                    
-  expect_equal(length(result$cluster), dim(data)[1])      
-  expect_equal(length(unique(result$cluster)), n_wt)       
-  expect_true(all(result$cluster %in% 1:n_wt))             
+  expect_type(result$cluster, "double")
+  expect_equal(length(result$cluster), dim(data)[1])
+  expect_equal(length(unique(result$cluster)), n_wt)
+  expect_true(all(result$cluster %in% 1:n_wt))
 })
 
 # 1.
 test_that("Results structure", {
- 
   expect_type(result, "list")
-  expect_equal(length(result),2)
+  expect_equal(length(result), 2)
   expect_true(is.numeric(result$cluster))
-  
 })
 
-# 2. 
+# 2.
 test_that("test that similar results when having similiar experience, because we are fixing the seed now", {
   skip_on_cran()
   if (!R_TEST_ALL) {
-    skip('skip')
+    skip("skip")
   }
 
   set.seed(123)
-  result_first<- weather_types(data = data,
-                          variables = c("Wind", "Temp_max"),
-                          dates = dates,
-                          n_wt = 5,
-                          coordinates = coordinates,
-                          return_plots = FALSE,
-                          names_units = c("m/s", "°C"),
-                          dir = tempdir())
+  result_first <- weather_types(
+    data = data,
+    variables = c("Wind", "Temp_max"),
+    dates = dates,
+    n_wt = 5,
+    coordinates = coordinates,
+    return_plots = FALSE,
+    names_units = c("m/s", "°C"),
+    dir = tempdir()
+  )
 
   set.seed(123)
-  result_second <- weather_types(data = data,
-                          variables = c("Wind", "Temp_max"),
-                          dates = dates,
-                          n_wt = 5,
-                          coordinates = coordinates,
-                          return_plots = FALSE,
-                          names_units = c("m/s", "°C"),
-                          dir = tempdir())
-  
-  expect_equal(result_first$cluster,result_second$cluster)
-  
+  result_second <- weather_types(
+    data = data,
+    variables = c("Wind", "Temp_max"),
+    dates = dates,
+    n_wt = 5,
+    coordinates = coordinates,
+    return_plots = FALSE,
+    names_units = c("m/s", "°C"),
+    dir = tempdir()
+  )
+
+  expect_equal(result_first$cluster, result_second$cluster)
 })
 
 
-# 3. 
+# 3.
 test_that("What happened when n wt is equal to zero", {
   skip_on_cran()
-  
+
   if (!R_TEST_ALL) {
-    skip('skip')
+    skip("skip")
   }
-  
-  expect_error( result <- weather_types(
+
+  expect_error(result <- weather_types(
     data = data,
     variables = c("Wind", "Temp_max"),
     dates = dates,
@@ -106,14 +107,14 @@ test_that("What happened when n wt is equal to zero", {
   ))
 })
 
-# 4. 
+# 4.
 test_that("What happened when max nwt is equal to zero", {
   skip_on_cran()
-  
+
   if (!R_TEST_ALL) {
-    skip('skip')
+    skip("skip")
   }
-  expect_error( result <- weather_types(
+  expect_error(result <- weather_types(
     data = data,
     variables = c("Wind", "Temp_max"),
     dates = dates,
@@ -124,5 +125,3 @@ test_that("What happened when max nwt is equal to zero", {
     dir = tempdir()
   ))
 })
-
-

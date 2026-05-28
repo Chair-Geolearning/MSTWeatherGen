@@ -33,8 +33,8 @@ loglik(par, parms, par_all, data, names, Vi, h, u, uh, ep, cr)
 Total log-likelihood value for the observed data given the current model parameters.
 }
 \description{
-Calculates the total log-likelihood for spatial or spatio-temporal data across all variable pairs. 
-Utilizes the Gneiting spatio-temporal covariance model to integrate log-likelihood contributions from each variable pair. 
+Calculates the total log-likelihood for spatial or spatio-temporal data across all variable pairs.
+Utilizes the Gneiting spatio-temporal covariance model to integrate log-likelihood contributions from each variable pair.
 This function is core to the optimization process within model fitting.
 }
 \details{

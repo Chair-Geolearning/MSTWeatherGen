@@ -13,8 +13,8 @@ editor_options:
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
-    collapse = TRUE,
-    comment = "#>"
+  collapse = TRUE,
+  comment = "#>"
 )
 ```
 
@@ -42,12 +42,12 @@ The data considered here is the meteorological dataset SAFRAN, developed by Mét
 ```{r echo=TRUE}
 data("data", package = "MSTWeatherGen")
 data("coordinates", package = "MSTWeatherGen")
-names = c("Precipitation", "Wind", "Temp_max")
-real_dates = seq(as.Date("2011-01-01"),as.Date("2021-12-31"), by="day")
+names <- c("Precipitation", "Wind", "Temp_max")
+real_dates <- seq(as.Date("2011-01-01"), as.Date("2021-12-31"), by = "day")
 
-dates <- seq(as.Date("2018-01-01"),as.Date("2021-12-31"), by="day")
+dates <- seq(as.Date("2018-01-01"), as.Date("2021-12-31"), by = "day")
 index_dates <- real_dates %in% dates
-data <- data[index_dates,,]
+data <- data[index_dates, , ]
 ```
 
 ### Note on data needed for `MSTWeatherGen`
@@ -74,7 +74,7 @@ seasons <- list(
 We can also provide the names of each season, to be used later for the validation plots:
 
 ```{r echo=TRUE}
-names_seasons = c("DJF", "MAM", "JJA", "SON")
+names_seasons <- c("DJF", "MAM", "JJA", "SON")
 ```
 
 If the considered data does not exhibit seasonality one can use the whole period to estimate the parameters. To do that, one needs to fix the argument `by_season` of the `MSTWeatherGen_Estim` as `False`.
@@ -82,10 +82,12 @@ If the considered data does not exhibit seasonality one can use the whole period
 All the data being ready, we can now proceed to the estimation of the parameters using `MSTWeatherGen_Estim` function.
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE, results='hide'}
-names_weather_types = names
-swg = MSTWeatherGen_Estim(data = data, seasons = seasons,dates = dates, names = names, by_season = T, scale = T, 
-                        precipitation = T,names_weather_types = names_weather_types,
-                        coordinates= coordinates, max_it=100, tmax=1, n1=3, n2=3)
+names_weather_types <- names
+swg <- MSTWeatherGen_Estim(
+  data = data, seasons = seasons, dates = dates, names = names, by_season = T, scale = T,
+  precipitation = T, names_weather_types = names_weather_types,
+  coordinates = coordinates, max_it = 100, tmax = 1, n1 = 3, n2 = 3
+)
 ```
 
 Along the important arguments already defined (`data`, `seasons`, `by_season`, `dates`, `names`, `coordinates`), the user needs to define other arguments related to the estimation such as `max_it` which is the maximum iteration used by the `optim` function for the estimation of the covariance parameters, `tmax` which is the maximum time lag considered in the covariance estimation, and `n1` and `n2` which are related to the selection of the spatial pairs in the covariance estimation. Finally, the user needs to specify if the precipitation variable is considered using the `precipitation` argument. The `names_weather_types` is optional and it provides the names of the variables to be used for the weather types determination. If not provided, all the variables are used.
@@ -97,15 +99,17 @@ Now that the estimation is done, which may take some time depending on the size 
 Now, we're ready to simulate weather data based on the estimated parameters. The simulation method used by `MSTWeatherGen` is based on the vector autoregressive (AR) model whose coefficients matrices can be calculated using the covariance parameters estimated using `MSTWeatherGen_Estim` function. Therefore, before running the simulation, the user needs to define the lag of the AR model `AR_lag` and then calculate the coefficient matrices using `calculate_AR_coefficients_matrices`. Note that choosing a higher value of `AR_lag` can be computationally challenging both in term of calculation and storage. Therefore, the choice of this parameters depends of the size of the spatial domain and the number of variables considered. Here we choose an AR of order 2 and fix `AR_lag` as 2.
 
 ```{r echo=TRUE}
-AR_lag = 1
-bk = calculate_AR_coefficients_matrices(parm = swg, coordinates = coordinates, AR_lag = AR_lag)
+AR_lag <- 1
+bk <- calculate_AR_coefficients_matrices(parm = swg, coordinates = coordinates, AR_lag = AR_lag)
 ```
 
 After calculating the AR coefficient matrices, we can now ran the simulation using `MSTWeatherGen_Sim` function.
 
 ```{r echo=TRUE}
-sim = MSTWeatherGen_Sim(dates_sim = dates, dates_original = dates, 
-                                data = data, seasons = seasons, parm = swg, AR_lag = AR_lag, bk = bk)
+sim <- MSTWeatherGen_Sim(
+  dates_sim = dates, dates_original = dates,
+  data = data, seasons = seasons, parm = swg, AR_lag = AR_lag, bk = bk
+)
 ```
 
 The object `sim` contains the simulated data in a 3D (time$\times$location$\times$variable) format (such as `data`) for the `dates_sim` dates.
@@ -117,7 +121,7 @@ Finally, to validate our simulation, we can compare the simulated data against o
 We first choose a location to use for validation.
 
 ```{r echo=TRUE}
-Marseille  <- which.min(apply(coordinates, 1, function(point) {
+Marseille <- which.min(apply(coordinates, 1, function(point) {
   sqrt(sum((point - c(5.37, 43.2965))^2))
 }))
 ```
@@ -126,11 +130,11 @@ We can compare observed and simulated maximum temperature
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE, fig.height = 5, fig.width = 7, fig.align = "center"}
 library(ggplot2)
-dates_to_plot <- seq(as.Date("2021-01-01"),as.Date("2021-12-31"), by="day")
+dates_to_plot <- seq(as.Date("2021-01-01"), as.Date("2021-12-31"), by = "day")
 df <- data.frame(
   Time = dates[dates %in% dates_to_plot],
-  Observed = data[dates %in% dates_to_plot,Marseille ,"Temp_max"], 
-  Simulated = sim[dates %in% dates_to_plot,Marseille , "Temp_max"] 
+  Observed = data[dates %in% dates_to_plot, Marseille, "Temp_max"],
+  Simulated = sim[dates %in% dates_to_plot, Marseille, "Temp_max"]
 )
 df_long <- data.frame(
   Time = rep(df$Time, 2),
@@ -140,11 +144,14 @@ df_long <- data.frame(
 ggplot2::ggplot(df_long, ggplot2::aes(x = Time, y = Value, color = Type)) +
   ggplot2::geom_line() +
   ggplot2::theme_minimal() +
-  ggplot2::labs(title = "Observed vs simulated maximum Temperature",
-       x = "Time",
-       y = "Value",
-       color = "Type") + ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5)) +
-  ggplot2::scale_color_manual("",values = c("Observed" = "blue", "Simulated" = "red")) 
+  ggplot2::labs(
+    title = "Observed vs simulated maximum Temperature",
+    x = "Time",
+    y = "Value",
+    color = "Type"
+  ) +
+  ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5)) +
+  ggplot2::scale_color_manual("", values = c("Observed" = "blue", "Simulated" = "red"))
 ```
 
 
@@ -152,15 +159,16 @@ ggplot2::ggplot(df_long, ggplot2::aes(x = Time, y = Value, color = Type)) +
 We now plot the observed empirical density versus simulated weather variables in Marseille  during the seasons considered (winter (DJF), spring (MAM), summer (JJA), and fall (SON)) using `plot_observed_vs_simulated_density`function
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE, fig.height = 4, fig.width = 7.5, fig.align = "center"}
-plot_observed_vs_simulated_density(sim = sim, observed = data, dates = dates, 
-                              seasons = seasons, location = Marseille , names = names, names_seasons =names_seasons)
-
+plot_observed_vs_simulated_density(
+  sim = sim, observed = data, dates = dates,
+  seasons = seasons, location = Marseille, names = names, names_seasons = names_seasons
+)
 ```
 
 Next, we can compare the observed and simulated monthly variable means in Marseille  using `plot_mean_by_month` function
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE, fig.height = 4, fig.width = 7, fig.align = "center"}
-plot_mean_by_month(sim = sim, observed = data,places = Marseille , names_places = "Marseille ", names = names, dates = dates)
+plot_mean_by_month(sim = sim, observed = data, places = Marseille, names_places = "Marseille ", names = names, dates = dates)
 ```
 
 Then, we can compare simulated and observed frequency of wet days in the considered area during the considered seasons
@@ -173,6 +181,6 @@ Finally, we can see if our stochastic weather generator can reproduce the observ
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE, fig.height = 5, fig.width = 7, fig.align = "center"}
 library(lubridate)
-id = lubridate::year(dates) %in% 2018:2021
-plot_dry_wet_spells_maps(sim = sim[id,,], observed = data[id,,], coordinates = coordinates, dates = dates[id])
+id <- lubridate::year(dates) %in% 2018:2021
+plot_dry_wet_spells_maps(sim = sim[id, , ], observed = data[id, , ], coordinates = coordinates, dates = dates[id])
 ```

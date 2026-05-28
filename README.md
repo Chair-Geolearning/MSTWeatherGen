@@ -38,6 +38,10 @@ Active all unit tests set "R_TEST_ALL" global variable to TRUE.
 
 Disable vignette building (that can take to much time) use : ```--no-build-vignettes``` at build and ```--ignore-vignettes``` at check.
 
+```
+devtools::check(args = "--ignore-vignettes",build_args = "--no-build-vignettes")
+```
+
 ## Getting Started
 
 To learn how to use the `{MSTWeatherGen}` package, please refer to the detailed vignette available [here](https://sobakrim.github.io/MSTWeatherGen/articles/MSTWeatherGen.html).

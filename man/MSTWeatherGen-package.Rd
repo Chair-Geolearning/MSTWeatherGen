@@ -22,7 +22,6 @@ It provides tools for estimating the model parameters and generating
 \examples{
 \dontrun{
 library("MSTWeather")
-
 }
 }
 \references{

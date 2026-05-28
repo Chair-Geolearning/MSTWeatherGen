@@ -7,7 +7,7 @@
 calculate_Bk_matrices(C_k_matrices, Bk_0)
 }
 \arguments{
-\item{C_k_matrices}{A list of covariance matrices, where each matrix represents the covariance at a different time lag. 
+\item{C_k_matrices}{A list of covariance matrices, where each matrix represents the covariance at a different time lag.
 C_k_matrices[[1]] is the covariance matrix at lag 0.}
 }
 \value{
