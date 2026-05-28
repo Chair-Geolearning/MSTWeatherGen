@@ -37,6 +37,20 @@ par_all_TEST <- initialize_par_all_if_missing(
 )
 par_all_TEST_updated <- update_ax_parameters(par_all_TEST, names, compute_ax(param(par_all_TEST, names), names))
 
+# Setup univarié
+names_univ   <- "Temp_max"
+par_all_univ <- par_all_TEST[
+  grepl("^Temp_max-Temp_max:|^Temp_max:", names(par_all_TEST)) |
+    names(par_all_TEST) %in% c("a1","d1","g1","a2","d2","g2",
+                               "b1","e1","l1","b2","e2","l2",
+                               "c","f","m")
+]
+ax_univ <- {
+  row <- ax_file[ax_file$v1 == names_univ & ax_file$v2 == names_univ, ]
+  matrix(row$cov, nrow = 1, ncol = 1,
+         dimnames = list(names_univ, names_univ))
+}
+
 
 #--------Tests--------
 
@@ -138,3 +152,13 @@ test_that("function is deterministic with same inputs", {
 
   expect_identical(result1, result2)
 })
+
+
+#-------------------------Setup univarié---------------------------------
+
+#1.
+test_that("update_ax_parameters univarié : tourne sans erreur", {
+  expect_silent(update_ax_parameters(par_all_univ, names_univ, ax_univ))
+})
+
+

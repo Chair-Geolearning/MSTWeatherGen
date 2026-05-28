@@ -8,6 +8,35 @@ names <- c("Precipitation", "Wind", "Temp_max")
 dates <- seq(as.Date("2018-01-01"), as.Date("2021-12-31"), by = "day")
 names <- c("Precipitation", "Wind", "Temp_max")
 
+# Data without precipitation cas bivarie :
+names_no_prec <- c("Wind", "Temp_max")
+data_no_prec  <- data[, , 2:3, drop = FALSE]
+
+data_univarie <- data[, , 3, drop = FALSE]   # Temp_max uniquement
+names_univ    <- c("Temp_max")
+
+data_univarie2 <- data[, , 2, drop = FALSE]   # Wind uniquement
+names_univ2    <- c("Wind")
+
+set.seed(1)
+wt <- resultperm$cluster
+K  <- length(unique(wt))
+
+res_univ <- estimate_lambda_transformations(
+  data        = data_univarie,
+  wt          = wt,
+  names       = names_univ,
+  coordinates = coordinates
+)
+
+res_univ2 <- estimate_lambda_transformations(
+  data        = data_univarie2,
+  wt          = wt,
+  names       = names_univ2,
+  coordinates = coordinates
+)
+
+
 # Retrieving results:
 set.seed(1)
 wt <- resultperm$cluster
@@ -21,7 +50,41 @@ res <- estimate_lambda_transformations(
   coordinates = coordinates
 )
 
-# 0.
+# Cas SANS précipitation (nouveaux tests)
+res_no_prec <- estimate_lambda_transformations(
+  data        = data_no_prec,
+  wt          = wt,
+  names       = names_no_prec,
+  coordinates = coordinates
+)
+
+ns <- dim(data)[2]
+
+
+# ── Données trivariées sans précipitation et une variable creee factice ─────────────────────────────────────
+data_triv   <- data
+data("data", package = "MSTWeatherGen")
+data("coordinates", package = "MSTWeatherGen")
+dimnames(data_triv)[[3]][1] <- "Temp_min"
+data_triv[, , "Temp_min"] <- rnorm(prod(dim(data_triv)[1:2]))
+names_triv  <- c("Temp_min", "Wind", "Temp_max")
+data_triv   <- data_triv[, , names_triv, drop = FALSE]
+
+set.seed(1)
+wt <- resultperm$cluster
+K  <- length(unique(wt))
+ns <- dim(data_triv)[2]
+nv <- length(names_triv)   # 3
+
+res_triv <- estimate_lambda_transformations(
+  data        = data_triv,
+  wt          = wt,
+  names       = names_triv,
+  coordinates = coordinates
+)
+
+# ── AVEC Précipitation Cas trivarie ────────────────────────────────────────────────────────
+# 0. 
 test_that("estimate_lambda_transformations returns a list with expected components", {
   expect_type(res, "list")
   expect_equal(length(res), 2)
@@ -59,4 +122,276 @@ test_that("threshold_precip is numeric and positive", {
 
   expect_type(res$threshold_precip, "list")
   expect_true(all(is.finite(unlist(res$threshold_precip)))) # 3.Check of the finitude if the threshold
+})
+
+# ── SANS Précipitation Cas TRivarie ────────────────────────────────────────────────────────
+
+# 1.
+test_that("[triv] sortie contient les deux composantes attendues", {
+  expect_type(res_triv, "list")
+  expect_named(res_triv, c("lambda_transformations", "threshold_precip"),
+               ignore.order = TRUE)
+})
+
+# 2.
+test_that("[triv] lambda_transformations : exactement 3 variables par weather type", {
+  lapply(seq_len(K), function(k) {
+    expect_equal(
+      length(res_triv$lambda_transformations[[k]]), nv,
+      info = paste("k =", k)
+    )
+  })
+})
+
+# 3.
+test_that("[triv] lambda_transformations : exactement ns transformations par variable", {
+  lapply(seq_len(K), function(k) {
+    lapply(seq_len(nv), function(v) {
+      expect_equal(
+        length(res_triv$lambda_transformations[[k]][[v]]), ns,
+        info = paste("k =", k, "v =", v)
+      )
+    })
+  })
+})
+
+# 4.
+test_that("[triv] chaque transformation possède un champ q", {
+  lapply(seq_len(K), function(k) {
+    lapply(seq_len(nv), function(v) {
+      lapply(seq_len(ns), function(j) {
+        expect_true(
+          "q" %in% names(res_triv$lambda_transformations[[k]][[v]][[j]]),
+          info = paste("k =", k, "v =", v, "j =", j)
+        )
+      })
+    })
+  })
+})
+
+# 5.
+test_that("[triv] threshold_precip : liste de K matrices nulles (1 x ns)", {
+  expect_type(res_triv$threshold_precip, "list")
+  expect_length(res_triv$threshold_precip, K)
+  
+  lapply(seq_len(K), function(k) {
+    expect_equal(
+      dim(res_triv$threshold_precip[[k]]), c(1L, ns),
+      info = paste("shape incorrecte k =", k)
+    )
+    expect_true(
+      all(res_triv$threshold_precip[[k]] == 0),
+      info = paste("valeurs non nulles k =", k)
+    )
+  })
+})
+
+# 6.
+test_that("[triv] q == -Inf pour toutes les variables (aucune n'est Precipitation)", {
+  lapply(seq_len(K), function(k) {
+    lapply(seq_len(nv), function(v) {
+      lapply(seq_len(ns), function(j) {
+        expect_equal(
+          res_triv$lambda_transformations[[k]][[v]][[j]]$q, -Inf,
+          info = paste("k =", k, "v =", names_triv[v], "j =", j)
+        )
+      })
+    })
+  })
+})
+
+# 7.
+test_that("[triv] Precipitation est absente des variables transformees", {
+  lapply(seq_len(K), function(k) {
+    expect_equal(
+      length(res_triv$lambda_transformations[[k]]), 3
+    )
+    expect_false(
+      "Precipitation" %in% names_triv,
+      info = "Precipitation ne doit pas figurer dans les variables"
+    )
+  })
+})
+
+# ── SANS Précipitation Cas Bivarie ────────────────────────────────────────────────────────
+# 5.
+test_that("sans Precipitation : même structure de sortie globale", {
+  expect_type(res_no_prec, "list")
+  expect_equal(length(res_no_prec), 2)
+  expect_true(all(c("lambda_transformations", "threshold_precip") %in% names(res_no_prec)))
+  expect_equal(length(res_no_prec$lambda_transformations), K)
+})
+
+# 6.
+test_that("sans Precipitation : threshold_precip est une liste de matrices nulles (1 x ns)", {
+  expect_type(res_no_prec$threshold_precip, "list")
+  expect_length(res_no_prec$threshold_precip, K)
+  
+  lapply(seq_len(K), function(k) {
+    expect_equal(
+      dim(res_no_prec$threshold_precip[[k]]),
+      c(1L, ns),
+      info = paste("shape incorrecte pour k =", k)
+    )
+    expect_true(
+      all(res_no_prec$threshold_precip[[k]] == 0),
+      info = paste("valeurs non nulles pour k =", k)
+    )
+  })
+})
+
+# 7.
+test_that("sans Precipitation : lambda_transformations contient exactement 2 variables", {
+  nv_no_prec <- length(names_no_prec)
+  
+  lapply(seq_len(K), function(k) {
+    expect_equal(
+      length(res_no_prec$lambda_transformations[[k]]),
+      nv_no_prec,
+      info = paste("mauvais nombre de variables pour k =", k)
+    )
+    lapply(seq_len(nv_no_prec), function(v) {
+      expect_equal(length(res_no_prec$lambda_transformations[[k]][[v]]), ns)
+    })
+  })
+})
+
+# ── Données univariées sans précipitation avec Temp_max ─────────────────────────────────────
+
+# 1.
+test_that("[univ] la sortie est une liste avec les deux composantes", {
+  expect_type(res_univ, "list")
+  expect_named(res_univ, c("lambda_transformations", "threshold_precip"),
+               ignore.order = TRUE)
+})
+
+# 2.
+test_that("[univ] lambda_transformations contient exactement 1 variable par weather type", {
+  lapply(seq_len(K), function(k) {
+    expect_equal(
+      length(res_univ$lambda_transformations[[k]]), 1,
+      info = paste("k =", k)
+    )
+  })
+})
+
+# 3.
+test_that("[univ] chaque variable contient ns transformations", {
+  lapply(seq_len(K), function(k) {
+    expect_equal(
+      length(res_univ$lambda_transformations[[k]][[1]]), ns,
+      info = paste("k =", k)
+    )
+  })
+})
+
+# 4.
+test_that("[univ] chaque transformation contient un champ q", {
+  lapply(seq_len(K), function(k) {
+    lapply(seq_len(ns), function(j) {
+      expect_true(
+        "q" %in% names(res_univ$lambda_transformations[[k]][[1]][[j]]),
+        info = paste("k =", k, "j =", j)
+      )
+    })
+  })
+})
+
+# 5.
+test_that("[univ] threshold_precip est une liste de matrices nulles (1 x ns)", {
+  expect_type(res_univ$threshold_precip, "list")
+  expect_length(res_univ$threshold_precip, K)
+  
+  lapply(seq_len(K), function(k) {
+    expect_equal(
+      dim(res_univ$threshold_precip[[k]]), c(1L, ns),
+      info = paste("shape incorrecte pour k =", k)
+    )
+    expect_true(
+      all(res_univ$threshold_precip[[k]] == 0),
+      info = paste("valeurs non nulles pour k =", k)
+    )
+  })
+})
+
+# 6.
+test_that("[univ] q vaut -Inf pour une variable continue sans zéros", {
+  lapply(seq_len(K), function(k) {
+    lapply(seq_len(ns), function(j) {
+      expect_equal(
+        res_univ$lambda_transformations[[k]][[1]][[j]]$q, -Inf,
+        info = paste("k =", k, "j =", j)
+      )
+    })
+  })
+})
+
+# ── Données univariées sans précipitation avec Wind ─────────────────────────────────────
+
+# 1.
+test_that("[univ] la sortie est une liste avec les deux composantes", {
+  expect_type(res_univ2, "list")
+  expect_named(res_univ2, c("lambda_transformations", "threshold_precip"),
+               ignore.order = TRUE)
+})
+
+# 2.
+test_that("[univ] lambda_transformations contient exactement 1 variable par weather type", {
+  lapply(seq_len(K), function(k) {
+    expect_equal(
+      length(res_univ2$lambda_transformations[[k]]), 1,
+      info = paste("k =", k)
+    )
+  })
+})
+
+# 3.
+test_that("[univ] chaque variable contient ns transformations", {
+  lapply(seq_len(K), function(k) {
+    expect_equal(
+      length(res_univ2$lambda_transformations[[k]][[1]]), ns,
+      info = paste("k =", k)
+    )
+  })
+})
+
+# 4.
+test_that("[univ] chaque transformation contient un champ q", {
+  lapply(seq_len(K), function(k) {
+    lapply(seq_len(ns), function(j) {
+      expect_true(
+        "q" %in% names(res_univ2$lambda_transformations[[k]][[1]][[j]]),
+        info = paste("k =", k, "j =", j)
+      )
+    })
+  })
+})
+
+# 5.
+test_that("[univ] threshold_precip est une liste de matrices nulles (1 x ns)", {
+  expect_type(res_univ2$threshold_precip, "list")
+  expect_length(res_univ2$threshold_precip, K)
+  
+  lapply(seq_len(K), function(k) {
+    expect_equal(
+      dim(res_univ2$threshold_precip[[k]]), c(1L, ns),
+      info = paste("shape incorrecte pour k =", k)
+    )
+    expect_true(
+      all(res_univ2$threshold_precip[[k]] == 0),
+      info = paste("valeurs non nulles pour k =", k)
+    )
+  })
+})
+
+# 6.
+test_that("[univ] q vaut -Inf pour une variable continue sans zéros", {
+  lapply(seq_len(K), function(k) {
+    lapply(seq_len(ns), function(j) {
+      expect_equal(
+        res_univ2$lambda_transformations[[k]][[1]][[j]]$q, -Inf,
+        info = paste("k =", k, "j =", j)
+      )
+    })
+  })
 })

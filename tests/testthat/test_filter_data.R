@@ -46,7 +46,31 @@ test_that("Empty data", {
   empty_data <- array(NA, dim = c(0, 3, 3)) # Empty table
   season <- list(min_day = 1, max_day = 31, min_month = 1, max_month = 12)
   expect_error(result <- filter_season_data(empty_data, dates, season))
-
-  # expect_equal(length(result$data_filtered), 0)
-  # expect_equal(length(result$dates_filtered), 0)
 })
+# Setup univarié
+names_univ <- "Temp_max"
+
+# 4.
+test_that("filter_season_data univarié : data_filtered reste un tableau 3D", {
+  result <- filter_season_data(data, dates, summer, names = names_univ)
+  expect_equal(length(dim(result$data_filtered)), 3L)
+})
+
+# 5.
+test_that("filter_season_data univarié : 3ème dimension vaut 1 avec le bon nom", {
+  result <- filter_season_data(data, dates, summer, names = names_univ)
+  expect_equal(dim(result$data_filtered)[3], 1L)
+  expect_equal(dimnames(result$data_filtered)[[3]], names_univ)
+})
+
+# Setup bivarié
+names_biv <- c("Wind", "Temp_max")
+
+# 6.
+test_that("filter_season_data bivarié : data_filtered reste un tableau 3D", {
+  result <- filter_season_data(data, dates, summer, names = names_biv)
+  expect_equal(length(dim(result$data_filtered)), 3L)
+  expect_equal(dim(result$data_filtered)[3], 2L)
+  expect_equal(dimnames(result$data_filtered)[[3]], names_biv)
+})
+
