@@ -46,7 +46,7 @@ test_that("Empty data", {
   empty_data <- array(NA, dim = c(0, 3, 3)) # Empty table
   season <- list(min_day = 1, max_day = 31, min_month = 1, max_month = 12)
   expect_error(result <- filter_season_data(empty_data, dates, season))
-
+})
 # Setup univarié
 names_univ <- "Temp_max"
 
