@@ -131,7 +131,7 @@ orderNorm_all <- function(data, j, coordinates, left) {
 #' @return Transformed or inverse-transformed data based on the specified operation.
 #'
 #' @keywords internal
-predict.orderNormTransf <- function(object,
+predict_orderNormTransf <- function(object,
                                     newdata = NULL,
                                     inverse = FALSE,
                                     warn = TRUE,
@@ -431,9 +431,9 @@ transformations <- function(data, wt, names, coordinates, lmbd) {
         }
 
         # Apply the transformation to the data
-        # Assuming predict.orderNormTransf is defined elsewhere and applies the transformation
+        # Assuming predict_orderNormTransf is defined elsewhere and applies the transformation
         if (length(ind) > 0) { # Check if there are indices to update
-          data[ind, j, v] <- predict.orderNormTransf(m, newdata = data[ind, j, v], inverse = FALSE)
+          data[ind, j, v] <- predict_orderNormTransf(m, newdata = data[ind, j, v], inverse = FALSE)
         }
       }
     }
