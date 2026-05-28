@@ -48,10 +48,12 @@
 <url><loc>https://chair-geolearning.github.io/MSTWeatherGen/reference/index.html</loc></url>
 <url><loc>https://chair-geolearning.github.io/MSTWeatherGen/reference/init_space_par.html</loc></url>
 <url><loc>https://chair-geolearning.github.io/MSTWeatherGen/reference/inv_orderNorm_Transf.html</loc></url>
+<url><loc>https://chair-geolearning.github.io/MSTWeatherGen/reference/is_positive_definite.html</loc></url>
 <url><loc>https://chair-geolearning.github.io/MSTWeatherGen/reference/list_to_array.html</loc></url>
 <url><loc>https://chair-geolearning.github.io/MSTWeatherGen/reference/loglik.html</loc></url>
 <url><loc>https://chair-geolearning.github.io/MSTWeatherGen/reference/loglik_pair.html</loc></url>
 <url><loc>https://chair-geolearning.github.io/MSTWeatherGen/reference/loglik_spatial.html</loc></url>
+<url><loc>https://chair-geolearning.github.io/MSTWeatherGen/reference/make_positive_definite.html</loc></url>
 <url><loc>https://chair-geolearning.github.io/MSTWeatherGen/reference/modify_beta_parm.html</loc></url>
 <url><loc>https://chair-geolearning.github.io/MSTWeatherGen/reference/most_probable_weather_type.html</loc></url>
 <url><loc>https://chair-geolearning.github.io/MSTWeatherGen/reference/optimize_pairs_spatiotemporal.html</loc></url>
