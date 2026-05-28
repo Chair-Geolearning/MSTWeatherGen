@@ -112,7 +112,10 @@ update_ax_parameters <- function(par_all, names, ax) {
     ax = Matrix::nearPD(a)$mat
   }else{
     ax = if (nrow(ax) == 1) {
-      Matrix::Matrix(max(as.numeric(ax), 1e-6), nrow = 1, ncol = 1, dimnames = dimnames(ax))
+      if (any(as.numeric(ax) < 0)) {
+        warning("ax contient des valeurs négatives avant nearPD : ", paste(as.numeric(ax), collapse = ", "))
+      }
+      Matrix::nearPD(ax)$mat
     } else {
       Matrix::nearPD(ax)$mat
     }
