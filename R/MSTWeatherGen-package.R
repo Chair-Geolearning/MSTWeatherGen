@@ -115,23 +115,23 @@ setCores <- function(n = NULL) {
 
   if (is.na(total_cores)) {
     warning("Could not detect cores. Defaulting to 1 core.")
-    total_cores <- 1
+    total_cores <- 1L
   }
 
   if (is.null(n)) {
-    .pkgenv$nbcores <- min(2, total_cores) 
+    .pkgenv$nbcores <- min(2L, total_cores) 
     packageStartupMessage(
       "Number of cores set to ", .pkgenv$nbcores,
-      " (total: ", total_cores, ", reserved: ", total_cores - 2, ") "
+      " (total: ", total_cores, ", reserved: ", total_cores - 2L, ") "
     )
     packageStartupMessage("To change manually the number of cores, use: setCores(n)")
     packageStartupMessage("To check how many cores you are using, use: getCores()")
   } else {
-    if (!is.numeric(n) || n < 1) {
+    if (!is.numeric(n) || n < 1L) {
       stop("Number of cores must be at least 1")
     }
 
-    n <- max(1, as.integer(n))
+    n <- max(1L, as.integer(n))
 
     if (n > total_cores) {
       warning(
