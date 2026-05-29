@@ -9,16 +9,6 @@ dates = seq(as.Date("2018-01-01"),as.Date("2021-12-31"), by="day")
 names = c("Precipitation", "Wind", "Temp_max")
 s1 = list(min_day = 1, max_day = 29, min_month = 12, max_month = 2)
 
-
-# ── Trivariate Case (no precipitation, with synthetic variable) ───────────────
-
-data_triv <- data
-dimnames(data_triv)[[3]][1] <- "Temp_min"
-data_triv[, , "Temp_min"]   <- rnorm(prod(dim(data_triv)[1:2]))
-
-names_triv <- c("Temp_min", "Wind", "Temp_max")
-data_triv  <- data_triv[, , names_triv, drop = FALSE]
-
 # ── Bivariate Case — With Precipitation ──────────────────────────────────────
 
 names_prec <- c("Precipitation", "Temp_max")
@@ -40,12 +30,12 @@ data_univ2  <- data[, , 2, drop = FALSE]
 # ── Tests ──────────────────────────────────────────────────────────
 
 # ── Trivariate — avec précipitation (variable synthétique) ───────────────────
-test_that("Estim_season tourne sans erreur — trivarié sans précipitation", {
+test_that("Estim_season tourne sans erreur — trivarié AVEC précipitation", {
   expect_no_error(
     MSTWeatherGen_Estim_season(
       data          = data,
       dates         = dates,
-      precipitation = FALSE,
+      precipitation = TRUE,
       names         = names,
       coordinates   = coordinates,
       season        = s1,
@@ -57,7 +47,7 @@ test_that("Estim_season tourne sans erreur — trivarié sans précipitation", {
   )
 })
 
-# ── Trivariate — sans précipitation (variable synthétique) ───────────────────
+'# ── Trivariate — sans précipitation (variable synthétique) ───────────────────
 test_that("Estim_season tourne sans erreur — trivarié sans précipitation", {
   expect_no_error(
     MSTWeatherGen_Estim_season(
@@ -73,7 +63,7 @@ test_that("Estim_season tourne sans erreur — trivarié sans précipitation", {
       n2            = 3
     )
   )
-})
+})'
 
 # ── Bivariate — avec précipitation ───────────────────────────────────────────
 test_that("Estim_season tourne sans erreur — bivarié avec précipitation", {
