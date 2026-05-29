@@ -119,10 +119,10 @@ setCores <- function(n = NULL) {
   }
 
   if (is.null(n)) {
-    .pkgenv$nbcores <- max(1, total_cores - 2)
+    .pkgenv$nbcores <- min(2, total_cores) 
     packageStartupMessage(
       "Number of cores set to ", .pkgenv$nbcores,
-      " (total: ", total_cores, ", reserved: 2)"
+      " (total: ", total_cores, ", reserved: ", total_cores - 2, ") "
     )
     packageStartupMessage("To change manually the number of cores, use: setCores(n)")
     packageStartupMessage("To check how many cores you are using, use: getCores()")
