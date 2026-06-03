@@ -38,7 +38,7 @@ data_univ_prec  <- data[, , 1, drop = FALSE]
 # ── Tests ─────────────────────────────────────────────────────────────────────
 
 for (season_name in names(seasons)) {
-  s <- seasons[[season_name]]
+  s <- s1
   
   # ── Trivariate — avec précipitation ─────────────────────────────────────────
   test_that(paste("Estim_season tourne sans erreur — trivarié AVEC précipitation —", season_name), {
