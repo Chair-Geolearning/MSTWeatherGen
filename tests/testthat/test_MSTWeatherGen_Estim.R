@@ -58,27 +58,6 @@ test_that("Estim tourne sans erreur — trivarié AVEC précipitation", {
   )
 })
 
-'# ── Trivariate — sans précipitation ──────────────────────────────────────────
-test_that("Estim tourne sans erreur — trivarié sans précipitation", {
-  expect_no_error(
-    MSTWeatherGen_Estim(
-      data                = data_triv,
-      seasons             = seasons,
-      dates               = dates,
-      names               = names_triv,
-      by_season           = TRUE,
-      scale               = TRUE,
-      precipitation       = FALSE,
-      names_weather_types = names_triv,
-      coordinates         = coordinates,
-      max_it              = 100,
-      tmax                = 1,
-      n1                  = 3,
-      n2                  = 3
-    )
-  )
-})'
-
 # ── Bivariate — avec précipitation ───────────────────────────────────────────
 test_that("Estim tourne sans erreur — bivarié avec précipitation", {
   expect_no_error(
