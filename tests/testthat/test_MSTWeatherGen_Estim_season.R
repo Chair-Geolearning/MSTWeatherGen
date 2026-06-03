@@ -27,6 +27,9 @@ data_univ   <- data[, , 3, drop = FALSE]
 names_univ2 <- "Wind"
 data_univ2  <- data[, , 2, drop = FALSE]
 
+names_univ_prec <- "Precipitation"
+data_univ_prec  <- data[, , 1, drop = FALSE]
+
 # ── Tests ──────────────────────────────────────────────────────────
 
 # ── Trivariate — avec précipitation (variable synthétique) ───────────────────
@@ -119,6 +122,25 @@ test_that("Estim_season tourne sans erreur — univarié Wind", {
     )
   )
 })
+
+# ── Univarié — Precipitation ───────────────────────────────────────────────────────────
+test_that("Estim_season tourne sans erreur — univarié Precipitation", {
+  expect_no_error(
+    MSTWeatherGen_Estim_season(
+      data          = data_univ_prec,
+      dates         = dates,
+      precipitation = TRUE,
+      names         = names_univ_prec,
+      coordinates   = coordinates,
+      season        = s1,
+      max_it        = 3,
+      tmax          = 2,
+      n1            = 3,
+      n2            = 3
+    )
+  )
+})
+
 
 # ── Univarié — Temp_max ─────────────────────────────────────────────────────── A checker avec Jeff
 'test_that("Estim_season tourne sans erreur — univarié Temp_max", {
