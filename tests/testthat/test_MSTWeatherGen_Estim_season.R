@@ -136,7 +136,7 @@ for (season_name in names(seasons)) {
   })
   
   # ── Univarié — Precipitation ─────────────────────────────────────────────────
-  test_that(paste("Estim_season tourne sans erreur — univarié Precipitation —", season_name), {
+  'test_that(paste("Estim_season tourne sans erreur — univarié Precipitation —", season_name), {
     expect_no_error(
       MSTWeatherGen_Estim_season(
         data          = data_univ_prec,
@@ -151,7 +151,7 @@ for (season_name in names(seasons)) {
         n2            = 3
       )
     )
-  })
+  })'
   
   # ── Univarié — Temp_max ───────────────────────────────────────────── A checker avec Jeff bug des beta vus avec Denis
   'test_that(paste("Estim_season tourne sans erreur — univarié Temp_max —", season_name), {
