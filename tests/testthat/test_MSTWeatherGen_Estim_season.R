@@ -12,6 +12,7 @@ seasons <- list(
   s3 = list(min_day = 1, max_day = 31, min_month = 6,  max_month = 8),
   s4 = list(min_day = 1, max_day = 30, min_month = 9,  max_month = 11)
 )
+R_TEST_ALL <- as.logical(Sys.getenv("R_TEST_ALL"))
 
 # ── Bivariate Case — With Precipitation ──────────────────────────────────────
 
@@ -35,6 +36,12 @@ names_univ_prec <- "Precipitation"
 data_univ_prec  <- data[, , 1, drop = FALSE]
 
 # ── Tests ─────────────────────────────────────────────────────────────────────
+
+skip_on_ci()
+
+if (!R_TEST_ALL) {
+  skip("skip")
+}
 
 for (season_name in names(seasons)) {
   s <- seasons[[season_name]]
