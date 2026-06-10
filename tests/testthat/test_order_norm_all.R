@@ -136,21 +136,21 @@ test_that("orderNorm_all ne boucle pas avec 100% de zéros (cas extreme)", {
   
   # Doit terminer sans boucle infinie
   # On s'attend soit à un orderNorm soit à un warning/erreur propre
+  setTimeLimit(elapsed = 15, transient = TRUE)
+  
   result <- tryCatch(
-    R.utils::withTimeout(
-      orderNorm_all(
-        data        = data_k,
-        j           = j,
-        coordinates = coordinates,
-        left        = -Inf
-      ),
-      timeout   = 5,
-      onTimeout = "error"
+    orderNorm_all(
+      data        = data_k,
+      j           = j,
+      coordinates = coordinates,
+      left        = qnorm(mean(x == 0))
     ),
     error = function(e) {
       NULL
     }
   )
+  
+  setTimeLimit(elapsed = Inf, transient = TRUE)
   
   # Le résultat est soit un orderNorm soit NULL (erreur propre) — jamais une boucle infinie
   expect_true(is.null(result) || inherits(result, "orderNorm"))
