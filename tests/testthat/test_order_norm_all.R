@@ -43,14 +43,17 @@ test_that("orderNorm_all ne boucle pas indéfiniment apres l'ajout de la conditi
         } else {
           -Inf
         }
-        result <- R.utils::withTimeout(
+        setTimeLimit(elapsed = 10, transient = TRUE)
+        on.exit(setTimeLimit(elapsed = Inf, transient = TRUE), add = TRUE)
+        
+        result <- tryCatch(
           orderNorm_all(
             data        = data[wt_test == k, , v],
             j           = j,
             coordinates = coordinates,
             left        = q
           ),
-          timeout = 10
+          error = function(e) NULL
         )
         expect_false(is.null(result))
       }
