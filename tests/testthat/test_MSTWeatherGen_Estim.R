@@ -13,6 +13,7 @@ seasons <- list(
   s3 = list(min_day = 1, max_day = 31, min_month = 6,  max_month = 8),
   s4 = list(min_day = 1, max_day = 30, min_month = 9,  max_month = 11)
 )
+R_TEST_ALL <- as.logical(Sys.getenv("R_TEST_ALL"))
 
 # ── Bivariate Case — With Precipitation ──────────────────────────────────────
 
