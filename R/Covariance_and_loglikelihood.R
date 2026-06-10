@@ -84,9 +84,11 @@ Gneiting <- function(h, u, par, dij) {
   # Details : Additional Temporal attenuation
   rhoij <- 1 / (((d1 * abs(u))^(2 * e1) + 1)^(f) - (bi * bj * ((d2 * abs(u))^(2 * e2) + 1)^(-f)))
 
-  A1 <- eij / muij
-  A2 <- Matern(abs(h), r = (rij^2 / muij)^(1 / 2), v = vij) * rhoij
-  # A3 : Additional Term NOT in the paper
+  A1 <- eij 
+  
+  A2 <- rhoij *  Matern(abs(h), r = (rij^2 / muij)^(1 / 2), v = vij) / muij
+  
+  # A3 : Additional Temporal Term
   A3 <- ax * 1 / (((g1 * abs(u))^(2 * l1) + 1)^(m) - ci * cj * ((g2 * abs(u))^(2 * l2) + 1)^(-m))
 
   return(A1 * A2 + A3)
