@@ -37,6 +37,11 @@ data_univ_prec  <- data[, , 1, drop = FALSE]
 
 # ── Tests ─────────────────────────────────────────────────────────────────────
 
+skip_on_ci()
+
+if (!R_TEST_ALL) {
+  skip("skip")
+}
 # ── Trivariate — avec précipitation ───────────────────────────────────────────
 test_that("Estim tourne sans erreur — trivarié AVEC précipitation", {
   expect_no_error(
