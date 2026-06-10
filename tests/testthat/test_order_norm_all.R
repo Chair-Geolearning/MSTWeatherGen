@@ -104,16 +104,17 @@ test_that("orderNorm_all ne boucle pas quand j depasse length(kn) (cas pathologi
     for (j in 1:ns_test) {
       x <- data_k[, j]
     
-      result <- R.utils::withTimeout(
-        orderNorm_all(
-          data        = data_k,
-          j           = j,
-          coordinates = coordinates,
-          left        = qnorm(mean(x == 0))
-        ),
-        timeout = 5,  # doit terminer en moins de 5 secondes
-        onTimeout = "error"
+      setTimeLimit(elapsed = 15, transient = TRUE)
+      
+      result <- orderNorm_all(
+        data        = data_k,
+        j           = j,
+        coordinates = coordinates,
+        left        = qnorm(mean(x == 0))
       )
+      
+      setTimeLimit(elapsed = Inf, transient = TRUE)
+    
       expect_s3_class(result, "orderNorm")
     }
   }

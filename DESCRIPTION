@@ -33,7 +33,6 @@ Imports:
     mclust (>= 6.1), ggplot2 (>= 3.5.0), viridis (>= 0.6.5), FNN (>= 1.1.4),
     stringr (>= 1.5.1), dplyr (>= 1.1.4), VGAM (>= 1.1-10), crch (>= 1.1-2),
     geosphere (>= 1.5-18), ggpubr (>= 0.6.0), patchwork (>= 1.2.0)
-    R.utils
 Suggests:
     pkgnet,
     knitr,
