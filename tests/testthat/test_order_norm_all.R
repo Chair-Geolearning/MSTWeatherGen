@@ -123,6 +123,7 @@ test_that("orderNorm_all ne boucle pas quand j depasse length(kn) (cas pathologi
   }
 })
 
+'
 test_that("orderNorm_all ne boucle pas avec 100% de zéros (cas extreme)", {
   
   ndays_test <- dim(data)[1]
@@ -137,8 +138,10 @@ test_that("orderNorm_all ne boucle pas avec 100% de zéros (cas extreme)", {
   data_k  <- data_extreme[wt_test == k, , "Precipitation"]
   j       <- 1
   
+  x <- data_k[, j]
+  
   # Doit terminer sans boucle infinie
-  # On s'attend soit à un orderNorm soit à un warning/erreur propre
+  # On sattend soit à un orderNorm soit à un warning/erreur propre
   setTimeLimit(elapsed = 15, transient = TRUE)
   
   result <- tryCatch(
@@ -158,3 +161,5 @@ test_that("orderNorm_all ne boucle pas avec 100% de zéros (cas extreme)", {
   # Le résultat est soit un orderNorm soit NULL (erreur propre) — jamais une boucle infinie
   expect_true(is.null(result) || inherits(result, "orderNorm"))
 })
+
+'
