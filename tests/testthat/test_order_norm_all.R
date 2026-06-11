@@ -167,6 +167,7 @@ test_that("orderNorm_all ne boucle pas avec 1 seul non-zéros (cas extreme)", {
   expect_true(is.null(result) || inherits(result, "orderNorm"))
 })
 
+# Reste a voir le cas ou la donnee est toute egale a zeros.
 
 
 
