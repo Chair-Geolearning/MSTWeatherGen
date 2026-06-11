@@ -123,8 +123,8 @@ test_that("orderNorm_all ne boucle pas quand j depasse length(kn) (cas pathologi
   }
 })
 
-'
-test_that("orderNorm_all ne boucle pas avec 100% de zéros (cas extreme)", {
+
+test_that("orderNorm_all ne boucle pas avec 1 seul non-zéros (cas extreme)", {
   
   ndays_test <- dim(data)[1]
   ns_test    <- dim(data)[2]
@@ -132,16 +132,21 @@ test_that("orderNorm_all ne boucle pas avec 100% de zéros (cas extreme)", {
   data_extreme <- data
   # 100% de zéros → x[x != 0] sera vide
   data_extreme[,, "Precipitation"] <- 0
-
+  
+  # AJOUT : une seule valeur non nulle
+  
   wt_test <- resultperm$cluster
   k       <- 1  # tester sur le premier weather type
+  
   data_k  <- data_extreme[wt_test == k, , "Precipitation"]
+  data_k[1, 1] <- 1
+  
   j       <- 1
   
   x <- data_k[, j]
   
   # Doit terminer sans boucle infinie
-  # On sattend soit à un orderNorm soit à un warning/erreur propre
+  # On sattend soit à un orderNorm ou à un warning/erreur propre
   setTimeLimit(elapsed = 15, transient = TRUE)
   
   result <- tryCatch(
@@ -162,4 +167,6 @@ test_that("orderNorm_all ne boucle pas avec 100% de zéros (cas extreme)", {
   expect_true(is.null(result) || inherits(result, "orderNorm"))
 })
 
-'
+
+
+
