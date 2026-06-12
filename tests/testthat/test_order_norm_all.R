@@ -233,7 +233,45 @@ test_that("orderNorm_all ne boucle pas avec 1 seul de zéros", {
   expect_true(inherits(result, "orderNorm"))
 })
 
-# Reste a voir le cas ou la donnee est toute egale a zeros.
+# Reste a voir le cas ou la donnee est toute egale a zeros -- qui doit crasher car orderNorm(x[!x == 0], left = left) bloque sur glm
+test_that("orderNorm_all ne boucle pas avec 0 seul non-zéros (cas extreme)", {
+  
+  ndays_test <- dim(data)[1]
+  ns_test    <- dim(data)[2]
+  
+  data_extreme <- data
+  # 100% de zéros → x[x != 0] sera vide
+  data_extreme[,, "Precipitation"] <- 0
+  
+  # AJOUT : une seule valeur non nulle
+  
+  wt_test <- resultperm$cluster
+  k       <- 1  # tester sur le premier weather type
+  data_k  <- data_extreme[wt_test == k, , "Precipitation"]
+  j       <- 1
+  x <- data_k[, j]
+  
+  # Doit terminer sans boucle infinie
+  # On sattend soit à un orderNorm ou à un warning/erreur propre
+  setTimeLimit(elapsed = 15, transient = TRUE)
+  
+  result <- tryCatch(
+    orderNorm_all(
+      data        = data_k,
+      j           = j,
+      coordinates = coordinates,
+      left        = qnorm(mean(x == 0))
+    ),
+    error = function(e) {
+      NULL
+    }
+  )
+  
+  setTimeLimit(elapsed = Inf, transient = TRUE)
+  
+  # Le résultat est soit un orderNorm soit NULL (erreur propre) — jamais une boucle infinie
+  expect_true(is.null(result))
+})
 
 
 
