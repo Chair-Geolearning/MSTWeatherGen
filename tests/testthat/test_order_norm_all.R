@@ -140,9 +140,7 @@ test_that("orderNorm_all ne boucle pas avec 1 seul non-zéros (cas extreme)", {
   
   data_k  <- data_extreme[wt_test == k, , "Precipitation"]
   data_k[1, 1] <- 1
-  
   j       <- 1
-  
   x <- data_k[, j]
   
   # Doit terminer sans boucle infinie
@@ -165,6 +163,74 @@ test_that("orderNorm_all ne boucle pas avec 1 seul non-zéros (cas extreme)", {
   
   # Le résultat est soit un orderNorm soit NULL (erreur propre) — jamais une boucle infinie
   expect_true(is.null(result) || inherits(result, "orderNorm"))
+})
+
+test_that("orderNorm_all ne boucle pas avec 100 pourcent de non-zéros et uniforme (2e cas extreme)", {
+  
+  ndays_test <- dim(data)[1]
+  ns_test    <- dim(data)[2]
+  
+  data_extreme <- data
+  # 100% de non zéros sera vide
+  data_extreme[,, "Precipitation"] <- 1
+  
+  # AJOUT : une seule valeur non nulle
+  
+  wt_test <- resultperm$cluster
+  k       <- 1  # tester sur le premier weather type
+  
+  data_k  <- data_extreme[wt_test == k, , "Precipitation"]
+  data_k[1, 1] <- 0
+  j       <- 1
+  x <- data_k[, j]
+  
+  
+  # Doit terminer sans boucle infinie
+  # On sattend soit à un orderNorm ou à un warning/erreur propre
+  setTimeLimit(elapsed = 15, transient = TRUE)
+  
+  result <- orderNorm_all(
+      data        = data_k,
+      j           = j,
+      coordinates = coordinates,
+      left        = qnorm(mean(x == 0)))
+  
+  
+  setTimeLimit(elapsed = Inf, transient = TRUE)
+  expect_true(inherits(result, "orderNorm"))
+})
+
+test_that("orderNorm_all ne boucle pas avec 1 seul de zéros", {
+  
+  ndays_test <- dim(data)[1]
+  ns_test    <- dim(data)[2]
+  
+  data_extreme <- data
+  # 100% de non zéros sera vide
+  data_extreme[,, "Precipitation"] <- 1
+  
+  # AJOUT : une seule valeur non nulle
+  
+  wt_test <- resultperm$cluster
+  k       <- 1  # tester sur le premier weather type
+  
+  data_k  <- data_extreme[wt_test == k, , "Precipitation"]
+  j       <- 1
+  x <- data_k[, j]
+  
+  # Doit terminer sans boucle infinie
+  # On sattend soit à un orderNorm ou à un warning/erreur propre
+  setTimeLimit(elapsed = 15, transient = TRUE)
+  
+  result <- orderNorm_all(
+    data        = data_k,
+    j           = j,
+    coordinates = coordinates,
+    left        = qnorm(mean(x == 0)))
+  
+  
+  setTimeLimit(elapsed = Inf, transient = TRUE)
+  expect_true(inherits(result, "orderNorm"))
 })
 
 # Reste a voir le cas ou la donnee est toute egale a zeros.
