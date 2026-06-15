@@ -39,13 +39,15 @@ Download a special release : [![GitHub Release](https://img.shields.io/github/v/
 > create a project using version control with the URL : (SSH) git@github.com:Chair-Geolearning/MSTWeatherGen.git or (HTTPS read only) https://github.com/chair-geolearning/MSTWeatherGen.git
 
 Using git (you need to specify your ssh public key before in github account) :  
+
 ```{bash}
 cd /your/working/directory
 git clone git@github.com:Chair-Geolearning/MSTWeatherGen.git
 cd MSTWeatherGen
 ```
 
-Main commands:
+Main commands:  
+
 ```{bash}
 ## commit all modification
 git commit -a -m "commit message"
