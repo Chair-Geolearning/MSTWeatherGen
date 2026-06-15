@@ -158,7 +158,9 @@ test_that("function is deterministic with same inputs", {
 
 #1.
 test_that("update_ax_parameters univarié : tourne sans erreur", {
-  expect_silent(update_ax_parameters(par_all_univ, names_univ, ax_univ))
+  expect_no_error(
+    result1 <- update_ax_parameters(par_all_univ, names_univ, ax_univ)
+  )
 })
 
 

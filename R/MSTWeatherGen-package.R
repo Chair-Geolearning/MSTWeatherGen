@@ -66,6 +66,7 @@
 "_PACKAGE"
 
 .pkgenv <- new.env(parent = emptyenv())
+.pkgenv$nbcores <- 2L
 
 #' @title Get Package and System Information
 #'
@@ -113,13 +114,28 @@ getCores <- function() {
 setCores <- function(n = NULL) {
   total_cores <- parallel::detectCores()
 
+  # cette option peut être présente
+  # getOption("mc.cores") ou Sys.setenv("MC_CORES" = N)
+  # ainsi que la limite du check CRAN Sys.getenv("_R_CHECK_LIMIT_CORES_")
+  # TODO verifier ces variables
+  # conserver leurs valeurs
+  # sinon on défini à 2L (si possible)
+  # après c'est à l'utilisateur de modifier cette valeur
+
   if (is.na(total_cores)) {
     warning("Could not detect cores. Defaulting to 1 core.")
-    total_cores <- 1
+    total_cores <- 1L
+  }
+
+  # Limit cran , check
+  check_cores <- Sys.getenv("_R_CHECK_LIMIT_CORES_", "")
+
+  if (nzchar(check_cores) && check_cores != "FALSE"){
+    total_cores <- 2L
   }
 
   if (is.null(n)) {
-    .pkgenv$nbcores <- max(1, total_cores - 2)
+    .pkgenv$nbcores <- max(1L, total_cores - 2)
     packageStartupMessage(
       "Number of cores set to ", .pkgenv$nbcores,
       " (total: ", total_cores, ", reserved: 2)"
@@ -131,7 +147,7 @@ setCores <- function(n = NULL) {
       stop("Number of cores must be at least 1")
     }
 
-    n <- max(1, as.integer(n))
+    n <- max(1L, as.integer(n))
 
     if (n > total_cores) {
       warning(
@@ -146,7 +162,7 @@ setCores <- function(n = NULL) {
   }
 
   invisible(.pkgenv$nbcores)
-}
+  }
 
 #' @title Things to do at package attach
 #' @name .onAttach

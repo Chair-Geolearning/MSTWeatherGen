@@ -10,7 +10,7 @@ make_positive_definite(M, epsilon = 1e-06)
 \item{M}{a square, symmetric numeric matrix.}
 
 \item{epsilon}{a small positive numeric threshold below which eigenvalues
-are replaced(default -1e-9).}
+are replaced(default 1e-6).}
 }
 \value{
 a symmetric positive definite corrected matrix of the 

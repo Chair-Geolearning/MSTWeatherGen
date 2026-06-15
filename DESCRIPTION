@@ -24,9 +24,9 @@ Authors@R: c(
     )
 Description: Multivariate and Space-Time Weather Generator package is designed for the simulation of multivariate spatio-temporal meteorological variables. It provides tools for estimating the model parameters and generating synthetic weather data that can be used for a variety of applications, including climate research, agricultural or hydrological modeling.  
 License: GPL (>=3) | file LICENSE
-URL: https://github.com/Chair-Geolearning/MSTWeatherGen,
-     https://chair-Geolearning.github.io/MSTWeatherGen
-BugReports: https://github.com/Chair-Geolearning/MSTWeatherGen/issues
+URL: https://github.com/chair-ceolearning/MSTWeatherGen,
+     https://chair-geolearning.github.io/MSTWeatherGen
+BugReports: https://github.com/chair-geolearning/MSTWeatherGen/issues
 Depends: R (>= 4.0.0)
 Imports: 
     Matrix, stats, PTAk (>= 2.0.0), lubridate (>= 1.9.3), abind (>= 1.4-5),
@@ -44,6 +44,6 @@ Suggests:
 Config/testthat/edition: 3
 VignetteBuilder: knitr, rmarkdown, maps
 Encoding: UTF-8
-RoxygenNote: 7.3.3
 LazyData: true
 Config/Needs/website: rmarkdown, pkgnet, pkgdown
+Config/roxygen2/version: 8.0.0
