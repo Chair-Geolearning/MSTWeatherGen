@@ -1,8 +1,8 @@
 # MSTWeatherGen <img src="man/figures/MSTWeatherGen.png" align="right" alt="" width="120" />
 
 <!-- badges: start -->
-[![Check](https://github.com/Chair-Geolearning/MSTWeatherGen/actions/workflows/r-package-check.yml/badge.svg)](https://github.com/Chair-Geolearning/MSTWeatherGen/actions/workflows/r-package-check.yml)  
-[![GitHub Release](https://img.shields.io/github/v/release/Chair-Geolearning/MSTWeatherGen)]( https://github.com/Chair-Geolearning/MSTWeatherGen/releases)
+[![Check](https://github.com/Chair-Geolearning/MSTWeatherGen/actions/workflows/r-package-check.yml/badge.svg)](https://github.com/Chair-Geolearning/MSTWeatherGen/actions/workflows/r-package-check.yml) 
+[![GitHub Release](https://img.shields.io/github/v/release/Chair-Geolearning/MSTWeatherGen)]( https://github.com/Chair-Geolearning/MSTWeatherGen/releases)  
 <!-- badges: end -->
 
 ## Overview
@@ -34,20 +34,74 @@ Download a special release : [![GitHub Release](https://img.shields.io/github/v/
 
 ### Development
 
+#### Get the package code
+
+> create a project using version control with the URL : (SSH) git@github.com:Chair-Geolearning/MSTWeatherGen.git or (HTTPS read only) https://github.com/chair-geolearning/MSTWeatherGen.git
+
+Using git (you need to specify your ssh public key before in github account) :  
+```{bash}
+cd /your/working/directory
+git clone git@github.com:Chair-Geolearning/MSTWeatherGen.git
+cd MSTWeatherGen
+```
+
+Main commands:
+```{bash}
+## commit all modification
+git commit -a -m "commit message"
+## push (update) github repository
+git push origin <branch>
+## pull (update) to local working directory
+git pull origin <branch>
+```
+
+#### Debug
+
+When changing package code, before using it you need to "reinstall" it.
+
+```
+devtools::load_all()
+```
+
+To active debug mode :  
+
+```
+debug("function_name")
+#debug("MSTWeatherGen::MSTWeatherGen_Estim")
+function_name()
+undebug("function_name")
+```
+
+* n : next step (without enter in function)  
+* s : step into (enter into the function)
+* c : continue until next browser() / breakpoint
+* Q: quit
+* where : stack
+* traceback : who call who 
+
+
+#### Check package
+
+```
+R CMD build .
+# devtools::build()
+
+R CMD check MSTWeatherGen_x.x.x/tar.gz
+# devtools::check()
+```
+
+**Options**   
+
 Active all unit tests set "R_TEST_ALL" global variable to TRUE.
 
 Disable vignette building (that can take to much time) use : ```--no-build-vignettes``` at build and ```--ignore-vignettes``` at check.
 
-```
-devtools::check(args = "--ignore-vignettes",build_args = "--no-build-vignettes")
-```
-
 ## Getting Started
 
-To learn how to use the `{MSTWeatherGen}` package, please refer to the detailed vignette available [here](https://sobakrim.github.io/MSTWeatherGen/articles/MSTWeatherGen.html).
+To learn how to use the `{MSTWeatherGen}` package, please refer to the detailed vignette available [here](https://chair-geolearning.github.io/MSTWeatherGen/articles/MSTWeatherGen.html).
 
 ## Funding
-This work was made possible thanks to the [Geolearning Chair](https://chaire-geolearning.org/) funded by Andra, BNP-Paribas, CCR and the SCOR Foundation for Science. A preliminary version was supported by funding from the French National Research Agency (ANR) as part of the BEYOND project (Contract No. 20-PCPA-0002).
+This work was made possible thanks to the Geolearning Chair (Lien: ) funded by Andra, BNP-Paribas, CCR and the SCOR Foundation for Science. A preliminary version was supported by funding from the French National Research Agency (ANR) as part of the BEYOND project (Contract No. 20-PCPA-0002).
 
 <img alt="Chair Geolearning" src="man/figures/GL-logo-vertical-baseline@4x-100.jpg"  width="120"/> <img alt="Chair Geolearning" src="man/figures/geolearning_andra_logo_W.png"  width="120"/> <img alt="Chair Geolearning" src="man/figures/geolearning_bnp_logo_W.png"  width="120"/> <img alt="Chair Geolearning" src="man/figures/geolearning_ccr_logo_W.png"  width="120"/> 
 <img alt="Chair Geolearning" src="man/figures/geolearning_scor_logo_W.png"  width="120"/>

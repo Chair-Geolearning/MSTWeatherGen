@@ -35,9 +35,9 @@ url: https://cran.r-project.org/package=MSTWeatherGen.
 \seealso{
 Useful links:
 \itemize{
-  \item \url{https://github.com/Chair-Geolearning/MSTWeatherGen}
-  \item \url{https://chair-Geolearning.github.io/MSTWeatherGen}
-  \item Report bugs at \url{https://github.com/Chair-Geolearning/MSTWeatherGen/issues}
+  \item \url{https://github.com/chair-ceolearning/MSTWeatherGen}
+  \item \url{https://chair-geolearning.github.io/MSTWeatherGen}
+  \item Report bugs at \url{https://github.com/chair-geolearning/MSTWeatherGen/issues}
 }
 
 }
