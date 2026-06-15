@@ -32,7 +32,7 @@
 #' @details \tabular{ll}{
 #'          Package: \tab MSTWeatherGen\cr
 #'          Type: \tab Package\cr
-#'          Version: \tab 1.0.1\cr
+#'          Version: \tab 1.0.1.9999\cr
 #'          Date: \tab 2026-15-06\cr
 #'          License: \tab GPL (>=3)\cr
 #'          }
