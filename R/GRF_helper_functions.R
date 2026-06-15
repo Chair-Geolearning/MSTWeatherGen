@@ -144,24 +144,6 @@ update_ax_parameters <- function(par_all, names, ax) {
 #' @keywords internal
 #' @importFrom parallel mclapply
 init_space_par <- function(data, names, h, uh, max_it = 2000) {
-  # Initializes spatial parameters for each variable
-  # by optimizing an initial log-likelihood function (loglik0)
-  
-  # Arguments:
-  #   data: The dataset for which spatial parameters are being initialized. This could be
-  #         a matrix or data frame of observed values across locations.
-  #   names: A vector of variable names for which spatial parameters are to be initialized.
-  #   D: A matrix or data frame containing distances.
-  #   h: Vector of spatial distances used in the likelihood function.
-  #   uh: Matrix containing combined spatial and temporal distances, along with additional data,
-  #       used in the likelihood function.
-  #   par: A list or vector of model parameters that are held fixed during the optimization process.
-  #   max_it: Maximum number of iterations for the optimization process. Default is 2000.
-  
-  # Returns:
-  #   A list of optimized parameters for each variable. Each element in the list corresponds to
-  #   the set of parameters optimized for one of the variables specified in 'names'.
-  
   # Perform parallel optimization for each variable using mclapply
   ncores <- getCores()
 
@@ -382,26 +364,6 @@ optimize_temporal_parameters <- function(par_all, data, names, Vi, uh, cr, max_i
 
 estimation_gf <- function(data, wt_id, max_it, dates, tmax, names, par_all = NULL,
                           coordinates, n1, n2, ax, cr, threshold_precip) {
-  # Estimate geostatistical parameters for spatio-temporal data 
-  
-  # Arguments:
-  #   data: A 3D array of observed values over time and space for multiple variables.
-  #   wt_id: Identifiers for weather types or variables within the dataset.
-  #   max_it: Maximum number of iterations for the optimization process.
-  #   dates: Dates corresponding to the temporal observations in the dataset.
-  #   tmax: Maximum temporal lag to consider in the model.
-  #   names: Names of the variables included in the model.
-  #   fixed_par: Parameters that are held fixed during the optimization process.
-  #   fixed_variable: Variable name that should be fixed during parameter estimation.
-  #   par_all: Initial or current set of all model parameters.
-  #   coordinates: Coordinates for the spatial locations in the dataset.
-  #   n1, n2: Parameters defining the granularity of spatial index pairs.
-  #   ax: Precomputed correction terms for the covariance matrix.
-  #   cr: Initial correlation matrix for the variables.
-  #   threshold_precip: Threshold values for precipitation to be used in preprocessing.
-  
-  # Returns:
-  # The optimal parameters 
   
   # Dimensions of the data
   Nt <- dim(data)[1]  # Number of time points
