@@ -36,9 +36,11 @@ Matern <- function(h, r, v) {
 #' @return Numeric vector of covariance values calculated using Gneiting's model.
 #'
 #' @keywords internal
-Gneiting <- function(h, u, par, dij) {
+Gneiting <- function(h, u, par, rho2ij) {
+  # Same function as Gneiting, but with new names for variables
+  
   if (!is.numeric(par)) par <- as.numeric(par)
-
+  
   # Unpack parameters from the 'par' vector for clarity.
   a1 <- par[1]
   d1 <- par[2]
@@ -52,46 +54,55 @@ Gneiting <- function(h, u, par, dij) {
   b2 <- par[10]
   e2 <- par[11]
   l2 <- par[12]
-  c <- par[13]
-  f <- par[14]
-  m <- par[15]
-  ai <- par[16]
-  aj <- par[17]
-  bi <- par[18]
-  bj <- par[19]
-  ci <- par[20]
-  cj <- par[21]
-  rii <- par[22]
-  rjj <- par[23]
-  vii <- par[24]
-  vjj <- par[25]
-  # ax : correction term ?
-  ax <- par[26]
-
+  c  <- par[13]
+  f  <- par[14]
+  m  <- par[15]
+  Ai <- par[16]
+  Aj <- par[17]
+  Bi <- par[18]
+  Bj <- par[19]
+  Ci <- par[20]
+  Cj <- par[21]
+  
+  aii  <- par[22]
+  ajj  <- par[23]
+  nuii <- par[24]
+  nujj <- par[25]
+  
+  beta1ij <- par[26]  # ax : covariance for temporal component
+  
   # Calculated intermediate parameters for the covariance calculation.
-
+  
   # Details : Paper : See equation 10
-  vij <- (vii + vjj) / 2
-  rij <- sqrt((rii^2 + rjj^2) / 2)
-
-  # Details : Paper : See equation 10
-  eij <- dij * ((rii^vii * rjj^vjj) / rij^(2 * vij)) *
-    (gamma(vij) / (gamma(vii)^(1 / 2) * gamma(vjj)^(1 / 2))) *
-    sqrt((1 - ai^2) * (1 - aj^2)) * sqrt((1 - bi^2) * (1 - bj^2))
-
+  # Cross parameters of the Matern function
+  nuij <- (nuii + nujj) / 2
+  aij  <- sqrt((aii^2 + ajj^2) / 2)
+  
   # Details : Paper : See equation 10 Variogram
-  muij <- (((a1 * abs(u))^(2 * b1) + 1)^(c) - (ai * aj * ((a2 * abs(u))^(2 * b2) + 1)^(-c)))
+  # Temporal pseudo, \eta_{ij}
+  etaij <- ((a1 * abs(u))^(2 * b1) + 1)^c -
+    (Ai * Aj * ((a2 * abs(u))^(2 * b2) + 1)^(-c))
+  
   # Details : Additional Temporal attenuation
-  rhoij <- 1 / (((d1 * abs(u))^(2 * e1) + 1)^(f) - (bi * bj * ((d2 * abs(u))^(2 * e2) + 1)^(-f)))
-
-  A1 <- eij 
+  eta2ij <- ((d1 * abs(u))^(2 * e1) + 1)^f -
+    (Bi * Bj * ((d2 * abs(u))^(2 * e2) + 1)^(-f))
   
-  A2 <- rhoij *  Matern(abs(h), r = (rij^2 / muij)^(1 / 2), v = vij) / muij
+  # Details : Paper : See equation 10
+  beta2ij <- rho2ij *
+    ((aii^nuii * ajj^nujj) / aij^(2 * nuij)) *
+    (gamma(nuij) / (gamma(nuii)^(1 / 2) * gamma(nujj)^(1 / 2))) *
+    sqrt((1 - Ai^2) * (1 - Aj^2)) *
+    sqrt((1 - Bi^2) * (1 - Bj^2))
   
-  # A3 : Additional Temporal Term
-  A3 <- ax * 1 / (((g1 * abs(u))^(2 * l1) + 1)^(m) - ci * cj * ((g2 * abs(u))^(2 * l2) + 1)^(-m))
-
-  return(A1 * A2 + A3)
+  SpatioTemp <- Matern(abs(h), r = sqrt(aij^2 / etaij), v = nuij) / (etaij * eta2ij)
+  
+  # Temp : temporal component only (the term present in the paper)
+  Temp <- 1 / (
+    ((g1 * abs(u))^(2 * l1) + 1)^m -
+      Ci * Cj * ((g2 * abs(u))^(2 * l2) + 1)^(-m)
+  )
+  
+  return(beta2ij * SpatioTemp + beta1ij * Temp)
 }
 
 #' @title Construct Covariance Parameters DataFrame
