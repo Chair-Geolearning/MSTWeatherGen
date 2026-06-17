@@ -225,7 +225,7 @@ compute_beta <- function(parm, names, cr) {
       par <- get_parameters(v1, v2) # Retrieve parameters for the current pair
 
       # Calculate the correlation coefficient using the Gneiting function and correction term
-      cc <- Gneiting(0, 0, par, dij = 1) # Gneiting function calculation for the pair
+      cc <- Gneiting(0, 0, par, rho2ij = 1) # Gneiting function calculation for the pair
       ax <- par[26] / (1 - par[20] * par[21]) # Correction term calculation
       beta_val <- (cr[v1, v2]) / (cc - ax) # Adjusted correlation coefficient
 
@@ -476,7 +476,7 @@ loglik <- function(par, parms, par_all, data, names, Vi, h, u, uh, ep, cr) {
           return(-abs(rnorm(1)) * 1e+20)
         } else {
           # Calculate pairwise log-likelihood using Gneiting function and parameter adjustments.
-          cij <- Gneiting(h = h, u = u, par = par, dij = beta[Vi[v, 1], Vi[v, 2]])
+          cij <- Gneiting(h = h, u = u, par = par, rho2ij = beta[Vi[v, 1], Vi[v, 2]])
           delta <- 1 - cij^2
           v1 <- data[, , Vi[v, 1]]
           v1 <- v1[cbind(uh[, 3], uh[, 5])]
@@ -534,7 +534,7 @@ loglik <- function(par, parms, par_all, data, names, Vi, h, u, uh, ep, cr) {
           return(-abs(rnorm(1)) * 1e+20)
         } else {
           # Calculate pairwise log-likelihood using Gneiting function and parameter adjustments.
-          cij <- Gneiting(h = h, u = u, par = par, dij = beta[Vi[v, 1], Vi[v, 2]])
+          cij <- Gneiting(h = h, u = u, par = par, rho2ij = beta[Vi[v, 1], Vi[v, 2]])
           delta <- 1 - cij^2
           v1 <- data[, , Vi[v, 1]]
           v1 <- v1[cbind(uh[, 3], uh[, 5])]
