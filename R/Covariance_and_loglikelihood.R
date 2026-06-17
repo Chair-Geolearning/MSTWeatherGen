@@ -31,7 +31,7 @@ Matern <- function(h, r, v) {
 #' @param h Numeric vector of spatial distances.
 #' @param u Numeric vector of temporal distances.
 #' @param par Numeric vector of parameters for the covariance function.
-#' @param dij Correlation parameter between variables i and j.
+#' @param rho2ij Correlation parameter between variables i and j.
 #'
 #' @return Numeric vector of covariance values calculated using Gneiting's model.
 #'
@@ -354,7 +354,7 @@ loglik_pair <- function(par, parms, pair, par_all, data, names, Vi, h, u, uh, ep
       return(abs(rnorm(1)) * 1e+20)
     } else {
       # Compute covariance for the pair
-      cij <- Gneiting(h = h, u = u, par = par, dij = beta[sp[1], sp[2]])
+      cij <- Gneiting(h = h, u = u, par = par, rho2ij = beta[sp[1], sp[2]])
       delta <- 1 - cij^2
       # Extract observed values for the pair from 'data'
       v1 <- data[, , Vi[v, 1]]
@@ -773,8 +773,8 @@ cov_matrices <- function(par, coordinates, names, M) {
       cp_v2 <- lapply(names, function(v2) {
         # Retrieve parameters for the current pair of variables and calculate covariance
         cov_params <- par[(par$v1 == v1 & par$v2 == v2) | (par$v2 == v1 & par$v1 == v2), -c(1, 2)]
-        dij <- par$dij[(par$v1 == v1 & par$v2 == v2) | (par$v2 == v1 & par$v1 == v2)]
-        cov <- Gneiting(h, u, cov_params, dij)
+        rho2ij <- par$dij[(par$v1 == v1 & par$v2 == v2) | (par$v2 == v1 & par$v1 == v2)]
+        cov <- Gneiting(h, u, cov_params, rho2ij)
 
         # Filter to the current time point and reshape the covariance values into a matrix
         up <- (d$t1 == t1) & (d$t2 == 1)
