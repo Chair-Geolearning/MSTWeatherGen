@@ -252,7 +252,7 @@ compute_beta <- function(parm, names, cr) {
 #' @keywords internal
 
 
-compute_ax <- function(parm, names) {
+extract_ax <- function(parm, names) {
   ax <- sapply(names, function(v1) {
     sapply(names, function(v2) {
       ax <- parm$ax[parm$v1 == v1 & parm$v2 == v2 | parm$v1 == v2 & parm$v2 == v1]
@@ -328,7 +328,7 @@ loglik_pair <- function(par, parms, pair, par_all, data, names, Vi, h, u, uh, ep
 
   # Update and compute model parameters
   parm <- param(par, names)
-  ax <- Matrix::nearPD(compute_ax(parm, names))$mat # Compute ax correction terms
+  ax <- Matrix::nearPD(extract_ax(parm, names))$mat # Compute ax correction terms
   beta <- try(compute_beta(parm, names, cr), silent = T) # Compute beta coefficients
 
   # Attempt Cholesky decompositions for 'ax' and 'beta', checking for positive definiteness
@@ -448,8 +448,8 @@ loglik <- function(par, parms, par_all, data, names, Vi, h, u, uh, ep, cr) {
   par_all[parms] <- par # Update specified parameters.
 
   parm <- param(par_all, names)
-  # ax <- Matrix::nearPD(compute_ax(parm, names))$mat  # Compute ax correction terms
-  parm <- param(update_ax_parameters(par_all, names, compute_ax(parm, names)), names)
+  # ax <- Matrix::nearPD(extract_ax(parm, names))$mat  # Compute ax correction terms
+  parm <- param(update_ax_parameters(par_all, names, extract_ax(parm, names)), names)
   beta <- try(compute_beta(parm, names, cr), silent = T) # Compute beta coefficients
   # Attempt Cholesky decomposition to ensure positive definiteness.
   # ae <- try(chol(ax), silent = TRUE)
@@ -734,7 +734,6 @@ spacetime_cov <- function(data, wt_id, locations, ds = NULL, dates, lagstime, di
       return(cov(x1[cbind(ide[, 1], idxe[, 1])], x2[cbind(ide[, 2], idxe[, 2])]) / sqrt(c1 * c2))
     })
 
-    # Data frame with lag time, distances, and corresponding covariance values
     return(data.frame(lagtime = u, dist = dist, cov = cv))
   })
 

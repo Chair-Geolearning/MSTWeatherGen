@@ -35,7 +35,7 @@ par_all_TEST <- initialize_par_all_if_missing(
   ax = ax,
   cr = cr
 )
-par_all_TEST_updated <- update_ax_parameters(par_all_TEST, names, compute_ax(param(par_all_TEST, names), names))
+par_all_TEST_updated <- update_ax_parameters(par_all_TEST, names, extract_ax(param(par_all_TEST, names), names))
 
 # Setup univarié
 names_univ   <- "Temp_max"

@@ -4,7 +4,7 @@
 \alias{Gneiting}
 \title{Gneiting's Spatio-Temporal Covariance Model}
 \usage{
-Gneiting(h, u, par, dij)
+Gneiting(h, u, par, rho2ij)
 }
 \arguments{
 \item{h}{Numeric vector of spatial distances.}
@@ -13,7 +13,7 @@ Gneiting(h, u, par, dij)
 
 \item{par}{Numeric vector of parameters for the covariance function.}
 
-\item{dij}{Correlation parameter between variables i and j.}
+\item{rho2ij}{Correlation parameter between variables i and j.}
 }
 \value{
 Numeric vector of covariance values calculated using Gneiting's model.
