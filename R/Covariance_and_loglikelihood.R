@@ -171,7 +171,7 @@ param <- function(par, names) {
   }
   return(u)
 }
-#' @title Compute Beta Correlations
+#' @title Compute rho2ij Correlations
 #'
 #' @description
 #' This function calculates the beta correlation coefficients between variables based on the Gneiting function, adjusted for a correction term. It is intended for internal use within package functions to adjust initial correlation values using specified parameters.
@@ -329,14 +329,14 @@ loglik_pair <- function(par, parms, pair, par_all, data, names, Vi, h, u, uh, ep
   # Update and compute model parameters
   parm <- param(par, names)
   ax <- Matrix::nearPD(extract_ax(parm, names))$mat # Compute ax correction terms
-  beta <- try(compute_rho2ij(parm, names, cr), silent = T) # Compute beta coefficients
+  rho2ij <- try(compute_rho2ij(parm, names, cr), silent = T) # Compute rho2ij coefficients
 
-  # Attempt Cholesky decompositions for 'ax' and 'beta', checking for positive definiteness
+  # Attempt Cholesky decompositions for 'ax' and 'rho2ij', checking for positive definiteness
   ae <- try(chol(ax), silent = TRUE)
-  be <- try(chol(beta), silent = TRUE)
+  be <- try(chol(rho2ij), silent = TRUE)
 
   if (!is.character(be) & (!is.character(ae))) {
-    # Proceed if both 'ax' and 'beta' matrices are valid for further computations
+    # Proceed if both 'ax' and 'rho2ij' matrices are valid for further computations
 
     # Map parameters to each variable pair in 'Vi'
     parmm <- lapply(1:nrow(Vi), function(v) {
@@ -450,10 +450,10 @@ loglik <- function(par, parms, par_all, data, names, Vi, h, u, uh, ep, cr) {
   parm <- param(par_all, names)
   # ax <- Matrix::nearPD(extract_ax(parm, names))$mat  # Compute ax correction terms
   parm <- param(update_ax_parameters(par_all, names, extract_ax(parm, names)), names)
-  beta <- try(compute_rho2ij(parm, names, cr), silent = T) # Compute rho2ij coefficients
+  rho2ij <- try(compute_rho2ij(parm, names, cr), silent = T) # Compute rho2ij coefficients
   # Attempt Cholesky decomposition to ensure positive definiteness.
   # ae <- try(chol(ax), silent = TRUE)
-  be <- try(chol(beta), silent = TRUE)
+  be <- try(chol(rho2ij), silent = TRUE)
 
   if (!is.character(be)) {
     # Proceed if both 'ax' and 'rho2ij' matrices are valid for further computations.
@@ -476,7 +476,7 @@ loglik <- function(par, parms, par_all, data, names, Vi, h, u, uh, ep, cr) {
           return(-abs(rnorm(1)) * 1e+20)
         } else {
           # Calculate pairwise log-likelihood using Gneiting function and parameter adjustments.
-          cij <- Gneiting(h = h, u = u, par = par, rho2ij = beta[Vi[v, 1], Vi[v, 2]])
+          cij <- Gneiting(h = h, u = u, par = par, rho2ij = rho2ij[Vi[v, 1], Vi[v, 2]])
           delta <- 1 - cij^2
           v1 <- data[, , Vi[v, 1]]
           v1 <- v1[cbind(uh[, 3], uh[, 5])]
@@ -534,7 +534,7 @@ loglik <- function(par, parms, par_all, data, names, Vi, h, u, uh, ep, cr) {
           return(-abs(rnorm(1)) * 1e+20)
         } else {
           # Calculate pairwise log-likelihood using Gneiting function and parameter adjustments.
-          cij <- Gneiting(h = h, u = u, par = par, rho2ij = beta[Vi[v, 1], Vi[v, 2]])
+          cij <- Gneiting(h = h, u = u, par = par, rho2ij = rho2ij[Vi[v, 1], Vi[v, 2]])
           delta <- 1 - cij^2
           v1 <- data[, , Vi[v, 1]]
           v1 <- v1[cbind(uh[, 3], uh[, 5])]
