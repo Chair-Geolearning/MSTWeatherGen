@@ -433,7 +433,7 @@ loglik_pair <- function(par, parms, pair, par_all, data, names, Vi, h, u, uh, ep
 #' @param uh Combined matrix of spatial and temporal distances with additional identifiers.
 #' @param ep Data frame defining variable pairs for analysis.
 #' @param cr Initial correlation matrix across variables.
-#  beta: Precomputed beta coefficients matrix for all pairs.
+#  rho2ij: Precomputed rho2ij cross-correlation matrix for all pairs.
 #'
 #' @return Total log-likelihood value for the observed data given the current model parameters.
 #'

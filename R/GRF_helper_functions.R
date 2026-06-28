@@ -67,7 +67,7 @@ initialize_par_all_if_missing <- function(par_all, names, pairs, par_s, ax, cr) 
   par_all <- update_ax_parameters(par_all, names, ax)
 
   parm <- param(par_all, names)
-  beta <- try(compute_beta(parm, names, cr), silent = T)
+  beta <- try(compute_rho2ij(parm, names, cr), silent = T)
   ch <- try(chol(beta), silent = T)
   if (is.character(ch)) {
     par_s <- matrix(rep(1, length(names)^2), ncol = length(names), nrow = length(names))
@@ -430,7 +430,7 @@ estimation_gf <- function(data, wt_id, max_it, dates, tmax, names, par_all = NUL
   # Construct parameter and beta matrices
   par_all <- update_ax_parameters(par_all, names, extract_ax(param(par_all, names), names))
   parm <- param(par_all, names)
-  beta <- compute_beta(parm, names, cr)
+  beta <- compute_rho2ij(parm, names, cr)
   beta <- sapply(1:nrow(ep), function(i) beta[ep[i, 1], ep[i, 2]])
   par_all[1:length(beta)] <- beta
   parm <- param(par_all, names)
