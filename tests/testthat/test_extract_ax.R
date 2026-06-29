@@ -100,5 +100,5 @@ test_that("extract_ax univarié (length(names)==1) retourne une matrice", {
 #6.
 test_that("extract_ax univarié : la valeur est préservée", {
   result <- extract_ax(parm_univ, names_univ)
-  expect_equal(result[1, 1], parm_univ$ax)
+  expect_equal(result[1, 1], parm_univ$beta1ij)
 })
