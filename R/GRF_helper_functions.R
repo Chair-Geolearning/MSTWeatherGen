@@ -45,20 +45,20 @@ initialize_par_all_if_missing <- function(par_all, names, pairs, par_s, ax, cr) 
   # Initialize the `par_all` vector if it is missing, with default values or using `par_s`
   if (is.null(par_all)) {
     names_par_all <- c(
-      paste(pairs, "dij", sep = ":"), "a1", "d1", "g1", "a2", "d2", "g2",
+      paste(pairs, "rho2ij", sep = ":"), "a1", "d1", "g1", "a2", "d2", "g2",
       "b1", "e1", "l1", "b2", "e2", "l2", "c", "f", "m",
-      paste(names, "ai", sep = ":"), paste(names, "bi", sep = ":"),
-      paste(names, "ci", sep = ":"),
-      paste(pairs, "rij", sep = ":"), paste(pairs, "vij", sep = ":"),
-      paste(pairs, "ax", sep = ":")
+      paste(names, "Ai", sep = ":"), paste(names, "Bi", sep = ":"),
+      paste(names, "Ci", sep = ":"),
+      paste(pairs, "aii", sep = ":"), paste(pairs, "nuii", sep = ":"),
+      paste(pairs, "beta1ij", sep = ":")
     )
 
     par_all <- setNames(rep(0.1, length(names_par_all)), names_par_all)
 
-    par_all[paste(pairs, "dij", sep = ":")] <- 1
-    par_all[paste(pairs[1:length(names)], "rij", sep = ":")] <- par_s[1, ]
-    par_all[paste(pairs[1:length(names)], "vij", sep = ":")] <- par_s[2, ]
-    par_all[paste(pairs, "ax", sep = ":")] <- 0
+    par_all[paste(pairs, "rho2ij", sep = ":")] <- 1
+    par_all[paste(pairs[1:length(names)], "aii", sep = ":")] <- par_s[1, ]
+    par_all[paste(pairs[1:length(names)], "nuii", sep = ":")] <- par_s[2, ]
+    par_all[paste(pairs, "beta1ij", sep = ":")] <- 0
     parms <- c("a1", "a2", "d1", "d2", "g1", "g2")
     par_all[parms] <- rep(1, length(parms))
   }
@@ -67,12 +67,12 @@ initialize_par_all_if_missing <- function(par_all, names, pairs, par_s, ax, cr) 
   par_all <- update_ax_parameters(par_all, names, ax)
 
   parm <- param(par_all, names)
-  beta <- try(compute_rho2ij(parm, names, cr), silent = T)
-  ch <- try(chol(beta), silent = T)
+  rho2ij <- try(compute_rho2ij(parm, names, cr), silent = T)
+  ch <- try(chol(rho2ij), silent = T)
   if (is.character(ch)) {
     par_s <- matrix(rep(1, length(names)^2), ncol = length(names), nrow = length(names))
-    par_all[paste(pairs[1:length(names)], "rij", sep = ":")] <- 1
-    par_all[paste(pairs[1:length(names)], "vij", sep = ":")] <- 1
+    par_all[paste(pairs[1:length(names)], "aii", sep = ":")] <- 1
+    par_all[paste(pairs[1:length(names)], "nuii", sep = ":")] <- 1
     par_all <- update_ax_parameters(par_all, names, ax)
   }
   return(par_all)
@@ -98,13 +98,13 @@ update_ax_parameters <- function(par_all, names, ax) {
   if (!is.matrix(ax)) {
     for (v1 in names) {
       for (v2 in names) {
-        par_all[paste(paste(v1, v2, sep = "-"), "ax", sep = ":")] <- ax$cov[ax$v1 == v1 & ax$v2 == v2 | ax$v2 == v1 & ax$v1 == v2]
+        par_all[paste(paste(v1, v2, sep = "-"), "beta1ij", sep = ":")] <- ax$cov[ax$v1 == v1 & ax$v2 == v2 | ax$v2 == v1 & ax$v1 == v2]
       }
     }
     a <- sapply(names, function(v1) {
       sapply(names, function(v2) {
-        ax <- par_all[paste(paste(v1, v2, sep = "-"), "ax", sep = ":")]
-        if (is.na(ax)) ax <- par_all[paste(paste(v2, v1, sep = "-"), "ax", sep = ":")]
+        ax <- par_all[paste(paste(v1, v2, sep = "-"), "beta1ij", sep = ":")]
+        if (is.na(ax)) ax <- par_all[paste(paste(v2, v1, sep = "-"), "beta1ij", sep = ":")]
         return(ax)
       })
     })
@@ -124,7 +124,7 @@ update_ax_parameters <- function(par_all, names, ax) {
   colnames(ax) <- rownames(ax) <- names
   for (v1 in names) {
     for (v2 in names) {
-      par_all[paste(paste(v1, v2, sep = "-"), "ax", sep = ":")] <- ax[v1, v2]
+      par_all[paste(paste(v1, v2, sep = "-"), "beta1ij", sep = ":")] <- ax[v1, v2]
     }
   }
   return(par_all)
@@ -226,9 +226,9 @@ init_space_par <- function(data, names, h, uh, max_it = 2000) {
 optimize_spatial_parameters <- function(par_all, data, names, Vi, uh, cr, max_it, ep) {
   pairs <- paste(ep[, 1], ep[, 2], sep = "-")
   parms <- c(
-    paste(pairs, "ax", sep = ":"), paste(names, "ci", sep = ":"),
-    paste(pairs[1:length(names)], "rij", sep = ":"),
-    paste(pairs[1:length(names)], "vij", sep = ":")
+    paste(pairs, "beta1ij", sep = ":"), paste(names, "Ci", sep = ":"),
+    paste(pairs[1:length(names)], "aii", sep = ":"),
+    paste(pairs[1:length(names)], "nuii", sep = ":")
   )
   optimized_par <- optim(par_all[parms],
     fn = loglik, data = data, parms = parms,
@@ -347,8 +347,8 @@ optimize_temporal_parameters <- function(par_all, data, names, Vi, uh, cr, max_i
   parms <- c(
     "a1", "d1", "g1", "a2", "d2", "g2",
     "b1", "e1", "l1", "b2", "e2", "l2", "c", "f", "m",
-    paste(names, "ai", sep = ":"), paste(names, "bi", sep = ":"),
-    paste(names, "ci", sep = ":")
+    paste(names, "Ai", sep = ":"), paste(names, "Bi", sep = ":"),
+    paste(names, "Ci", sep = ":")
   )
   optimized_par <- optim(par_all[parms],
     fn = loglik, data = data, parms = parms,

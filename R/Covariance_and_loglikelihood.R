@@ -150,24 +150,24 @@ param <- function(par, names) {
   # Loop through each pair to populate the data frame with corresponding parameter values
   for (i in seq_len(J)) {
     # Extract and assign specific parameters for each pair based on naming convention
-    u$ai[i] <- par[paste(u$v1[i], "ai", sep = ":")]
-    u$aj[i] <- par[paste(u$v2[i], "ai", sep = ":")]
+    u$Ai[i] <- par[paste(u$v1[i], "Ai", sep = ":")]
+    u$Aj[i] <- par[paste(u$v2[i], "Ai", sep = ":")]
 
-    u$bi[i] <- par[paste(u$v1[i], "bi", sep = ":")]
-    u$bj[i] <- par[paste(u$v2[i], "bi", sep = ":")]
+    u$Bi[i] <- par[paste(u$v1[i], "Bi", sep = ":")]
+    u$Bj[i] <- par[paste(u$v2[i], "Bi", sep = ":")]
 
-    u$ci[i] <- par[paste(u$v1[i], "ci", sep = ":")]
-    u$cj[i] <- par[paste(u$v2[i], "ci", sep = ":")]
+    u$Ci[i] <- par[paste(u$v1[i], "Ci", sep = ":")]
+    u$Cj[i] <- par[paste(u$v2[i], "Ci", sep = ":")]
 
-    u$rii[i] <- par[paste(paste(u$v1[i], u$v1[i], sep = "-"), "rij", sep = ":")]
-    u$rjj[i] <- par[paste(paste(u$v2[i], u$v2[i], sep = "-"), "rij", sep = ":")]
+    u$aii[i] <- par[paste(paste(u$v1[i], u$v1[i], sep = "-"), "aii", sep = ":")]
+    u$ajj[i] <- par[paste(paste(u$v2[i], u$v2[i], sep = "-"), "aii", sep = ":")]
 
-    u$vii[i] <- par[paste(paste(u$v1[i], u$v1[i], sep = "-"), "vij", sep = ":")]
-    u$vjj[i] <- par[paste(paste(u$v2[i], u$v2[i], sep = "-"), "vij", sep = ":")]
+    u$nuii[i] <- par[paste(paste(u$v1[i], u$v1[i], sep = "-"), "nuii", sep = ":")]
+    u$nujj[i] <- par[paste(paste(u$v2[i], u$v2[i], sep = "-"), "nuii", sep = ":")]
 
-    u$ax[i] <- par[paste(paste(u$v1[i], u$v2[i], sep = "-"), "ax", sep = ":")]
+    u$beta1ij[i] <- par[paste(paste(u$v1[i], u$v2[i], sep = "-"), "beta1ij", sep = ":")]
 
-    u$dij[i] <- par[paste(paste(u$v1[i], u$v2[i], sep = "-"), "dij", sep = ":")]
+    u$rho2ij[i] <- par[paste(paste(u$v1[i], u$v2[i], sep = "-"), "rho2ij", sep = ":")]
   }
   return(u)
 }
@@ -255,7 +255,7 @@ compute_rho2ij <- function(parm, names, cr) {
 extract_ax <- function(parm, names) {
   ax <- sapply(names, function(v1) {
     sapply(names, function(v2) {
-      ax <- parm$ax[parm$v1 == v1 & parm$v2 == v2 | parm$v1 == v2 & parm$v2 == v1]
+      ax <- parm$beta1ij[parm$v1 == v1 & parm$v2 == v2 | parm$v1 == v2 & parm$v2 == v1]
       return(ax)
     })
   })
@@ -772,7 +772,7 @@ cov_matrices <- function(par, coordinates, names, M) {
       cp_v2 <- lapply(names, function(v2) {
         # Retrieve parameters for the current pair of variables and calculate covariance
         cov_params <- par[(par$v1 == v1 & par$v2 == v2) | (par$v2 == v1 & par$v1 == v2), -c(1, 2)]
-        rho2ij <- par$dij[(par$v1 == v1 & par$v2 == v2) | (par$v2 == v1 & par$v1 == v2)]
+        rho2ij <- par$rho2ij[(par$v1 == v1 & par$v2 == v2) | (par$v2 == v1 & par$v1 == v2)]
         cov <- Gneiting(h, u, cov_params, rho2ij)
 
         # Filter to the current time point and reshape the covariance values into a matrix
