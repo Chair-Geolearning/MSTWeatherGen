@@ -88,17 +88,17 @@ test_that("matrix input values are correctly assigned", {
 
   result <- update_ax_parameters(par_all_TEST, names, ax_matrix)
 
-  expect_equal(unname(result["Precipitation-Precipitation:ax"]), 1.0)
-  expect_equal(unname(result["Wind-Wind:ax"]), 1.0)
-  expect_equal(unname(result["Temp_max-Temp_max:ax"]), 1.0)
+  expect_equal(unname(result["Precipitation-Precipitation:beta1ij"]), 1.0)
+  expect_equal(unname(result["Wind-Wind:beta1ij"]), 1.0)
+  expect_equal(unname(result["Temp_max-Temp_max:beta1ij"]), 1.0)
 
-  expect_equal(unname(result["Precipitation-Wind:ax"]), 0.5)
-  expect_equal(unname(result["Wind-Temp_max:ax"]), 0.5)
-  expect_equal(unname(result["Precipitation-Temp_max:ax"]), 0.5)
+  expect_equal(unname(result["Precipitation-Wind:beta1ij"]), 0.5)
+  expect_equal(unname(result["Wind-Temp_max:beta1ij"]), 0.5)
+  expect_equal(unname(result["Precipitation-Temp_max:beta1ij"]), 0.5)
 
-  expect_equal(unname(result["Wind-Precipitation:ax"]), 0.5)
-  expect_equal(unname(result["Temp_max-Wind:ax"]), 0.5)
-  expect_equal(unname(result["Temp_max-Precipitation:ax"]), 0.5)
+  expect_equal(unname(result["Wind-Precipitation:beta1ij"]), 0.5)
+  expect_equal(unname(result["Temp_max-Wind:beta1ij"]), 0.5)
+  expect_equal(unname(result["Temp_max-Precipitation:beta1ij"]), 0.5)
 })
 
 # 2.
