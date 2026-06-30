@@ -449,7 +449,7 @@ loglik <- function(par, parms, par_all, data, names, Vi, h, u, uh, ep, cr) {
 
   parm <- param(par_all, names)
   # beta1ij <- Matrix::nearPD(extract_ax(parm, names))$mat  # Compute ax correction terms
-  parm <- param(update_beta1ij_parameters(par_all, names, extract_ax(parm, names)), names)
+  parm <- param(update_beta1ij_parameters(par_all, names, extract_beta1ij(parm, names)), names)
   rho2ij <- try(compute_rho2ij(parm, names, cr), silent = T) # Compute rho2ij coefficients
   # Attempt Cholesky decomposition to ensure positive definiteness.
   # ae <- try(chol(beta1ij), silent = TRUE)
