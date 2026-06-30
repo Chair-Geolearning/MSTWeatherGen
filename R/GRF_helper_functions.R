@@ -428,7 +428,7 @@ estimation_gf <- function(data, wt_id, max_it, dates, tmax, names, par_all = NUL
   }
 
   # Construct parameter and beta matrices
-  par_all <- update_beta1ij_parameters(par_all, names, extract_ax(param(par_all, names), names))
+  par_all <- update_beta1ij_parameters(par_all, names, extract_beta1ij(param(par_all, names), names))
   parm <- param(par_all, names)
   beta <- compute_rho2ij(parm, names, cr)
   beta <- sapply(1:nrow(ep), function(i) beta[ep[i, 1], ep[i, 2]])
