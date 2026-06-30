@@ -238,30 +238,30 @@ compute_rho2ij <- function(parm, names, cr) {
 #' @title Extract Correction Terms Matrix
 #'
 #' @description
-#' Extracts a matrix of correction terms ('ax') for each pair of variables based on the model parameters provided in 'parm'. Designed for internal use to facilitate calculations involving correction terms in spatial or spatio-temporal modeling.
+#' Extracts a matrix of correction terms ('beta1ij') for each pair of variables based on the model parameters provided in 'parm'. Designed for internal use to facilitate calculations involving correction terms in spatial or spatio-temporal modeling.
 #'
 #' @details
 #' This function implements the methods described in Sections 2.4 in Equation 8 of the article
 #' \strong{Stochastic Environmental Research and Risk Assessment, 2025} (DOI: 10.1007/s00477-024-02897-8).
 #'
-#' @param parm A data frame or list containing the model parameters, including 'ax' values.
+#' @param parm A data frame or list containing the model parameters, including 'beta1ij' values.
 #' @param names Character vector specifying the variable names for which correction terms are to be calculated.
 #'
-#' @return A square matrix where each element [i, j] represents the correction term ('ax') between the ith and jth variables, facilitating the adjustment of correlations or covariances between them.
+#' @return A square matrix where each element [i, j] represents the correction term ('beta1ij') between the ith and jth variables, facilitating the adjustment of correlations or covariances between them.
 #'
 #' @keywords internal
 
 
-extract_ax <- function(parm, names) {
-  ax <- sapply(names, function(v1) {
+extract_beta1ij <- function(parm, names) {
+  beta1ij <- sapply(names, function(v1) {
     sapply(names, function(v2) {
-      ax <- parm$beta1ij[parm$v1 == v1 & parm$v2 == v2 | parm$v1 == v2 & parm$v2 == v1]
-      return(ax)
+      beta1ij <- parm$beta1ij[parm$v1 == v1 & parm$v2 == v2 | parm$v1 == v2 & parm$v2 == v1]
+      return(beta1ij)
     })
   })
-  ax <- matrix(ax, nrow = length(names), ncol = length(names))  # ← forcer matrice
-  rownames(ax) <- colnames(ax) <- names
-  return(ax)
+  beta1ij <- matrix(beta1ij, nrow = length(names), ncol = length(names))  # ← forcer matrice
+  rownames(beta1ij) <- colnames(beta1ij) <- names
+  return(beta1ij)
 }
 #' @title Extract Beta Coefficients Matrix
 #'
@@ -328,15 +328,15 @@ loglik_pair <- function(par, parms, pair, par_all, data, names, Vi, h, u, uh, ep
 
   # Update and compute model parameters
   parm <- param(par, names)
-  ax <- Matrix::nearPD(extract_ax(parm, names))$mat # Compute ax correction terms
+  beta1ij_mat <- Matrix::nearPD(extract_beta1ij(parm, names))$mat # Compute ax correction terms
   rho2ij <- try(compute_rho2ij(parm, names, cr), silent = T) # Compute rho2ij coefficients
 
-  # Attempt Cholesky decompositions for 'ax' and 'rho2ij', checking for positive definiteness
-  ae <- try(chol(ax), silent = TRUE)
+  # Attempt Cholesky decompositions for 'beta1ij_mat' and 'rho2ij', checking for positive definiteness
+  ae <- try(chol(beta1ij_mat), silent = TRUE)
   be <- try(chol(rho2ij), silent = TRUE)
 
   if (!is.character(be) & (!is.character(ae))) {
-    # Proceed if both 'ax' and 'rho2ij' matrices are valid for further computations
+    # Proceed if both 'beta1ij' and 'rho2ij' matrices are valid for further computations
 
     # Map parameters to each variable pair in 'Vi'
     parmm <- lapply(1:nrow(Vi), function(v) {
@@ -448,15 +448,15 @@ loglik <- function(par, parms, par_all, data, names, Vi, h, u, uh, ep, cr) {
   par_all[parms] <- par # Update specified parameters.
 
   parm <- param(par_all, names)
-  # ax <- Matrix::nearPD(extract_ax(parm, names))$mat  # Compute ax correction terms
-  parm <- param(update_ax_parameters(par_all, names, extract_ax(parm, names)), names)
+  # beta1ij <- Matrix::nearPD(extract_ax(parm, names))$mat  # Compute ax correction terms
+  parm <- param(update_beta1ij_parameters(par_all, names, extract_ax(parm, names)), names)
   rho2ij <- try(compute_rho2ij(parm, names, cr), silent = T) # Compute rho2ij coefficients
   # Attempt Cholesky decomposition to ensure positive definiteness.
-  # ae <- try(chol(ax), silent = TRUE)
+  # ae <- try(chol(beta1ij), silent = TRUE)
   be <- try(chol(rho2ij), silent = TRUE)
 
   if (!is.character(be)) {
-    # Proceed if both 'ax' and 'rho2ij' matrices are valid for further computations.
+    # Proceed if both 'beta1ij' and 'rho2ij' matrices are valid for further computations.
 
     # Map parameters to each variable pair in 'Vi'.
     parmm <- lapply(1:nrow(Vi), function(v) {

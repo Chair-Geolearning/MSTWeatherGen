@@ -35,10 +35,10 @@ par_all_TEST <- initialize_par_all_if_missing(
   names = names,
   pairs = pairs,
   par_s = par_s,
-  ax = ax,
+  beta1ij = ax,
   cr = cr
 )
-par_all_TEST_updated <- update_ax_parameters(par_all_TEST, names, extract_ax(param(par_all_TEST, names), names))
+par_all_TEST_updated <- update_beta1ij_parameters(par_all_TEST, names, extract_beta1ij(param(par_all_TEST, names), names))
 parm <- param(par_all_TEST_updated, names)
 
 parm_univ <- parm[parm$v1 == names_univ & parm$v2 == names_univ, ]
@@ -46,17 +46,17 @@ parm_univ <- parm[parm$v1 == names_univ & parm$v2 == names_univ, ]
 #--------Tests--------
 
 # 0.
-test_that("extract_ax runs without error", {
+test_that("extract_beta1ij runs without error", {
   expect_silent({
-    result <- extract_ax(parm, names)
+    result <- extract_beta1ij(parm, names)
   })
   expect_true(is.matrix(result))
   expect_false(anyNA(result))
 })
 
 # 1.
-test_that("extract_ax returns correct matrix dimensions", {
-  result <- extract_ax(parm, names)
+test_that("extract_beta1ij returns correct matrix dimensions", {
+  result <- extract_beta1ij(parm, names)
 
   expect_equal(nrow(result), length(names))
   expect_equal(ncol(result), length(names))
@@ -64,8 +64,8 @@ test_that("extract_ax returns correct matrix dimensions", {
 })
 
 # 2.
-test_that("extract_ax returns matrix with correct names", {
-  result <- extract_ax(parm, names)
+test_that("extract_beta1ij returns matrix with correct names", {
+  result <- extract_beta1ij(parm, names)
 
   expect_equal(colnames(result), names)
   expect_equal(rownames(result), names)
@@ -73,7 +73,7 @@ test_that("extract_ax returns matrix with correct names", {
 
 # 3.
 test_that("matrix is symmetric", {
-  result <- extract_ax(parm, names)
+  result <- extract_beta1ij(parm, names)
 
   expect_true(isSymmetric(result))
   expect_true(all(is.finite(result)))
@@ -81,15 +81,15 @@ test_that("matrix is symmetric", {
 
 # 4.
 test_that("function is deterministic", {
-  result1 <- extract_ax(parm, names)
-  result2 <- extract_ax(parm, names)
+  result1 <- extract_beta1ij(parm, names)
+  result2 <- extract_beta1ij(parm, names)
 
   expect_identical(result1, result2)
 })
 
 #5.
-test_that("extract_ax univarié (length(names)==1) retourne une matrice", {
-  result <- extract_ax(parm_univ, names_univ)
+test_that("extract_beta1ij univarié (length(names)==1) retourne une matrice", {
+  result <- extract_beta1ij(parm_univ, names_univ)
   expect_true(is.matrix(result))
   expect_equal(dim(result), c(1L, 1L))
   expect_equal(rownames(result), names_univ)
@@ -98,7 +98,7 @@ test_that("extract_ax univarié (length(names)==1) retourne une matrice", {
 })
 
 #6.
-test_that("extract_ax univarié : la valeur est préservée", {
-  result <- extract_ax(parm_univ, names_univ)
+test_that("extract_beta1ij univarié : la valeur est préservée", {
+  result <- extract_beta1ij(parm_univ, names_univ)
   expect_equal(result[1, 1], parm_univ$beta1ij)
 })
