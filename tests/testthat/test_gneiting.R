@@ -132,7 +132,7 @@ test_that("Gneiting returns positive values for positive parameters", {
 })
 
 # 5.
-test_that("Gneiting returns zero if dij=0 (partial correlation effect)", {
+test_that("Gneiting returns zero if rho2ij=0 (partial correlation effect)", {
   res <- Gneiting(h = 0.5, u = 1, par = par, rho2ij = 0)
   expect_true(is.finite(res))
 })
