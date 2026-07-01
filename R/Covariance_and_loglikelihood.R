@@ -253,15 +253,15 @@ compute_rho2ij <- function(parm, names, cr) {
 
 
 extract_beta1ij <- function(parm, names) {
-  beta1ij <- sapply(names, function(v1) {
+  beta1ij_mat <- sapply(names, function(v1) {
     sapply(names, function(v2) {
       beta1ij <- parm$beta1ij[parm$v1 == v1 & parm$v2 == v2 | parm$v1 == v2 & parm$v2 == v1]
       return(beta1ij)
     })
   })
-  beta1ij <- matrix(beta1ij, nrow = length(names), ncol = length(names))  # ← forcer matrice
-  rownames(beta1ij) <- colnames(beta1ij) <- names
-  return(beta1ij)
+  beta1ij_mat <- matrix(beta1ij_mat, nrow = length(names), ncol = length(names))  # ← forcer matrice
+  rownames(beta1ij_mat) <- colnames(beta1ij_mat) <- names
+  return(beta1ij_mat)
 }
 #' @title Extract Beta Coefficients Matrix
 #'
