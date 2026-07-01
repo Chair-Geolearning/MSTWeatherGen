@@ -25,8 +25,8 @@ max_it <- 50
 parms <- c(
   "a1", "d1", "g1", "a2", "d2", "g2",
   "b1", "e1", "l1", "b2", "e2", "l2", "c", "f", "m",
-  paste(names, "ai", sep = ":"), paste(names, "bi", sep = ":"),
-  paste(names, "ci", sep = ":")
+  paste(names, "Ai", sep = ":"), paste(names, "Bi", sep = ":"),
+  paste(names, "Ci", sep = ":")
 )
 par <- par_all[parms]
 u <- NULL

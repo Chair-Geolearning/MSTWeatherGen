@@ -33,7 +33,7 @@ par_all_TEST <- initialize_par_all_if_missing(
   names = names,
   pairs = pairs,
   par_s = par_s,
-  ax = ax,
+  beta1ij = ax,
   cr = cr
 )
 
@@ -48,7 +48,7 @@ test_that("initialize_par_all_if_missing runs without error", {
       names = names,
       pairs = pairs,
       par_s = par_s,
-      ax = ax,
+      beta1ij = ax,
       cr = cr
     )
   })
@@ -62,10 +62,10 @@ test_that("initialize_par_all_if_missing runs without error", {
 # 1.
 test_that("initialize_par_all_if_missing creates expected parameter names", {
   expected_names <- c(
-    paste(pairs, "dij", sep = ":"),
-    paste(pairs, "rij", sep = ":"),
-    paste(pairs, "vij", sep = ":"),
-    paste(pairs, "ax", sep = ":")
+    paste(pairs, "rho2ij", sep = ":"),
+    paste(pairs, "aii", sep = ":"),
+    paste(pairs, "nuii", sep = ":"),
+    paste(pairs, "beta1ij", sep = ":")
   )
 
   expect_true(all(expected_names %in% names(par_all_TEST)))
@@ -80,7 +80,7 @@ test_that("existing par_all is not overwritten", {
     names = names,
     pairs = pairs,
     par_s = par_s,
-    ax = ax,
+    beta1ij = ax,
     cr = cr
   )
 
@@ -89,7 +89,7 @@ test_that("existing par_all is not overwritten", {
     names = names,
     pairs = pairs,
     par_s = par_s,
-    ax = ax,
+    beta1ij = ax,
     cr = cr
   )
 
@@ -98,7 +98,7 @@ test_that("existing par_all is not overwritten", {
 
 # 3.
 test_that("default values are correctly assigned", {
-  dij_params <- paste(pairs, "dij", sep = ":")
+  dij_params <- paste(pairs, "rho2ij", sep = ":")
   expect_true(all(par_all_TEST[dij_params] == 1))
 
   parms <- c("a1", "a2", "d1", "d2", "g1", "g2")
@@ -110,8 +110,8 @@ test_that("default values are correctly assigned", {
 
 # 4.
 test_that("par_s values are correctly assigned to rij and vij", {
-  rij_params <- paste(pairs[1:length(names)], "rij", sep = ":")
-  vij_params <- paste(pairs[1:length(names)], "vij", sep = ":")
+  rij_params <- paste(pairs[1:length(names)], "aii", sep = ":")
+  vij_params <- paste(pairs[1:length(names)], "nuii", sep = ":")
 
   expect_equal(unname(par_all_TEST[rij_params]), par_s[1, ])
   expect_equal(unname(par_all_TEST[vij_params]), par_s[2, ])
@@ -119,7 +119,7 @@ test_that("par_s values are correctly assigned to rij and vij", {
 
 # 5.
 test_that("ax parameters are initialized to 0 then updated", {
-  ax_params <- paste(pairs, "ax", sep = ":")
+  ax_params <- paste(pairs, "beta1ij", sep = ":")
 
   expect_true(all(ax_params %in% names(par_all_TEST)))
   expect_type(par_all_TEST[ax_params], "double")
@@ -148,7 +148,7 @@ test_that("par_all has expected length", {
     names = single_name,
     pairs = single_pairs,
     par_s = single_par_s,
-    ax = ax[1,],
+    beta1ij = ax[1,],
     cr = cr[1, 1, drop = FALSE]
   )
 

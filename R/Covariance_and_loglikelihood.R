@@ -31,14 +31,16 @@ Matern <- function(h, r, v) {
 #' @param h Numeric vector of spatial distances.
 #' @param u Numeric vector of temporal distances.
 #' @param par Numeric vector of parameters for the covariance function.
-#' @param dij Correlation parameter between variables i and j.
+#' @param rho2ij Correlation parameter between variables i and j.
 #'
 #' @return Numeric vector of covariance values calculated using Gneiting's model.
 #'
 #' @keywords internal
-Gneiting <- function(h, u, par, dij) {
+Gneiting <- function(h, u, par, rho2ij) {
+  # Same function as Gneiting, but with new names for variables
+  
   if (!is.numeric(par)) par <- as.numeric(par)
-
+  
   # Unpack parameters from the 'par' vector for clarity.
   a1 <- par[1]
   d1 <- par[2]
@@ -52,46 +54,55 @@ Gneiting <- function(h, u, par, dij) {
   b2 <- par[10]
   e2 <- par[11]
   l2 <- par[12]
-  c <- par[13]
-  f <- par[14]
-  m <- par[15]
-  ai <- par[16]
-  aj <- par[17]
-  bi <- par[18]
-  bj <- par[19]
-  ci <- par[20]
-  cj <- par[21]
-  rii <- par[22]
-  rjj <- par[23]
-  vii <- par[24]
-  vjj <- par[25]
-  # ax : correction term ?
-  ax <- par[26]
-
+  c  <- par[13]
+  f  <- par[14]
+  m  <- par[15]
+  Ai <- par[16]
+  Aj <- par[17]
+  Bi <- par[18]
+  Bj <- par[19]
+  Ci <- par[20]
+  Cj <- par[21]
+  
+  aii  <- par[22]
+  ajj  <- par[23]
+  nuii <- par[24]
+  nujj <- par[25]
+  
+  beta1ij <- par[26]  # beta1ij : covariance for temporal component
+  
   # Calculated intermediate parameters for the covariance calculation.
-
+  
   # Details : Paper : See equation 10
-  vij <- (vii + vjj) / 2
-  rij <- sqrt((rii^2 + rjj^2) / 2)
-
-  # Details : Paper : See equation 10
-  eij <- dij * ((rii^vii * rjj^vjj) / rij^(2 * vij)) *
-    (gamma(vij) / (gamma(vii)^(1 / 2) * gamma(vjj)^(1 / 2))) *
-    sqrt((1 - ai^2) * (1 - aj^2)) * sqrt((1 - bi^2) * (1 - bj^2))
-
+  # Cross parameters of the Matern function
+  nuij <- (nuii + nujj) / 2
+  aij  <- sqrt((aii^2 + ajj^2) / 2)
+  
   # Details : Paper : See equation 10 Variogram
-  muij <- (((a1 * abs(u))^(2 * b1) + 1)^(c) - (ai * aj * ((a2 * abs(u))^(2 * b2) + 1)^(-c)))
+  # Temporal pseudo, \eta_{ij}
+  etaij <- ((a1 * abs(u))^(2 * b1) + 1)^c -
+    (Ai * Aj * ((a2 * abs(u))^(2 * b2) + 1)^(-c))
+  
   # Details : Additional Temporal attenuation
-  rhoij <- 1 / (((d1 * abs(u))^(2 * e1) + 1)^(f) - (bi * bj * ((d2 * abs(u))^(2 * e2) + 1)^(-f)))
-
-  A1 <- eij 
+  eta2ij <- ((d1 * abs(u))^(2 * e1) + 1)^f -
+    (Bi * Bj * ((d2 * abs(u))^(2 * e2) + 1)^(-f))
   
-  A2 <- rhoij *  Matern(abs(h), r = (rij^2 / muij)^(1 / 2), v = vij) / muij
+  # Details : Paper : See equation 10
+  beta2ij <- rho2ij *
+    ((aii^nuii * ajj^nujj) / aij^(2 * nuij)) *
+    (gamma(nuij) / (gamma(nuii)^(1 / 2) * gamma(nujj)^(1 / 2))) *
+    sqrt((1 - Ai^2) * (1 - Aj^2)) *
+    sqrt((1 - Bi^2) * (1 - Bj^2))
   
-  # A3 : Additional Temporal Term
-  A3 <- ax * 1 / (((g1 * abs(u))^(2 * l1) + 1)^(m) - ci * cj * ((g2 * abs(u))^(2 * l2) + 1)^(-m))
-
-  return(A1 * A2 + A3)
+  SpatioTemp <- Matern(abs(h), r = sqrt(aij^2 / etaij), v = nuij) / (etaij * eta2ij)
+  
+  # Temp : temporal component only (the term present in the paper)
+  Temp <- 1 / (
+    ((g1 * abs(u))^(2 * l1) + 1)^m -
+      Ci * Cj * ((g2 * abs(u))^(2 * l2) + 1)^(-m)
+  )
+  
+  return(beta2ij * SpatioTemp + beta1ij * Temp)
 }
 
 #' @title Construct Covariance Parameters DataFrame
@@ -139,28 +150,28 @@ param <- function(par, names) {
   # Loop through each pair to populate the data frame with corresponding parameter values
   for (i in seq_len(J)) {
     # Extract and assign specific parameters for each pair based on naming convention
-    u$ai[i] <- par[paste(u$v1[i], "ai", sep = ":")]
-    u$aj[i] <- par[paste(u$v2[i], "ai", sep = ":")]
+    u$Ai[i] <- par[paste(u$v1[i], "Ai", sep = ":")]
+    u$Aj[i] <- par[paste(u$v2[i], "Ai", sep = ":")]
 
-    u$bi[i] <- par[paste(u$v1[i], "bi", sep = ":")]
-    u$bj[i] <- par[paste(u$v2[i], "bi", sep = ":")]
+    u$Bi[i] <- par[paste(u$v1[i], "Bi", sep = ":")]
+    u$Bj[i] <- par[paste(u$v2[i], "Bi", sep = ":")]
 
-    u$ci[i] <- par[paste(u$v1[i], "ci", sep = ":")]
-    u$cj[i] <- par[paste(u$v2[i], "ci", sep = ":")]
+    u$Ci[i] <- par[paste(u$v1[i], "Ci", sep = ":")]
+    u$Cj[i] <- par[paste(u$v2[i], "Ci", sep = ":")]
 
-    u$rii[i] <- par[paste(paste(u$v1[i], u$v1[i], sep = "-"), "rij", sep = ":")]
-    u$rjj[i] <- par[paste(paste(u$v2[i], u$v2[i], sep = "-"), "rij", sep = ":")]
+    u$aii[i] <- par[paste(paste(u$v1[i], u$v1[i], sep = "-"), "aii", sep = ":")]
+    u$ajj[i] <- par[paste(paste(u$v2[i], u$v2[i], sep = "-"), "aii", sep = ":")]
 
-    u$vii[i] <- par[paste(paste(u$v1[i], u$v1[i], sep = "-"), "vij", sep = ":")]
-    u$vjj[i] <- par[paste(paste(u$v2[i], u$v2[i], sep = "-"), "vij", sep = ":")]
+    u$nuii[i] <- par[paste(paste(u$v1[i], u$v1[i], sep = "-"), "nuii", sep = ":")]
+    u$nujj[i] <- par[paste(paste(u$v2[i], u$v2[i], sep = "-"), "nuii", sep = ":")]
 
-    u$ax[i] <- par[paste(paste(u$v1[i], u$v2[i], sep = "-"), "ax", sep = ":")]
+    u$beta1ij[i] <- par[paste(paste(u$v1[i], u$v2[i], sep = "-"), "beta1ij", sep = ":")]
 
-    u$dij[i] <- par[paste(paste(u$v1[i], u$v2[i], sep = "-"), "dij", sep = ":")]
+    u$rho2ij[i] <- par[paste(paste(u$v1[i], u$v2[i], sep = "-"), "rho2ij", sep = ":")]
   }
   return(u)
 }
-#' @title Compute Beta Correlations
+#' @title Compute rho2ij Correlations
 #'
 #' @description
 #' This function calculates the beta correlation coefficients between variables based on the Gneiting function, adjusted for a correction term. It is intended for internal use within package functions to adjust initial correlation values using specified parameters.
@@ -180,10 +191,10 @@ param <- function(par, names) {
 #' @importFrom Matrix nearPD
 #' @keywords internal
 
-compute_beta <- function(parm, names, cr) {
+compute_rho2ij <- function(parm, names, cr) {
   J <- length(names) # Number of variables
-  beta <- matrix(0, ncol = J, nrow = J) # Initialize the beta matrix with zeros
-  colnames(beta) <- rownames(beta) <- names # Set the row and column names of the matrix to variable names
+  rho2ij <- matrix(0, ncol = J, nrow = J) # Initialize the beta matrix with zeros
+  colnames(rho2ij) <- rownames(rho2ij) <- names # Set the row and column names of the matrix to variable names
 
   # Create a map to fetch parameters quickly using a two-level list structure
   parm_map <- split(parm, list(parm$v1, parm$v2))
@@ -214,43 +225,43 @@ compute_beta <- function(parm, names, cr) {
       par <- get_parameters(v1, v2) # Retrieve parameters for the current pair
 
       # Calculate the correlation coefficient using the Gneiting function and correction term
-      cc <- Gneiting(0, 0, par, dij = 1) # Gneiting function calculation for the pair
+      cc <- Gneiting(0, 0, par, rho2ij = 1) # Gneiting function calculation for the pair
       ax <- par[26] / (1 - par[20] * par[21]) # Correction term calculation
-      beta_val <- (cr[v1, v2]) / (cc - ax) # Adjusted correlation coefficient
+      rho2ij_val <- (cr[v1, v2]) / (cc - ax) # Adjusted correlation coefficient
 
-      beta[v1, v2] <- beta[v2, v1] <- beta_val # Symmetric assignment to ensure the matrix is symmetric
+      rho2ij[v1, v2] <- rho2ij[v2, v1] <- rho2ij_val # Symmetric assignment to ensure the matrix is symmetric
     }
   }
 
-  return(beta)
+  return(rho2ij)
 }
 #' @title Extract Correction Terms Matrix
 #'
 #' @description
-#' Extracts a matrix of correction terms ('ax') for each pair of variables based on the model parameters provided in 'parm'. Designed for internal use to facilitate calculations involving correction terms in spatial or spatio-temporal modeling.
+#' Extracts a matrix of correction terms ('beta1ij') for each pair of variables based on the model parameters provided in 'parm'. Designed for internal use to facilitate calculations involving correction terms in spatial or spatio-temporal modeling.
 #'
 #' @details
 #' This function implements the methods described in Sections 2.4 in Equation 8 of the article
 #' \strong{Stochastic Environmental Research and Risk Assessment, 2025} (DOI: 10.1007/s00477-024-02897-8).
 #'
-#' @param parm A data frame or list containing the model parameters, including 'ax' values.
+#' @param parm A data frame or list containing the model parameters, including 'beta1ij' values.
 #' @param names Character vector specifying the variable names for which correction terms are to be calculated.
 #'
-#' @return A square matrix where each element [i, j] represents the correction term ('ax') between the ith and jth variables, facilitating the adjustment of correlations or covariances between them.
+#' @return A square matrix where each element [i, j] represents the correction term ('beta1ij') between the ith and jth variables, facilitating the adjustment of correlations or covariances between them.
 #'
 #' @keywords internal
 
 
-compute_ax <- function(parm, names) {
-  ax <- sapply(names, function(v1) {
+extract_beta1ij <- function(parm, names) {
+  beta1ij_mat <- sapply(names, function(v1) {
     sapply(names, function(v2) {
-      ax <- parm$ax[parm$v1 == v1 & parm$v2 == v2 | parm$v1 == v2 & parm$v2 == v1]
-      return(ax)
+      beta1ij <- parm$beta1ij[parm$v1 == v1 & parm$v2 == v2 | parm$v1 == v2 & parm$v2 == v1]
+      return(beta1ij)
     })
   })
-  ax <- matrix(ax, nrow = length(names), ncol = length(names))  # ← forcer matrice
-  rownames(ax) <- colnames(ax) <- names
-  return(ax)
+  beta1ij_mat <- matrix(beta1ij_mat, nrow = length(names), ncol = length(names))  # ← forcer matrice
+  rownames(beta1ij_mat) <- colnames(beta1ij_mat) <- names
+  return(beta1ij_mat)
 }
 #' @title Extract Beta Coefficients Matrix
 #'
@@ -317,15 +328,15 @@ loglik_pair <- function(par, parms, pair, par_all, data, names, Vi, h, u, uh, ep
 
   # Update and compute model parameters
   parm <- param(par, names)
-  ax <- Matrix::nearPD(compute_ax(parm, names))$mat # Compute ax correction terms
-  beta <- try(compute_beta(parm, names, cr), silent = T) # Compute beta coefficients
+  beta1ij_mat <- Matrix::nearPD(extract_beta1ij(parm, names))$mat # Compute ax correction terms
+  rho2ij <- try(compute_rho2ij(parm, names, cr), silent = T) # Compute rho2ij coefficients
 
-  # Attempt Cholesky decompositions for 'ax' and 'beta', checking for positive definiteness
-  ae <- try(chol(ax), silent = TRUE)
-  be <- try(chol(beta), silent = TRUE)
+  # Attempt Cholesky decompositions for 'beta1ij_mat' and 'rho2ij', checking for positive definiteness
+  ae <- try(chol(beta1ij_mat), silent = TRUE)
+  be <- try(chol(rho2ij), silent = TRUE)
 
   if (!is.character(be) & (!is.character(ae))) {
-    # Proceed if both 'ax' and 'beta' matrices are valid for further computations
+    # Proceed if both 'beta1ij' and 'rho2ij' matrices are valid for further computations
 
     # Map parameters to each variable pair in 'Vi'
     parmm <- lapply(1:nrow(Vi), function(v) {
@@ -343,7 +354,7 @@ loglik_pair <- function(par, parms, pair, par_all, data, names, Vi, h, u, uh, ep
       return(abs(rnorm(1)) * 1e+20)
     } else {
       # Compute covariance for the pair
-      cij <- Gneiting(h = h, u = u, par = par, dij = beta[sp[1], sp[2]])
+      cij <- Gneiting(h = h, u = u, par = par, rho2ij = beta[sp[1], sp[2]])
       delta <- 1 - cij^2
       # Extract observed values for the pair from 'data'
       v1 <- data[, , Vi[v, 1]]
@@ -422,7 +433,7 @@ loglik_pair <- function(par, parms, pair, par_all, data, names, Vi, h, u, uh, ep
 #' @param uh Combined matrix of spatial and temporal distances with additional identifiers.
 #' @param ep Data frame defining variable pairs for analysis.
 #' @param cr Initial correlation matrix across variables.
-#  beta: Precomputed beta coefficients matrix for all pairs.
+#  rho2ij: Precomputed rho2ij cross-correlation matrix for all pairs.
 #'
 #' @return Total log-likelihood value for the observed data given the current model parameters.
 #'
@@ -437,15 +448,15 @@ loglik <- function(par, parms, par_all, data, names, Vi, h, u, uh, ep, cr) {
   par_all[parms] <- par # Update specified parameters.
 
   parm <- param(par_all, names)
-  # ax <- Matrix::nearPD(compute_ax(parm, names))$mat  # Compute ax correction terms
-  parm <- param(update_ax_parameters(par_all, names, compute_ax(parm, names)), names)
-  beta <- try(compute_beta(parm, names, cr), silent = T) # Compute beta coefficients
+  # beta1ij <- Matrix::nearPD(extract_beta1ij(parm, names))$mat  # Compute ax correction terms
+  parm <- param(update_beta1ij_parameters(par_all, names, extract_beta1ij(parm, names)), names)
+  rho2ij <- try(compute_rho2ij(parm, names, cr), silent = T) # Compute rho2ij coefficients
   # Attempt Cholesky decomposition to ensure positive definiteness.
-  # ae <- try(chol(ax), silent = TRUE)
-  be <- try(chol(beta), silent = TRUE)
+  # ae <- try(chol(beta1ij), silent = TRUE)
+  be <- try(chol(rho2ij), silent = TRUE)
 
   if (!is.character(be)) {
-    # Proceed if both 'ax' and 'beta' matrices are valid for further computations.
+    # Proceed if both 'beta1ij' and 'rho2ij' matrices are valid for further computations.
 
     # Map parameters to each variable pair in 'Vi'.
     parmm <- lapply(1:nrow(Vi), function(v) {
@@ -465,7 +476,7 @@ loglik <- function(par, parms, par_all, data, names, Vi, h, u, uh, ep, cr) {
           return(-abs(rnorm(1)) * 1e+20)
         } else {
           # Calculate pairwise log-likelihood using Gneiting function and parameter adjustments.
-          cij <- Gneiting(h = h, u = u, par = par, dij = beta[Vi[v, 1], Vi[v, 2]])
+          cij <- Gneiting(h = h, u = u, par = par, rho2ij = rho2ij[Vi[v, 1], Vi[v, 2]])
           delta <- 1 - cij^2
           v1 <- data[, , Vi[v, 1]]
           v1 <- v1[cbind(uh[, 3], uh[, 5])]
@@ -523,7 +534,7 @@ loglik <- function(par, parms, par_all, data, names, Vi, h, u, uh, ep, cr) {
           return(-abs(rnorm(1)) * 1e+20)
         } else {
           # Calculate pairwise log-likelihood using Gneiting function and parameter adjustments.
-          cij <- Gneiting(h = h, u = u, par = par, dij = beta[Vi[v, 1], Vi[v, 2]])
+          cij <- Gneiting(h = h, u = u, par = par, rho2ij = rho2ij[Vi[v, 1], Vi[v, 2]])
           delta <- 1 - cij^2
           v1 <- data[, , Vi[v, 1]]
           v1 <- v1[cbind(uh[, 3], uh[, 5])]
@@ -723,7 +734,6 @@ spacetime_cov <- function(data, wt_id, locations, ds = NULL, dates, lagstime, di
       return(cov(x1[cbind(ide[, 1], idxe[, 1])], x2[cbind(ide[, 2], idxe[, 2])]) / sqrt(c1 * c2))
     })
 
-    # Data frame with lag time, distances, and corresponding covariance values
     return(data.frame(lagtime = u, dist = dist, cov = cv))
   })
 
@@ -762,8 +772,8 @@ cov_matrices <- function(par, coordinates, names, M) {
       cp_v2 <- lapply(names, function(v2) {
         # Retrieve parameters for the current pair of variables and calculate covariance
         cov_params <- par[(par$v1 == v1 & par$v2 == v2) | (par$v2 == v1 & par$v1 == v2), -c(1, 2)]
-        dij <- par$dij[(par$v1 == v1 & par$v2 == v2) | (par$v2 == v1 & par$v1 == v2)]
-        cov <- Gneiting(h, u, cov_params, dij)
+        rho2ij <- par$rho2ij[(par$v1 == v1 & par$v2 == v2) | (par$v2 == v1 & par$v1 == v2)]
+        cov <- Gneiting(h, u, cov_params, rho2ij)
 
         # Filter to the current time point and reshape the covariance values into a matrix
         up <- (d$t1 == t1) & (d$t2 == 1)
