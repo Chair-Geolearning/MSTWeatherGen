@@ -69,7 +69,7 @@ Gneiting <- function(h, u, par, rho2ij) {
   nuii <- par[24]
   nujj <- par[25]
   
-  beta1ij <- par[26]  # ax : covariance for temporal component
+  beta1ij <- par[26]  # beta1ij : covariance for temporal component
   
   # Calculated intermediate parameters for the covariance calculation.
   
