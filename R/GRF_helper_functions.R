@@ -695,7 +695,7 @@ estimate_gaussian_field_params <- function(data, wt, names, coordinates, tmax, m
     gf_par[[k]] <- estimation_gf(
       data = data, wt_id = wt_id, max_it = max_it, dates = dates,
       tmax = tmax, names = names, coordinates = coordinates, n1 = n1,
-      n2 = n2, beta1ij = vgm[vgm$lagtime == 0 & vgm$dist == max(vgm$dist), ],
+      n2 = n2, beta1 = vgm[vgm$lagtime == 0 & vgm$dist == max(vgm$dist), ],
       cr = cr, threshold_precip = threshold_precip[[k]]
     )$parm
   }
