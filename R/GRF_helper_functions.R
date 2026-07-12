@@ -41,7 +41,7 @@ generate_variable_index_pairs <- function(names) {
 #' @keywords internal
 #' @importFrom stats setNames
 #' @noRd
-initialize_par_all_if_missing <- function(par_all, names, pairs, par_s, beta1ij, cr) {
+initialize_par_all_if_missing <- function(par_all, names, pairs, par_s, beta1, cr) {
   # Initialize the `par_all` vector if it is missing, with default values or using `par_s`
   if (is.null(par_all)) {
     names_par_all <- c(
@@ -64,7 +64,7 @@ initialize_par_all_if_missing <- function(par_all, names, pairs, par_s, beta1ij,
   }
 
   # Update beta1ij parameters based on covariance information
-  par_all <- update_beta1_parameters(par_all, names, beta1ij)
+  par_all <- update_beta1_parameters(par_all, names, beta1)
 
   parm <- param(par_all, names)
   rho2 <- try(compute_rho2(parm, names, cr), silent = T)
@@ -77,7 +77,7 @@ initialize_par_all_if_missing <- function(par_all, names, pairs, par_s, beta1ij,
   }
   return(par_all)
 }
-#' Update beta1ij Parameters in Model Parameters
+#' Update beta1 Parameters in Model Parameters
 #'
 #' Modifies the 'beta1ij' parameters within the complete set of model parameters (`par_all`) using the covariance information provided by the 'beta1ij' matrix. This adjustment is crucial for ensuring accurate covariance structures in the model.
 #'
@@ -86,19 +86,19 @@ initialize_par_all_if_missing <- function(par_all, names, pairs, par_s, beta1ij,
 #'
 #' @param par_all The complete set of model parameters, including 'beta1ij' values to be updated.
 #' @param names Vector of variable names, indicating the variables for which 'beta1ij' adjustments are applied.
-#' @param beta1ij Matrix or data frame containing the updated covariance information to adjust 'beta1ij' parameters in `par_all`. If `beta1ij` is not a matrix, it will be transformed to ensure positive definiteness before updating.
+#' @param beta1 Matrix or data frame containing the updated covariance information to adjust 'beta1ij' parameters in `par_all`. If `beta1ij` is not a matrix, it will be transformed to ensure positive definiteness before updating.
 #'
 #' @return The modified `par_all` vector with updated 'beta1ij' parameters reflecting the provided covariance information.
 #'
 #' @keywords internal
 #' @noRd
 #' @importFrom Matrix nearPD
-update_beta1_parameters <- function(par_all, names, beta1ij) {
+update_beta1_parameters <- function(par_all, names, beta1) {
   # Update the `beta1ij` parameters in `par_all` based on the covariance information in `beta1ij`
-  if (!is.matrix(beta1ij)) {
+  if (!is.matrix(beta1)) {
     for (v1 in names) {
       for (v2 in names) {
-        par_all[paste(paste(v1, v2, sep = "-"), "beta1ij", sep = ":")] <- beta1ij$cov[beta1ij$v1 == v1 & beta1ij$v2 == v2 | beta1ij$v2 == v1 & beta1ij$v1 == v2]
+        par_all[paste(paste(v1, v2, sep = "-"), "beta1ij", sep = ":")] <- beta1$cov[beta1$v1 == v1 & beta1$v2 == v2 | beta1$v2 == v1 & beta1$v1 == v2]
       }
     }
     a <- sapply(names, function(v1) {
@@ -110,21 +110,21 @@ update_beta1_parameters <- function(par_all, names, beta1ij) {
     })
     a <- matrix(a, nrow = length(names), ncol = length(names))
     rownames(a) <- colnames(a) <- names
-    beta1ij = Matrix::nearPD(a)$mat
+    beta1 = Matrix::nearPD(a)$mat
   }else{
-    if (any(diag(beta1ij) < 0)) {
-      warning("beta1ij contient des valeurs negatives avant nearPD : ", paste(as.numeric(beta1ij), collapse = ", "))
+    if (any(diag(beta1) < 0)) {
+      warning("beta1 contient des valeurs negatives avant nearPD : ", paste(as.numeric(beta1), collapse = ", "))
     }
-    beta1ij <- if (length(names) == 1) {
-      Matrix::Matrix(max(as.numeric(beta1ij), 1e-6), nrow = 1, ncol = 1, dimnames = list(names, names))
+    beta1 <- if (length(names) == 1) {
+      Matrix::Matrix(max(as.numeric(beta1), 1e-6), nrow = 1, ncol = 1, dimnames = list(names, names))
     } else {
-      Matrix::nearPD(beta1ij)$mat
+      Matrix::nearPD(beta1)$mat
     }
   }
-  colnames(beta1ij) <- rownames(beta1ij) <- names
+  colnames(beta1) <- rownames(beta1) <- names
   for (v1 in names) {
     for (v2 in names) {
-      par_all[paste(paste(v1, v2, sep = "-"), "beta1ij", sep = ":")] <- beta1ij[v1, v2]
+      par_all[paste(paste(v1, v2, sep = "-"), "beta1ij", sep = ":")] <- beta1[v1, v2]
     }
   }
   return(par_all)
@@ -388,7 +388,7 @@ optimize_temporal_parameters <- function(par_all, data, names, Vi, uh, cr, max_i
 #' @importFrom parallel mclapply
 
 estimation_gf <- function(data, wt_id, max_it, dates, tmax, names, par_all = NULL,
-                          coordinates, n1, n2, beta1ij, cr, threshold_precip) {
+                          coordinates, n1, n2, beta1, cr, threshold_precip) {
   # Dimensions of the data
   Nt <- dim(data)[1] # Number of time points
   Ns <- dim(data)[2] # Number of spatial locations
@@ -416,7 +416,7 @@ estimation_gf <- function(data, wt_id, max_it, dates, tmax, names, par_all = NUL
   pairs <- paste(ep[, 1], ep[, 2], sep = "-")
 
   # Check and initialize par_all if missing
-  par_all <- initialize_par_all_if_missing(par_all, names, pairs, par_s, beta1ij, cr = cr)
+  par_all <- initialize_par_all_if_missing(par_all, names, pairs, par_s, beta1, cr = cr)
 
   par_all <- optimize_spatial_parameters(par_all, data, names, Vi, uh[uh[, 1] == 0, ], cr, max_it, ep)
 

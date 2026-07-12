@@ -35,7 +35,7 @@ par_all_TEST <- initialize_par_all_if_missing(
   names = names,
   pairs = pairs,
   par_s = par_s,
-  beta1ij = ax,
+  beta1 = ax,
   cr = cr
 )
 par_all_TEST_updated <- update_beta1_parameters(par_all_TEST, names, extract_beta1(param(par_all_TEST, names), names))

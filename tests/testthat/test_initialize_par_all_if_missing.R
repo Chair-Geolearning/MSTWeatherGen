@@ -33,7 +33,7 @@ par_all_TEST <- initialize_par_all_if_missing(
   names = names,
   pairs = pairs,
   par_s = par_s,
-  beta1ij = ax,
+  beta1 = ax,
   cr = cr
 )
 
@@ -48,7 +48,7 @@ test_that("initialize_par_all_if_missing runs without error", {
       names = names,
       pairs = pairs,
       par_s = par_s,
-      beta1ij = ax,
+      beta1 = ax,
       cr = cr
     )
   })
@@ -80,7 +80,7 @@ test_that("existing par_all is not overwritten", {
     names = names,
     pairs = pairs,
     par_s = par_s,
-    beta1ij = ax,
+    beta1 = ax,
     cr = cr
   )
 
@@ -89,7 +89,7 @@ test_that("existing par_all is not overwritten", {
     names = names,
     pairs = pairs,
     par_s = par_s,
-    beta1ij = ax,
+    beta1 = ax,
     cr = cr
   )
 

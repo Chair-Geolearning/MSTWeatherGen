@@ -450,10 +450,10 @@ loglik <- function(par, parms, par_all, data, names, Vi, h, u, uh, ep, cr) {
   parm <- param(par_all, names)
   # beta1 <- Matrix::nearPD(extract_beta1(parm, names))$mat  # Compute ax correction terms
   parm <- param(update_beta1_parameters(par_all, names, extract_beta1(parm, names)), names)
-  rho2ij <- try(compute_rho2(parm, names, cr), silent = T) # Compute rho2ij coefficients
+  rho2 <- try(compute_rho2(parm, names, cr), silent = T) # Compute rho2 coefficients
   # Attempt Cholesky decomposition to ensure positive definiteness.
   # ae <- try(chol(beta1ij), silent = TRUE)
-  be <- try(chol(rho2ij), silent = TRUE)
+  be <- try(chol(rho2), silent = TRUE)
 
   if (!is.character(be)) {
     # Proceed if both 'beta1ij' and 'rho2ij' matrices are valid for further computations.
@@ -476,7 +476,7 @@ loglik <- function(par, parms, par_all, data, names, Vi, h, u, uh, ep, cr) {
           return(-abs(rnorm(1)) * 1e+20)
         } else {
           # Calculate pairwise log-likelihood using Gneiting function and parameter adjustments.
-          cij <- Gneiting(h = h, u = u, par = par, rho2ij = rho2ij[Vi[v, 1], Vi[v, 2]])
+          cij <- Gneiting(h = h, u = u, par = par, rho2ij = rho2[Vi[v, 1], Vi[v, 2]])
           delta <- 1 - cij^2
           v1 <- data[, , Vi[v, 1]]
           v1 <- v1[cbind(uh[, 3], uh[, 5])]
@@ -534,7 +534,7 @@ loglik <- function(par, parms, par_all, data, names, Vi, h, u, uh, ep, cr) {
           return(-abs(rnorm(1)) * 1e+20)
         } else {
           # Calculate pairwise log-likelihood using Gneiting function and parameter adjustments.
-          cij <- Gneiting(h = h, u = u, par = par, rho2ij = rho2ij[Vi[v, 1], Vi[v, 2]])
+          cij <- Gneiting(h = h, u = u, par = par, rho2ij = rho2[Vi[v, 1], Vi[v, 2]])
           delta <- 1 - cij^2
           v1 <- data[, , Vi[v, 1]]
           v1 <- v1[cbind(uh[, 3], uh[, 5])]
