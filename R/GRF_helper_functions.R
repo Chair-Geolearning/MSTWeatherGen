@@ -237,7 +237,7 @@ optimize_spatial_parameters <- function(par_all, data, names, Vi, uh, cr, max_it
     control = list(maxit = max_it)
   )$par
   par_all[parms] <- optimized_par
-  return(update_beta1ij_parameters(par_all, names, extract_beta1ij(param(par_all, names), names)))
+  return(update_beta1ij_parameters(par_all, names, extract_beta1(param(par_all, names), names)))
 }
 #' Optimize Spatio-Temporal Parameters for Variable Pairs
 #'
@@ -428,7 +428,7 @@ estimation_gf <- function(data, wt_id, max_it, dates, tmax, names, par_all = NUL
   }
 
   # Construct parameter and beta matrices
-  par_all <- update_beta1ij_parameters(par_all, names, extract_beta1ij(param(par_all, names), names))
+  par_all <- update_beta1ij_parameters(par_all, names, extract_beta1(param(par_all, names), names))
   parm <- param(par_all, names)
   beta <- compute_rho2(parm, names, cr)
   beta <- sapply(1:nrow(ep), function(i) beta[ep[i, 1], ep[i, 2]])

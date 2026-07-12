@@ -252,16 +252,16 @@ compute_rho2 <- function(parm, names, cr) {
 #' @keywords internal
 
 
-extract_beta1ij <- function(parm, names) {
-  beta1ij_mat <- sapply(names, function(v1) {
+extract_beta1 <- function(parm, names) {
+  beta1 <- sapply(names, function(v1) {
     sapply(names, function(v2) {
       beta1ij <- parm$beta1ij[parm$v1 == v1 & parm$v2 == v2 | parm$v1 == v2 & parm$v2 == v1]
       return(beta1ij)
     })
   })
-  beta1ij_mat <- matrix(beta1ij_mat, nrow = length(names), ncol = length(names))  # ← forcer matrice
-  rownames(beta1ij_mat) <- colnames(beta1ij_mat) <- names
-  return(beta1ij_mat)
+  beta1 <- matrix(beta1, nrow = length(names), ncol = length(names))  # ← forcer matrice
+  rownames(beta1) <- colnames(beta1) <- names
+  return(beta1)
 }
 #' @title Extract Beta Coefficients Matrix
 #'
@@ -328,12 +328,12 @@ loglik_pair <- function(par, parms, pair, par_all, data, names, Vi, h, u, uh, ep
 
   # Update and compute model parameters
   parm <- param(par, names)
-  beta1ij_mat <- Matrix::nearPD(extract_beta1ij(parm, names))$mat # Compute ax correction terms
-  rho2ij <- try(compute_rho2(parm, names, cr), silent = T) # Compute rho2ij coefficients
+  beta1 <- Matrix::nearPD(extract_beta1(parm, names))$mat # Compute ax correction terms
+  rho2 <- try(compute_rho2(parm, names, cr), silent = T) # Compute rho2ij coefficients
 
   # Attempt Cholesky decompositions for 'beta1ij_mat' and 'rho2ij', checking for positive definiteness
-  ae <- try(chol(beta1ij_mat), silent = TRUE)
-  be <- try(chol(rho2ij), silent = TRUE)
+  ae <- try(chol(beta1), silent = TRUE)
+  be <- try(chol(rho2), silent = TRUE)
 
   if (!is.character(be) & (!is.character(ae))) {
     # Proceed if both 'beta1ij' and 'rho2ij' matrices are valid for further computations
@@ -449,7 +449,7 @@ loglik <- function(par, parms, par_all, data, names, Vi, h, u, uh, ep, cr) {
 
   parm <- param(par_all, names)
   # beta1ij <- Matrix::nearPD(extract_beta1ij(parm, names))$mat  # Compute ax correction terms
-  parm <- param(update_beta1ij_parameters(par_all, names, extract_beta1ij(parm, names)), names)
+  parm <- param(update_beta1ij_parameters(par_all, names, extract_beta1(parm, names)), names)
   rho2ij <- try(compute_rho2(parm, names, cr), silent = T) # Compute rho2ij coefficients
   # Attempt Cholesky decomposition to ensure positive definiteness.
   # ae <- try(chol(beta1ij), silent = TRUE)
