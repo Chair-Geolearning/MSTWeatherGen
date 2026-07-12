@@ -55,7 +55,7 @@ ax_univ <- {
 #--------Tests--------
 
 # 0.
-test_that("update_beta1ij_parameters runs without error with matrix input", {
+test_that("update_beta1_parameters runs without error with matrix input", {
   ax_matrix <- matrix(
     c(
       1, 0.5, 0.3,
