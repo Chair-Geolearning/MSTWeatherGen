@@ -21,7 +21,7 @@ cr <- sapply(names, function(v1) {
 
 # 0.
 test_that("compute_beta returns a symmetric matrix", {
-  result <- compute_rho2ij(parm, names, cr)
+  result <- compute_rho2(parm, names, cr)
 
   expect_true(is.matrix(result))
   expect_equal(nrow(result), ncol(result))
@@ -30,7 +30,7 @@ test_that("compute_beta returns a symmetric matrix", {
 
 # 1.
 test_that("compute_beta dimensions", {
-  result <- compute_rho2ij(parm, names, cr)
+  result <- compute_rho2(parm, names, cr)
 
   expect_equal(nrow(result), length(names))
   expect_equal(ncol(result), length(names))
@@ -38,7 +38,7 @@ test_that("compute_beta dimensions", {
 
 # 2.
 test_that("compute_beta names", {
-  result <- compute_rho2ij(parm, names, cr)
+  result <- compute_rho2(parm, names, cr)
 
   expect_equal(rownames(result), names)
   expect_equal(colnames(result), names)
@@ -46,7 +46,7 @@ test_that("compute_beta names", {
 
 # 3.
 test_that("compute_beta retourne des valeurs numériques", {
-  result <- compute_rho2ij(parm, names, cr)
+  result <- compute_rho2(parm, names, cr)
 
   expect_true(all(is.numeric(result)))
   expect_true(all(is.finite(result)))

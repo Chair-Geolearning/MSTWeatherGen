@@ -191,10 +191,10 @@ param <- function(par, names) {
 #' @importFrom Matrix nearPD
 #' @keywords internal
 
-compute_rho2ij <- function(parm, names, cr) {
+compute_rho2 <- function(parm, names, cr) {
   J <- length(names) # Number of variables
-  rho2ij <- matrix(0, ncol = J, nrow = J) # Initialize the beta matrix with zeros
-  colnames(rho2ij) <- rownames(rho2ij) <- names # Set the row and column names of the matrix to variable names
+  rho2 <- matrix(0, ncol = J, nrow = J) # Initialize the beta matrix with zeros
+  colnames(rho2) <- rownames(rho2) <- names # Set the row and column names of the matrix to variable names
 
   # Create a map to fetch parameters quickly using a two-level list structure
   parm_map <- split(parm, list(parm$v1, parm$v2))
@@ -227,13 +227,13 @@ compute_rho2ij <- function(parm, names, cr) {
       # Calculate the correlation coefficient using the Gneiting function and correction term
       cc <- Gneiting(0, 0, par, rho2ij = 1) # Gneiting function calculation for the pair
       ax <- par[26] / (1 - par[20] * par[21]) # Correction term calculation
-      rho2ij_val <- (cr[v1, v2]) / (cc - ax) # Adjusted correlation coefficient
+      rho2ij <- (cr[v1, v2]) / (cc - ax) # Adjusted correlation coefficient
 
-      rho2ij[v1, v2] <- rho2ij[v2, v1] <- rho2ij_val # Symmetric assignment to ensure the matrix is symmetric
+      rho2[v1, v2] <- rho2[v2, v1] <- rho2ij # Symmetric assignment to ensure the matrix is symmetric
     }
   }
 
-  return(rho2ij)
+  return(rho2)
 }
 #' @title Extract Correction Terms Matrix
 #'
@@ -329,7 +329,7 @@ loglik_pair <- function(par, parms, pair, par_all, data, names, Vi, h, u, uh, ep
   # Update and compute model parameters
   parm <- param(par, names)
   beta1ij_mat <- Matrix::nearPD(extract_beta1ij(parm, names))$mat # Compute ax correction terms
-  rho2ij <- try(compute_rho2ij(parm, names, cr), silent = T) # Compute rho2ij coefficients
+  rho2ij <- try(compute_rho2(parm, names, cr), silent = T) # Compute rho2ij coefficients
 
   # Attempt Cholesky decompositions for 'beta1ij_mat' and 'rho2ij', checking for positive definiteness
   ae <- try(chol(beta1ij_mat), silent = TRUE)
@@ -450,7 +450,7 @@ loglik <- function(par, parms, par_all, data, names, Vi, h, u, uh, ep, cr) {
   parm <- param(par_all, names)
   # beta1ij <- Matrix::nearPD(extract_beta1ij(parm, names))$mat  # Compute ax correction terms
   parm <- param(update_beta1ij_parameters(par_all, names, extract_beta1ij(parm, names)), names)
-  rho2ij <- try(compute_rho2ij(parm, names, cr), silent = T) # Compute rho2ij coefficients
+  rho2ij <- try(compute_rho2(parm, names, cr), silent = T) # Compute rho2ij coefficients
   # Attempt Cholesky decomposition to ensure positive definiteness.
   # ae <- try(chol(beta1ij), silent = TRUE)
   be <- try(chol(rho2ij), silent = TRUE)
