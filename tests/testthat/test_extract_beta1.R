@@ -38,7 +38,7 @@ par_all_TEST <- initialize_par_all_if_missing(
   beta1ij = ax,
   cr = cr
 )
-par_all_TEST_updated <- update_beta1ij_parameters(par_all_TEST, names, extract_beta1(param(par_all_TEST, names), names))
+par_all_TEST_updated <- update_beta1_parameters(par_all_TEST, names, extract_beta1(param(par_all_TEST, names), names))
 parm <- param(par_all_TEST_updated, names)
 
 parm_univ <- parm[parm$v1 == names_univ & parm$v2 == names_univ, ]

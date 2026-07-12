@@ -35,7 +35,7 @@ par_all_TEST <- initialize_par_all_if_missing(
   beta1ij = ax,
   cr = cr
 )
-par_all_TEST_updated <- update_beta1ij_parameters(par_all_TEST, names, extract_beta1(param(par_all_TEST, names), names))
+par_all_TEST_updated <- update_beta1_parameters(par_all_TEST, names, extract_beta1(param(par_all_TEST, names), names))
 
 # Setup univarié
 names_univ   <- "Temp_max"
@@ -67,7 +67,7 @@ test_that("update_beta1ij_parameters runs without error with matrix input", {
   )
 
   expect_silent({
-    result <- update_beta1ij_parameters(par_all_TEST, names, ax_matrix)
+    result <- update_beta1_parameters(par_all_TEST, names, ax_matrix)
   })
 
   expect_type(result, "double")
@@ -86,7 +86,7 @@ test_that("matrix input values are correctly assigned", {
     nrow = 3, ncol = 3
   )
 
-  result <- update_beta1ij_parameters(par_all_TEST, names, ax_matrix)
+  result <- update_beta1_parameters(par_all_TEST, names, ax_matrix)
 
   expect_equal(unname(result["Precipitation-Precipitation:beta1ij"]), 1.0)
   expect_equal(unname(result["Wind-Wind:beta1ij"]), 1.0)
@@ -112,7 +112,7 @@ test_that("nearPD is applied to non-positive definite matrix", {
     nrow = 3, ncol = 3
   )
 
-  result <- update_beta1ij_parameters(par_all_TEST, names, ax_matrix_non_PD)
+  result <- update_beta1_parameters(par_all_TEST, names, ax_matrix_non_PD)
 
   expect_type(result, "double")
   expect_false(anyNA(result))
@@ -122,14 +122,14 @@ test_that("nearPD is applied to non-positive definite matrix", {
 test_that("all zeros matrix (extreme case)", {
   ax_zeros <- matrix(0, nrow = 3, ncol = 3)
 
-  expect_error(result <- update_beta1ij_parameters(par_all_TEST, names, ax_zeros))
+  expect_error(result <- update_beta1_parameters(par_all_TEST, names, ax_zeros))
 })
 
 # 4.
 test_that("output preserves par_all structure", {
   ax_matrix <- diag(3)
 
-  result <- update_beta1ij_parameters(par_all_TEST, names, ax_matrix)
+  result <- update_beta1_parameters(par_all_TEST, names, ax_matrix)
 
   expect_equal(length(result), length(par_all_TEST))
   expect_equal(names(result), names(par_all_TEST))
@@ -147,8 +147,8 @@ test_that("function is deterministic with same inputs", {
     nrow = 3, ncol = 3
   )
 
-  result1 <- update_beta1ij_parameters(par_all_TEST, names, ax_matrix)
-  result2 <- update_beta1ij_parameters(par_all_TEST, names, ax_matrix)
+  result1 <- update_beta1_parameters(par_all_TEST, names, ax_matrix)
+  result2 <- update_beta1_parameters(par_all_TEST, names, ax_matrix)
 
   expect_identical(result1, result2)
 })
@@ -157,9 +157,9 @@ test_that("function is deterministic with same inputs", {
 #-------------------------Setup univarié---------------------------------
 
 #1.
-test_that("update_beta1ij_parameters univarié : tourne sans erreur", {
+test_that("update_beta1_parameters univarié : tourne sans erreur", {
   expect_no_error(
-    result1 <- update_beta1ij_parameters(par_all_univ, names_univ, ax_univ)
+    result1 <- update_beta1_parameters(par_all_univ, names_univ, ax_univ)
   )
 })
 

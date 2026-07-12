@@ -64,7 +64,7 @@ initialize_par_all_if_missing <- function(par_all, names, pairs, par_s, beta1ij,
   }
 
   # Update beta1ij parameters based on covariance information
-  par_all <- update_beta1ij_parameters(par_all, names, beta1ij)
+  par_all <- update_beta1_parameters(par_all, names, beta1ij)
 
   parm <- param(par_all, names)
   rho2 <- try(compute_rho2(parm, names, cr), silent = T)
@@ -73,7 +73,7 @@ initialize_par_all_if_missing <- function(par_all, names, pairs, par_s, beta1ij,
     par_s <- matrix(rep(1, length(names)^2), ncol = length(names), nrow = length(names))
     par_all[paste(pairs[1:length(names)], "aii", sep = ":")] <- 1
     par_all[paste(pairs[1:length(names)], "nuii", sep = ":")] <- 1
-    par_all <- update_beta1ij_parameters(par_all, names, beta1ij)
+    par_all <- update_beta1_parameters(par_all, names, beta1ij)
   }
   return(par_all)
 }
@@ -93,7 +93,7 @@ initialize_par_all_if_missing <- function(par_all, names, pairs, par_s, beta1ij,
 #' @keywords internal
 #' @noRd
 #' @importFrom Matrix nearPD
-update_beta1ij_parameters <- function(par_all, names, beta1ij) {
+update_beta1_parameters <- function(par_all, names, beta1ij) {
   # Update the `beta1ij` parameters in `par_all` based on the covariance information in `beta1ij`
   if (!is.matrix(beta1ij)) {
     for (v1 in names) {
@@ -237,7 +237,7 @@ optimize_spatial_parameters <- function(par_all, data, names, Vi, uh, cr, max_it
     control = list(maxit = max_it)
   )$par
   par_all[parms] <- optimized_par
-  return(update_beta1ij_parameters(par_all, names, extract_beta1(param(par_all, names), names)))
+  return(update_beta1_parameters(par_all, names, extract_beta1(param(par_all, names), names)))
 }
 #' Optimize Spatio-Temporal Parameters for Variable Pairs
 #'
@@ -428,7 +428,7 @@ estimation_gf <- function(data, wt_id, max_it, dates, tmax, names, par_all = NUL
   }
 
   # Construct parameter and beta matrices
-  par_all <- update_beta1ij_parameters(par_all, names, extract_beta1(param(par_all, names), names))
+  par_all <- update_beta1_parameters(par_all, names, extract_beta1(param(par_all, names), names))
   parm <- param(par_all, names)
   beta <- compute_rho2(parm, names, cr)
   beta <- sapply(1:nrow(ep), function(i) beta[ep[i, 1], ep[i, 2]])
