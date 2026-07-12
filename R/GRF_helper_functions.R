@@ -73,7 +73,7 @@ initialize_par_all_if_missing <- function(par_all, names, pairs, par_s, beta1, c
     par_s <- matrix(rep(1, length(names)^2), ncol = length(names), nrow = length(names))
     par_all[paste(pairs[1:length(names)], "aii", sep = ":")] <- 1
     par_all[paste(pairs[1:length(names)], "nuii", sep = ":")] <- 1
-    par_all <- update_beta1_parameters(par_all, names, beta1ij)
+    par_all <- update_beta1_parameters(par_all, names, beta1)
   }
   return(par_all)
 }
