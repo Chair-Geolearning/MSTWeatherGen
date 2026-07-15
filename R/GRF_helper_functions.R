@@ -377,7 +377,7 @@ optimize_temporal_parameters <- function(par_all, data, names, Vi, uh, cr, max_i
 #' @param par_all (Optional) Initial or current complete set of model parameters. If not provided, parameters are initialized within the function.
 #' @param coordinates Matrix containing the geographical coordinates of the spatial locations in the dataset.
 #' @param n1, n2 Parameters that define the granularity for generating spatial index pairs, affecting the spatial resolution of the model.
-#' @param beta1ij Matrix of precomputed correction terms used to adjust the covariance matrix, aiding in model stabilization.
+#' @param beta1 Matrix of precomputed correction terms used to adjust the covariance matrix, aiding in model stabilization.
 #' @param cr Initial correlation matrix representing the base relationships between variables, used as a starting point for optimization.
 #' @param threshold_precip Threshold values for precipitation, used in preprocessing to distinguish between different precipitation intensities.
 #'
