@@ -203,3 +203,47 @@ calculate_ICI <- function(radiation, time) {
 
   return(ICI)
 }
+
+#' Explore or summarize estimation output
+#'
+#' Summuraze MSTWeatherGen_Estim() function output.
+#'
+#' @param swg A list containing the results of the `MSTWeatherGen_Estim` function,
+#' including estimated parameters and other outputs relevant to weather generation, such as weather type classifications and spatial dependencies.
+#' Each season contains a list containing dates, scale parameters, weather types, transition probabilities, lambda transformations,
+#' and parameters for the Gaussian field model for the specified season.
+#' @param season number of a season (1, 2 3, or 4), default NULL show summarize seasons
+#' @param raw a boolean to output raw values (default = FALSE)
+#'
+#' @return nothings
+#'
+#' @export
+summarize <- function(swg, season=NULL, raw=FALSE) {
+  if(is.list(swg) && is.list(swg$swg)) {
+    cat("Estimated Variables:", paste0(swg$names, collapse=" , "),'\n')
+    cat("Weather types names:",paste0(swg$names_weather_types, collapse=" , "),'\n')
+    cat("Number of seasons:",length(swg$swg),'\n')
+  }
+  else stop("Input wrong format, list of list is needed")
+  
+  if(is.null(season)) {
+    tmp <- lapply(names(swg$swg), function(s) {
+      cat("season",s,'\n')
+      list_s <- swg$swg[[s]]
+      cat("Dates: Start",as.Date(list_s$dates[1]), "- End",as.Date(list_s$dates[length(list_s$dates)]), "- Nb of dates:",length(list_s$date),'\n')
+      cat("Number of weather types", length(unique(list_s$wt)), "values [",sort(unique(list_s$wt)),"]",'\n')
+      tmp <- lapply(sort(unique(list_s$wt)), function(wt){
+        cat('\t',wt,sum(list_s$wt == wt),'\n')
+      })
+      cat('\t',"T",length(list_s$wt),'\n')
+      #scale_param
+      #transitions
+      # lmbd
+      #gf_par
+    })
+  }
+  
+#list(swg = swg, by_season = by_season, names = names, names_weather_types = names_weather_types))
+#  dates = dates, wt = wt, scale_parm = scale_parm,
+#    transitions = transitions, lmbd = lmbd, gf_par = gf_par
+}
