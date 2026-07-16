@@ -255,7 +255,7 @@ summary.swg <- function(swg, season = NULL, all = FALSE) {
 
     # Dates
     cat(
-      "Dates:\n",
+      paste0(prefix,"$dates\n"),
       "\tStart", as.character(as.Date(list_s$dates[1])), "\n",
       "\tEnd", as.character(as.Date(list_s$dates[length(list_s$dates)])), "\n",
       "\tNb of dates:", length(list_s$dates), "\n"
@@ -263,7 +263,7 @@ summary.swg <- function(swg, season = NULL, all = FALSE) {
 
     # Weather Types
     wt_counts <- table(list_s$wt)
-    cat(
+    cat(paste0(prefix,"$wt\n"),
       "Number of weather types", length(wt_counts),
       "-> values [", paste(names(wt_counts), collapse = " "), "]", "\n"
     )
