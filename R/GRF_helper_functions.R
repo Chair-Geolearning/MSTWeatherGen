@@ -63,7 +63,7 @@ initialize_par_all_if_missing <- function(par_all, names, pairs, par_s, beta1, c
     par_all[parms] <- rep(1, length(parms))
   }
 
-  # Update beta1ij parameters based on covariance information
+  # Update beta1 parameters based on covariance information
   par_all <- update_beta1_parameters(par_all, names, beta1)
 
   parm <- param(par_all, names)
@@ -79,7 +79,7 @@ initialize_par_all_if_missing <- function(par_all, names, pairs, par_s, beta1, c
 }
 #' Update beta1 Parameters in Model Parameters
 #'
-#' Modifies the 'beta1ij' parameters within the complete set of model parameters (`par_all`) using the covariance information provided by the 'beta1ij' matrix. This adjustment is crucial for ensuring accurate covariance structures in the model.
+#' Modifies the 'beta1' parameters within the complete set of model parameters (`par_all`) using the covariance information provided by the 'beta1ij' matrix. This adjustment is crucial for ensuring accurate covariance structures in the model.
 #'
 #' This function implements the methods described in Section 2.4 of the article, functions log_lik and log
 #' *Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8).
@@ -94,7 +94,7 @@ initialize_par_all_if_missing <- function(par_all, names, pairs, par_s, beta1, c
 #' @noRd
 #' @importFrom Matrix nearPD
 update_beta1_parameters <- function(par_all, names, beta1) {
-  # Update the `beta1ij` parameters in `par_all` based on the covariance information in `beta1ij`
+  # Update the `beta1ij` parameters in `par_all` based on the covariance information in `beta1`
   if (!is.matrix(beta1)) {
     for (v1 in names) {
       for (v2 in names) {

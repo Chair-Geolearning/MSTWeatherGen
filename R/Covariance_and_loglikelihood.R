@@ -171,7 +171,7 @@ param <- function(par, names) {
   }
   return(u)
 }
-#' @title Compute rho2ij Correlations
+#' @title Compute rho2 Correlations
 #'
 #' @description
 #' This function calculates the beta correlation coefficients between variables based on the Gneiting function, adjusted for a correction term. It is intended for internal use within package functions to adjust initial correlation values using specified parameters.
