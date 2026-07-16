@@ -81,7 +81,7 @@ steps to derive the optimal model parameters that best fit the observed data.</p
 <span>  <span class="va">coordinates</span>,</span>
 <span>  <span class="va">n1</span>,</span>
 <span>  <span class="va">n2</span>,</span>
-<span>  <span class="va">ax</span>,</span>
+<span>  <span class="va">beta1</span>,</span>
 <span>  <span class="va">cr</span>,</span>
 <span>  <span class="va">threshold_precip</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -127,16 +127,16 @@ steps to derive the optimal model parameters that best fit the observed data.</p
 <dd><p>n2 Parameters that define the granularity for generating spatial index pairs, affecting the spatial resolution of the model.</p></dd>
 
 
-<dt id="arg-ax">ax<a class="anchor" aria-label="anchor" href="#arg-ax"></a></dt>
-<dd><p>Matrix of precomputed correction terms used to adjust the covariance matrix, aiding in model stabilization.</p></dd>
-
-
 <dt id="arg-cr">cr<a class="anchor" aria-label="anchor" href="#arg-cr"></a></dt>
 <dd><p>Initial correlation matrix representing the base relationships between variables, used as a starting point for optimization.</p></dd>
 
 
 <dt id="arg-threshold-precip">threshold_precip<a class="anchor" aria-label="anchor" href="#arg-threshold-precip"></a></dt>
 <dd><p>Threshold values for precipitation, used in preprocessing to distinguish between different precipitation intensities.</p></dd>
+
+
+<dt id="arg-beta-">beta1<a class="anchor" aria-label="anchor" href="#arg-beta-"></a></dt>
+<dd><p>Matrix of precomputed correction terms used to adjust the covariance matrix, aiding in model stabilization.</p></dd>
 
 </dl></div>
     <div id="value">
@@ -162,7 +162,7 @@ steps to derive the optimal model parameters that best fit the observed data.</p
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
       </footer></div>
