@@ -43,7 +43,7 @@ estimation_gf(
 
 \item{threshold_precip}{Threshold values for precipitation, used in preprocessing to distinguish between different precipitation intensities.}
 
-\item{beta1ij}{Matrix of precomputed correction terms used to adjust the covariance matrix, aiding in model stabilization.}
+\item{beta1}{Matrix of precomputed correction terms used to adjust the covariance matrix, aiding in model stabilization.}
 }
 \value{
 A list containing two elements: `parm`, the parameter matrix formatted for interpretation and use in subsequent model applications, and

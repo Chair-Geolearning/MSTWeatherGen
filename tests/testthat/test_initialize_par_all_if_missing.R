@@ -148,7 +148,7 @@ test_that("par_all has expected length", {
     names = single_name,
     pairs = single_pairs,
     par_s = single_par_s,
-    beta1ij = ax[1,],
+    beta1 = ax[1,],
     cr = cr[1, 1, drop = FALSE]
   )
 

@@ -33,7 +33,7 @@ generate_variable_index_pairs <- function(names) {
 #' @param names Vector of variable names involved in the model.
 #' @param pairs Generated pairs of variables for which parameters are set.
 #' @param par_s Initial scaling parameters for the covariance function.
-#' @param beta1ij Correction term parameters to be updated in `par_all`.
+#' @param beta1 Correction term parameters to be updated in `par_all`.
 #' @param cr Initial correlation matrix used for beta computation.
 #'
 #' @return Updated `par_all` vector with all model parameters, including default and specified values.
