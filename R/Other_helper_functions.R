@@ -246,6 +246,10 @@ summary.swg <- function(swg, season = NULL, all = FALSE) {
   }
 
   for (s in season) {
+    if (!(s %in% all_seasons)) {
+      warning("Season '", s, "' not found, skipping.")
+      next
+    }
     list_s <- swg$swg[[s]]
     prefix <- paste0(variable_name, "$swg$", s)
 
