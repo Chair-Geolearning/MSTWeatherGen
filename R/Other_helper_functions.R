@@ -278,7 +278,7 @@ summary.swg <- function(swg, season = NULL, all = FALSE) {
     cat(paste0(prefix, "$scale_parm$mu"), "\n")
     cat("\t", paste0("$", names(list_s$scale_parm$mu)), "\n")
     if (all) str(list_s$scale_parm$mu)
-    cat(paste0(prefix, "scale_parm$sd"), "\n")
+    cat(paste0(prefix, "$scale_parm$sd"), "\n")
     cat("\t", paste0("$", names(list_s$scale_parm$sd)), "\n")
     if (all) str(list_s$scale_parm$sd)
     # transitions
