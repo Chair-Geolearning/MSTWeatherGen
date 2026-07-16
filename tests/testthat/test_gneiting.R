@@ -77,7 +77,7 @@ parms <- c("a1", "a2", "d1", "d2", "g1", "g2")
 par_all[parms] <-rep(1, length(parms))
 
 
-par_all <- update_ax_parameters(par_all, names, compute_ax(param(par_all, names), names))
+par_all <- update_beta1_parameters(par_all, names, extract_beta1(param(par_all, names), names))
 parm <- param(par_all, names)
 
 # Create a map to fetch parameters quickly using a two-level list structure
@@ -106,13 +106,13 @@ dij <- 1
 
 # 1.
 test_that("Gneiting returns numeric", {
-  res <- Gneiting(h = 0.1, u = 0.2, par = par, dij = dij)
+  res <- Gneiting(h = 0.1, u = 0.2, par = par, rho2ij = dij)
   expect_true(is.numeric(res))
 })
 
 # 2.
 test_that("Gneiting works for h=0, u=0, Nan value check with Jeff.", {
-  res <- Gneiting(h = 0, u = 0, par = par, dij = dij)
+  res <- Gneiting(h = 0, u = 0, par = par, rho2ij = dij)
   expect_true(is.na(res))
 })
 
@@ -120,27 +120,27 @@ test_that("Gneiting works for h=0, u=0, Nan value check with Jeff.", {
 test_that("Gneiting returns finite values for vector inputs", {
   h <- c(0.2, 0.5, 1)
   u <- c(0.2, 1, 2)
-  res <- Gneiting(h = h, u = u, par = par, dij = dij)
+  res <- Gneiting(h = h, u = u, par = par, rho2ij = dij)
   expect_equal(length(res), 3)
   expect_true(all(is.finite(res)))
 })
 
 # 4.
 test_that("Gneiting returns positive values for positive parameters", {
-  res <- Gneiting(h = 0.5, u = 1, par = par, dij = dij)
+  res <- Gneiting(h = 0.5, u = 1, par = par, rho2ij = dij)
   expect_true(res >= 0)
 })
 
 # 5.
-test_that("Gneiting returns zero if dij=0 (partial correlation effect)", {
-  res <- Gneiting(h = 0.5, u = 1, par = par, dij = 0)
+test_that("Gneiting returns zero if rho2ij=0 (partial correlation effect)", {
+  res <- Gneiting(h = 0.5, u = 1, par = par, rho2ij = 0)
   expect_true(is.finite(res))
 })
 
 # 6.
 test_that("Gneiting returns same values for repeated calls", {
-  res1 <- Gneiting(h = 0.5, u = 1, par = par, dij = dij)
-  res2 <- Gneiting(h = 0.5, u = 1, par = par, dij = dij)
+  res1 <- Gneiting(h = 0.5, u = 1, par = par, rho2ij = dij)
+  res2 <- Gneiting(h = 0.5, u = 1, par = par, rho2ij = dij)
   expect_equal(res1, res2)
 })
 
@@ -148,7 +148,7 @@ test_that("Gneiting returns same values for repeated calls", {
 test_that("Gneiting works for vector h and scalar u", {
   h <- c(0, 0.5, 1)
   u <- 0.5
-  res <- Gneiting(h = h, u = u, par = par, dij = dij)
+  res <- Gneiting(h = h, u = u, par = par, rho2ij = dij)
   expect_equal(length(res), length(h))
 })
 
@@ -156,6 +156,6 @@ test_that("Gneiting works for vector h and scalar u", {
 testthat::test_that("Gneiting works for scalar h and vector u", {
   h <- 0.5
   u <- c(0, 0.5, 1)
-  res <- Gneiting(h = h, u = u, par = par, dij = dij)
+  res <- Gneiting(h = h, u = u, par = par, rho2ij = dij)
   expect_equal(length(res), length(u))
 })

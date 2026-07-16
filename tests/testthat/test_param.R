@@ -41,8 +41,8 @@ test_that("it contains the right parameters.", {
   required_cols <- c(
     "v1", "v2", "a1", "d1", "g1", "a2", "d2", "g2",
     "b1", "e1", "l1", "b2", "e2", "l2", "c", "f", "m",
-    "ai", "aj", "bi", "bj", "ci", "cj",
-    "rii", "rjj", "vii", "vjj", "ax", "dij"
+    "Ai", "Aj", "Bi", "Bj", "Ci", "Cj",
+    "aii", "ajj", "nuii", "nujj", "beta1ij", "rho2ij"
   )
 
   expect_true(all(required_cols %in% colnames(parm)))
