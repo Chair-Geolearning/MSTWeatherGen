@@ -223,6 +223,7 @@ calculate_ICI <- function(radiation, time) {
 #' \dontrun{
 #'   swg <- MSTWeatherGen_estim()
 #'   summary(swg)
+#'   summary.swg(swg)
 #' }
 #' @return invisible(NULL)
 #' @export
@@ -264,6 +265,8 @@ summary.swg <- function(swg, season = NULL, all = FALSE) {
       "\tEnd", as.character(as.Date(list_s$dates[length(list_s$dates)])), "\n",
       "\tNb of dates:", length(list_s$dates), "\n"
     )
+    cat("Unique days : ",dim(list_s$scale_parm$mu[[1]])[1],'\n')
+    cat("Nb of Coordinates : ",dim(list_s$scale_parm$mu[[1]])[2],'\n')
 
     # Weather Types
     wt_counts <- table(list_s$wt)
@@ -277,17 +280,18 @@ summary.swg <- function(swg, season = NULL, all = FALSE) {
     }
     cat("\t", "T", sum(wt_counts), "\n")
     if (all) str(list_s$wt)
-
-    # scale_param
-    cat(paste0(prefix, "$scale_parm$mu"), "\n")
-    cat("\t", paste0("$", names(list_s$scale_parm$mu)), "\n")
-    if (all) str(list_s$scale_parm$mu)
-    cat(paste0(prefix, "$scale_parm$sd"), "\n")
-    cat("\t", paste0("$", names(list_s$scale_parm$sd)), "\n")
-    if (all) str(list_s$scale_parm$sd)
     # transitions
+    cat("Weather type transitions Matrix : ")
     cat(paste0(prefix, "$transitions"), "\n")
     if (all) str(list_s$transitions)
+    # scale_param
+    cat(paste0("Central tendency : ",prefix, "$scale_parm$mu"), "\n")
+    cat("\t", paste0("$", names(list_s$scale_parm$mu)), "\n")
+    if (all) str(list_s$scale_parm$mu)
+    cat(paste0("Standard deviation : ", prefix, "$scale_parm$sd"), "\n")
+    cat("\t", paste0("$", names(list_s$scale_parm$sd)), "\n")
+    if (all) str(list_s$scale_parm$sd)
+    
     # lmbd
     cat(paste0(prefix, "$lmbd"), "\n")
     if (all) str(list_s$lmbd)
