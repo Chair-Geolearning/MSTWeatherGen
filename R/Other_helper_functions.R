@@ -117,12 +117,12 @@ filter_season_data <- function(data, dates, season, names) {
   season_indices <- season_indices(dates, season)
 
   # Filter data and dates based on season indices
-  data_filtered <- data[season_indices,,, drop = FALSE]
+  data_filtered <- data[season_indices, , , drop = FALSE]
   dates_filtered <- dates[season_indices]
 
   # Further filter data to include only the specified variables (names)
-  data_filtered <- data_filtered[,,names,drop = FALSE]
-  
+  data_filtered <- data_filtered[, , names, drop = FALSE]
+
   # Order the filtered data by dates
   data_filtered <- data_filtered[order(dates_filtered), , , drop = FALSE]
 
@@ -202,4 +202,104 @@ calculate_ICI <- function(radiation, time) {
   ICI <- radiation / TOA_irradiance
 
   return(ICI)
+}
+
+#' Explore or summarize estimation output swg
+#'
+#' Summarize `MSTWeatherGen_Estim()`` function output (swg object class).
+#'
+#' @param swg A swg class, as a list containing the results of the
+#'  `MSTWeatherGen_Estim` function, including estimated parameters and
+#'  other outputs relevant to weather generation, such as weather type
+#'  classifications and spatial dependencies.
+#' Each season contains a list containing dates, scale parameters,
+#'  weather types, transition probabilities, lambda transformations,
+#' and parameters for the Gaussian field model for the specified season.
+#' @param season vector of seasons names,
+#'  default NULL show summarize seasons
+#' @param all a boolean to output all values as str (default = FALSE)
+#' 
+#' @examples
+#' \dontrun{
+#'   swg <- MSTWeatherGen_estim()
+#'   summary(swg)
+#'   summary.swg(swg)
+#' }
+#' @return invisible(NULL)
+#' @export
+summary.swg <- function(swg, season = NULL, all = FALSE) {
+  variable_name <- deparse(substitute(swg))
+
+  if (!(is.list(swg) && is.list(swg$swg))) {
+    stop("Input wrong format, list of list is needed", call. = FALSE)
+  }
+
+  cat("Estimated Variables:", paste0(swg$names, collapse = " , "), "\n")
+  cat(
+    "Weather types names:",
+    paste0(swg$names_weather_types, collapse = " , "), "\n"
+  )
+  cat("Number of seasons:", length(swg$swg), "\n")
+
+  all_seasons <- names(swg$swg)
+  if (is.null(season)) {
+    season <- all_seasons
+  }
+
+  for (s in season) {
+    if (!(s %in% all_seasons)) {
+      warning("Season '", s, "' not found, skipping.")
+      next
+    }
+    list_s <- swg$swg[[s]]
+    prefix <- paste0(variable_name, "$swg$", s)
+
+    cat("\n---\n")
+    cat(prefix, "\n")
+    cat("Season", s, "\n")
+
+    # Dates
+    cat(
+      paste0(prefix,"$dates\n"),
+      "\tStart", as.character(as.Date(list_s$dates[1])), "\n",
+      "\tEnd", as.character(as.Date(list_s$dates[length(list_s$dates)])), "\n",
+      "\tNb of dates:", length(list_s$dates), "\n"
+    )
+    cat("Unique days : ",dim(list_s$scale_parm$mu[[1]])[1],'\n')
+    cat("Nb of Coordinates : ",dim(list_s$scale_parm$mu[[1]])[2],'\n')
+
+    # Weather Types
+    wt_counts <- table(list_s$wt)
+    cat(paste0(prefix,"$wt\n"),
+      "Number of weather types", length(wt_counts),
+      "-> values [", paste(names(wt_counts), collapse = " "), "]", "\n"
+    )
+
+    for (wt_name in names(wt_counts)) {
+      cat("\t", wt_name, wt_counts[[wt_name]], "\n")
+    }
+    cat("\t", "T", sum(wt_counts), "\n")
+    if (all) str(list_s$wt)
+    # transitions
+    cat("Weather type transitions Matrix : ")
+    cat(paste0(prefix, "$transitions"), "\n")
+    if (all) str(list_s$transitions)
+    # scale_param
+    cat(paste0("Central tendency : ",prefix, "$scale_parm$mu"), "\n")
+    cat("\t", paste0("$", names(list_s$scale_parm$mu)), "\n")
+    if (all) str(list_s$scale_parm$mu)
+    cat(paste0("Standard deviation : ", prefix, "$scale_parm$sd"), "\n")
+    cat("\t", paste0("$", names(list_s$scale_parm$sd)), "\n")
+    if (all) str(list_s$scale_parm$sd)
+    
+    # lmbd
+    cat(paste0(prefix, "$lmbd"), "\n")
+    if (all) str(list_s$lmbd)
+    # gf_par
+    cat(paste0(prefix, "$gf_par[[1:", length(list_s$gf_par), "]]"), "\n")
+    cat("\t", paste0("$", names(list_s$gf_par[[1]])), "\n")
+    if (all) str(list_s$gf_par)
+  }
+
+  invisible(NULL)
 }

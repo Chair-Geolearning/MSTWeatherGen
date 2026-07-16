@@ -74,8 +74,9 @@ MSTWeatherGen_Estim <- function(data, dates, by_season = TRUE, seasons, scale = 
       n1 = n1, n2 = n2
     )
   })
-
-  return(list(swg = swg, by_season = by_season, names = names, names_weather_types = names_weather_types))
+  return_swg <- list(swg = swg, by_season = by_season, names = names, names_weather_types = names_weather_types)
+  class(return_swg) <- append("swg", class(return_swg))
+  return(return_swg)
 }
 
 #' @title Simulate Weather Data Using MSTWeatherGen
