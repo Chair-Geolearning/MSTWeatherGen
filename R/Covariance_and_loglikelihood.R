@@ -113,32 +113,17 @@ param <- function(par, names) {
   u <- data.frame(v1 = ep$v1, v2 = ep$v2, stringsAsFactors = FALSE)
 
   # Assign common temporal parameters to all pairs
-  u$a1 <- par["a1"]
-  u$d1 <- par["d1"]
-  u$g1 <- par["g1"]
-  u$a2 <- par["a2"]
-  u$d2 <- par["d2"]
-  u$g2 <- par["g2"]
-  u$b1 <- par["b1"]
-  u$e1 <- par["e1"]
-  u$l1 <- par["l1"]
-  u$b2 <- par["b2"]
-  u$e2 <- par["e2"]
-  u$l2 <- par["l2"]
+  u$a <- par["a"]
+  u$b <- par["b"]
   u$c <- par["c"]
-  u$f <- par["f"]
-  u$m <- par["m"]
+  u$d <- par["d"]
+  u$e <- par["e"]
+  
   # Loop through each pair to populate the data frame with corresponding parameter values
   for (i in seq_len(J)) {
     # Extract and assign specific parameters for each pair based on naming convention
     u$Ai[i] <- par[paste(u$v1[i], "Ai", sep = ":")]
     u$Aj[i] <- par[paste(u$v2[i], "Ai", sep = ":")]
-
-    u$Bi[i] <- par[paste(u$v1[i], "Bi", sep = ":")]
-    u$Bj[i] <- par[paste(u$v2[i], "Bi", sep = ":")]
-
-    u$Ci[i] <- par[paste(u$v1[i], "Ci", sep = ":")]
-    u$Cj[i] <- par[paste(u$v2[i], "Ci", sep = ":")]
 
     u$aii[i] <- par[paste(paste(u$v1[i], u$v1[i], sep = "-"), "aii", sep = ":")]
     u$ajj[i] <- par[paste(paste(u$v2[i], u$v2[i], sep = "-"), "aii", sep = ":")]
@@ -148,6 +133,14 @@ param <- function(par, names) {
 
     u$beta1ij[i] <- par[paste(paste(u$v1[i], u$v2[i], sep = "-"), "beta1ij", sep = ":")]
 
+    # r2ii, r2jj — spatio-temporal exponential decay (per variable)
+    u$r2ii[i] <- par[paste(u$v1[i], "r2ii", sep = ":")]
+    u$r2jj[i] <- par[paste(u$v2[i], "r2ii", sep = ":")]
+    
+    # r1ii, r1jj — purely temporal exponential decay (per variable)
+    u$r1ii[i] <- par[paste(u$v1[i], "r1ii", sep = ":")]
+    u$r1jj[i] <- par[paste(u$v2[i], "r1ii", sep = ":")]
+    
     u$rho2ij[i] <- par[paste(paste(u$v1[i], u$v2[i], sep = "-"), "rho2ij", sep = ":")]
   }
   return(u)
