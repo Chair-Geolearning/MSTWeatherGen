@@ -37,64 +37,54 @@ Matern <- function(h, r, v) {
 #'
 #' @keywords internal
 Gneiting <- function(h, u, par, rho2ij) {
-  # Multivariate space-time Gneiting's covariance function
-  # From the paper: https://doi.org/10.1016/j.spasta.2022.100706
+  # Same function as Gneiting, but with new names for variables
   
-  # Arguments:loglik
-  #   h: Numeric vector of spatial distances.
-  #   u: Numeric vector of temporal distances.
-  #   par: Numeric vector of parameters used in the covariance function.
-  #   rho2ij: correlation parameter between variable i and j.
-  
-  # Returns:
-  #   Covariance value(s) calculated using Gneiting's spatio-temporal covariance model.
-  
-  if(!is.numeric(par)) par <- as.numeric(par)
+  if (!is.numeric(par)) par <- as.numeric(par)
   
   # Unpack parameters from the 'par' vector for clarity.
-  a <- par[1]
-  b <- par[2]
-  c <- par[3]
-  d <- par[4]
-  e <- par[5]
-  Ai <- par[6] 
-  Aj <- par[7]
-  aii <- par[12]  # paramètre de portee dans la Matern
-  ajj <- par[13]  # paramètre de portee dans la Matern
-  nuii <- par[14] 
-  nujj <- par[15]
-  beta1ij <- par[16]
-  r2ii <- par[17]  # intervient dans le spatio-temp
-  r2jj <- par[18]
-  r1ii <- par[19]  # intervient dans le temporel
-  r1jj <- par[20]
+  a       <- par[1]
+  b       <- par[2]
+  c       <- par[3]
+  d       <- par[4]
+  e       <- par[5]
+  Ai      <- par[6]
+  Aj      <- par[7]
+  aii     <- par[8]   # portée Matérn variable i
+  ajj     <- par[9]   # portée Matérn variable j
+  nuii    <- par[10]  # lissage Matérn variable i
+  nujj    <- par[11]  # lissage Matérn variable j
+  beta1ij <- par[12]  # coefficient terme temporel pur
+  r2ii    <- par[13]  # décroissance exp. spatiotemporelle variable i
+  r2jj    <- par[14]  # décroissance exp. spatiotemporelle variable j
+  r1ii    <- par[15]  # décroissance exp. temporelle variable i
+  r1jj    <- par[16]  # décroissance exp. temporelle variable j
   
-  # Calculated intermediate parameters for the covariance calculation.
+  # Cross parameters (calculated, never stored)
   nuij <- (nuii + nujj) / 2
-  aij <- sqrt((aii^2 + ajj^2) / 2)  # paramètre de portee dans la Matern
+  aij  <- sqrt((aii^2 + ajj^2) / 2)
+  r1ij <- sqrt((r1ii^2 + r1jj^2) / 2)
+  r2ij <- sqrt((r2ii^2 + r2jj^2) / 2)
   
+  # Temporal pseudo-variogram \eta_{ij}
+  etaij <- ((a * abs(u))^(2*b) + 1)^c -
+    (Ai * Aj * ((d * abs(u))^(2*e) + 1)^(-c))
   
-  r1ij <- sqrt((r1ii^2 + r1jj^2) / 2) # paramètre temporel dans TEMP
-  r2ij <- sqrt((r2ii^2 + r2jj^2) / 2) # paramètre temporel dans SPATIOTEMP
-  
-  beta2ij <- rho2ij *((aii^nuii * ajj^nujj) / aij^(2*nuij)) *
+  # Cross-correlation amplitude
+  beta2ij <- rho2ij *
+    ((aii^nuii * ajj^nujj) / aij^(2*nuij)) *
     (gamma(nuij) / (gamma(nuii)^(1/2) * gamma(nujj)^(1/2))) *
-    sqrt((1-Ai^2)*(1-Aj^2)) *
+    sqrt((1 - Ai^2) * (1 - Aj^2)) *
     (r2ii^(1/2) * r2jj^(1/2)) / r2ij
   
-  etaij <- ((a * abs(u))^(2*b) + 1)^c - (Ai*Aj * ((d * abs(u))^(2*e) + 1)^(-c))
+  # Spatio-temporal component
+  SpatioTemp <- Matern(abs(h), r = sqrt(aij^2 / etaij), v = nuij) *
+    exp(-r2ij * abs(u)) / etaij
   
-  #A1 <- eij / muij
-  #A2 <- Matern(abs(h), r = (rij^2 / muij)^(1/2), v = vij) * exp(-aij * abs(u))
+  # Purely temporal component
+  Temp <- exp(-r1ij * abs(u))
   
-  SpatioTemp = Matern(abs(h), r = (aij^2 / etaij)^(1/2), v = nuij) * exp(-r2ij * abs(u))/etaij
-  #A3 <- ax * ((bii^(1/2) * bjj^(1/2)) / bij) * exp(-bij * abs(u))
-  
-  Temp = exp(-r1ij * abs(u))
-  
-  return(beta2ij*SpatioTemp + beta1ij*Temp)
-
-  }
+  return(beta2ij * SpatioTemp + beta1ij * Temp)
+}
 
 #' @title Construct Covariance Parameters DataFrame
 #'
