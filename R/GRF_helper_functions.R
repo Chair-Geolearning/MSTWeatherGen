@@ -45,12 +45,14 @@ initialize_par_all_if_missing <- function(par_all, names, pairs, par_s, beta1, c
   # Initialize the `par_all` vector if it is missing, with default values or using `par_s`
   if (is.null(par_all)) {
     names_par_all <- c(
-      paste(pairs, "rho2ij", sep = ":"), "a1", "d1", "g1", "a2", "d2", "g2",
-      "b1", "e1", "l1", "b2", "e2", "l2", "c", "f", "m",
-      paste(names, "Ai", sep = ":"), paste(names, "Bi", sep = ":"),
-      paste(names, "Ci", sep = ":"),
-      paste(pairs, "aii", sep = ":"), paste(pairs, "nuii", sep = ":"),
-      paste(pairs, "beta1ij", sep = ":")
+      paste(pairs, "rho2ij", sep = ":"),
+      "a", "b", "c", "d", "e",
+      paste(names, "Ai", sep = ":"),
+      paste(pairs[1:length(names)], "aii", sep = ":"),   # ← self-pairs
+      paste(pairs[1:length(names)], "nuii", sep = ":"),  # ← self-pairs
+      paste(pairs, "beta1ij", sep = ":"),
+      paste(names, "r2ii", sep = ":"),   # ← par variable (nouveau)
+      paste(names, "r1ii", sep = ":")    # ← par variable (nouveau)
     )
 
     par_all <- setNames(rep(0.1, length(names_par_all)), names_par_all)
@@ -59,7 +61,7 @@ initialize_par_all_if_missing <- function(par_all, names, pairs, par_s, beta1, c
     par_all[paste(pairs[1:length(names)], "aii", sep = ":")] <- par_s[1, ]
     par_all[paste(pairs[1:length(names)], "nuii", sep = ":")] <- par_s[2, ]
     par_all[paste(pairs, "beta1ij", sep = ":")] <- 0
-    parms <- c("a1", "a2", "d1", "d2", "g1", "g2")
+    parms <- c("a", "b", "c", "d", "e")
     par_all[parms] <- rep(1, length(parms))
   }
 
