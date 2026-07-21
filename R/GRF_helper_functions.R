@@ -57,22 +57,22 @@ initialize_par_all_if_missing <- function(par_all, names, pairs, par_s, beta1, c
 
     par_all <- setNames(rep(0.1, length(names_par_all)), names_par_all)
 
-    par_all[paste(pairs, "rho2ij", sep = ":")] <- 1
+    par_all[paste(pairs, "rho2ij", sep = ":")] <- 1 # A checker encore juste mettre a les self pairs.
     par_all[paste(pairs[1:length(names)], "aii", sep = ":")] <- par_s[1, ]
     par_all[paste(pairs[1:length(names)], "nuii", sep = ":")] <- par_s[2, ]
-    par_all[paste(pairs, "beta1ij", sep = ":")] <- 0
-    parms <- c("a", "b", "c", "d", "e")
-    par_all[parms] <- rep(1, length(parms))
+    par_all[paste(pairs, "beta1ij", sep = ":")] <- 0 #  a mettre a un uniquement pour les self pairs.
+    parm_eta <- c("a", "b", "c", "d", "e") #  a renommer parms = parm_eta
+    par_all[parm_eta] <- rep(1, length(parm_eta))
   }
 
   # Update beta1 parameters based on covariance information
   par_all <- update_beta1_parameters(par_all, names, beta1)
 
-  parm <- param(par_all, names)
+  parm <- param(par_all, names)   #  a renommer en create_df_param
   rho2 <- try(compute_rho2(parm, names, cr), silent = T)
   ch <- try(chol(rho2), silent = T)
   if (is.character(ch)) {
-    par_s <- matrix(rep(1, length(names)^2), ncol = length(names), nrow = length(names))
+    #par_s <- matrix(rep(1, length(names)^2), ncol = length(names), nrow = length(names))
     par_all[paste(pairs[1:length(names)], "aii", sep = ":")] <- 1
     par_all[paste(pairs[1:length(names)], "nuii", sep = ":")] <- 1
     par_all <- update_beta1_parameters(par_all, names, beta1)
@@ -166,7 +166,8 @@ init_space_par <- function(data, names, h, uh, max_it = 2000) {
 
     parallel::clusterExport(cl, c("loglik_spatial"), envir = environment())
     parent_seed <- .Random.seed
-
+    
+    #Loop on variables in name
     par <- parallel::parLapply(cl, names, function(v) {
       assign(".Random.seed", parent_seed, envir = .GlobalEnv)
       optim(
