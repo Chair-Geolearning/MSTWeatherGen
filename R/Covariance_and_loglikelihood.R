@@ -42,65 +42,46 @@ Gneiting <- function(h, u, par, rho2ij) {
   if (!is.numeric(par)) par <- as.numeric(par)
   
   # Unpack parameters from the 'par' vector for clarity.
-  a1 <- par[1]
-  d1 <- par[2]
-  g1 <- par[3]
-  a2 <- par[4]
-  d2 <- par[5]
-  g2 <- par[6]
-  b1 <- par[7]
-  e1 <- par[8]
-  l1 <- par[9]
-  b2 <- par[10]
-  e2 <- par[11]
-  l2 <- par[12]
-  c  <- par[13]
-  f  <- par[14]
-  m  <- par[15]
-  Ai <- par[16]
-  Aj <- par[17]
-  Bi <- par[18]
-  Bj <- par[19]
-  Ci <- par[20]
-  Cj <- par[21]
+  a       <- par[1]
+  b       <- par[2]
+  c       <- par[3]
+  d       <- par[4]
+  e       <- par[5]
+  Ai      <- par[6]
+  Aj      <- par[7]
+  aii     <- par[8]   # portée Matérn variable i
+  ajj     <- par[9]   # portée Matérn variable j
+  nuii    <- par[10]  # lissage Matérn variable i
+  nujj    <- par[11]  # lissage Matérn variable j
+  beta1ij <- par[12]  # coefficient terme temporel pur
+  r2ii    <- par[13]  # décroissance exp. spatiotemporelle variable i
+  r2jj    <- par[14]  # décroissance exp. spatiotemporelle variable j
+  r1ii    <- par[15]  # décroissance exp. temporelle variable i
+  r1jj    <- par[16]  # décroissance exp. temporelle variable j
   
-  aii  <- par[22]
-  ajj  <- par[23]
-  nuii <- par[24]
-  nujj <- par[25]
-  
-  beta1ij <- par[26]  # beta1ij : covariance for temporal component
-  
-  # Calculated intermediate parameters for the covariance calculation.
-  
-  # Details : Paper : See equation 10
-  # Cross parameters of the Matern function
+  # Cross parameters (calculated, never stored)
   nuij <- (nuii + nujj) / 2
   aij  <- sqrt((aii^2 + ajj^2) / 2)
+  r1ij <- sqrt((r1ii^2 + r1jj^2) / 2)
+  r2ij <- sqrt((r2ii^2 + r2jj^2) / 2)
   
-  # Details : Paper : See equation 10 Variogram
-  # Temporal pseudo, \eta_{ij}
-  etaij <- ((a1 * abs(u))^(2 * b1) + 1)^c -
-    (Ai * Aj * ((a2 * abs(u))^(2 * b2) + 1)^(-c))
+  # Temporal pseudo-variogram \eta_{ij}
+  etaij <- ((a * abs(u))^(2*b) + 1)^c -
+    (Ai * Aj * ((d * abs(u))^(2*e) + 1)^(-c))
   
-  # Details : Additional Temporal attenuation
-  eta2ij <- ((d1 * abs(u))^(2 * e1) + 1)^f -
-    (Bi * Bj * ((d2 * abs(u))^(2 * e2) + 1)^(-f))
-  
-  # Details : Paper : See equation 10
+  # Cross-correlation amplitude
   beta2ij <- rho2ij *
-    ((aii^nuii * ajj^nujj) / aij^(2 * nuij)) *
-    (gamma(nuij) / (gamma(nuii)^(1 / 2) * gamma(nujj)^(1 / 2))) *
+    ((aii^nuii * ajj^nujj) / aij^(2*nuij)) *
+    (gamma(nuij) / (gamma(nuii)^(1/2) * gamma(nujj)^(1/2))) *
     sqrt((1 - Ai^2) * (1 - Aj^2)) *
-    sqrt((1 - Bi^2) * (1 - Bj^2))
+    (r2ii^(1/2) * r2jj^(1/2)) / r2ij
   
-  SpatioTemp <- Matern(abs(h), r = sqrt(aij^2 / etaij), v = nuij) / (etaij * eta2ij)
+  # Spatio-temporal component
+  SpatioTemp <- Matern(abs(h), r = sqrt(aij^2 / etaij), v = nuij) *
+    exp(-r2ij * abs(u)) / etaij
   
-  # Temp : temporal component only (the term present in the paper)
-  Temp <- 1 / (
-    ((g1 * abs(u))^(2 * l1) + 1)^m -
-      Ci * Cj * ((g2 * abs(u))^(2 * l2) + 1)^(-m)
-  )
+  # Purely temporal component
+  Temp <- exp(-r1ij * abs(u))
   
   return(beta2ij * SpatioTemp + beta1ij * Temp)
 }
@@ -123,7 +104,7 @@ Gneiting <- function(h, u, par, rho2ij) {
 #'
 #' @keywords internal
 
-param <- function(par, names) {
+create_df_param <- function(par, names) {
   # Generate all possible pairs of variable names, including self-pairs, for parameter definitions
   ep <- generate_variable_index_pairs(names)
   pairs <- paste(ep[, 1], ep[, 2], sep = "-")
@@ -132,32 +113,17 @@ param <- function(par, names) {
   u <- data.frame(v1 = ep$v1, v2 = ep$v2, stringsAsFactors = FALSE)
 
   # Assign common temporal parameters to all pairs
-  u$a1 <- par["a1"]
-  u$d1 <- par["d1"]
-  u$g1 <- par["g1"]
-  u$a2 <- par["a2"]
-  u$d2 <- par["d2"]
-  u$g2 <- par["g2"]
-  u$b1 <- par["b1"]
-  u$e1 <- par["e1"]
-  u$l1 <- par["l1"]
-  u$b2 <- par["b2"]
-  u$e2 <- par["e2"]
-  u$l2 <- par["l2"]
+  u$a <- par["a"]
+  u$b <- par["b"]
   u$c <- par["c"]
-  u$f <- par["f"]
-  u$m <- par["m"]
+  u$d <- par["d"]
+  u$e <- par["e"]
+  
   # Loop through each pair to populate the data frame with corresponding parameter values
   for (i in seq_len(J)) {
     # Extract and assign specific parameters for each pair based on naming convention
     u$Ai[i] <- par[paste(u$v1[i], "Ai", sep = ":")]
     u$Aj[i] <- par[paste(u$v2[i], "Ai", sep = ":")]
-
-    u$Bi[i] <- par[paste(u$v1[i], "Bi", sep = ":")]
-    u$Bj[i] <- par[paste(u$v2[i], "Bi", sep = ":")]
-
-    u$Ci[i] <- par[paste(u$v1[i], "Ci", sep = ":")]
-    u$Cj[i] <- par[paste(u$v2[i], "Ci", sep = ":")]
 
     u$aii[i] <- par[paste(paste(u$v1[i], u$v1[i], sep = "-"), "aii", sep = ":")]
     u$ajj[i] <- par[paste(paste(u$v2[i], u$v2[i], sep = "-"), "aii", sep = ":")]
@@ -167,6 +133,14 @@ param <- function(par, names) {
 
     u$beta1ij[i] <- par[paste(paste(u$v1[i], u$v2[i], sep = "-"), "beta1ij", sep = ":")]
 
+    # r2ii, r2jj — spatio-temporal exponential decay (per variable)
+    u$r2ii[i] <- par[paste(u$v1[i], "r2ii", sep = ":")]
+    u$r2jj[i] <- par[paste(u$v2[i], "r2ii", sep = ":")]
+    
+    # r1ii, r1jj — purely temporal exponential decay (per variable)
+    u$r1ii[i] <- par[paste(u$v1[i], "r1ii", sep = ":")]
+    u$r1jj[i] <- par[paste(u$v2[i], "r1ii", sep = ":")]
+    
     u$rho2ij[i] <- par[paste(paste(u$v1[i], u$v2[i], sep = "-"), "rho2ij", sep = ":")]
   }
   return(u)
@@ -327,7 +301,7 @@ loglik_pair <- function(par, parms, pair, par_all, data, names, Vi, h, u, uh, ep
   v <- which(Vi[, 1] == sp[1] & Vi[, 2] == sp[2]) # Find the index of the pair in 'Vi'
 
   # Update and compute model parameters
-  parm <- param(par, names)
+  parm <- create_df_param(par, names)
   beta1 <- Matrix::nearPD(extract_beta1(parm, names))$mat # Compute ax correction terms
   rho2 <- try(compute_rho2(parm, names, cr), silent = T) # Compute rho2ij coefficients
 
@@ -447,9 +421,9 @@ loglik <- function(par, parms, par_all, data, names, Vi, h, u, uh, ep, cr) {
 
   par_all[parms] <- par # Update specified parameters.
 
-  parm <- param(par_all, names)
+  parm <- create_df_param(par_all, names)
   # beta1 <- Matrix::nearPD(extract_beta1(parm, names))$mat  # Compute ax correction terms
-  parm <- param(update_beta1_parameters(par_all, names, extract_beta1(parm, names)), names)
+  parm <- create_df_param(update_beta1_parameters(par_all, names, extract_beta1(parm, names)), names)
   rho2 <- try(compute_rho2(parm, names, cr), silent = T) # Compute rho2 coefficients
   # Attempt Cholesky decomposition to ensure positive definiteness.
   # ae <- try(chol(beta1ij), silent = TRUE)

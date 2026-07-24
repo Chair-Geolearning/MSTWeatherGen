@@ -45,32 +45,34 @@ initialize_par_all_if_missing <- function(par_all, names, pairs, par_s, beta1, c
   # Initialize the `par_all` vector if it is missing, with default values or using `par_s`
   if (is.null(par_all)) {
     names_par_all <- c(
-      paste(pairs, "rho2ij", sep = ":"), "a1", "d1", "g1", "a2", "d2", "g2",
-      "b1", "e1", "l1", "b2", "e2", "l2", "c", "f", "m",
-      paste(names, "Ai", sep = ":"), paste(names, "Bi", sep = ":"),
-      paste(names, "Ci", sep = ":"),
-      paste(pairs, "aii", sep = ":"), paste(pairs, "nuii", sep = ":"),
-      paste(pairs, "beta1ij", sep = ":")
+      paste(pairs, "rho2ij", sep = ":"),
+      "a", "b", "c", "d", "e",
+      paste(names, "Ai", sep = ":"),
+      paste(pairs[1:length(names)], "aii", sep = ":"),   # ← self-pairs
+      paste(pairs[1:length(names)], "nuii", sep = ":"),  # ← self-pairs
+      paste(pairs, "beta1ij", sep = ":"),
+      paste(names, "r2ii", sep = ":"),   # ← par variable (nouveau)
+      paste(names, "r1ii", sep = ":")    # ← par variable (nouveau)
     )
 
     par_all <- setNames(rep(0.1, length(names_par_all)), names_par_all)
 
-    par_all[paste(pairs, "rho2ij", sep = ":")] <- 1
+    par_all[paste(pairs, "rho2ij", sep = ":")] <- 1 # A checker encore juste mettre a les self pairs.
     par_all[paste(pairs[1:length(names)], "aii", sep = ":")] <- par_s[1, ]
     par_all[paste(pairs[1:length(names)], "nuii", sep = ":")] <- par_s[2, ]
-    par_all[paste(pairs, "beta1ij", sep = ":")] <- 0
-    parms <- c("a1", "a2", "d1", "d2", "g1", "g2")
-    par_all[parms] <- rep(1, length(parms))
+    par_all[paste(pairs, "beta1ij", sep = ":")] <- 0 #  a mettre a un uniquement pour les self pairs.
+    parm_eta <- c("a", "b", "c", "d", "e") #  a renommer parms = parm_eta
+    par_all[parm_eta] <- rep(1, length(parm_eta))
   }
 
   # Update beta1 parameters based on covariance information
   par_all <- update_beta1_parameters(par_all, names, beta1)
 
-  parm <- param(par_all, names)
+  parm <- create_df_param(par_all, names)   #  a renommer en create_df_param
   rho2 <- try(compute_rho2(parm, names, cr), silent = T)
   ch <- try(chol(rho2), silent = T)
   if (is.character(ch)) {
-    par_s <- matrix(rep(1, length(names)^2), ncol = length(names), nrow = length(names))
+    #par_s <- matrix(rep(1, length(names)^2), ncol = length(names), nrow = length(names))
     par_all[paste(pairs[1:length(names)], "aii", sep = ":")] <- 1
     par_all[paste(pairs[1:length(names)], "nuii", sep = ":")] <- 1
     par_all <- update_beta1_parameters(par_all, names, beta1)
@@ -164,7 +166,8 @@ init_space_par <- function(data, names, h, uh, max_it = 2000) {
 
     parallel::clusterExport(cl, c("loglik_spatial"), envir = environment())
     parent_seed <- .Random.seed
-
+    
+    #Loop on variables in name
     par <- parallel::parLapply(cl, names, function(v) {
       assign(".Random.seed", parent_seed, envir = .GlobalEnv)
       optim(
@@ -237,7 +240,7 @@ optimize_spatial_parameters <- function(par_all, data, names, Vi, uh, cr, max_it
     control = list(maxit = max_it)
   )$par
   par_all[parms] <- optimized_par
-  return(update_beta1_parameters(par_all, names, extract_beta1(param(par_all, names), names)))
+  return(update_beta1_parameters(par_all, names, extract_beta1(create_df_param(par_all, names), names)))
 }
 #' Optimize Spatio-Temporal Parameters for Variable Pairs
 #'
@@ -428,12 +431,12 @@ estimation_gf <- function(data, wt_id, max_it, dates, tmax, names, par_all = NUL
   }
 
   # Construct parameter and beta matrices
-  par_all <- update_beta1_parameters(par_all, names, extract_beta1(param(par_all, names), names))
-  parm <- param(par_all, names)
+  par_all <- update_beta1_parameters(par_all, names, extract_beta1(create_df_param(par_all, names), names))
+  parm <- create_df_param(par_all, names)
   beta <- compute_rho2(parm, names, cr)
   beta <- sapply(1:nrow(ep), function(i) beta[ep[i, 1], ep[i, 2]])
   par_all[1:length(beta)] <- beta
-  parm <- param(par_all, names)
+  parm <- create_df_param(par_all, names)
 
   return(list(parm = parm, par_all = par_all))
 }
