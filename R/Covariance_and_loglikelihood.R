@@ -301,7 +301,7 @@ loglik_pair <- function(par, parms, pair, par_all, data, names, Vi, h, u, uh, ep
   v <- which(Vi[, 1] == sp[1] & Vi[, 2] == sp[2]) # Find the index of the pair in 'Vi'
 
   # Update and compute model parameters
-  parm <- param(par, names)
+  parm <- create_df_param(par, names)
   beta1 <- Matrix::nearPD(extract_beta1(parm, names))$mat # Compute ax correction terms
   rho2 <- try(compute_rho2(parm, names, cr), silent = T) # Compute rho2ij coefficients
 
@@ -421,9 +421,9 @@ loglik <- function(par, parms, par_all, data, names, Vi, h, u, uh, ep, cr) {
 
   par_all[parms] <- par # Update specified parameters.
 
-  parm <- param(par_all, names)
+  parm <- create_df_param(par_all, names)
   # beta1 <- Matrix::nearPD(extract_beta1(parm, names))$mat  # Compute ax correction terms
-  parm <- param(update_beta1_parameters(par_all, names, extract_beta1(parm, names)), names)
+  parm <- create_df_param(update_beta1_parameters(par_all, names, extract_beta1(parm, names)), names)
   rho2 <- try(compute_rho2(parm, names, cr), silent = T) # Compute rho2 coefficients
   # Attempt Cholesky decomposition to ensure positive definiteness.
   # ae <- try(chol(beta1ij), silent = TRUE)
