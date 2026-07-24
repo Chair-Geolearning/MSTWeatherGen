@@ -104,7 +104,7 @@ Gneiting <- function(h, u, par, rho2ij) {
 #'
 #' @keywords internal
 
-param <- function(par, names) {
+create_df_param <- function(par, names) {
   # Generate all possible pairs of variable names, including self-pairs, for parameter definitions
   ep <- generate_variable_index_pairs(names)
   pairs <- paste(ep[, 1], ep[, 2], sep = "-")
