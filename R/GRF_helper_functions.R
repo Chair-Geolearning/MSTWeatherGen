@@ -41,7 +41,7 @@ generate_variable_index_pairs <- function(names) {
 #' @keywords internal
 #' @importFrom stats setNames
 #' @noRd
-initialize_par_all_if_missing <- function(par_all, names, pairs, par_s, beta1, cr) {
+initialize_par_all_if_missing <- function(par_all, names, pairs, par_s, rho1, cr) {
   # Initialize the `par_all` vector if it is missing, with default values or using `par_s`
   if (is.null(par_all)) {
     names_par_all <- c(
@@ -50,7 +50,7 @@ initialize_par_all_if_missing <- function(par_all, names, pairs, par_s, beta1, c
       paste(names, "Ai", sep = ":"),
       paste(pairs[1:length(names)], "aii", sep = ":"),   # ← self-pairs
       paste(pairs[1:length(names)], "nuii", sep = ":"),  # ← self-pairs
-      paste(pairs, "beta1ij", sep = ":"),
+      paste(pairs, "rho1ij", sep = ":"),
       paste(names, "r2ii", sep = ":"),   # ← par variable (nouveau)
       paste(names, "r1ii", sep = ":")    # ← par variable (nouveau)
     )
@@ -60,13 +60,13 @@ initialize_par_all_if_missing <- function(par_all, names, pairs, par_s, beta1, c
     par_all[paste(pairs, "rho2ij", sep = ":")] <- 1 # A checker encore juste mettre a les self pairs.
     par_all[paste(pairs[1:length(names)], "aii", sep = ":")] <- par_s[1, ]
     par_all[paste(pairs[1:length(names)], "nuii", sep = ":")] <- par_s[2, ]
-    par_all[paste(pairs, "beta1ij", sep = ":")] <- 0 #  a mettre a un uniquement pour les self pairs.
+    par_all[paste(pairs, "rho1ij", sep = ":")] <- 0 #  a mettre a un uniquement pour les self pairs.
     parm_eta <- c("a", "b", "c", "d", "e") #  a renommer parms = parm_eta
     par_all[parm_eta] <- rep(1, length(parm_eta))
   }
 
-  # Update beta1 parameters based on covariance information
-  par_all <- update_beta1_parameters(par_all, names, beta1)
+  # Update rho1 parameters based on covariance information
+  par_all <- update_rho1_parameters(par_all, names, rho1)
 
   parm <- create_df_param(par_all, names)   #  a renommer en create_df_param
   rho2 <- try(compute_rho2(parm, names, cr), silent = T)
@@ -75,11 +75,11 @@ initialize_par_all_if_missing <- function(par_all, names, pairs, par_s, beta1, c
     #par_s <- matrix(rep(1, length(names)^2), ncol = length(names), nrow = length(names))
     par_all[paste(pairs[1:length(names)], "aii", sep = ":")] <- 1
     par_all[paste(pairs[1:length(names)], "nuii", sep = ":")] <- 1
-    par_all <- update_beta1_parameters(par_all, names, beta1)
+    par_all <- update_rho1_parameters(par_all, names, rho1)
   }
   return(par_all)
 }
-#' Update beta1 Parameters in Model Parameters
+#' Update rho1 Parameters in Model Parameters
 #'
 #' Modifies the 'rho1' parameters within the complete set of model parameters (`par_all`) using the covariance information provided by the 'beta1ij' matrix. This adjustment is crucial for ensuring accurate covariance structures in the model.
 #'
