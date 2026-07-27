@@ -35,7 +35,7 @@ par_all_TEST <- initialize_par_all_if_missing(
   beta1 = ax,
   cr = cr
 )
-par_all_TEST_updated <- update_beta1_parameters(par_all_TEST, names, extract_beta1(create_df_param(par_all_TEST, names), names))
+par_all_TEST_updated <- update_beta1_parameters(par_all_TEST, names, extract_rho1(create_df_param(par_all_TEST, names), names))
 
 # Setup univarié
 names_univ   <- "Temp_max"
