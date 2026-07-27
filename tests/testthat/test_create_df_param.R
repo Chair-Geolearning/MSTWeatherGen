@@ -14,21 +14,21 @@ names <- c("Precipitation", "Wind", "Temp_max")
 
 # 0.
 test_that("param return a df", {
-  parm <- param(par_all_TEST, names)
+  parm <- create_df_param(par_all_TEST, names)
 
   expect_true(is.data.frame(parm))
 })
 
 # 1.
 test_that("col and row number", {
-  parm <- param(par_all_TEST, names)
+  parm <- create_df_param(par_all_TEST, names)
 
   expect_equal(nrow(parm), 6)
 })
 
 # 2.
 test_that("the result contain v1 and v2", {
-  parm <- param(par_all_TEST, names)
+  parm <- create_df_param(par_all_TEST, names)
 
   expect_true("v1" %in% colnames(parm))
   expect_true("v2" %in% colnames(parm))
@@ -36,7 +36,7 @@ test_that("the result contain v1 and v2", {
 
 # 3.
 test_that("it contains the right parameters.", {
-  parm <- param(par_all_TEST, names)
+  parm <- create_df_param(par_all_TEST, names)
 
   required_cols <- c(
     "v1", "v2", "a1", "d1", "g1", "a2", "d2", "g2",

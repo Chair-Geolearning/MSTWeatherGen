@@ -77,8 +77,8 @@ parms <- c("a1", "a2", "d1", "d2", "g1", "g2")
 par_all[parms] <-rep(1, length(parms))
 
 
-par_all <- update_beta1_parameters(par_all, names, extract_beta1(param(par_all, names), names))
-parm <- param(par_all, names)
+par_all <- update_beta1_parameters(par_all, names, extract_beta1(create_df_param(par_all, names), names))
+parm <- create_df_param(par_all, names)
 
 # Create a map to fetch parameters quickly using a two-level list structure
 parm_map <- split(parm, list(parm$v1, parm$v2))
