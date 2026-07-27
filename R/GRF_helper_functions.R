@@ -88,7 +88,7 @@ initialize_par_all_if_missing <- function(par_all, names, pairs, par_s, rho1, cr
 #'
 #' @param par_all The complete set of model parameters, including 'rho1ij' values to be updated.
 #' @param names Vector of variable names, indicating the variables for which 'rho1ij' adjustments are applied.
-#' @param beta1 Matrix or data frame containing the updated covariance information to adjust 'rho1ij' parameters in `par_all`. If `rho1` is not a matrix, it will be transformed to ensure positive definiteness before updating.
+#' @param rho1 Matrix or data frame containing the updated covariance information to adjust 'rho1ij' parameters in `par_all`. If `rho1` is not a matrix, it will be transformed to ensure positive definiteness before updating.
 #'
 #' @return The modified `par_all` vector with updated 'rho1ij' parameters reflecting the provided covariance information.
 #'
