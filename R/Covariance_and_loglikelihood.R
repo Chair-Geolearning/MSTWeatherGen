@@ -308,11 +308,11 @@ loglik_pair <- function(par, parms, pair, par_all, data, names, Vi, h, u, uh, ep
 
   # Update and compute model parameters
   parm <- create_df_param(par, names)
-  beta1 <- Matrix::nearPD(extract_beta1(parm, names))$mat # Compute ax correction terms
+  rho1 <- Matrix::nearPD(extract_rho1(parm, names))$mat # Compute ax correction terms
   rho2 <- try(compute_rho2(parm, names, cr), silent = T) # Compute rho2ij coefficients
 
   # Attempt Cholesky decompositions for 'beta1ij_mat' and 'rho2ij', checking for positive definiteness
-  ae <- try(chol(beta1), silent = TRUE)
+  ae <- try(chol(rho1), silent = TRUE)
   be <- try(chol(rho2), silent = TRUE)
 
   if (!is.character(be) & (!is.character(ae))) {
@@ -413,7 +413,7 @@ loglik_pair <- function(par, parms, pair, par_all, data, names, Vi, h, u, uh, ep
 #' @param uh Combined matrix of spatial and temporal distances with additional identifiers.
 #' @param ep Data frame defining variable pairs for analysis.
 #' @param cr Initial correlation matrix across variables.
-#  rho2ij: Precomputed rho2ij cross-correlation matrix for all pairs.
+#  rho2: Precomputed rho2 cross-correlation matrix for all pairs.
 #'
 #' @return Total log-likelihood value for the observed data given the current model parameters.
 #'
@@ -428,15 +428,15 @@ loglik <- function(par, parms, par_all, data, names, Vi, h, u, uh, ep, cr) {
   par_all[parms] <- par # Update specified parameters.
 
   parm <- create_df_param(par_all, names)
-  # beta1 <- Matrix::nearPD(extract_beta1(parm, names))$mat  # Compute ax correction terms
-  parm <- create_df_param(update_beta1_parameters(par_all, names, extract_beta1(parm, names)), names)
+  # rho1 <- Matrix::nearPD(extract_rho1(parm, names))$mat  # Compute ax correction terms
+  parm <- create_df_param(update_beta1_parameters(par_all, names, extract_rho1(parm, names)), names)
   rho2 <- try(compute_rho2(parm, names, cr), silent = T) # Compute rho2 coefficients
   # Attempt Cholesky decomposition to ensure positive definiteness.
-  # ae <- try(chol(beta1ij), silent = TRUE)
+  # ae <- try(chol(rho1), silent = TRUE)
   be <- try(chol(rho2), silent = TRUE)
 
   if (!is.character(be)) {
-    # Proceed if both 'beta1ij' and 'rho2ij' matrices are valid for further computations.
+    # Proceed if both 'rho1' and 'rho2' matrices are valid for further computations.
 
     # Map parameters to each variable pair in 'Vi'.
     parmm <- lapply(1:nrow(Vi), function(v) {
