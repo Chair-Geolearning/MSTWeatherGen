@@ -73,7 +73,7 @@ Gneiting <- function(h, u, par, rho2ij) {
   w1 <- sqrt(r1ii * r1jj) / r1ij
   w2 <- sqrt(r2ii * r2jj) / r2ij
   
-  # Cross_factor
+  # Cross_factor Spatio Temp
   cross_factor <- ((aii^nuii * ajj^nujj) / aij^(2*nuij)) *
     (gamma(nuij) / (gamma(nuii)^(1/2) * gamma(nujj)^(1/2))) *
     sqrt((1 - Ai^2) * (1 - Aj^2))
