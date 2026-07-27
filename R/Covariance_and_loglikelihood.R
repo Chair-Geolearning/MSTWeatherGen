@@ -70,15 +70,15 @@ Gneiting <- function(h, u, par, rho2ij) {
     (Ai * Aj * ((d * abs(u))^(2*e) + 1)^(-c))
   
   # Cross-correlation amplitude
-  m1ij    <- sqrt(r1ii*r1jj)/r1ij 
-  beta1ij <- rho1ij*m1ij
+  cross_factor1<- sqrt(r1ii*r1jj)/r1ij 
+  beta1ij <- rho1ij*cross_factor1
   
   # Spatial cross-correlation
-  m2ij  <- ((aii^nuii * ajj^nujj) / aij^(2*nuij)) *
+  cross_factor2  <- ((aii^nuii * ajj^nujj) / aij^(2*nuij)) *
     (gamma(nuij) / (gamma(nuii)^(1/2) * gamma(nujj)^(1/2))) *
     sqrt((1 - Ai^2) * (1 - Aj^2)) *
     (r2ii^(1/2) * r2jj^(1/2)) / r2ij
-  beta2ij <- rho2ij * m2ij
+  beta2ij <- rho2ij * cross_factor2
   
   # Purely temporal component
   Temp <- exp(-r1ij * abs(u))
