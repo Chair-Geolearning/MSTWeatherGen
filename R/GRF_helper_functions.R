@@ -81,22 +81,22 @@ initialize_par_all_if_missing <- function(par_all, names, pairs, par_s, beta1, c
 }
 #' Update beta1 Parameters in Model Parameters
 #'
-#' Modifies the 'beta1' parameters within the complete set of model parameters (`par_all`) using the covariance information provided by the 'beta1ij' matrix. This adjustment is crucial for ensuring accurate covariance structures in the model.
+#' Modifies the 'rho1' parameters within the complete set of model parameters (`par_all`) using the covariance information provided by the 'beta1ij' matrix. This adjustment is crucial for ensuring accurate covariance structures in the model.
 #'
 #' This function implements the methods described in Section 2.4 of the article, functions log_lik and log
 #' *Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8).
 #'
-#' @param par_all The complete set of model parameters, including 'beta1ij' values to be updated.
+#' @param par_all The complete set of model parameters, including 'rho1ij' values to be updated.
 #' @param names Vector of variable names, indicating the variables for which 'beta1ij' adjustments are applied.
 #' @param beta1 Matrix or data frame containing the updated covariance information to adjust 'beta1ij' parameters in `par_all`. If `beta1ij` is not a matrix, it will be transformed to ensure positive definiteness before updating.
 #'
-#' @return The modified `par_all` vector with updated 'beta1ij' parameters reflecting the provided covariance information.
+#' @return The modified `par_all` vector with updated 'rho1ij' parameters reflecting the provided covariance information.
 #'
 #' @keywords internal
 #' @noRd
 #' @importFrom Matrix nearPD
-update_beta1_parameters <- function(par_all, names, beta1) {
-  # Update the `beta1ij` parameters in `par_all` based on the covariance information in `beta1`
+update_rho1_parameters <- function(par_all, names, beta1) {
+  # Update the `rho1ij` parameters in `par_all` based on the covariance information in `beta1`
   if (!is.matrix(beta1)) {
     for (v1 in names) {
       for (v2 in names) {
