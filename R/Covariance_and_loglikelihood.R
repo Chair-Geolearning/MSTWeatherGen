@@ -429,7 +429,7 @@ loglik <- function(par, parms, par_all, data, names, Vi, h, u, uh, ep, cr) {
 
   parm <- create_df_param(par_all, names)
   # rho1 <- Matrix::nearPD(extract_rho1(parm, names))$mat  # Compute ax correction terms
-  parm <- create_df_param(update_beta1_parameters(par_all, names, extract_rho1(parm, names)), names)
+  parm <- create_df_param(update_rho1_parameters(par_all, names, extract_rho1(parm, names)), names)
   rho2 <- try(compute_rho2(parm, names, cr), silent = T) # Compute rho2 coefficients
   # Attempt Cholesky decomposition to ensure positive definiteness.
   # ae <- try(chol(rho1), silent = TRUE)
