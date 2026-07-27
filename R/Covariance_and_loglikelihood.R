@@ -137,7 +137,7 @@ create_df_param <- function(par, names) {
     u$nuii[i] <- par[paste(paste(u$v1[i], u$v1[i], sep = "-"), "nuii", sep = ":")]
     u$nujj[i] <- par[paste(paste(u$v2[i], u$v2[i], sep = "-"), "nuii", sep = ":")]
 
-    u$beta1ij[i] <- par[paste(paste(u$v1[i], u$v2[i], sep = "-"), "beta1ij", sep = ":")]
+    u$rho1ij[i] <- par[paste(paste(u$v1[i], u$v2[i], sep = "-"), "rho1ij", sep = ":")]
 
     # r2ii, r2jj — spatio-temporal exponential decay (per variable)
     u$r2ii[i] <- par[paste(u$v1[i], "r2ii", sep = ":")]
