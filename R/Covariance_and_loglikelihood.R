@@ -53,7 +53,7 @@ Gneiting <- function(h, u, par, rho2ij) {
   ajj     <- par[9]   # portée Matérn variable j
   nuii    <- par[10]  # lissage Matérn variable i
   nujj    <- par[11]  # lissage Matérn variable j
-  beta1ij <- par[12]  # coefficient terme temporel pur
+  rho1ij  <- par[12]  # correlation temporelle pure 
   r2ii    <- par[13]  # décroissance exp. spatiotemporelle variable i
   r2jj    <- par[14]  # décroissance exp. spatiotemporelle variable j
   r1ii    <- par[15]  # décroissance exp. temporelle variable i
@@ -70,20 +70,25 @@ Gneiting <- function(h, u, par, rho2ij) {
     (Ai * Aj * ((d * abs(u))^(2*e) + 1)^(-c))
   
   # Cross-correlation amplitude
-  beta2ij <- rho2ij *
-    ((aii^nuii * ajj^nujj) / aij^(2*nuij)) *
+  m1ij    <- sqrt(r1ii*r1jj)/r1ij 
+  beta1ij <- rho1ij*m1ij
+  
+  # Spatial cross-correlation
+  m2ij  <- ((aii^nuii * ajj^nujj) / aij^(2*nuij)) *
     (gamma(nuij) / (gamma(nuii)^(1/2) * gamma(nujj)^(1/2))) *
     sqrt((1 - Ai^2) * (1 - Aj^2)) *
     (r2ii^(1/2) * r2jj^(1/2)) / r2ij
+  beta2ij <- rho2ij * m2ij
+  
+  # Purely temporal component
+  Temp <- exp(-r1ij * abs(u))
   
   # Spatio-temporal component
   SpatioTemp <- Matern(abs(h), r = sqrt(aij^2 / etaij), v = nuij) *
     exp(-r2ij * abs(u)) / etaij
   
-  # Purely temporal component
-  Temp <- exp(-r1ij * abs(u))
   
-  return(beta2ij * SpatioTemp + beta1ij * Temp)
+  return(beta1ij * Temp + beta2ij * SpatioTemp)
 }
 
 #' @title Construct Covariance Parameters DataFrame
