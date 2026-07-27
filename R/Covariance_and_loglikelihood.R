@@ -232,16 +232,16 @@ compute_rho2 <- function(parm, names, cr) {
 #' @keywords internal
 
 
-extract_beta1 <- function(parm, names) {
-  beta1 <- sapply(names, function(v1) {
+extract_rho1 <- function(parm, names) {
+  rho1 <- sapply(names, function(v1) {
     sapply(names, function(v2) {
-      beta1ij <- parm$beta1ij[parm$v1 == v1 & parm$v2 == v2 | parm$v1 == v2 & parm$v2 == v1]
-      return(beta1ij)
+      rho1ij <- parm$beta1ij[parm$v1 == v1 & parm$v2 == v2 | parm$v1 == v2 & parm$v2 == v1]
+      return(rho1ij)
     })
   })
-  beta1 <- matrix(beta1, nrow = length(names), ncol = length(names))  # ← forcer matrice
-  rownames(beta1) <- colnames(beta1) <- names
-  return(beta1)
+  rho1 <- matrix(rho1, nrow = length(names), ncol = length(names))  # ← forcer matrice
+  rownames(rho1) <- colnames(rho1) <- names
+  return(rho1)
 }
 #' @title Extract Beta Coefficients Matrix
 #'
