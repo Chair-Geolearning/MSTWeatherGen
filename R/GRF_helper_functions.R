@@ -95,32 +95,32 @@ initialize_par_all_if_missing <- function(par_all, names, pairs, par_s, beta1, c
 #' @keywords internal
 #' @noRd
 #' @importFrom Matrix nearPD
-update_rho1_parameters <- function(par_all, names, beta1) {
+update_rho1_parameters <- function(par_all, names, rho1) {
   # Update the `rho1ij` parameters in `par_all` based on the covariance information in `beta1`
-  if (!is.matrix(beta1)) {
+  if (!is.matrix(rho1)) {
     for (v1 in names) {
       for (v2 in names) {
-        par_all[paste(paste(v1, v2, sep = "-"), "beta1ij", sep = ":")] <- beta1$cov[beta1$v1 == v1 & beta1$v2 == v2 | beta1$v2 == v1 & beta1$v1 == v2]
+        par_all[paste(paste(v1, v2, sep = "-"), "rho1ij", sep = ":")] <- beta1$cov[beta1$v1 == v1 & beta1$v2 == v2 | beta1$v2 == v1 & beta1$v1 == v2]
       }
     }
     a <- sapply(names, function(v1) {
       sapply(names, function(v2) {
-        beta1ij <- par_all[paste(paste(v1, v2, sep = "-"), "beta1ij", sep = ":")]
-        if (is.na(beta1ij)) beta1ij <- par_all[paste(paste(v2, v1, sep = "-"), "beta1ij", sep = ":")]
+        beta1ij <- par_all[paste(paste(v1, v2, sep = "-"), "rho1ij", sep = ":")]
+        if (is.na(beta1ij)) beta1ij <- par_all[paste(paste(v2, v1, sep = "-"), "rho1ij", sep = ":")]
         return(beta1ij)
       })
     })
     a <- matrix(a, nrow = length(names), ncol = length(names))
     rownames(a) <- colnames(a) <- names
-    beta1 = Matrix::nearPD(a)$mat
+    rho1 = Matrix::nearPD(a)$mat
   }else{
-    if (any(diag(beta1) < 0)) {
-      warning("beta1 contient des valeurs negatives avant nearPD : ", paste(as.numeric(beta1), collapse = ", "))
+    if (any(diag(rho1) < 0)) {
+      warning("rho1 contient des valeurs negatives avant nearPD : ", paste(as.numeric(rho1), collapse = ", "))
     }
-    beta1 <- if (length(names) == 1) {
-      Matrix::Matrix(max(as.numeric(beta1), 1e-6), nrow = 1, ncol = 1, dimnames = list(names, names))
+    rho1 <- if (length(names) == 1) {
+      Matrix::Matrix(max(as.numeric(rho1), 1e-6), nrow = 1, ncol = 1, dimnames = list(names, names))
     } else {
-      Matrix::nearPD(beta1)$mat
+      Matrix::nearPD(rho1)$mat
     }
   }
   colnames(beta1) <- rownames(beta1) <- names
