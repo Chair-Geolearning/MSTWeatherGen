@@ -48,7 +48,7 @@ test_that("initialize_par_all_if_missing runs without error", {
       names = names,
       pairs = pairs,
       par_s = par_s,
-      beta1 = ax,
+      rho1 = ax,
       cr = cr
     )
   })
