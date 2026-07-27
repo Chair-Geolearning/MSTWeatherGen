@@ -123,10 +123,10 @@ update_rho1_parameters <- function(par_all, names, rho1) {
       Matrix::nearPD(rho1)$mat
     }
   }
-  colnames(beta1) <- rownames(beta1) <- names
+  colnames(rho1) <- rownames(rho1) <- names
   for (v1 in names) {
     for (v2 in names) {
-      par_all[paste(paste(v1, v2, sep = "-"), "beta1ij", sep = ":")] <- beta1[v1, v2]
+      par_all[paste(paste(v1, v2, sep = "-"), "rho1ij", sep = ":")] <- rho1[v1, v2]
     }
   }
   return(par_all)
