@@ -218,16 +218,16 @@ compute_rho2 <- function(parm, names, cr) {
 #' @title Extract Correction Terms Matrix
 #'
 #' @description
-#' Extracts a matrix of correction terms ('beta1ij') for each pair of variables based on the model parameters provided in 'parm'. Designed for internal use to facilitate calculations involving correction terms in spatial or spatio-temporal modeling.
+#' Extracts a matrix of correction terms ('rho1ij') for each pair of variables based on the model parameters provided in 'parm'. Designed for internal use to facilitate calculations involving correction terms in spatial or spatio-temporal modeling.
 #'
 #' @details
 #' This function implements the methods described in Sections 2.4 in Equation 8 of the article
 #' \strong{Stochastic Environmental Research and Risk Assessment, 2025} (DOI: 10.1007/s00477-024-02897-8).
 #'
-#' @param parm A data frame or list containing the model parameters, including 'beta1ij' values.
+#' @param parm A data frame or list containing the model parameters, including 'rho1ij' values.
 #' @param names Character vector specifying the variable names for which correction terms are to be calculated.
 #'
-#' @return A square matrix where each element [i, j] represents the correction term ('beta1ij') between the ith and jth variables, facilitating the adjustment of correlations or covariances between them.
+#' @return A square matrix where each element [i, j] represents the correction term ('rho1ij') between the ith and jth variables, facilitating the adjustment of correlations or covariances between them.
 #'
 #' @keywords internal
 
@@ -235,7 +235,7 @@ compute_rho2 <- function(parm, names, cr) {
 extract_rho1 <- function(parm, names) {
   rho1 <- sapply(names, function(v1) {
     sapply(names, function(v2) {
-      rho1ij <- parm$beta1ij[parm$v1 == v1 & parm$v2 == v2 | parm$v1 == v2 & parm$v2 == v1]
+      rho1ij <- parm$rho1ij[parm$v1 == v1 & parm$v2 == v2 | parm$v1 == v2 & parm$v2 == v1]
       return(rho1ij)
     })
   })
@@ -308,15 +308,15 @@ loglik_pair <- function(par, parms, pair, par_all, data, names, Vi, h, u, uh, ep
 
   # Update and compute model parameters
   parm <- create_df_param(par, names)
-  rho1 <- Matrix::nearPD(extract_rho1(parm, names))$mat # Compute ax correction terms
+  rho1 <- Matrix::nearPD(extract_rho1(parm, names))$mat # Compute rho1 correction terms
   rho2 <- try(compute_rho2(parm, names, cr), silent = T) # Compute rho2ij coefficients
 
-  # Attempt Cholesky decompositions for 'beta1ij_mat' and 'rho2ij', checking for positive definiteness
+  # Attempt Cholesky decompositions for 'rho1' and 'rho2', checking for positive definiteness
   ae <- try(chol(rho1), silent = TRUE)
   be <- try(chol(rho2), silent = TRUE)
 
   if (!is.character(be) & (!is.character(ae))) {
-    # Proceed if both 'beta1ij' and 'rho2ij' matrices are valid for further computations
+    # Proceed if both 'rho1ij' and 'rho2ij' matrices are valid for further computations
 
     # Map parameters to each variable pair in 'Vi'
     parmm <- lapply(1:nrow(Vi), function(v) {
