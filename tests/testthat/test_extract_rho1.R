@@ -100,5 +100,5 @@ test_that("extract_rho1 univarié (length(names)==1) retourne une matrice", {
 #6.
 test_that("extract_rho1 univarié : la valeur est préservée", {
   result <- extract_rho1(parm_univ, names_univ)
-  expect_equal(result[1, 1], parm_univ$beta1ij)
+  expect_equal(result[1, 1], parm_univ$rho1ij)
 })
