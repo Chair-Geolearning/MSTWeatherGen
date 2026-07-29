@@ -348,11 +348,11 @@ optimize_pairs_spatiotemporal <- function(par_all, data, names, Vi, uh, cr, max_
 optimize_temporal_parameters <- function(par_all, data, names, Vi, uh, cr, max_it, ep) {
   # Final optimization step for the subset of parameters across all variable pairs
   parms <- c(
-    "a1", "d1", "g1", "a2", "d2", "g2",
-    "b1", "e1", "l1", "b2", "e2", "l2", "c", "f", "m",
-    paste(names, "Ai", sep = ":"), paste(names, "Bi", sep = ":"),
-    paste(names, "Ci", sep = ":")
+    "a", "b", "c", "d", "e",           # paramètres globaux de etaij
+    paste(names, "Ai", sep = ":"),      
+    paste(names, "r1ii", sep = ":") 
   )
+  
   optimized_par <- optim(par_all[parms],
     fn = loglik, data = data, parms = parms,
     par_all = par_all, ep = ep, names = names,
