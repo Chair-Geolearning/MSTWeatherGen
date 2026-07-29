@@ -334,7 +334,7 @@ loglik_pair <- function(par, parms, pair, par_all, data, names, Vi, h, u, uh, ep
       return(abs(rnorm(1)) * 1e+20)
     } else {
       # Compute covariance for the pair
-      cij <- Gneiting(h = h, u = u, par = par, rho2ij = beta[sp[1], sp[2]])
+      cij <- Gneiting(h = h, u = u, par = par, rho2ij = rho2[sp[1], sp[2]])
       delta <- 1 - cij^2
       # Extract observed values for the pair from 'data'
       v1 <- data[, , Vi[v, 1]]
