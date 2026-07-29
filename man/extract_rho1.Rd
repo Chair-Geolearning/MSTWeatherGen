@@ -7,15 +7,15 @@
 extract_rho1(parm, names)
 }
 \arguments{
-\item{parm}{A data frame or list containing the model parameters, including 'beta1ij' values.}
+\item{parm}{A data frame or list containing the model parameters, including 'rho1ij' values.}
 
 \item{names}{Character vector specifying the variable names for which correction terms are to be calculated.}
 }
 \value{
-A square matrix where each element [i, j] represents the correction term ('beta1ij') between the ith and jth variables, facilitating the adjustment of correlations or covariances between them.
+A square matrix where each element [i, j] represents the correction term ('rho1ij') between the ith and jth variables, facilitating the adjustment of correlations or covariances between them.
 }
 \description{
-Extracts a matrix of correction terms ('beta1ij') for each pair of variables based on the model parameters provided in 'parm'. Designed for internal use to facilitate calculations involving correction terms in spatial or spatio-temporal modeling.
+Extracts a matrix of correction terms ('rho1ij') for each pair of variables based on the model parameters provided in 'parm'. Designed for internal use to facilitate calculations involving correction terms in spatial or spatio-temporal modeling.
 }
 \details{
 This function implements the methods described in Sections 2.4 in Equation 8 of the article
