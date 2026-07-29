@@ -351,7 +351,7 @@ optimize_temporal_parameters <- function(par_all, data, names, Vi, uh, cr, max_i
   parms <- c(
     "a", "b", "c", "d", "e",           # paramètres globaux de etaij
     paste(names, "Ai", sep = ":"),      
-    paste(names, "r1ii", sep = ":") 
+    paste(names, "r1ii", sep = ":")  # RAjout de r1ii
   )
   
   optimized_par <- optim(par_all[parms],
