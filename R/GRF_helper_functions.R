@@ -231,7 +231,8 @@ optimize_spatial_parameters <- function(par_all, data, names, Vi, uh, cr, max_it
   parms <- c(
     paste(pairs, "rho1ij", sep = ":"),
     paste(pairs[1:length(names)], "aii", sep = ":"),
-    paste(pairs[1:length(names)], "nuii", sep = ":")
+    paste(pairs[1:length(names)], "nuii", sep = ":"),
+    paste(names, "r2ii", sep = ":") 
   )
   optimized_par <- optim(par_all[parms],
     fn = loglik, data = data, parms = parms,
