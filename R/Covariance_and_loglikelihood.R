@@ -452,7 +452,7 @@ loglik <- function(par, parms, par_all, data, names, Vi, h, u, uh, ep, cr) {
         l1 <- l2 <- l3 <- l4 <- 0
         par <- parmm[[v]] # Parameters for the current pair.
         # Validate parameter constraints; return a large penalty if violated.
-        if (any(par[c(1:11)] < 0) | any(par[c(6:7)] > 1) | abs(par[12]) > 1) {
+        if (any(par[c(1:11, 13:16)] < 0) | any(par[c(6:7)] > 1) | abs(par[12]) > 1) {
           return(-abs(rnorm(1)) * 1e+20)
         } else {
           # Calculate pairwise log-likelihood using Gneiting function and parameter adjustments.
@@ -510,7 +510,7 @@ loglik <- function(par, parms, par_all, data, names, Vi, h, u, uh, ep, cr) {
         l1 <- l2 <- l3 <- l4 <- 0
         par <- parmm[[v]] # Parameters for the current pair.
         # Validate parameter constraints; return a large penalty if violated.
-        if (any(par[c(1:11)] < 0) | any(par[c(6:7)] > 1) | abs(par[12]) > 1) {
+        if (any(par[c(1:11, 13:16)] < 0) | any(par[c(6:7)] > 1) | abs(par[12]) > 1) {
           return(-abs(rnorm(1)) * 1e+20)
         } else {
           # Calculate pairwise log-likelihood using Gneiting function and parameter adjustments.
