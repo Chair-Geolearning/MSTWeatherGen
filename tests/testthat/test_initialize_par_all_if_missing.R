@@ -65,7 +65,7 @@ test_that("initialize_par_all_if_missing creates expected parameter names", {
     paste(pairs, "rho2ij", sep = ":"),
     paste(pairs, "aii", sep = ":"),
     paste(pairs, "nuii", sep = ":"),
-    paste(pairs, "beta1ij", sep = ":")
+    paste(pairs, "rho1ij", sep = ":")
   )
 
   expect_true(all(expected_names %in% names(par_all_TEST)))
@@ -119,7 +119,7 @@ test_that("par_s values are correctly assigned to rij and vij", {
 
 # 5.
 test_that("ax parameters are initialized to 0 then updated", {
-  ax_params <- paste(pairs, "beta1ij", sep = ":")
+  ax_params <- paste(pairs, "rho1ij", sep = ":")
 
   expect_true(all(ax_params %in% names(par_all_TEST)))
   expect_type(par_all_TEST[ax_params], "double")

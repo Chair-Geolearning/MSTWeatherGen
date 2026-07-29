@@ -229,7 +229,7 @@ init_space_par <- function(data, names, h, uh, max_it = 2000) {
 optimize_spatial_parameters <- function(par_all, data, names, Vi, uh, cr, max_it, ep) {
   pairs <- paste(ep[, 1], ep[, 2], sep = "-")
   parms <- c(
-    paste(pairs, "beta1ij", sep = ":"), paste(names, "Ci", sep = ":"),
+    paste(pairs, "rho1ij", sep = ":"),
     paste(pairs[1:length(names)], "aii", sep = ":"),
     paste(pairs[1:length(names)], "nuii", sep = ":")
   )

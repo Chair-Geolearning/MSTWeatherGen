@@ -42,7 +42,7 @@ test_that("it contains the right parameters.", {
     "v1", "v2", "a1", "d1", "g1", "a2", "d2", "g2",
     "b1", "e1", "l1", "b2", "e2", "l2", "c", "f", "m",
     "Ai", "Aj", "Bi", "Bj", "Ci", "Cj",
-    "aii", "ajj", "nuii", "nujj", "beta1ij", "rho2ij"
+    "aii", "ajj", "nuii", "nujj", "rho1ij", "rho2ij"
   )
 
   expect_true(all(required_cols %in% colnames(parm)))
