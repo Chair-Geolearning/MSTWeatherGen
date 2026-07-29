@@ -88,17 +88,17 @@ test_that("matrix input values are correctly assigned", {
 
   result <- update_rho1_parameters(par_all_TEST, names, ax_matrix)
 
-  expect_equal(unname(result["Precipitation-Precipitation:beta1ij"]), 1.0)
-  expect_equal(unname(result["Wind-Wind:beta1ij"]), 1.0)
-  expect_equal(unname(result["Temp_max-Temp_max:beta1ij"]), 1.0)
+  expect_equal(unname(result["Precipitation-Precipitation:rho1ij"]), 1.0)
+  expect_equal(unname(result["Wind-Wind:rho1ij"]), 1.0)
+  expect_equal(unname(result["Temp_max-Temp_max:rho1ij"]), 1.0)
 
-  expect_equal(unname(result["Precipitation-Wind:beta1ij"]), 0.5)
-  expect_equal(unname(result["Wind-Temp_max:beta1ij"]), 0.5)
-  expect_equal(unname(result["Precipitation-Temp_max:beta1ij"]), 0.5)
+  expect_equal(unname(result["Precipitation-Wind:rho1ij"]), 0.5)
+  expect_equal(unname(result["Wind-Temp_max:rho1ij"]), 0.5)
+  expect_equal(unname(result["Precipitation-Temp_max:rho1ij"]), 0.5)
 
-  expect_equal(unname(result["Wind-Precipitation:beta1ij"]), 0.5)
-  expect_equal(unname(result["Temp_max-Wind:beta1ij"]), 0.5)
-  expect_equal(unname(result["Temp_max-Precipitation:beta1ij"]), 0.5)
+  expect_equal(unname(result["Wind-Precipitation:rho1ij"]), 0.5)
+  expect_equal(unname(result["Temp_max-Wind:rho1ij"]), 0.5)
+  expect_equal(unname(result["Temp_max-Precipitation:rho1ij"]), 0.5)
 })
 
 # 2.
