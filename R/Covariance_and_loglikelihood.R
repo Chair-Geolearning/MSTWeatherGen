@@ -189,6 +189,7 @@ compute_rho2 <- function(parm, names, cr) {
     }
     return(par)
   }
+  # A rechecker avec Denis 
   ax <- sapply(names, function(v1) {
     sapply(names, function(v2) {
       par <- get_parameters(v1, v2)
@@ -198,6 +199,7 @@ compute_rho2 <- function(parm, names, cr) {
       return(par[12] * w1)
     })
   })
+  
   cr <- Matrix::nearPD(cr - ax)$mat
   # Iterate over pairs of variables to compute and assign the beta values
   for (j in seq_along(names)) {
@@ -209,11 +211,10 @@ compute_rho2 <- function(parm, names, cr) {
       # Calculate the correlation coefficient using the Gneiting function and correction term
       cc <- Gneiting(0, 0, par, rho2ij = 1) # Gneiting function calculation for the pair
       # Après
-      r1ij <- sqrt((par[15]^2 + par[16]^2) / 2)
+      'r1ij <- sqrt((par[15]^2 + par[16]^2) / 2)
       w1   <- sqrt(par[15] * par[16]) / r1ij
-      ax   <- par[12] * w1 # Correction term calculation
+      ax   <- par[12] * w1 # Correction term calculation'
       rho2ij <- cr[v1, v2]   # Adjusted correlation coefficient
-
       rho2[v1, v2] <- rho2[v2, v1] <- rho2ij # Symmetric assignment to ensure the matrix is symmetric
     }
   }
