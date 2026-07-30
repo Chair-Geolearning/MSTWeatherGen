@@ -101,7 +101,7 @@ v2 <- names[k]
 
 par <- get_parameters(v1, v2)'
 
-par <- rep(1, 26)
+par <- rep(1, 16)
 dij <- 1
 
 # 1.
