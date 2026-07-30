@@ -41,9 +41,7 @@ par_all_TEST_updated <- update_rho1_parameters(par_all_TEST, names, extract_rho1
 names_univ   <- "Temp_max"
 par_all_univ <- par_all_TEST[
   grepl("^Temp_max-Temp_max:|^Temp_max:", names(par_all_TEST)) |
-    names(par_all_TEST) %in% c("a1","d1","g1","a2","d2","g2",
-                               "b1","e1","l1","b2","e2","l2",
-                               "c","f","m")
+    names(par_all_TEST) %in% c("a","b","c","d","e")
 ]
 ax_univ <- {
   row <- ax_file[ax_file$v1 == names_univ & ax_file$v2 == names_univ, ]
