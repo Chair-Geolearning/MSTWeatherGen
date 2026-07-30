@@ -193,7 +193,9 @@ compute_rho2 <- function(parm, names, cr) {
     sapply(names, function(v2) {
       par <- get_parameters(v1, v2)
       if (any(is.na(par))) par <- get_parameters(v2, v1)
-      return(par[26] / (1 - par[20] * par[21]))
+      r1ij <- sqrt((par[15]^2 + par[16]^2) / 2)
+      w1   <- sqrt(par[15] * par[16]) / r1ij
+      return(par[12] * w1)
     })
   })
   cr <- Matrix::nearPD(cr - ax)$mat
@@ -206,8 +208,11 @@ compute_rho2 <- function(parm, names, cr) {
 
       # Calculate the correlation coefficient using the Gneiting function and correction term
       cc <- Gneiting(0, 0, par, rho2ij = 1) # Gneiting function calculation for the pair
-      ax <- par[26] / (1 - par[20] * par[21]) # Correction term calculation
-      rho2ij <- (cr[v1, v2]) / (cc - ax) # Adjusted correlation coefficient
+      # Après
+      r1ij <- sqrt((par[15]^2 + par[16]^2) / 2)
+      w1   <- sqrt(par[15] * par[16]) / r1ij
+      ax   <- par[12] * w1 # Correction term calculation
+      rho2ij <- cr[v1, v2]   # Adjusted correlation coefficient
 
       rho2[v1, v2] <- rho2[v2, v1] <- rho2ij # Symmetric assignment to ensure the matrix is symmetric
     }
@@ -267,130 +272,6 @@ extract_beta <- function(parm, names) {
   })
   return(ax)
 }
-#' @title Compute Log-likelihood for Variable Pair
-#'
-#' @description
-#' Calculates the log-likelihood for a given pair of variables using the Gneiting spatio-temporal covariance model. This function is part of the internal mechanism for optimizing model parameters based on observed data.
-#'
-#' @details
-#' This function implements the methods described in Section 3.3 of the article
-#' \strong{Stochastic Environmental Research and Risk Assessment, 2025} (DOI: 10.1007/s00477-024-02897-8).
-#'
-#' @param par Current parameters being optimized.
-# beta Matrix of beta coefficients, precomputed.
-#' @param parms Indices or names of parameters in 'par' to be updated.
-#' @param pair A string indicating the pair of variables (e.g., "temperature-wind") being analyzed.
-#' @param par_all Complete set of parameters for the model.
-#' @param data 3D array of observed data, with dimensions corresponding to times, locations, and variables.
-#' @param names Vector of variable names, indicating the variables' names (e.g., "temperature" and "wind").
-#' @param Vi Matrix where each line corresponds for a possible combination of variables in "names".
-#' @param h Vector of spatial distances for the pair.
-#' @param u Vector of temporal distances for the pair.
-#' @param uh Matrix containing pairs of spatial and temporal distances, and additional information.
-#' @param ep A matrix or data frame defining pairs of variables.
-#' @param cr Correlation matrix, initial or base correlations between variables.
-#'
-#' @return The log-likelihood value for the given pair of variables based on the current model parameters.
-#'
-#' @importFrom VGAM pbinorm
-#' @importFrom stats rnorm pnorm
-#' @keywords internal
-
-loglik_pair <- function(par, parms, pair, par_all, data, names, Vi, h, u, uh, ep, cr) {
-  J <- length(names) # Number of variables
-  pairs <- paste(ep[, 1], ep[, 2], sep = "-") # Constructing pairs from 'ep' data frame
-
-  par_all[parms] <- par # Update specific parameters in the complete set
-
-  par <- par_all # Use the updated parameter set for computations
-  sp <- unlist(strsplit(pair, "-")) # Split the pair string to individual variables
-  v <- which(Vi[, 1] == sp[1] & Vi[, 2] == sp[2]) # Find the index of the pair in 'Vi'
-
-  # Update and compute model parameters
-  parm <- create_df_param(par, names)
-  rho1 <- Matrix::nearPD(extract_rho1(parm, names))$mat # Compute rho1 correction terms
-  rho2 <- try(compute_rho2(parm, names, cr), silent = T) # Compute rho2ij coefficients
-
-  # Attempt Cholesky decompositions for 'rho1' and 'rho2', checking for positive definiteness
-  ae <- try(chol(rho1), silent = TRUE)
-  be <- try(chol(rho2), silent = TRUE)
-
-  if (!is.character(be) & (!is.character(ae))) {
-    # Proceed if both 'rho1ij' and 'rho2ij' matrices are valid for further computations
-
-    # Map parameters to each variable pair in 'Vi'
-    parmm <- lapply(1:nrow(Vi), function(v) {
-      as.numeric(parm[(parm$v1 == Vi[v, 1] & parm$v2 == Vi[v, 2]) | (parm$v1 == Vi[v, 2] & parm$v2 == Vi[v, 1]), ][-c(1, 2)])
-    })
-    u <- uh[, 1]
-    h <- uh[, 2]
-
-    # Initializing log-likelihood components
-    l1 <- l2 <- l3 <- l4 <- 0
-    par <- parmm[[v]] # Parameters for the current pair
-
-    # Parameter constraints check; return a large value if constraints are violated
-    if (any(par[c(1:21, 23:24)] < 0) | any(par[c(2, 3, 5, 7:13)] > 1)) {
-      return(abs(rnorm(1)) * 1e+20)
-    } else {
-      # Compute covariance for the pair
-      cij <- Gneiting(h = h, u = u, par = par, rho2ij = rho2[sp[1], sp[2]])
-      delta <- 1 - cij^2
-      # Extract observed values for the pair from 'data'
-      v1 <- data[, , Vi[v, 1]]
-      v1 <- v1[cbind(uh[, 3], uh[, 5])]
-      v2 <- data[, , Vi[v, 2]]
-      v2 <- v2[cbind(uh[, 4], uh[, 6])]
-
-      # Detailed computation of log-likelihood components for various cases
-      # Identifying cases based on the variable type (e.g., Precipitation) and the presence of zero values
-
-      dz <- !(h == 0 & u == 0 & Vi[v, 1] == Vi[v, 2])
-      cij <- cij[dz]
-      delta <- delta[dz]
-      v1 <- v1[dz]
-      v2 <- v2[dz]
-      uh <- uh[dz, ]
-      id1 <- (v1 == 0) & (!v2 == 0) & (sp[1] == "Precipitation")
-      id2 <- (!v1 == 0) & (v2 == 0) & (sp[2] == "Precipitation")
-      id4 <- (!v1 == 0) & (!v2 == 0)
-      id3 <- (v1 == 0) & (v2 == 0) & (sp[1] == "Precipitation") & (sp[2] == "Precipitation")
-
-
-      # Adjustments for infinite values in setting a practical lower limit
-      uh[, 8][which(uh[, 8] == -Inf)] <- -2.282295 # Adjusting for log transform lower bounds
-      uh[, 7][which(uh[, 7] == -Inf)] <- -2.282295
-
-      # Case 1: Both variables have non-zero values
-      if (!length(which(id4 == TRUE)) == 0) {
-        l4 <- sum((-1 / 2) * (log(delta[id4]) + (v1[id4]^2 - (2 * cij[id4] * v1[id4] * v2[id4]) + v2[id4]^2) / delta[id4]))
-      }
-
-      # Case 2: First variable is non-zero and the second is zero, and the second is Precipitation
-      if (!length(which(id2 == TRUE)) == 0) {
-        l2 <- sum(log(pnorm((uh[id2, 8] - cij[id2] * v1[id2]) / sqrt(delta[id2]))))
-      }
-
-      # Case 3: First variable is zero and the second is non-zero, and the first is Precipitation
-      if (!length(which(id1 == TRUE)) == 0) {
-        l1 <- sum(log(pnorm((uh[id1, 7] - cij[id1] * v2[id1]) / sqrt(delta[id1]))))
-      }
-
-      # Case 4: Both variables are zero, and both are Precipitation
-      if (!length(which(id3 == TRUE)) == 0) {
-        l3 <- try(sum(log(pbinorm(uh[id3, 7], uh[id3, 8], var1 = 1, var2 = 1, cov12 = cij[id3]))), silent = TRUE)
-        if (is.character(l3)) l3 <- -abs(rnorm(1)) * 1e+20 # Handle errors in computing bivariate normal CDF
-      }
-
-      # The negative log-likelihood
-      return(-(l1 + l2 + l3 + l4))
-    }
-  } else {
-    # Return a large value if Cholesky decomposition fails, indicating non-positive definiteness
-    return(abs(rnorm(1)) * 1e+20)
-  }
-}
-
 #' @title Total Log-Likelihood Calculation
 #'
 #' @description
