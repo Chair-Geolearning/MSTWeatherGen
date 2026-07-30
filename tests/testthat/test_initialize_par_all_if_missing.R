@@ -61,11 +61,16 @@ test_that("initialize_par_all_if_missing runs without error", {
 
 # 1.
 test_that("initialize_par_all_if_missing creates expected parameter names", {
+  # Après
   expected_names <- c(
     paste(pairs, "rho2ij", sep = ":"),
-    paste(pairs, "aii", sep = ":"),
-    paste(pairs, "nuii", sep = ":"),
-    paste(pairs, "rho1ij", sep = ":")
+    paste(pairs, "rho1ij", sep = ":"),
+    paste(pairs[1:length(names)], "aii", sep = ":"),
+    paste(pairs[1:length(names)], "nuii", sep = ":"),
+    paste(names, "Ai", sep = ":"),
+    paste(names, "r2ii", sep = ":"),
+    paste(names, "r1ii", sep = ":"),
+    "a", "b", "c", "d", "e"
   )
 
   expect_true(all(expected_names %in% names(par_all_TEST)))
@@ -101,11 +106,8 @@ test_that("default values are correctly assigned", {
   dij_params <- paste(pairs, "rho2ij", sep = ":")
   expect_true(all(par_all_TEST[dij_params] == 1))
 
-  parms <- c("a1", "a2", "d1", "d2", "g1", "g2")
+  parms <- c("a", "b", "c", "d", "e")
   expect_true(all(par_all_TEST[parms] == 1))
-
-  other_params <- c("b1", "e1", "l1", "b2", "e2", "l2", "c", "f", "m")
-  expect_true(all(par_all_TEST[other_params] == 0.1))
 })
 
 # 4.
@@ -130,9 +132,7 @@ test_that("par_all has expected length", {
   n_pairs <- length(pairs)
   n_names <- length(names)
 
-  expected_length <- n_pairs * 4 +
-    15 +
-    n_names * 3 + 3
+  expected_length <- n_pairs + 5 + n_names * 5 + n_names^2
   expect_equal(length(par_all_TEST), expected_length)
 })
 
