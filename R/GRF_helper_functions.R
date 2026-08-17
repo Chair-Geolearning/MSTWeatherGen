@@ -57,11 +57,11 @@ initialize_par_all_if_missing <- function(par_all, names, pairs, par_s, rho1, cr
 
     par_all <- setNames(rep(0.1, length(names_par_all)), names_par_all)
 
-    par_all[paste(pairs, "rho2ij", sep = ":")] <- 1 # A checker encore juste mettre a les self pairs.
+    par_all[paste(pairs[1:length(names)], "rho2ij", sep = ":")] <- 1 # A checker encore juste mettre a les self pairs.
     par_all[paste(pairs[1:length(names)], "aii", sep = ":")] <- par_s[1, ]
     par_all[paste(pairs[1:length(names)], "nuii", sep = ":")] <- par_s[2, ]
-    par_all[paste(pairs, "rho1ij", sep = ":")] <- 0 #  a mettre a un uniquement pour les self pairs.
-    parm_eta <- c("a", "b", "c", "d", "e") #  a renommer parms = parm_eta
+    par_all[paste(pairs[1:length(names)], "rho1ij", sep = ":")] <- 1 #  a mettre a un uniquement pour les self pairs.
+    parm_eta <- c("a", "b", "c", "d", "e")  
     par_all[parm_eta] <- rep(1, length(parm_eta))
   }
 
