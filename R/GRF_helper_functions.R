@@ -66,8 +66,10 @@ initialize_par_all_if_missing <- function(par_all, names, pairs, par_s, rho1, cr
   }
 
   # Update rho1 parameters based on covariance information
+  # il prend par all et mets rho1 dela signature dans par ll
   par_all <- update_rho1_parameters(par_all, names, rho1)
-
+  
+  # partie 'check je pense'
   parm <- create_df_param(par_all, names)   #  a renommer en create_df_param
   rho2 <- try(compute_rho2(parm, names, cr), silent = T)
   ch <- try(chol(rho2), silent = T)
@@ -77,6 +79,7 @@ initialize_par_all_if_missing <- function(par_all, names, pairs, par_s, rho1, cr
     par_all[paste(pairs[1:length(names)], "nuii", sep = ":")] <- 1
     par_all <- update_rho1_parameters(par_all, names, rho1)
   }
+  
   return(par_all)
 }
 #' Update rho1 Parameters in Model Parameters
@@ -229,10 +232,8 @@ init_space_par <- function(data, names, h, uh, max_it = 2000) {
 optimize_spatial_parameters <- function(par_all, data, names, Vi, uh, cr, max_it, ep) {
   pairs <- paste(ep[, 1], ep[, 2], sep = "-")
   parms <- c(
-    paste(pairs, "rho1ij", sep = ":"),
     paste(pairs[1:length(names)], "aii", sep = ":"),
-    paste(pairs[1:length(names)], "nuii", sep = ":"),
-    paste(names, "r2ii", sep = ":") 
+    paste(pairs[1:length(names)], "nuii", sep = ":")
   )
   optimized_par <- optim(par_all[parms],
     fn = loglik, data = data, parms = parms,
@@ -351,7 +352,9 @@ optimize_temporal_parameters <- function(par_all, data, names, Vi, uh, cr, max_i
   parms <- c(
     "a", "b", "c", "d", "e",           # paramètres globaux de etaij
     paste(names, "Ai", sep = ":"),      
-    paste(names, "r1ii", sep = ":")  # RAjout de r1ii
+    paste(names, "r1ii", sep = ":"),
+    paste(names, "r2ii", sep = ":"),
+    paste(pairs, "rho1ij", sep = ":")
   )
   
   optimized_par <- optim(par_all[parms],
