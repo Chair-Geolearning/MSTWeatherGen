@@ -189,37 +189,32 @@ compute_rho2 <- function(parm, names, cr) {
     }
     return(par)
   }
-  # A rechecker avec Denis 
-  ax <- sapply(names, function(v1) {
-    sapply(names, function(v2) {
-      par <- get_parameters(v1, v2)
-      if (any(is.na(par))) par <- get_parameters(v2, v1)
-      r1ij <- sqrt((par[15]^2 + par[16]^2) / 2)
-      w1   <- sqrt(par[15] * par[16]) / r1ij
-      return(par[12] * w1)
-    })
-  })
   
-  cr <- Matrix::nearPD(cr - ax)$mat
-  # Iterate over pairs of variables to compute and assign the beta values
   for (j in seq_along(names)) {
     for (k in seq(j, J)) {
-      v1 <- names[j] # First variable in the pair
-      v2 <- names[k] # Second variable in the pair
-      par <- get_parameters(v1, v2) # Retrieve parameters for the current pair
-
-      # Calculate the correlation coefficient using the Gneiting function and correction term
-      cc <- Gneiting(0, 0, par, rho2ij = 1) # Gneiting function calculation for the pair
-      # Après
-      'r1ij <- sqrt((par[15]^2 + par[16]^2) / 2)
+      v1  <- names[j]
+      v2  <- names[k]
+      par <- get_parameters(v1, v2)
+      
+      # w1,ij = sqrt(r1ii * r1jj) / r1ij
+      r1ij <- sqrt((par[15]^2 + par[16]^2) / 2)
       w1   <- sqrt(par[15] * par[16]) / r1ij
-      ax   <- par[12] * w1 # Correction term calculation'
-      rho2ij <- cr[v1, v2]   # Adjusted correlation coefficient
-      rho2[v1, v2] <- rho2[v2, v1] <- rho2ij # Symmetric assignment to ensure the matrix is symmetric
+      
+      # cc = Gneiting(0, 0, par, rho2ij=1) = rho1ij*w1 + w2
+      cc <- Gneiting(0, 0, par, rho2ij = 1)
+      
+      # Formule (9) : rho2ij = (cr - rho1ij*w1) / (cc - rho1ij*w1)
+      rho1ij <- par[12]
+      rho2ij <- (cr[v1, v2] - rho1ij * w1) / (cc - rho1ij * w1)
+      
+      rho2[v1, v2] <- rho2[v2, v1] <- rho2ij
     }
   }
-
+  
+  # Vérifier DP et corriger si nécessaire
+  rho2 <- Matrix::nearPD(rho2)$mat
   return(rho2)
+  
 }
 #' @title Extract Correction Terms Matrix
 #'
