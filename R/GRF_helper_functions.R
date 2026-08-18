@@ -57,10 +57,10 @@ initialize_par_all_if_missing <- function(par_all, names, pairs, par_s, rho1, cr
 
     par_all <- setNames(rep(0.1, length(names_par_all)), names_par_all)
 
-    par_all[paste(pairs[1:length(names)], "rho2ij", sep = ":")] <- 1 # A checker encore juste mettre a les self pairs.
+    par_all[paste(pairs[1:length(names)], "rho2ij", sep = ":")] <- 1 
     par_all[paste(pairs[1:length(names)], "aii", sep = ":")] <- par_s[1, ]
     par_all[paste(pairs[1:length(names)], "nuii", sep = ":")] <- par_s[2, ]
-    par_all[paste(pairs[1:length(names)], "rho1ij", sep = ":")] <- 1 #  a mettre a un uniquement pour les self pairs.
+    par_all[paste(pairs[1:length(names)], "rho1ij", sep = ":")] <- 1 
     parm_eta <- c("a", "b", "c", "d", "e")  
     par_all[parm_eta] <- rep(1, length(parm_eta))
   }
@@ -418,13 +418,21 @@ estimation_gf <- function(data, wt_id, max_it, dates, tmax, names, par_all = NUL
   par_s <- init_space_par(data = data, names = names, h = h[u == 0], uh = uh[u == 0, ], max_it = max_it)
   par_s <- do.call(cbind, par_s)
 
+  'par_s rend  le vecteur 
+  c(range = valeur_estimee_de_par_1,
+  smoothness = valeur_estimee_de_par_2) qui sont les aij et nuij dans le papier 
+  c("range", "smoothness")
+  aii = range et nuii = smoothness
+  qui sont les parametres spatiaux mis dans optim spatial'
+  
   # Construct parameter matrix for covariance model
   ep <- generate_variable_index_pairs(names)
   pairs <- paste(ep[, 1], ep[, 2], sep = "-")
 
   # Check and initialize par_all if missing
   par_all <- initialize_par_all_if_missing(par_all, names, pairs, par_s, rho1, cr = cr)
-
+  'par_all normalement contient tous les params autre que les spatiaux ie les temporels dans optim temporal'
+  
   par_all <- optimize_spatial_parameters(par_all, data, names, Vi, uh[uh[, 1] == 0, ], cr, max_it, ep)
 
   for (v in 1:2) {
@@ -668,6 +676,8 @@ estimate_gaussian_field_params <- function(data, wt, names, coordinates, tmax, m
       geosphere::distHaversine(coordinates[i, ], coordinates[j, ]) / 1000
     })
   })
+  
+  ##Variogram a checker
   vgm <- lapply(1:nrow(ep), function(i) {
     variable <- unlist(ep[i, ])
     dist <- sort(unique(c(floor(dst))))
