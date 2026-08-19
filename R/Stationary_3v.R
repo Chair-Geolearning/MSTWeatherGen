@@ -1,5 +1,4 @@
-source("NSMuST_testset3v.R") ## load functions
-
+source("/home/aboualam/MSTWeatherGen/R/NSMuST_test3v.R")
 # Define spatial and temporal resolutions
 spatial_resolution  = 0.4
 temporal_resolution = 1
@@ -12,8 +11,40 @@ spatial_coordinates = as.matrix(grid_spatial)
 ns = nrow(spatial_coordinates)   
 
 # Define temporal sequence
-t_seq = seq(1, 30, by = temporal_resolution)
+t_seq = seq(1, 1461, by = temporal_resolution)
 nt = length(t_seq)  
+
+
+# Charger les 108 coordonnées originales
+utils::data(
+  "coordinates",
+  package = "MSTWeatherGen"
+)
+
+spatial_coordinates <- as.matrix(
+  coordinates[, c("longitude", "latitude")]
+)
+
+ns <- nrow(spatial_coordinates)
+
+# Dates : 2018-01-01 à 2021-12-31
+dates_Z1 <- seq(
+  from = as.Date("2018-01-01"),
+  to   = as.Date("2021-12-31"),
+  by   = "day"
+)
+
+nt <- length(dates_Z1)
+
+# Temps numérique utilisé par le simulateur
+temporal_resolution <- 1
+
+t_seq <- seq(
+  from = 1,
+  by = temporal_resolution,
+  length.out = nt
+)
+
 
 p = 3 # Number of variables
 L = 3000 # Number of waves
