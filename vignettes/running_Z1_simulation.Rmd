@@ -1,0 +1,243 @@
+---
+title: "Estimating MSTWeatherGen from a Z1 simulation"
+description: "Load, inspect, plot, and estimate a non-seasonal MSTWeatherGen model from Z1"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Estimating MSTWeatherGen from a Z1 simulation}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options:
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Introduction
+
+This vignette shows how to load a simulated three-dimensional array named
+`Z1`, inspect its structure, plot one of its variables through time, and fit a
+non-seasonal `MSTWeatherGen` model. It uses only the simulated `Z1` dataset and
+the 108 spatial coordinates supplied with the package. The original SAFRAN
+weather array is not loaded or used.
+
+The expected organization of `Z1` is:
+
+```text
+Z1[time, spatial location, variable]
+```
+
+For the example considered here, its expected dimensions are 1,461 days, 108
+spatial locations, and 3 variables.
+
+## Load MSTWeatherGen
+
+```{r load-package, message=FALSE, warning=FALSE}
+library(MSTWeatherGen)
+```
+
+## Part 1 :  Read the Z1 simulation data
+
+The code below searches for `Z1_V2.rds` from either the package source tree or
+the local project. For an installed package, the recommended location is
+`inst/extdata/Z1_V2.rds`.
+
+```{r read-z1}
+# Lecture du fichier Z1
+fichier_Z1 <- "/home/aboualam/MSTWeatherGen/data/Z1_V2.rds"
+
+# Vérification et lecture
+stopifnot(file.exists(fichier_Z1))
+Z1 <- readRDS(z1_path)
+
+if (length(dim(Z1)) != 3L) {
+  stop("Z1 must be a three-dimensional array: time, location, variable.")
+}
+
+dim(Z1)
+```
+
+## Part 2 : Define dates, coordinates, and variable names
+
+The simulation covers the period from 1 January 2018 to 31 December 2021.
+The coordinates distributed with `MSTWeatherGen` contain the 108 locations
+used here.
+
+```{r define-metadata}
+dates_Z1 <- seq(
+  from = as.Date("2018-01-01"),
+  to   = as.Date("2021-12-31"),
+  by   = "day"
+)
+
+utils::data("coordinates", package = "MSTWeatherGen")
+
+coordinates_Z1 <- coordinates[, c("longitude", "latitude")]
+
+weather_names <- c(
+  "Precipitation",
+  "Wind",
+  "Temp_max"
+)
+
+expected_dimensions <- c(
+  length(dates_Z1),
+  nrow(coordinates_Z1),
+  length(weather_names)
+)
+
+dimnames(Z1)[[3]] <- weather_names
+
+dim(Z1)
+head(dates_Z1)
+head(coordinates_Z1)
+```
+
+
+## Plot one variable through time A reverifier.
+
+The following function plots one variable at one spatial location. The
+defaults display the third variable (`Temp_max`) at the first location.
+
+```{r plot-function}
+plot_Z1_variable <- function(
+  Z,
+  dates,
+  variable = 3,
+  position = 1,
+  variable_names = dimnames(Z)[[3]]
+) {
+  if (length(dim(Z)) != 3L) {
+    stop("Z must have dimensions: time, location, variable.")
+  }
+
+  if (length(dates) != dim(Z)[1]) {
+    stop("The number of dates must equal the first dimension of Z.")
+  }
+
+  if (variable < 1L || variable > dim(Z)[3]) {
+    stop("The requested variable does not exist.")
+  }
+
+  if (position < 1L || position > dim(Z)[2]) {
+    stop("The requested spatial position does not exist.")
+  }
+
+  variable_label <- if (is.null(variable_names)) {
+    paste("Variable", variable)
+  } else {
+    variable_names[variable]
+  }
+
+  plot(
+    dates,
+    Z[, position, variable],
+    type = "l",
+    lwd = 1,
+    col = "steelblue4",
+    xlab = "Date",
+    ylab = variable_label,
+    main = paste(variable_label, "- spatial location", position)
+  )
+}
+```
+
+```{r plot-z1}
+plot_Z1_variable(
+  Z = Z1,
+  dates = dates_Z1,
+  variable = 3,
+  position = 1
+)
+```
+
+## Estimate a non-seasonal model
+
+The estimation is performed over the full 2018--2021 period. Consequently,
+`by_season` is set to `FALSE` and no `seasons` argument is supplied.
+
+`scale` is also set to `FALSE`: the internal seasonal standardization requires
+more than five years of observations, whereas this example contains four
+years.
+
+The following computation can take time, so this chunk is not run while the
+vignette is built. Remove `eval=FALSE` or run the code interactively to perform
+the estimation.
+
+```{r estimate-z1, eval=FALSE}
+seasons <- list(
+  s1 = list(min_day = 1, max_day = 29, min_month = 12, max_month = 2),
+  s2 = list(min_day = 1, max_day = 31, min_month = 3, max_month = 5),
+  s3 = list(min_day = 1, max_day = 31, min_month = 6, max_month = 8),
+  s4 = list(min_day = 1, max_day = 30, min_month = 9, max_month = 11)
+)
+
+swg_Z1 <- MSTWeatherGen_Estim(
+  data                = Z1,
+  seasons             = seasons,
+  dates               = dates_Z1,
+  names               = weather_names,
+  by_season           = TRUE,
+  scale               = FALSE,
+  precipitation       = FALSE,
+  names_weather_types = weather_names,
+  coordinates         = coordinates,
+  max_it              = 100,
+  tmax                 = 1,
+  n1                   = 3,
+  n2                   = 3
+)
+```
+
+If the first variable is a Gaussian field containing negative values rather
+than a non-negative precipitation field, rename it and disable the special
+precipitation treatment before estimation:
+
+```{r estimate-gaussian-z1, eval=FALSE}
+gaussian_names <- c("Variable_1", "Wind", "Temp_max")
+dimnames(Z1)[[3]] <- gaussian_names
+
+swg_Z1 <- MSTWeatherGen_Estim(
+  data                = Z1,
+  dates               = dates_Z1,
+  names               = gaussian_names,
+  by_season           = FALSE,
+  scale               = FALSE,
+  precipitation       = FALSE,
+  names_weather_types = gaussian_names,
+  coordinates         = coordinates_Z1,
+  max_it              = 100,
+  tmax                 = 1,
+  n1                   = 3,
+  n2                   = 3
+)
+```
+
+## Inspect and save the fitted model
+
+After running one of the estimation chunks, inspect and save the resulting
+object as follows:
+
+```{r save-estimation, eval=FALSE}
+str(swg_Z1, max.level = 2)
+
+saveRDS(
+  swg_Z1,
+  file = "swg_Z1_estimation.rds"
+)
+```
+
+## Summary
+
+This workflow:
+
+1. loads only the simulated `Z1` array;
+2. associates it with 1,461 dates and 108 coordinates;
+3. validates its `time x location x variable` structure;
+4. plots a selected variable through time; and
+5. estimates one non-seasonal `MSTWeatherGen` model over the complete period.
