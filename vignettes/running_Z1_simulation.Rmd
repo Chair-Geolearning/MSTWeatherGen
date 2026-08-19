@@ -53,7 +53,7 @@ fichier_Z1 <- "/home/aboualam/MSTWeatherGen/data/Z1_V2.rds"
 
 # Vérification et lecture
 stopifnot(file.exists(fichier_Z1))
-Z1 <- readRDS(z1_path)
+Z1 <- readRDS(fichier_Z1)
 
 if (length(dim(Z1)) != 3L) {
   stop("Z1 must be a three-dimensional array: time, location, variable.")
