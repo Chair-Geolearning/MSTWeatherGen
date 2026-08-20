@@ -33,7 +33,7 @@ generate_variable_index_pairs <- function(names) {
 #' @param names Vector of variable names involved in the model.
 #' @param pairs Generated pairs of variables for which parameters are set.
 #' @param par_s Initial scaling parameters for the covariance function.
-#' @param beta1 Correction term parameters to be updated in `par_all`.
+#' @param rho1 Correction term parameters to be updated in `par_all`.
 #' @param cr Initial correlation matrix used for beta computation.
 #'
 #' @return Updated `par_all` vector with all model parameters, including default and specified values.
@@ -41,90 +41,95 @@ generate_variable_index_pairs <- function(names) {
 #' @keywords internal
 #' @importFrom stats setNames
 #' @noRd
-initialize_par_all_if_missing <- function(par_all, names, pairs, par_s, beta1, cr) {
+initialize_par_all_if_missing <- function(par_all, names, pairs, par_s, rho1, cr) {
   # Initialize the `par_all` vector if it is missing, with default values or using `par_s`
   if (is.null(par_all)) {
     names_par_all <- c(
-      paste(pairs, "rho2ij", sep = ":"), "a1", "d1", "g1", "a2", "d2", "g2",
-      "b1", "e1", "l1", "b2", "e2", "l2", "c", "f", "m",
-      paste(names, "Ai", sep = ":"), paste(names, "Bi", sep = ":"),
-      paste(names, "Ci", sep = ":"),
-      paste(pairs, "aii", sep = ":"), paste(pairs, "nuii", sep = ":"),
-      paste(pairs, "beta1ij", sep = ":")
+      paste(pairs, "rho2ij", sep = ":"),
+      "a", "b", "c", "d", "e",
+      paste(names, "Ai", sep = ":"),
+      paste(pairs[1:length(names)], "aii", sep = ":"),   # ← self-pairs
+      paste(pairs[1:length(names)], "nuii", sep = ":"),  # ← self-pairs
+      paste(pairs, "rho1ij", sep = ":"),
+      paste(names, "r2ii", sep = ":"),   # ← par variable (nouveau)
+      paste(names, "r1ii", sep = ":")    # ← par variable (nouveau)
     )
 
     par_all <- setNames(rep(0.1, length(names_par_all)), names_par_all)
 
-    par_all[paste(pairs, "rho2ij", sep = ":")] <- 1
+    par_all[paste(pairs[1:length(names)], "rho2ij", sep = ":")] <- 1 
     par_all[paste(pairs[1:length(names)], "aii", sep = ":")] <- par_s[1, ]
     par_all[paste(pairs[1:length(names)], "nuii", sep = ":")] <- par_s[2, ]
-    par_all[paste(pairs, "beta1ij", sep = ":")] <- 0
-    parms <- c("a1", "a2", "d1", "d2", "g1", "g2")
-    par_all[parms] <- rep(1, length(parms))
+    par_all[paste(pairs[1:length(names)], "rho1ij", sep = ":")] <- 1 
+    parm_eta <- c("a", "b", "c", "d", "e")  
+    par_all[parm_eta] <- rep(1, length(parm_eta))
   }
 
-  # Update beta1 parameters based on covariance information
-  par_all <- update_beta1_parameters(par_all, names, beta1)
-
-  parm <- param(par_all, names)
+  # Update rho1 parameters based on covariance information
+  # il prend par all et mets rho1 dela signature dans par ll
+  par_all <- update_rho1_parameters(par_all, names, rho1)
+  
+  # partie 'check je pense'
+  parm <- create_df_param(par_all, names)   #  a renommer en create_df_param
   rho2 <- try(compute_rho2(parm, names, cr), silent = T)
   ch <- try(chol(rho2), silent = T)
   if (is.character(ch)) {
-    par_s <- matrix(rep(1, length(names)^2), ncol = length(names), nrow = length(names))
+    #par_s <- matrix(rep(1, length(names)^2), ncol = length(names), nrow = length(names))
     par_all[paste(pairs[1:length(names)], "aii", sep = ":")] <- 1
     par_all[paste(pairs[1:length(names)], "nuii", sep = ":")] <- 1
-    par_all <- update_beta1_parameters(par_all, names, beta1)
+    par_all <- update_rho1_parameters(par_all, names, rho1)
   }
+  
   return(par_all)
 }
-#' Update beta1 Parameters in Model Parameters
+#' Update rho1 Parameters in Model Parameters
 #'
-#' Modifies the 'beta1' parameters within the complete set of model parameters (`par_all`) using the covariance information provided by the 'beta1ij' matrix. This adjustment is crucial for ensuring accurate covariance structures in the model.
+#' Modifies the 'rho1' parameters within the complete set of model parameters (`par_all`) using the covariance information provided by the 'rho1' matrix. This adjustment is crucial for ensuring accurate covariance structures in the model.
 #'
 #' This function implements the methods described in Section 2.4 of the article, functions log_lik and log
 #' *Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8).
 #'
-#' @param par_all The complete set of model parameters, including 'beta1ij' values to be updated.
-#' @param names Vector of variable names, indicating the variables for which 'beta1ij' adjustments are applied.
-#' @param beta1 Matrix or data frame containing the updated covariance information to adjust 'beta1ij' parameters in `par_all`. If `beta1ij` is not a matrix, it will be transformed to ensure positive definiteness before updating.
+#' @param par_all The complete set of model parameters, including 'rho1ij' values to be updated.
+#' @param names Vector of variable names, indicating the variables for which 'rho1ij' adjustments are applied.
+#' @param rho1 Matrix or data frame containing the updated covariance information to adjust 'rho1ij' parameters in `par_all`. If `rho1` is not a matrix, it will be transformed to ensure positive definiteness before updating.
 #'
-#' @return The modified `par_all` vector with updated 'beta1ij' parameters reflecting the provided covariance information.
+#' @return The modified `par_all` vector with updated 'rho1ij' parameters reflecting the provided covariance information.
 #'
 #' @keywords internal
 #' @noRd
 #' @importFrom Matrix nearPD
-update_beta1_parameters <- function(par_all, names, beta1) {
-  # Update the `beta1ij` parameters in `par_all` based on the covariance information in `beta1`
-  if (!is.matrix(beta1)) {
+update_rho1_parameters <- function(par_all, names, rho1) {
+  # Update the `rho1ij` parameters in `par_all` based on the covariance information in `rho1`
+  if (!is.matrix(rho1)) {
     for (v1 in names) {
       for (v2 in names) {
-        par_all[paste(paste(v1, v2, sep = "-"), "beta1ij", sep = ":")] <- beta1$cov[beta1$v1 == v1 & beta1$v2 == v2 | beta1$v2 == v1 & beta1$v1 == v2]
+        par_all[paste(paste(v1, v2, sep = "-"), "rho1ij", sep = ":")] <- rho1$cov[rho1$v1 == v1 & rho1$v2 == v2 | rho1$v2 == v1 & rho1$v1 == v2]
       }
     }
     a <- sapply(names, function(v1) {
       sapply(names, function(v2) {
-        beta1ij <- par_all[paste(paste(v1, v2, sep = "-"), "beta1ij", sep = ":")]
-        if (is.na(beta1ij)) beta1ij <- par_all[paste(paste(v2, v1, sep = "-"), "beta1ij", sep = ":")]
-        return(beta1ij)
+        rho1ij <- par_all[paste(paste(v1, v2, sep = "-"), "rho1ij", sep = ":")]
+        if (is.na(rho1ij)) rho1ij <- par_all[paste(paste(v2, v1, sep = "-"), "rho1ij", sep = ":")]
+        return(rho1ij)
       })
     })
     a <- matrix(a, nrow = length(names), ncol = length(names))
     rownames(a) <- colnames(a) <- names
-    beta1 = Matrix::nearPD(a)$mat
+    rho1 = Matrix::nearPD(a)$mat
   }else{
-    if (any(diag(beta1) < 0)) {
-      warning("beta1 contient des valeurs negatives avant nearPD : ", paste(as.numeric(beta1), collapse = ", "))
+    if (any(diag(rho1) < 0)) {
+      warning("rho1 contient des valeurs negatives avant nearPD : ", paste(as.numeric(rho1), collapse = ", "))
     }
-    beta1 <- if (length(names) == 1) {
-      Matrix::Matrix(max(as.numeric(beta1), 1e-6), nrow = 1, ncol = 1, dimnames = list(names, names))
+    rho1 <- if (length(names) == 1) {
+      Matrix::Matrix(max(as.numeric(rho1), 1e-6), nrow = 1, ncol = 1, dimnames = list(names, names))
     } else {
-      Matrix::nearPD(beta1)$mat
+      Matrix::nearPD(rho1)$mat
     }
   }
-  colnames(beta1) <- rownames(beta1) <- names
+  colnames(rho1) <- rownames(rho1) <- names
   for (v1 in names) {
     for (v2 in names) {
-      par_all[paste(paste(v1, v2, sep = "-"), "beta1ij", sep = ":")] <- beta1[v1, v2]
+      par_all[paste(paste(v1, v2, sep = "-"), "rho1ij", sep = ":")] <- rho1[v1, v2]
     }
   }
   return(par_all)
@@ -164,7 +169,8 @@ init_space_par <- function(data, names, h, uh, max_it = 2000) {
 
     parallel::clusterExport(cl, c("loglik_spatial"), envir = environment())
     parent_seed <- .Random.seed
-
+    
+    #Loop on variables in name
     par <- parallel::parLapply(cl, names, function(v) {
       assign(".Random.seed", parent_seed, envir = .GlobalEnv)
       optim(
@@ -226,7 +232,6 @@ init_space_par <- function(data, names, h, uh, max_it = 2000) {
 optimize_spatial_parameters <- function(par_all, data, names, Vi, uh, cr, max_it, ep) {
   pairs <- paste(ep[, 1], ep[, 2], sep = "-")
   parms <- c(
-    paste(pairs, "beta1ij", sep = ":"), paste(names, "Ci", sep = ":"),
     paste(pairs[1:length(names)], "aii", sep = ":"),
     paste(pairs[1:length(names)], "nuii", sep = ":")
   )
@@ -237,7 +242,7 @@ optimize_spatial_parameters <- function(par_all, data, names, Vi, uh, cr, max_it
     control = list(maxit = max_it)
   )$par
   par_all[parms] <- optimized_par
-  return(update_beta1_parameters(par_all, names, extract_beta1(param(par_all, names), names)))
+  return(update_rho1_parameters(par_all, names, extract_rho1(create_df_param(par_all, names), names)))
 }
 #' Optimize Spatio-Temporal Parameters for Variable Pairs
 #'
@@ -345,11 +350,13 @@ optimize_pairs_spatiotemporal <- function(par_all, data, names, Vi, uh, cr, max_
 optimize_temporal_parameters <- function(par_all, data, names, Vi, uh, cr, max_it, ep) {
   # Final optimization step for the subset of parameters across all variable pairs
   parms <- c(
-    "a1", "d1", "g1", "a2", "d2", "g2",
-    "b1", "e1", "l1", "b2", "e2", "l2", "c", "f", "m",
-    paste(names, "Ai", sep = ":"), paste(names, "Bi", sep = ":"),
-    paste(names, "Ci", sep = ":")
+    "a", "b", "c", "d", "e",           # paramètres globaux de etaij
+    paste(names, "Ai", sep = ":"),      
+    paste(names, "r1ii", sep = ":"),
+    paste(names, "r2ii", sep = ":"),
+    paste(pairs, "rho1ij", sep = ":")
   )
+  
   optimized_par <- optim(par_all[parms],
     fn = loglik, data = data, parms = parms,
     par_all = par_all, ep = ep, names = names,
@@ -377,7 +384,7 @@ optimize_temporal_parameters <- function(par_all, data, names, Vi, uh, cr, max_i
 #' @param par_all (Optional) Initial or current complete set of model parameters. If not provided, parameters are initialized within the function.
 #' @param coordinates Matrix containing the geographical coordinates of the spatial locations in the dataset.
 #' @param n1, n2 Parameters that define the granularity for generating spatial index pairs, affecting the spatial resolution of the model.
-#' @param beta1 Matrix of precomputed correction terms used to adjust the covariance matrix, aiding in model stabilization.
+#' @param rho1 Matrix of precomputed correction terms used to adjust the covariance matrix, aiding in model stabilization.
 #' @param cr Initial correlation matrix representing the base relationships between variables, used as a starting point for optimization.
 #' @param threshold_precip Threshold values for precipitation, used in preprocessing to distinguish between different precipitation intensities.
 #'
@@ -388,7 +395,7 @@ optimize_temporal_parameters <- function(par_all, data, names, Vi, uh, cr, max_i
 #' @importFrom parallel mclapply
 
 estimation_gf <- function(data, wt_id, max_it, dates, tmax, names, par_all = NULL,
-                          coordinates, n1, n2, beta1, cr, threshold_precip) {
+                          coordinates, n1, n2, rho1, cr, threshold_precip) {
   # Dimensions of the data
   Nt <- dim(data)[1] # Number of time points
   Ns <- dim(data)[2] # Number of spatial locations
@@ -411,13 +418,21 @@ estimation_gf <- function(data, wt_id, max_it, dates, tmax, names, par_all = NUL
   par_s <- init_space_par(data = data, names = names, h = h[u == 0], uh = uh[u == 0, ], max_it = max_it)
   par_s <- do.call(cbind, par_s)
 
+  'par_s rend  le vecteur 
+  c(range = valeur_estimee_de_par_1,
+  smoothness = valeur_estimee_de_par_2) qui sont les aij et nuij dans le papier 
+  c("range", "smoothness")
+  aii = range et nuii = smoothness
+  qui sont les parametres spatiaux mis dans optim spatial'
+  
   # Construct parameter matrix for covariance model
   ep <- generate_variable_index_pairs(names)
   pairs <- paste(ep[, 1], ep[, 2], sep = "-")
 
   # Check and initialize par_all if missing
-  par_all <- initialize_par_all_if_missing(par_all, names, pairs, par_s, beta1, cr = cr)
-
+  par_all <- initialize_par_all_if_missing(par_all, names, pairs, par_s, rho1, cr = cr)
+  'par_all normalement contient tous les params autre que les spatiaux ie les temporels dans optim temporal'
+  
   par_all <- optimize_spatial_parameters(par_all, data, names, Vi, uh[uh[, 1] == 0, ], cr, max_it, ep)
 
   for (v in 1:2) {
@@ -428,12 +443,12 @@ estimation_gf <- function(data, wt_id, max_it, dates, tmax, names, par_all = NUL
   }
 
   # Construct parameter and beta matrices
-  par_all <- update_beta1_parameters(par_all, names, extract_beta1(param(par_all, names), names))
-  parm <- param(par_all, names)
+  par_all <- update_rho1_parameters(par_all, names, extract_rho1(create_df_param(par_all, names), names))
+  parm <- create_df_param(par_all, names)
   beta <- compute_rho2(parm, names, cr)
   beta <- sapply(1:nrow(ep), function(i) beta[ep[i, 1], ep[i, 2]])
   par_all[1:length(beta)] <- beta
-  parm <- param(par_all, names)
+  parm <- create_df_param(par_all, names)
 
   return(list(parm = parm, par_all = par_all))
 }
@@ -661,6 +676,8 @@ estimate_gaussian_field_params <- function(data, wt, names, coordinates, tmax, m
       geosphere::distHaversine(coordinates[i, ], coordinates[j, ]) / 1000
     })
   })
+  
+  ##Variogram a checker
   vgm <- lapply(1:nrow(ep), function(i) {
     variable <- unlist(ep[i, ])
     dist <- sort(unique(c(floor(dst))))
@@ -695,7 +712,7 @@ estimate_gaussian_field_params <- function(data, wt, names, coordinates, tmax, m
     gf_par[[k]] <- estimation_gf(
       data = data, wt_id = wt_id, max_it = max_it, dates = dates,
       tmax = tmax, names = names, coordinates = coordinates, n1 = n1,
-      n2 = n2, beta1 = vgm[vgm$lagtime == 0 & vgm$dist == max(vgm$dist), ],
+      n2 = n2, rho1 = vgm[vgm$lagtime == 0 & vgm$dist == max(vgm$dist), ],
       cr = cr, threshold_precip = threshold_precip[[k]]
     )$parm
   }
