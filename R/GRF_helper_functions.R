@@ -98,11 +98,14 @@ initialize_par_all_if_missing <- function(par_all, names, pairs, par_s, rho1, cr
 #' @keywords internal
 #' @noRd
 #' @importFrom Matrix nearPD
+#' @keywords internal
+#' @noRd
+#' @importFrom Matrix nearPD
 update_rho1_parameters <- function(par_all, names, rho1) {
   if (!is.matrix(rho1)) {
     for (v1 in names) {
       for (v2 in names) {
-        par_all[paste(paste(v1, v2, sep = "-"), "rho1ij", sep = ":")] <- 
+        par_all[paste(paste(v1, v2, sep = "-"), "rho1ij", sep = ":")] <-
           rho1$cov[rho1$v1 == v1 & rho1$v2 == v2 | rho1$v2 == v1 & rho1$v1 == v2]
       }
     }
@@ -115,43 +118,35 @@ update_rho1_parameters <- function(par_all, names, rho1) {
     })
     a <- matrix(a, nrow = length(names), ncol = length(names))
     rownames(a) <- colnames(a) <- names
-    rho1 <- if (length(names) == 1) {
-      Matrix::Matrix(max(as.numeric(a), 1e-6), nrow=1, ncol=1, dimnames=list(names,names))
-    } else {
-      # Protection : borner rho1ij entre -0.9999 et 0.9999 avant nearPD
-      a <- pmax(pmin(a, 0.9999), -0.9999)
-      diag(a) <- pmax(diag(a), 1e-6)   # diagonale toujours positive
-      tryCatch(
-        Matrix::nearPD(a)$mat,
-        error = function(e) {
-          # Si nearPD échoue, forcer une matrice DP minimale
-          diag_mat <- diag(pmax(diag(a), 0.01), nrow=length(names))
-          rownames(diag_mat) <- colnames(diag_mat) <- names
-          Matrix::Matrix(diag_mat)
-        }
-      )
-    }
+    
+    # Seule contrainte physique : diagonale strictement positive (variance > 0)
+    diag(a) <- pmax(diag(a), 1e-6)
+    rho1 <- tryCatch(
+      Matrix::nearPD(a)$mat,
+      error = function(e) {
+        diag_mat <- diag(rep(0.01, length(names)))
+        rownames(diag_mat) <- colnames(diag_mat) <- names
+        Matrix::Matrix(diag_mat)
+      }
+    )
+    
   } else {
     if (any(diag(rho1) < 0)) {
       warning("rho1 contient des valeurs negatives avant nearPD : ",
               paste(as.numeric(rho1), collapse = ", "))
     }
-    rho1 <- if (length(names) == 1) {
-      Matrix::Matrix(max(as.numeric(rho1), 1e-6), nrow=1, ncol=1, dimnames=list(names,names))
-    } else {
-      # Protection : borner avant nearPD
-      rho1 <- pmax(pmin(as.matrix(rho1), 0.9999), -0.9999)
-      diag(rho1) <- pmax(diag(rho1), 1e-6)
-      tryCatch(
-        Matrix::nearPD(rho1)$mat,
-        error = function(e) {
-          diag_mat <- diag(pmax(diag(rho1), 0.01), nrow=length(names))
-          rownames(diag_mat) <- colnames(diag_mat) <- names
-          Matrix::Matrix(diag_mat)
-        }
-      )
-    }
+    # Seule contrainte physique : diagonale strictement positive (variance > 0)
+    diag(rho1) <- pmax(diag(as.matrix(rho1)), 1e-6)
+    rho1 <- tryCatch(
+      Matrix::nearPD(rho1)$mat,
+      error = function(e) {
+        diag_mat <- diag(rep(0.01, length(names)))
+        rownames(diag_mat) <- colnames(diag_mat) <- names
+        Matrix::Matrix(diag_mat)
+      }
+    )
   }
+  
   colnames(rho1) <- rownames(rho1) <- names
   for (v1 in names) {
     for (v2 in names) {
