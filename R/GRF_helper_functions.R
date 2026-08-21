@@ -62,7 +62,7 @@ initialize_par_all_if_missing <- function(par_all, names, pairs, par_s, rho1, cr
     par_all[paste(pairs[1:length(names)], "nuii", sep = ":")] <- par_s[2, ]
     par_all[paste(pairs[1:length(names)], "rho1ij", sep = ":")] <- 1 
     parm_eta <- c("a", "b", "c", "d", "e")  
-    par_all[parm_eta] <- rep(1, length(parm_eta))
+    par_all[parm_eta] <- rep(0.5, length(parm_eta))
   }
 
   # Update rho1 parameters based on covariance information
@@ -99,11 +99,11 @@ initialize_par_all_if_missing <- function(par_all, names, pairs, par_s, rho1, cr
 #' @noRd
 #' @importFrom Matrix nearPD
 update_rho1_parameters <- function(par_all, names, rho1) {
-  # Update the `rho1ij` parameters in `par_all` based on the covariance information in `rho1`
   if (!is.matrix(rho1)) {
     for (v1 in names) {
       for (v2 in names) {
-        par_all[paste(paste(v1, v2, sep = "-"), "rho1ij", sep = ":")] <- rho1$cov[rho1$v1 == v1 & rho1$v2 == v2 | rho1$v2 == v1 & rho1$v1 == v2]
+        par_all[paste(paste(v1, v2, sep = "-"), "rho1ij", sep = ":")] <- 
+          rho1$cov[rho1$v1 == v1 & rho1$v2 == v2 | rho1$v2 == v1 & rho1$v1 == v2]
       }
     }
     a <- sapply(names, function(v1) {
@@ -115,15 +115,41 @@ update_rho1_parameters <- function(par_all, names, rho1) {
     })
     a <- matrix(a, nrow = length(names), ncol = length(names))
     rownames(a) <- colnames(a) <- names
-    rho1 = Matrix::nearPD(a)$mat
-  }else{
+    rho1 <- if (length(names) == 1) {
+      Matrix::Matrix(max(as.numeric(a), 1e-6), nrow=1, ncol=1, dimnames=list(names,names))
+    } else {
+      # Protection : borner rho1ij entre -0.9999 et 0.9999 avant nearPD
+      a <- pmax(pmin(a, 0.9999), -0.9999)
+      diag(a) <- pmax(diag(a), 1e-6)   # diagonale toujours positive
+      tryCatch(
+        Matrix::nearPD(a)$mat,
+        error = function(e) {
+          # Si nearPD échoue, forcer une matrice DP minimale
+          diag_mat <- diag(pmax(diag(a), 0.01), nrow=length(names))
+          rownames(diag_mat) <- colnames(diag_mat) <- names
+          Matrix::Matrix(diag_mat)
+        }
+      )
+    }
+  } else {
     if (any(diag(rho1) < 0)) {
-      warning("rho1 contient des valeurs negatives avant nearPD : ", paste(as.numeric(rho1), collapse = ", "))
+      warning("rho1 contient des valeurs negatives avant nearPD : ",
+              paste(as.numeric(rho1), collapse = ", "))
     }
     rho1 <- if (length(names) == 1) {
-      Matrix::Matrix(max(as.numeric(rho1), 1e-6), nrow = 1, ncol = 1, dimnames = list(names, names))
+      Matrix::Matrix(max(as.numeric(rho1), 1e-6), nrow=1, ncol=1, dimnames=list(names,names))
     } else {
-      Matrix::nearPD(rho1)$mat
+      # Protection : borner avant nearPD
+      rho1 <- pmax(pmin(as.matrix(rho1), 0.9999), -0.9999)
+      diag(rho1) <- pmax(diag(rho1), 1e-6)
+      tryCatch(
+        Matrix::nearPD(rho1)$mat,
+        error = function(e) {
+          diag_mat <- diag(pmax(diag(rho1), 0.01), nrow=length(names))
+          rownames(diag_mat) <- colnames(diag_mat) <- names
+          Matrix::Matrix(diag_mat)
+        }
+      )
     }
   }
   colnames(rho1) <- rownames(rho1) <- names
@@ -230,19 +256,38 @@ init_space_par <- function(data, names, h, uh, max_it = 2000) {
 #' @importFrom stringr str_split
 #' @importFrom stats optim
 optimize_spatial_parameters <- function(par_all, data, names, Vi, uh, cr, max_it, ep) {
-  pairs <- paste(ep[, 1], ep[, 2], sep = "-")
+  pairs <- paste(ep[,1], ep[,2], sep="-")
   parms <- c(
-    paste(pairs[1:length(names)], "aii", sep = ":"),
-    paste(pairs[1:length(names)], "nuii", sep = ":")
+    paste(pairs[1:length(names)], "aii",  sep=":"),
+    paste(pairs[1:length(names)], "nuii", sep=":")
   )
-  optimized_par <- optim(par_all[parms],
-    fn = loglik, data = data, parms = parms,
-    par_all = par_all, ep = ep, names = names,
-    Vi = Vi, uh = uh, cr = cr,
+  
+  n_aii  <- length(names)
+  n_nuii <- length(names)
+  
+  lower <- c(
+    rep(1e-3, n_aii),    # aii > 0 (minimum raisonnable)
+    rep(0.1,  n_nuii)    # nuii >= 0.1 (Matérn valide)
+  )
+  upper <- c(
+    rep(Inf, n_aii),     # aii sans borne supérieure
+    rep(5,   n_nuii)     # nuii <= 5 (suffisant physiquement)
+  )
+  
+  optimized_par <- optim(
+    par_all[parms],
+    fn     = loglik,
+    method = "L-BFGS-B",
+    lower  = lower,
+    upper  = upper,
+    data   = data, parms = parms, par_all = par_all,
+    ep = ep, names = names, Vi = Vi, uh = uh, cr = cr,
     control = list(maxit = max_it)
   )$par
+  
   par_all[parms] <- optimized_par
-  return(update_rho1_parameters(par_all, names, extract_rho1(create_df_param(par_all, names), names)))
+  return(update_rho1_parameters(par_all, names,
+                                extract_rho1(create_df_param(par_all, names), names)))
 }
 #' Optimize Spatio-Temporal Parameters for Variable Pairs
 #'
@@ -348,21 +393,54 @@ optimize_pairs_spatiotemporal <- function(par_all, data, names, Vi, uh, cr, max_
 #' @keywords internal
 #' @importFrom stats optim
 optimize_temporal_parameters <- function(par_all, data, names, Vi, uh, cr, max_it, ep) {
-  # Final optimization step for the subset of parameters across all variable pairs
+  pairs <- paste(ep[,1], ep[,2], sep="-")
   parms <- c(
-    "a", "b", "c", "d", "e",           # paramètres globaux de etaij
-    paste(names, "Ai", sep = ":"),      
-    paste(names, "r1ii", sep = ":"),
-    paste(names, "r2ii", sep = ":"),
-    paste(pairs, "rho1ij", sep = ":")
+    "a", "b", "c", "d", "e",
+    paste(names, "Ai",     sep=":"),
+    paste(names, "r1ii",   sep=":"),
+    paste(names, "r2ii",   sep=":"),
+    paste(pairs, "rho1ij", sep=":")
   )
   
-  optimized_par <- optim(par_all[parms],
-    fn = loglik, data = data, parms = parms,
-    par_all = par_all, ep = ep, names = names,
-    Vi = Vi, uh = uh, cr = cr,
+  n_Ai     <- length(names)
+  n_r1ii   <- length(names)
+  n_r2ii   <- length(names)
+  n_rho1ij <- length(pairs)
+  
+  lower <- c(
+    1e-6,                      # a > 0
+    1e-6,                      # 0 < b <= 1
+    0,                         # 0 <= c <= 1
+    1e-6,                      # d > 0
+    1e-6,                      # 0 < e <= 1
+    rep(0,    n_Ai),           # 0 <= Ai < 1
+    rep(1e-6, n_r1ii),         # r1ii > 0
+    rep(1e-6, n_r2ii),         # r2ii > 0
+    rep(-Inf, n_rho1ij)        # rho1ij : covariance, sans borne
+  )
+  upper <- c(
+    Inf,                       # a
+    1,                         # b <= 1
+    1,                         # c <= 1
+    Inf,                       # d
+    1,                         # e <= 1
+    rep(0.9999, n_Ai),         # Ai < 1
+    rep(Inf,    n_r1ii),       # r1ii
+    rep(Inf,    n_r2ii),       # r2ii
+    rep(Inf,    n_rho1ij)      # rho1ij : covariance, sans borne
+  )
+  
+  optimized_par <- optim(
+    par_all[parms],
+    fn     = loglik,
+    method = "L-BFGS-B",
+    lower  = lower,
+    upper  = upper,
+    data   = data, parms = parms, par_all = par_all,
+    ep = ep, names = names, Vi = Vi, uh = uh, cr = cr,
     control = list(maxit = max_it)
   )$par
+  
   par_all[parms] <- optimized_par
   return(par_all)
 }
@@ -438,6 +516,7 @@ estimation_gf <- function(data, wt_id, max_it, dates, tmax, names, par_all = NUL
   for (v in 1:2) {
     # Optimize temporal parameters
     par_all <- optimize_temporal_parameters(par_all, data, names, Vi, uh, cr, max_it, ep)
+    
     # Optimize spatial parameters
     par_all <- optimize_spatial_parameters(par_all, data, names, Vi, uh, cr, max_it, ep)
   }
