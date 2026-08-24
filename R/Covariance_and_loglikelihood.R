@@ -49,6 +49,7 @@ Gneiting <- function(h, u, par, rho2ij) {
   e       <- par[5]
   Ai      <- par[6]
   Aj      <- par[7]
+  
   aii     <- par[8]   # portée Matérn variable i
   ajj     <- par[9]   # portée Matérn variable j
   nuii    <- par[10]  # lissage Matérn variable i
@@ -57,7 +58,7 @@ Gneiting <- function(h, u, par, rho2ij) {
   r2ii    <- par[13]  # décroissance exp. spatiotemporelle variable i
   r2jj    <- par[14]  # décroissance exp. spatiotemporelle variable j
   r1ii    <- par[15]  # décroissance exp. temporelle variable i
-  r1jj    <- par[16]  # décroissance exp. temporelle variable j
+  r1jj    <- par[16]
   
   # Cross parameters (calculated, never stored)
   nuij <- (nuii + nujj) / 2
@@ -172,22 +173,17 @@ create_df_param <- function(par, names) {
 #' @keywords internal
 
 compute_rho2 <- function(parm, names, cr) {
-  J <- length(names) # Number of variables
-  rho2 <- matrix(0, ncol = J, nrow = J) # Initialize the beta matrix with zeros
-  colnames(rho2) <- rownames(rho2) <- names # Set the row and column names of the matrix to variable names
-
-  # Create a map to fetch parameters quickly using a two-level list structure
+  J <- length(names)
+  rho2 <- matrix(0, ncol = J, nrow = J)
+  colnames(rho2) <- rownames(rho2) <- names
+  
   parm_map <- split(parm, list(parm$v1, parm$v2))
-
-  # Function to retrieve parameters for a given pair of variables v1 and v2
+  
   get_parameters <- function(v1, v2) {
-    # Attempt to fetch parameters based on the naming convention, handling both v1,v2 and v2,v1 cases
-    if (exists(paste0(v1, ".", v2), parm_map)) {
-      par <- as.numeric(parm_map[[paste0(v1, ".", v2)]][-c(1, 2)]) # Exclude the first two elements (variable names)
-    } else {
-      par <- as.numeric(parm_map[[paste0(v2, ".", v1)]][-c(1, 2)])
-    }
-    return(par)
+    if (exists(paste0(v1, ".", v2), parm_map))
+      as.numeric(parm_map[[paste0(v1, ".", v2)]][-c(1, 2)])
+    else
+      as.numeric(parm_map[[paste0(v2, ".", v1)]][-c(1, 2)])
   }
   
   for (j in seq_along(names)) {
@@ -197,15 +193,25 @@ compute_rho2 <- function(parm, names, cr) {
       par <- get_parameters(v1, v2)
       
       # w1,ij = sqrt(r1ii * r1jj) / r1ij
-      r1ij <- sqrt((par[15]^2 + par[16]^2) / 2)
-      w1   <- sqrt(par[15] * par[16]) / r1ij
+      r1ij   <- sqrt((par[15]^2 + par[16]^2) / 2)
+      w1     <- sqrt(par[15] * par[16]) / r1ij
+      rho1ij <- par[12]
       
       # cc = Gneiting(0, 0, par, rho2ij=1) = rho1ij*w1 + w2
-      cc <- Gneiting(0, 0, par, rho2ij = 1)
+      cc    <- Gneiting(0, 0, par, rho2ij = 1)
       
-      # Formule (9) : rho2ij = (cr - rho1ij*w1) / (cc - rho1ij*w1)
-      rho1ij <- par[12]
-      rho2ij <- (cr[v1, v2] - rho1ij * w1) / (cc - rho1ij * w1)
+      # denom = w2,ij = cc - rho1ij*w1
+      denom <- cc - rho1ij * w1
+      
+      # Formule (9) avec garde-fous
+      if (is.na(denom) || is.nan(denom) || abs(denom) < 0.01) {
+        # w2 trop petit → terme spatiotemporel négligeable → rho2ij = 0
+        rho2ij <- 0
+      } else {
+        rho2ij <- (cr[v1, v2] - rho1ij * w1) / denom
+        # Borner rho2ij à des valeurs raisonnables (covariance, pas corrélation)
+        rho2ij <- pmax(pmin(rho2ij, 5), -5)
+      }
       
       rho2[v1, v2] <- rho2[v2, v1] <- rho2ij
     }
@@ -214,7 +220,6 @@ compute_rho2 <- function(parm, names, cr) {
   # Vérifier DP et corriger si nécessaire
   rho2 <- Matrix::nearPD(rho2)$mat
   return(rho2)
-  
 }
 #' @title Extract Correction Terms Matrix
 #'
@@ -299,151 +304,128 @@ extract_beta <- function(parm, names) {
 #' @importFrom stats rnorm pnorm
 #' @keywords internal
 loglik <- function(par, parms, par_all, data, names, Vi, h, u, uh, ep, cr) {
-  J <- length(names) # Number of variables in the analysis.
-  pairs <- paste(ep[, 1], ep[, 2], sep = "-") # Construct pairs from 'ep' for parameter naming.
-
-  par_all[parms] <- par # Update specified parameters.
-
+  J <- length(names)
+  pairs <- paste(ep[, 1], ep[, 2], sep = "-")
+  
+  par_all[parms] <- par
+  
   parm <- create_df_param(par_all, names)
-  # rho1 <- Matrix::nearPD(extract_rho1(parm, names))$mat  # Compute ax correction terms
   parm <- create_df_param(update_rho1_parameters(par_all, names, extract_rho1(parm, names)), names)
-  rho2 <- try(compute_rho2(parm, names, cr), silent = T) # Compute rho2 coefficients
-  # Attempt Cholesky decomposition to ensure positive definiteness.
-  # ae <- try(chol(rho1), silent = TRUE)
-  be <- try(chol(rho2), silent = TRUE)
-
+  rho2 <- try(compute_rho2(parm, names, cr), silent = T)
+  be   <- try(chol(rho2), silent = TRUE)
+  
   if (!is.character(be)) {
-    # Proceed if both 'rho1' and 'rho2' matrices are valid for further computations.
-
-    # Map parameters to each variable pair in 'Vi'.
+    
     parmm <- lapply(1:nrow(Vi), function(v) {
-      as.numeric(parm[(parm$v1 == Vi[v, 1] & parm$v2 == Vi[v, 2]) | (parm$v1 == Vi[v, 2] & parm$v2 == Vi[v, 1]), ][, -c(1, 2)])
+      as.numeric(parm[(parm$v1 == Vi[v, 1] & parm$v2 == Vi[v, 2]) |
+                        (parm$v1 == Vi[v, 2] & parm$v2 == Vi[v, 1]), ][, -c(1, 2)])
     })
     u <- uh[, 1]
     h <- uh[, 2]
-
+    
     ncores <- getCores()
     if (.Platform$OS.type == "windows") {
       ll <- lapply(1:nrow(Vi), function(v) {
-        # Initialize log-likelihood components for the current pair.
         l1 <- l2 <- l3 <- l4 <- 0
-        par <- parmm[[v]] # Parameters for the current pair.
-        # Validate parameter constraints; return a large penalty if violated.
+        par <- parmm[[v]]
         if (any(par[c(1:11, 13:16)] < 0) | any(par[c(6:7)] > 1) | abs(par[12]) > 1) {
-          return(-abs(rnorm(1)) * 1e+20)
+          return(1e20)                                          # ← fini pour L-BFGS-B
         } else {
-          # Calculate pairwise log-likelihood using Gneiting function and parameter adjustments.
           cij <- Gneiting(h = h, u = u, par = par, rho2ij = rho2[Vi[v, 1], Vi[v, 2]])
-          delta <- 1 - cij^2
+          cij   <- pmax(pmin(cij, 0.9999999), -0.9999999)     # ← borner cij
+          delta <- pmax(1 - cij^2, 1e-10)                     # ← éviter delta=0
           v1 <- data[, , Vi[v, 1]]
           v1 <- v1[cbind(uh[, 3], uh[, 5])]
           v2 <- data[, , Vi[v, 2]]
           v2 <- v2[cbind(uh[, 4], uh[, 6])]
           dz <- !(h == 0 & u == 0 & Vi[v, 1] == Vi[v, 2])
-          cij <- cij[dz]
+          cij   <- cij[dz]
           delta <- delta[dz]
-          v1 <- v1[dz]
-          v2 <- v2[dz]
-          uh <- uh[dz, ]
-
-          # Detailed computations for log-likelihood components based on variable presence and types.
+          v1    <- v1[dz]
+          v2    <- v2[dz]
+          uh_dz <- uh[dz, ]                                    # ← uh_dz au lieu de uh
+          
           id1 <- (v1 == 0) & (!v2 == 0) & (Vi[v, 1] == "Precipitation")
           id2 <- (!v1 == 0) & (v2 == 0) & (Vi[v, 2] == "Precipitation")
           id4 <- (!v1 == 0) & (!v2 == 0)
           id3 <- (v1 == 0) & (v2 == 0) & (Vi[v, 1] == "Precipitation") & (Vi[v, 2] == "Precipitation")
-          uh[, 8][which(uh[, 8] == -Inf)] <- -2.282295
-          uh[, 7][which(uh[, 7] == -Inf)] <- -2.282295
-
-          # l1: Case where the first variable is zero and the second is non-zero
-          # where the first variable is "Precipitation"
+          uh_dz[, 8][which(uh_dz[, 8] == -Inf)] <- -2.282295
+          uh_dz[, 7][which(uh_dz[, 7] == -Inf)] <- -2.282295
+          
           if (!length(which(id1 == TRUE)) == 0) {
-            l1 <- sum(log(pnorm((uh[id1, 7] - cij[id1] * v2[id1]) / sqrt(delta[id1]))))
+            l1 <- sum(log(pnorm((uh_dz[id1, 7] - cij[id1] * v2[id1]) / sqrt(delta[id1]))), na.rm = TRUE)
           }
-
-          # l2: Case where the first variable is non-zero and the second is zero
-          # where the second variable is "Precipitation"
           if (!length(which(id2 == TRUE)) == 0) {
-            l2 <- sum(log(pnorm((uh[id2, 8] - cij[id2] * v1[id2]) / sqrt(delta[id2]))))
+            l2 <- sum(log(pnorm((uh_dz[id2, 8] - cij[id2] * v1[id2]) / sqrt(delta[id2]))), na.rm = TRUE)
           }
-
-          # l3: Case where both variables are zero and both are "Precipitation"
           if (!length(which(id3 == TRUE)) == 0) {
             rho_bound <- pmin(pmax(cij[id3], -0.99999999), 0.99999999)
-            l3 <- sum(log(pbinorm(uh[id3, 7], uh[id3, 8], var1 = 1, var2 = 1, cov12 = rho_bound)))
+            l3 <- sum(log(pbinorm(uh_dz[id3, 7], uh_dz[id3, 8], var1 = 1, var2 = 1, cov12 = rho_bound)), na.rm = TRUE)
           }
-
-          # l4: Case where both variables have non-zero values
           if (!length(which(id4 == TRUE)) == 0) {
-            l4 <- sum((-1 / 2) * (log(delta[id4]) + (v1[id4]^2 - (2 * cij[id4] * v1[id4] * v2[id4]) + v2[id4]^2) / delta[id4]))
+            l4 <- sum((-1 / 2) * (log(delta[id4]) + (v1[id4]^2 - (2 * cij[id4] * v1[id4] * v2[id4]) + v2[id4]^2) / delta[id4]), na.rm = TRUE)
           }
-
-          return(l1 + l2 + l3 + l4)
+          
+          result_pair <- l1 + l2 + l3 + l4
+          if (!is.finite(result_pair)) return(1e20)            # ← protection finale paire
+          return(result_pair)
         }
       })
     } else {
-      # Parallel computation of log-likelihood for each pair using mclapply (if multicore is intended, else lapply).
       ll <- parallel::mclapply(1:nrow(Vi), function(v) {
-        # Initialize log-likelihood components for the current pair.
         l1 <- l2 <- l3 <- l4 <- 0
-        par <- parmm[[v]] # Parameters for the current pair.
-        # Validate parameter constraints; return a large penalty if violated.
+        par <- parmm[[v]]
         if (any(par[c(1:11, 13:16)] < 0) | any(par[c(6:7)] > 1) | abs(par[12]) > 1) {
-          return(-abs(rnorm(1)) * 1e+20)
+          return(1e20)                                          # ← fini pour L-BFGS-B
         } else {
-          # Calculate pairwise log-likelihood using Gneiting function and parameter adjustments.
           cij <- Gneiting(h = h, u = u, par = par, rho2ij = rho2[Vi[v, 1], Vi[v, 2]])
-          delta <- 1 - cij^2
+          cij   <- pmax(pmin(cij, 0.9999999), -0.9999999)     # ← borner cij
+          delta <- pmax(1 - cij^2, 1e-10)                     # ← éviter delta=0
           v1 <- data[, , Vi[v, 1]]
           v1 <- v1[cbind(uh[, 3], uh[, 5])]
           v2 <- data[, , Vi[v, 2]]
           v2 <- v2[cbind(uh[, 4], uh[, 6])]
           dz <- !(h == 0 & u == 0 & Vi[v, 1] == Vi[v, 2])
-          cij <- cij[dz]
+          cij   <- cij[dz]
           delta <- delta[dz]
-          v1 <- v1[dz]
-          v2 <- v2[dz]
-          uh <- uh[dz, ]
-
-          # Detailed computations for log-likelihood components based on variable presence and types.
+          v1    <- v1[dz]
+          v2    <- v2[dz]
+          uh_dz <- uh[dz, ]                                    # ← uh_dz au lieu de uh
+          
           id1 <- (v1 == 0) & (!v2 == 0) & (Vi[v, 1] == "Precipitation")
           id2 <- (!v1 == 0) & (v2 == 0) & (Vi[v, 2] == "Precipitation")
           id4 <- (!v1 == 0) & (!v2 == 0)
           id3 <- (v1 == 0) & (v2 == 0) & (Vi[v, 1] == "Precipitation") & (Vi[v, 2] == "Precipitation")
-          uh[, 8][which(uh[, 8] == -Inf)] <- -2.282295
-          uh[, 7][which(uh[, 7] == -Inf)] <- -2.282295
-
-          # l1: Case where the first variable is zero and the second is non-zero
-          # where the first variable is "Precipitation"
+          uh_dz[, 8][which(uh_dz[, 8] == -Inf)] <- -2.282295
+          uh_dz[, 7][which(uh_dz[, 7] == -Inf)] <- -2.282295
+          
           if (!length(which(id1 == TRUE)) == 0) {
-            l1 <- sum(log(pnorm((uh[id1, 7] - cij[id1] * v2[id1]) / sqrt(delta[id1]))))
+            l1 <- sum(log(pnorm((uh_dz[id1, 7] - cij[id1] * v2[id1]) / sqrt(delta[id1]))), na.rm = TRUE)
           }
-
-          # l2: Case where the first variable is non-zero and the second is zero
-          # where the second variable is "Precipitation"
           if (!length(which(id2 == TRUE)) == 0) {
-            l2 <- sum(log(pnorm((uh[id2, 8] - cij[id2] * v1[id2]) / sqrt(delta[id2]))))
+            l2 <- sum(log(pnorm((uh_dz[id2, 8] - cij[id2] * v1[id2]) / sqrt(delta[id2]))), na.rm = TRUE)
           }
-
-          # l3: Case where both variables are zero and both are "Precipitation"
           if (!length(which(id3 == TRUE)) == 0) {
             rho_bound <- pmin(pmax(cij[id3], -0.99999999), 0.99999999)
-            l3 <- sum(log(pbinorm(uh[id3, 7], uh[id3, 8], var1 = 1, var2 = 1, cov12 = rho_bound)))
+            l3 <- sum(log(pbinorm(uh_dz[id3, 7], uh_dz[id3, 8], var1 = 1, var2 = 1, cov12 = rho_bound)), na.rm = TRUE)
           }
-
-          # l4: Case where both variables have non-zero values
           if (!length(which(id4 == TRUE)) == 0) {
-            l4 <- sum((-1 / 2) * (log(delta[id4]) + (v1[id4]^2 - (2 * cij[id4] * v1[id4] * v2[id4]) + v2[id4]^2) / delta[id4]))
+            l4 <- sum((-1 / 2) * (log(delta[id4]) + (v1[id4]^2 - (2 * cij[id4] * v1[id4] * v2[id4]) + v2[id4]^2) / delta[id4]), na.rm = TRUE)
           }
-
-          return(l1 + l2 + l3 + l4)
+          
+          result_pair <- l1 + l2 + l3 + l4
+          if (!is.finite(result_pair)) return(1e20)            # ← protection finale paire
+          return(result_pair)
         }
       }, mc.cores = ncores, mc.set.seed = FALSE)
     }
-    # Sum and negate the log-likelihood contributions from all pairs.
-    return(-sum(unlist(ll)))
+    
+    result <- -sum(unlist(ll))
+    if (!is.finite(result)) return(1e20)                       # ← protection finale globale
+    return(result)
+    
   } else {
-    # Return a large penalty if Cholesky decomposition fails, indicating issues with matrix definiteness.
-    return(abs(rnorm(1)) * 1e+20)
+    return(1e20)                                               # ← fini pour L-BFGS-B
   }
 }
 #' @title Log-Likelihood for Spatial Data
