@@ -42,23 +42,23 @@ Gneiting <- function(h, u, par, rho2ij) {
   if (!is.numeric(par)) par <- as.numeric(par)
   
   # Unpack parameters from the 'par' vector for clarity.
-  a       <- par[1]
-  b       <- par[2]
-  c       <- par[3]
-  d       <- par[4]
-  e       <- par[5]
-  Ai      <- par[6]
-  Aj      <- par[7]
+  a       <- par[.a]
+  b       <- par[.b]
+  c       <- par[.c]
+  d       <- par[.d]
+  e       <- par[.e]
+  Ai      <- par[.Ai]
+  Aj      <- par[.Aj]
   
-  aii     <- par[8]   # portée Matérn variable i
-  ajj     <- par[9]   # portée Matérn variable j
-  nuii    <- par[10]  # lissage Matérn variable i
-  nujj    <- par[11]  # lissage Matérn variable j
-  rho1ij  <- par[12]  # correlation temporelle pure 
-  r2ii    <- par[13]  # décroissance exp. spatiotemporelle variable i
-  r2jj    <- par[14]  # décroissance exp. spatiotemporelle variable j
-  r1ii    <- par[15]  # décroissance exp. temporelle variable i
-  r1jj    <- par[16]
+  aii     <- par[.aii]   # portée Matérn variable i
+  ajj     <- par[.ajj]   # portée Matérn variable j
+  nuii    <- par[.nuii]  # lissage Matérn variable i
+  nujj    <- par[.nujj]  # lissage Matérn variable j
+  rho1ij  <- par[.rho1ij]  # correlation temporelle pure 
+  r2ii    <- par[.r2ii]  # décroissance exp. spatiotemporelle variable i
+  r2jj    <- par[.r2jj]  # décroissance exp. spatiotemporelle variable j
+  r1ii    <- par[.r1ii]  # décroissance exp. temporelle variable i
+  r1jj    <- par[.r1jj]
   
   # Cross parameters (calculated, never stored)
   nuij <- (nuii + nujj) / 2
@@ -119,6 +119,7 @@ create_df_param <- function(par, names) {
   J <- length(pairs)
   u <- data.frame(v1 = ep$v1, v2 = ep$v2, stringsAsFactors = FALSE)
 
+  # For Parameters order see indices.R to keep the right order
   # Assign common temporal parameters to all pairs
   u$a <- par["a"]
   u$b <- par["b"]
@@ -177,44 +178,34 @@ compute_rho2 <- function(parm, names, cr) {
   rho2 <- matrix(0, ncol = J, nrow = J)
   colnames(rho2) <- rownames(rho2) <- names
   
-  parm_map <- split(parm, list(parm$v1, parm$v2))
-  
-  get_parameters <- function(v1, v2) {
-    if (exists(paste0(v1, ".", v2), parm_map))
-      as.numeric(parm_map[[paste0(v1, ".", v2)]][-c(1, 2)])
-    else
-      as.numeric(parm_map[[paste0(v2, ".", v1)]][-c(1, 2)])
-  }
-  
-  for (j in seq_along(names)) {
-    for (k in seq(j, J)) {
-      v1  <- names[j]
-      v2  <- names[k]
-      par <- get_parameters(v1, v2)
+    # ite on pair variables existing in names
+  for(pair_indice in which( parm[which(parm$v1 == names)]$v2 == names) ) {
+    v1  <- parm[pair_indice, "v1"]
+    v2  <- parm[pair_indice, "v2"]
+    parameters_pair <- as.numeric(parm[pair_indice,-c(1,2)])
+
+    # w1,ij = sqrt(r1ii * r1jj) / r1ij
+    r1ij   <- sqrt((parameters_pair[.r1ii]^2 + parameters_pair[.r2jj]^2) / 2)
+    w1     <- sqrt(parameters_pair[.r1ii] * parameters_pair[.r2jj]) / r1ij
+    rho1ij <- parameters_pair[.rho1ij]
       
-      # w1,ij = sqrt(r1ii * r1jj) / r1ij
-      r1ij   <- sqrt((par[15]^2 + par[16]^2) / 2)
-      w1     <- sqrt(par[15] * par[16]) / r1ij
-      rho1ij <- par[12]
+    # cc = Gneiting(0, 0, par, rho2ij=1) = rho1ij*w1 + w2
+    cc    <- Gneiting(0, 0, parameters_pair, rho2ij = 1)
       
-      # cc = Gneiting(0, 0, par, rho2ij=1) = rho1ij*w1 + w2
-      cc    <- Gneiting(0, 0, par, rho2ij = 1)
+    # denom = w2,ij = cc - rho1ij*w1
+    denom <- cc - rho1ij * w1
       
-      # denom = w2,ij = cc - rho1ij*w1
-      denom <- cc - rho1ij * w1
-      
-      # Formule (9) avec garde-fous
-      if (is.na(denom) || is.nan(denom) || abs(denom) < 0.01) {
-        # w2 trop petit → terme spatiotemporel négligeable → rho2ij = 0
-        rho2ij <- 0
-      } else {
-        rho2ij <- (cr[v1, v2] - rho1ij * w1) / denom
-        # Borner rho2ij à des valeurs raisonnables (covariance, pas corrélation)
-        rho2ij <- pmax(pmin(rho2ij, 5), -5)
-      }
-      
-      rho2[v1, v2] <- rho2[v2, v1] <- rho2ij
+    # Formule (9) avec garde-fous
+    if (is.na(denom) || is.nan(denom) || abs(denom) < 0.01) {
+      # w2 trop petit → terme spatiotemporel négligeable → rho2ij = 0
+      rho2ij <- 0
+    } else {
+      rho2ij <- (cr[v1, v2] - rho1ij * w1) / denom
+      # Borner rho2ij à des valeurs raisonnables (covariance, pas corrélation)
+      rho2ij <- pmax(pmin(rho2ij, 5), -5)
     }
+      
+    rho2[v1, v2] <- rho2[v2, v1] <- rho2ij
   }
   
   # Vérifier DP et corriger si nécessaire
@@ -328,7 +319,7 @@ loglik <- function(par, parms, par_all, data, names, Vi, h, u, uh, ep, cr) {
       ll <- lapply(1:nrow(Vi), function(v) {
         l1 <- l2 <- l3 <- l4 <- 0
         par <- parmm[[v]]
-        if (any(par[c(1:11, 13:16)] < 0) | any(par[c(6:7)] > 1) | abs(par[12]) > 1) {
+        if (any(par[c(.a:.nujj, .r2ii:.r1jj)] < 0) | any(par[c(.Ai:.Aj)] > 1) | abs(par[.rho1ij]) > 1) {
           return(1e20)                                          # ← fini pour L-BFGS-B
         } else {
           cij <- Gneiting(h = h, u = u, par = par, rho2ij = rho2[Vi[v, 1], Vi[v, 2]])
