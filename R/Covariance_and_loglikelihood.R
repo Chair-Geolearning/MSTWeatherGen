@@ -236,34 +236,11 @@ extract_rho1 <- function(parm, names) {
       return(rho1ij)
     })
   })
-  rho1 <- matrix(rho1, nrow = length(names), ncol = length(names))  # ← forcer matrice
+  rho1 <- matrix(rho1, nrow = length(names), ncol = length(names))  # ← forcer matrice (byrow=TRUE non necessaire matrice carré et symétrique)
   rownames(rho1) <- colnames(rho1) <- names
   return(rho1)
 }
-#' @title Extract Beta Coefficients Matrix
-#'
-#' @description
-#' Extracts a matrix of beta coefficients ('dij') for each pair of variables from the provided model parameters. Intended for internal use, this function supports spatial and spatio-temporal modeling by organizing pairwise beta coefficients into a structured format.
-#'
-#' @details
-#' This function implements the methods described in Sections 2.4 in Equation 8 of the article
-#' \strong{Stochastic Environmental Research and Risk Assessment, 2025} (DOI: 10.1007/s00477-024-02897-8).
-#'
-#' @param parm A data frame or list containing the model parameters, which must include 'dij' values representing beta coefficients between pairs of variables.
-#' @param names Character vector of variable names for which beta coefficients are to be extracted.
-#'
-#' @return A square matrix where each element [i, j] contains the beta coefficient ('dij') between the ith and jth variables. This matrix is crucial for modeling the interactions and dependencies between different variables in the model.
-#'
-#' @keywords internal
 
-extract_beta <- function(parm, names) {
-  ax <- sapply(names, function(v1) {
-    sapply(names, function(v2) {
-      parm$dij[parm$v1 == v1 & parm$v2 == v2 | parm$v1 == v2 & parm$v2 == v1]
-    })
-  })
-  return(ax)
-}
 #' @title Total Log-Likelihood Calculation
 #'
 #' @description
@@ -620,61 +597,4 @@ cov_matrices <- function(par, coordinates, names, M) {
     return(do.call(cbind, cp_v1))
   })
   return(cp)
-}
-#' @title Check Positive Definiteness Condition
-#'
-#' @description
-#' Verifies the positive definiteness of the covariance matrix constructed from model parameters, which is crucial for ensuring valid covariance structures in spatio-temporal modeling.
-#'
-#' @param parm A data frame or list containing the model parameters.
-#' @param names Character vector of variable names for which the condition is checked.
-#'
-#' @return Logical value indicating whether the covariance matrix, constructed based on the parameters and variable names, is positive definite.
-#'
-#' @keywords internal
-
-
-pd_condition <- function(parm, names) {
-  eij <- sapply(names, function(v1) {
-    sapply(names, function(v2) {
-      dij <- parm$dij[parm$v1 == v1 & parm$v2 == v2 | parm$v1 == v2 & parm$v2 == v1]
-      vii <- parm$vii[parm$v1 == v1 & parm$v2 == v2 | parm$v1 == v2 & parm$v2 == v1]
-      vjj <- parm$vjj[parm$v1 == v1 & parm$v2 == v2 | parm$v1 == v2 & parm$v2 == v1]
-      rii <- parm$rii[parm$v1 == v1 & parm$v2 == v2 | parm$v1 == v2 & parm$v2 == v1]
-      rjj <- parm$rjj[parm$v1 == v1 & parm$v2 == v2 | parm$v1 == v2 & parm$v2 == v1]
-      aii <- parm$aii[parm$v1 == v1 & parm$v2 == v2 | parm$v1 == v2 & parm$v2 == v1]
-      ajj <- parm$ajj[parm$v1 == v1 & parm$v2 == v2 | parm$v1 == v2 & parm$v2 == v1]
-      ci <- parm$ci[parm$v1 == v1 & parm$v2 == v2 | parm$v1 == v2 & parm$v2 == v1]
-      cj <- parm$cj[parm$v1 == v1 & parm$v2 == v2 | parm$v1 == v2 & parm$v2 == v1]
-      vij <- (vii + vjj) / 2
-      rij <- sqrt((rii^2 + rjj^2) / 2)
-      aij <- sqrt((aii^2 + ajj^2) / 2)
-
-      dij <- dij * ((rii^vii * rjj^vjj) / rij^(2 * vij)) *
-        (gamma(vij) / (gamma(vii)^(1 / 2) * gamma(vjj)^(1 / 2))) *
-        (2 - ci^2) * (2 - cj^2)
-      return(dij / gamma(vij))
-    })
-  })
-  pd <- try(chol(eij), silent = T)
-  return(!is.character(pd))
-}
-#' @title Modify Beta Parameters in Model Parameters
-#'
-#' @description
-#' Adjusts the 'dij' parameters in the model parameter set based on computed beta coefficients, ensuring that the covariance structure reflects these adjustments.
-#'
-#' @param parm A data frame or list representing the current set of model parameters, including 'v1', 'v2', and 'dij' among others.
-#' @param beta A matrix of beta coefficients computed to adjust the correlations or dependencies between variables.
-#'
-#' @return The modified set of model parameters with updated 'dij' values based on the beta coefficients.
-#'
-#' @keywords internal
-
-
-modify_beta_parm <- function(parm, beta) {
-  for (i in 1:nrow(parm)) {
-    parm$dij[i] <- beta[parm$v1[i], parm$v2[i]]
-  }
-  return(parm)
 }

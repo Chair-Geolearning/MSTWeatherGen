@@ -20,33 +20,41 @@ import(patchwork)
 import(stringr)
 import(viridis)
 importFrom(FNN,get.knn)
-importFrom(Matrix,chol2inv)
-importFrom(Matrix,nearPD)
+importFrom(Matrix,
+  chol2inv,
+  nearPD
+)
 importFrom(PTAk,PTA3)
 importFrom(VGAM,pbinorm)
 importFrom(abind,abind)
 importFrom(crch,qcnorm)
-importFrom(dplyr,case_when)
-importFrom(dplyr,filter)
-importFrom(dplyr,group_by)
-importFrom(dplyr,mutate)
-importFrom(dplyr,summarise)
-importFrom(dplyr,tally)
+importFrom(dplyr,
+  case_when,
+  filter,
+  group_by,
+  mutate,
+  summarise,
+  tally
+)
 importFrom(geosphere,distHaversine)
-importFrom(lubridate,leap_year)
-importFrom(lubridate,month)
-importFrom(lubridate,year)
+importFrom(lubridate,
+  leap_year,
+  month,
+  year
+)
 importFrom(parallel,mclapply)
-importFrom(stats,approx)
-importFrom(stats,cor)
-importFrom(stats,cov)
-importFrom(stats,dist)
-importFrom(stats,glm)
-importFrom(stats,kmeans)
-importFrom(stats,optim)
-importFrom(stats,pnorm)
-importFrom(stats,qnorm)
-importFrom(stats,rnorm)
-importFrom(stats,setNames)
+importFrom(stats,
+  approx,
+  cor,
+  cov,
+  dist,
+  glm,
+  kmeans,
+  optim,
+  pnorm,
+  qnorm,
+  rnorm,
+  setNames
+)
 importFrom(stringr,str_split)
 importFrom(utils,packageVersion)
