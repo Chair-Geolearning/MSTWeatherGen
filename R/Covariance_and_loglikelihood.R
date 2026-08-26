@@ -296,8 +296,12 @@ extract_rho1 <- function(parm, names) {
 #' @importFrom VGAM pbinorm
 #' @importFrom stats rnorm pnorm
 #' @keywords internal
-## TODO a réécrire 
+## TODO a réécrire (semble identique à loglik)
 loglik_pair <- function(par, parms, pair, par_all, data, names, Vi, h, u, uh, ep, cr) {
+  
+  # ancienne notation
+  # semble identique à loglik
+
   J <- length(names) # Number of variables
   pairs <- paste(ep[, 1], ep[, 2], sep = "-") # Constructing pairs from 'ep' data frame
 

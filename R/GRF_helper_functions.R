@@ -323,13 +323,14 @@ optimize_spatiotemporal_parameters <- function(par_all, data, names, Vi, uh, cr,
 
   # Ici on va optimiser les valeurs des parametres
   # a, b , c , d , e
-  # Ai (et Aj ?)
-  # Dans par_all tous les Ai et Aj sont dans Ai
+  # Ai
   parms <- c(
     "a", "b", "c", "d", "e",
     paste(names, "Ai",     sep=":")
   )
 
+  ## old code qui fait une distinction entre self-pair et non self-pair
+  # pour pourrait utiliser loglik au lieu de loglike_pair ?
   pairs <- paste(ep[, 1], ep[, 2], sep = "-")
   # Optimize model parameters for each pair of variables using the log-likelihood function
   for (i in seq(nrow(ep))) {
