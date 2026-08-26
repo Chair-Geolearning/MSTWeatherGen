@@ -298,7 +298,7 @@ summary.swg <- function(swg, season = NULL, all = FALSE) {
     # gf_par
     cat(paste0(prefix, "$gf_par[[1:", length(list_s$gf_par), "]]"), "\n")
     cat("\t", paste0("$", names(list_s$gf_par[[1]])), "\n")
-    if (all) str(list_s$gf_par)
+    if (all) print(list_s$gf_par)
   }
 
   invisible(NULL)
