@@ -210,8 +210,37 @@ compute_rho2 <- function(parm, names, cr) {
   
   # Vérifier DP et corriger si nécessaire
   rho2 <- Matrix::nearPD(rho2)$mat
+
   return(rho2)
 }
+
+#' @title update rho2ij values in a names vector
+#'
+#' @description
+#' extract values from rho2ij matrix for each variables pairs and save it in a named vector as 'variable1-variable2:rho2ij' index.
+#'
+#' @param par_all a named vector containing variables pairs rho2ij values and models values.
+#' @param names character vector specifying the variable names for which rho2ij is in vector rho2ij and pair have to be updates.
+#' @param rho2ij a square matrix containing rho2ij values indiced by pairs number
+#'
+#' @return a named vector with variables pair rho2ij vlaues updates and the other model values.
+#'
+#' @keywords internal
+update_rho2_parameters <- function(par_all, names, rho2ij) {
+  # Generate all possible pairs of variable names, including self-pairs, for parameter definitions
+  pairs_ind <- generate_variable_index_pairs(names)
+
+  for( pairs_it in seq_len(nrow(pairs_ind)) ) {
+    v1 <- pairs_ind[pairs_it, 1]
+    v2 <- pairs_ind[pairs_it, 2]
+    
+    if( !is.na(par_all[paste0(v1,"-",v2,":rho2ij")])) par_all[paste0(v1,"-",v2,":rho2ij")] <- rho2ij[v1,v2]
+    else par_all[paste0(v2,"-",v1,":rho2ij")] <- rho2ij[v2,v1]
+  }
+  
+  return(par_all)
+  }
+
 #' @title Extract Correction Terms Matrix
 #'
 #' @description

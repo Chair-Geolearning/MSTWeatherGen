@@ -421,20 +421,12 @@ estimation_gf <- function(data, wt_id, max_it, dates, tmax, names, par_all = NUL
   par_s <- init_space_par(data = data, names = names, h = h[u == 0], uh = uh[u == 0, ], max_it = max_it)
   par_s <- do.call(cbind, par_s)
 
-  'par_s rend  le vecteur 
-  c(range = valeur_estimee_de_par_1,
-  smoothness = valeur_estimee_de_par_2) qui sont les aij et nuij dans le papier 
-  c("range", "smoothness")
-  aii = range et nuii = smoothness
-  qui sont les parametres spatiaux mis dans optim spatial'
-  
   # Construct parameter matrix for covariance model
   ep <- generate_variable_index_pairs(names)
   pairs <- paste(ep[, 1], ep[, 2], sep = "-")
 
   # Check and initialize par_all if missing
   par_all <- initialize_par_all_if_missing(par_all, names, pairs, par_s, rho1, cr = cr)
-  'par_all normalement contient tous les params autre que les spatiaux ie les temporels dans optim temporal'
   
   par_all <- optimize_spatial_parameters(par_all, data, names, Vi, uh[uh[, 1] == 0, ], cr, max_it, ep)
 
@@ -447,11 +439,10 @@ estimation_gf <- function(data, wt_id, max_it, dates, tmax, names, par_all = NUL
   }
 
   # Construct parameter and beta matrices
+  # rho1 in par_all already update in optimize_spatial_parameters
   par_all <- update_rho1_parameters(par_all, names, extract_rho1(create_df_param(par_all, names), names))
   parm <- create_df_param(par_all, names)
-  beta <- compute_rho2(parm, names, cr)
-  beta <- sapply(1:nrow(ep), function(i) beta[ep[i, 1], ep[i, 2]])
-  par_all[1:length(beta)] <- beta
+  par_all <- update_rho2_parameters(par_all,names, compute_rho2(parm, names, cr))
   parm <- create_df_param(par_all, names)
 
   return(list(parm = parm, par_all = par_all))
