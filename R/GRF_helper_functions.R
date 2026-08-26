@@ -284,6 +284,89 @@ optimize_spatial_parameters <- function(par_all, data, names, Vi, uh, cr, max_it
   return(update_rho1_parameters(par_all, names,
                                 extract_rho1(create_df_param(par_all, names), names)))
 }
+
+#' Optimize Spatio-Temporal Parameters for Variable Pairs
+#'
+#' Optimizes spatio-temporal model parameters for each pair of variables to enhance the
+#' log-likelihood of the observed data under the model. This function focuses on both spatial
+#' and temporal interactions between pairs of variables, refining the model's ability to capture
+#' complex spatio-temporal dependencies.
+#'
+#' This function implements the methods described in Section 3.3 of the article, functions log_lik and log
+#' *Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8).
+#'
+#' @param par_all Initial comprehensive set of model parameters to be refined through optimization.
+#' @param data Dataset containing spatio-temporal observations, typically a 3D array or list
+#'        with dimensions representing locations, times, and variables.
+#' @param names Vector containing the names of the variables considered in the model,
+#'        indicating the scope of the optimization.
+#' @param Vi Matrix specifying variable pairs, directing the optimization towards relevant
+#'        variable interactions.
+#' @param uh Matrix that combines spatial and temporal distances with additional identifiers,
+#'        essential for defining the context of each data point in spatio-temporal space.
+#' @param cr Initial correlation matrix offering a preliminary estimate of relationships
+#'        between variables, serving as a foundation for optimization.
+#' @param max_it Specifies the maximum number of iterations for the optimization process,
+#'        setting a limit to ensure computational feasibility.
+#' @param ep Data frame defining pairs of variables for detailed analysis, guiding the optimization
+#'        process by highlighting specific interactions of interest.
+#'
+#' @return Updated `par_all` vector containing optimized parameters for each variable pair,
+#'         representing an enhanced set of model parameters post-optimization.
+#'         This updated parameter set is ready for subsequent model application or further analysis.
+#'
+#' @keywords internal
+#' @importFrom stringr str_split
+#' @importFrom stats optim
+## TODO a réécrire
+optimize_spatiotemporal_parameters <- function(par_all, data, names, Vi, uh, cr, max_it, ep) {
+
+  # Ici on va optimiser les valeurs des parametres
+  # a, b , c , d , e
+  # Ai (et Aj ?)
+  # Dans par_all tous les Ai et Aj sont dans Ai
+  parms <- c(
+    "a", "b", "c", "d", "e",
+    paste(names, "Ai",     sep=":")
+  )
+
+  pairs <- paste(ep[, 1], ep[, 2], sep = "-")
+  # Optimize model parameters for each pair of variables using the log-likelihood function
+  for (i in seq(nrow(ep))) {
+    pair <- pairs[i]
+    sp <- unlist(stringr::str_split(pair, "-"))
+    if (sp[1] == sp[2]) {
+      parms <- c(
+        paste(sp[1], "ci", sep = ":"), paste(sp[2], "ci", sep = ":"), ## Plus utilisé
+        paste(sp[1], "ai", sep = ":"), paste(sp[2], "ai", sep = ":"), ## les Ai
+        paste(pair, "ax", sep = ":"), ## Plus utilisé (ancien rho2)
+        paste(pair, "rij", sep = ":"), paste(pair, "vij", sep = ":") 
+      )
+      par_all[parms] <- optim(par_all[parms],
+        fn = loglik_pair, data = data, pair = pair, parms = parms,
+        par_all = par_all, ep = ep, names = names,
+        Vi = Vi, uh = uh, cr = cr,
+        control = list(maxit = max_it)
+      )$par
+    } else {
+      pair <- paste(ep[i, 1], ep[i, 1], sep = "-")
+      parms <- c(
+        paste(sp[1], "ci", sep = ":"), paste(sp[2], "ci", sep = ":"),
+        paste(sp[1], "ai", sep = ":"), paste(sp[2], "ai", sep = ":")
+      )
+      # pair <- paste(ep[i,2],ep[i,2], sep = "-")
+      # parms <- c(parms, paste(pair, "aij", sep = ":"))
+      par_all[parms] <- optim(par_all[parms],
+        fn = loglik_pair, data = data, pair = pairs[i], parms = parms,
+        par_all = par_all, ep = ep, names = names,
+        Vi = Vi, uh = uh, cr = cr,
+        control = list(maxit = max_it)
+      )$par
+    }
+  }
+  return(par_all)
+}
+
 #' Optimize Temporal Parameters Across All Variable Pairs
 #'
 #' Performs a final optimization step to refine the temporal parameters of the model,
@@ -436,6 +519,9 @@ estimation_gf <- function(data, wt_id, max_it, dates, tmax, names, par_all = NUL
     
     # Optimize spatial parameters
     par_all <- optimize_spatial_parameters(par_all, data, names, Vi, uh, cr, max_it, ep)
+
+    # Optimize spatotemporal parameters
+    #par_all <- optimize_spatiotemporal_parameters(par_all, data, names, Vi, uh=[uh[,1] <= 2,], cr, max_it, ep)
   }
 
   # Construct parameter and beta matrices

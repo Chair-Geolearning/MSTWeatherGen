@@ -19,6 +19,7 @@ Matern <- function(h, r, v) {
   rt[h == 0] <- 1 # Ensures that the covariance at distance 0 is 1.
   return(rt)
 }
+
 #' @title Gneiting's Spatio-Temporal Covariance Model
 #'
 #' @description
@@ -110,7 +111,6 @@ Gneiting <- function(h, u, par, rho2ij) {
 #' and their associated spatio-temporal covariance parameters.
 #'
 #' @keywords internal
-
 create_df_param <- function(par, names) {
   # Generate all possible pairs of variable names, including self-pairs, for parameter definitions
   ep <- generate_variable_index_pairs(names)
@@ -153,6 +153,7 @@ create_df_param <- function(par, names) {
   }
   return(u)
 }
+
 #' @title Compute rho2 Correlations
 #'
 #' @description
@@ -172,7 +173,6 @@ create_df_param <- function(par, names) {
 #'
 #' @importFrom Matrix nearPD
 #' @keywords internal
-
 compute_rho2 <- function(parm, names, cr) {
   J <- length(names)
   rho2 <- matrix(0, ncol = J, nrow = J)
@@ -256,8 +256,6 @@ update_rho2_parameters <- function(par_all, names, rho2ij) {
 #' @return A square matrix where each element [i, j] represents the correction term ('rho1ij') between the ith and jth variables, facilitating the adjustment of correlations or covariances between them.
 #'
 #' @keywords internal
-
-
 extract_rho1 <- function(parm, names) {
   rho1 <- sapply(names, function(v1) {
     sapply(names, function(v2) {
@@ -268,6 +266,130 @@ extract_rho1 <- function(parm, names) {
   rho1 <- matrix(rho1, nrow = length(names), ncol = length(names))  # ← forcer matrice (byrow=TRUE non necessaire matrice carré et symétrique)
   rownames(rho1) <- colnames(rho1) <- names
   return(rho1)
+}
+
+#' @title Compute Log-likelihood for Variable Pair
+#'
+#' @description
+#' Calculates the log-likelihood for a given pair of variables using the Gneiting spatio-temporal covariance model. This function is part of the internal mechanism for optimizing model parameters based on observed data.
+#'
+#' @details
+#' This function implements the methods described in Section 3.3 of the article
+#' \strong{Stochastic Environmental Research and Risk Assessment, 2025} (DOI: 10.1007/s00477-024-02897-8).
+#'
+#' @param par Current parameters being optimized.
+# beta Matrix of beta coefficients, precomputed.
+#' @param parms Indices or names of parameters in 'par' to be updated.
+#' @param pair A string indicating the pair of variables (e.g., "temperature-wind") being analyzed.
+#' @param par_all Complete set of parameters for the model.
+#' @param data 3D array of observed data, with dimensions corresponding to times, locations, and variables.
+#' @param names Vector of variable names, indicating the variables' names (e.g., "temperature" and "wind").
+#' @param Vi Matrix where each line corresponds for a possible combination of variables in "names".
+#' @param h Vector of spatial distances for the pair.
+#' @param u Vector of temporal distances for the pair.
+#' @param uh Matrix containing pairs of spatial and temporal distances, and additional information.
+#' @param ep A matrix or data frame defining pairs of variables.
+#' @param cr Correlation matrix, initial or base correlations between variables.
+#'
+#' @return The log-likelihood value for the given pair of variables based on the current model parameters.
+#'
+#' @importFrom VGAM pbinorm
+#' @importFrom stats rnorm pnorm
+#' @keywords internal
+## TODO a réécrire 
+loglik_pair <- function(par, parms, pair, par_all, data, names, Vi, h, u, uh, ep, cr) {
+  J <- length(names) # Number of variables
+  pairs <- paste(ep[, 1], ep[, 2], sep = "-") # Constructing pairs from 'ep' data frame
+
+  par_all[parms] <- par # Update specific parameters in the complete set
+
+  par <- par_all # Use the updated parameter set for computations
+  sp <- unlist(strsplit(pair, "-")) # Split the pair string to individual variables
+  v <- which(Vi[, 1] == sp[1] & Vi[, 2] == sp[2]) # Find the index of the pair in 'Vi'
+
+  # Update and compute model parameters
+  parm <- param(par, names)
+  beta1 <- Matrix::nearPD(extract_beta1(parm, names))$mat # Compute ax correction terms
+  rho2 <- try(compute_rho2(parm, names, cr), silent = T) # Compute rho2ij coefficients
+
+  # Attempt Cholesky decompositions for 'beta1ij_mat' and 'rho2ij', checking for positive definiteness
+  ae <- try(chol(beta1), silent = TRUE)
+  be <- try(chol(rho2), silent = TRUE)
+
+  if (!is.character(be) & (!is.character(ae))) {
+    # Proceed if both 'beta1ij' and 'rho2ij' matrices are valid for further computations
+
+    # Map parameters to each variable pair in 'Vi'
+    parmm <- lapply(1:nrow(Vi), function(v) {
+      as.numeric(parm[(parm$v1 == Vi[v, 1] & parm$v2 == Vi[v, 2]) | (parm$v1 == Vi[v, 2] & parm$v2 == Vi[v, 1]), ][-c(1, 2)])
+    })
+    u <- uh[, 1]
+    h <- uh[, 2]
+
+    # Initializing log-likelihood components
+    l1 <- l2 <- l3 <- l4 <- 0
+    par <- parmm[[v]] # Parameters for the current pair
+
+    # Parameter constraints check; return a large value if constraints are violated
+    if (any(par[c(1:21, 23:24)] < 0) | any(par[c(2, 3, 5, 7:13)] > 1)) {
+      return(abs(rnorm(1)) * 1e+20)
+    } else {
+      # Compute covariance for the pair
+      cij <- Gneiting(h = h, u = u, par = par, rho2ij = beta[sp[1], sp[2]])
+      delta <- 1 - cij^2
+      # Extract observed values for the pair from 'data'
+      v1 <- data[, , Vi[v, 1]]
+      v1 <- v1[cbind(uh[, 3], uh[, 5])]
+      v2 <- data[, , Vi[v, 2]]
+      v2 <- v2[cbind(uh[, 4], uh[, 6])]
+
+      # Detailed computation of log-likelihood components for various cases
+      # Identifying cases based on the variable type (e.g., Precipitation) and the presence of zero values
+
+      dz <- !(h == 0 & u == 0 & Vi[v, 1] == Vi[v, 2])
+      cij <- cij[dz]
+      delta <- delta[dz]
+      v1 <- v1[dz]
+      v2 <- v2[dz]
+      uh <- uh[dz, ]
+      id1 <- (v1 == 0) & (!v2 == 0) & (sp[1] == "Precipitation")
+      id2 <- (!v1 == 0) & (v2 == 0) & (sp[2] == "Precipitation")
+      id4 <- (!v1 == 0) & (!v2 == 0)
+      id3 <- (v1 == 0) & (v2 == 0) & (sp[1] == "Precipitation") & (sp[2] == "Precipitation")
+
+
+      # Adjustments for infinite values in setting a practical lower limit
+      uh[, 8][which(uh[, 8] == -Inf)] <- -2.282295 # Adjusting for log transform lower bounds
+      uh[, 7][which(uh[, 7] == -Inf)] <- -2.282295
+
+      # Case 1: Both variables have non-zero values
+      if (!length(which(id4 == TRUE)) == 0) {
+        l4 <- sum((-1 / 2) * (log(delta[id4]) + (v1[id4]^2 - (2 * cij[id4] * v1[id4] * v2[id4]) + v2[id4]^2) / delta[id4]))
+      }
+
+      # Case 2: First variable is non-zero and the second is zero, and the second is Precipitation
+      if (!length(which(id2 == TRUE)) == 0) {
+        l2 <- sum(log(pnorm((uh[id2, 8] - cij[id2] * v1[id2]) / sqrt(delta[id2]))))
+      }
+
+      # Case 3: First variable is zero and the second is non-zero, and the first is Precipitation
+      if (!length(which(id1 == TRUE)) == 0) {
+        l1 <- sum(log(pnorm((uh[id1, 7] - cij[id1] * v2[id1]) / sqrt(delta[id1]))))
+      }
+
+      # Case 4: Both variables are zero, and both are Precipitation
+      if (!length(which(id3 == TRUE)) == 0) {
+        l3 <- try(sum(log(pbinorm(uh[id3, 7], uh[id3, 8], var1 = 1, var2 = 1, cov12 = cij[id3]))), silent = TRUE)
+        if (is.character(l3)) l3 <- -abs(rnorm(1)) * 1e+20 # Handle errors in computing bivariate normal CDF
+      }
+
+      # The negative log-likelihood
+      return(-(l1 + l2 + l3 + l4))
+    }
+  } else {
+    # Return a large value if Cholesky decomposition fails, indicating non-positive definiteness
+    return(abs(rnorm(1)) * 1e+20)
+  }
 }
 
 #' @title Total Log-Likelihood Calculation
@@ -425,6 +547,7 @@ loglik <- function(par, parms, par_all, data, names, Vi, h, u, uh, ep, cr) {
     return(1e20)                                               # ← fini pour L-BFGS-B
   }
 }
+
 #' @title Log-Likelihood for Spatial Data
 #'
 #' @description
@@ -493,6 +616,7 @@ loglik_spatial <- function(par, data, h, uh, v) {
     return(ll)
   }
 }
+
 #' @title Compute Spatio-Temporal Covariances
 #'
 #' @description
@@ -576,6 +700,7 @@ spacetime_cov <- function(data, wt_id, locations, ds = NULL, dates, lagstime, di
   # Combine and return results
   return(do.call(rbind, vgm))
 }
+
 #' @title Generate Covariance Matrices for Spatio-Temporal Model
 #'
 #' @description
@@ -589,7 +714,6 @@ spacetime_cov <- function(data, wt_id, locations, ds = NULL, dates, lagstime, di
 #' @return A list of covariance matrices for each time lag up to M, and for each pair of variables, where each matrix represents the spatial covariance structure for a given time lag and variable pair.
 #'
 #' @keywords internal
-
 cov_matrices <- function(par, coordinates, names, M) {
   Nt <- M + 1 # Number of time points considered
   Ns <- nrow(coordinates) # Number of spatial locations
