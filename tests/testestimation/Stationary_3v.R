@@ -25,7 +25,9 @@ spatial_coordinates <- as.matrix(
 ns <- nrow(spatial_coordinates)
 
 ## TEMPORELLE
-# Define temporal sequence A changer ici la taille ici, correpondance avec la taille de data sur la plage 2018-2021
+# Define temporal sequence A changer ici la taille ici, correpondance avec la taille de data sur la plage 2018-2021.
+# Mettre 4018 pour avoir la plage complete de 2011 a 2021
+
 t_seq = seq(1, 1461, by = temporal_resolution)
 nt = length(t_seq)  
 # Dates : 2018-01-01 à 2021-12-31
@@ -49,8 +51,9 @@ p = 3 # Number of variables
 L = 3000 # Number of waves
 
 # Définition des Matern
-rs = c(0.5,1,2) # paramètres a dans le papier
-nu = c(0.5,1,2) 
+rs = c(0.5,1,2) # paramètres ai dans le papier
+nu = c(0.5,1,2) # paramètres nui dans le papier
+
 # Define Matern covariance function parameters
 matern_fun1 = function(t_val, s_coord) {
   list(nu=nu[1], r=rs[1])
@@ -93,7 +96,8 @@ params = list(
   Sigma_fun    = Sigma_fun
 )
 
-# Run spatio-temporal simulation 
+# Run spatio-temporal simulation. Generation de Z1_data.
+
 set.seed(14347)
 Z1 = SimulateParsimNS(
   L                  = L,
@@ -107,6 +111,8 @@ Z1 = SimulateParsimNS(
   batch_size = 100,
   n_cores = 4
 )
+
+
 
 r_t = c(0.2,0.4,0.6)
 rho  = Sigma_fun(1,1)
