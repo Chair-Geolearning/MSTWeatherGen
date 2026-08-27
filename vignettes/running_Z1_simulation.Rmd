@@ -62,12 +62,6 @@ dates <- seq(as.Date("2018-01-01"), as.Date("2021-12-31"), by = "day")
 names <- c("Precipitation", "Wind", "Temp_max")
 coordinates_Z1 <- coordinates[, c("longitude", "latitude")]
 
-expected_dimensions <- c(
-  length(dates_Z1),
-  nrow(coordinates_Z1),
-  length(weather_names)
-)
-
 dimnames(Z1)[[3]] <- names
 
 ```
@@ -105,7 +99,7 @@ plot_Z1_variable <- function(
 }
 variable = 1
 # Plotter une variable i entre 1 et 3 par rapport au temps ici precipitation vs
-plot_Z1_variable(Z = Z1, dates = dates_Z1, variable = variable, spatial_position = 1)
+plot_Z1_variable(Z = Z1, dates = dates, variable = variable, spatial_position = 1)
 ```
 
 ## Estimate a non-seasonal model
@@ -152,7 +146,7 @@ After running one of the estimation chunks, inspect and save the resulting
 object as follows:
 
 ```{r eval=FALSE}
-number_simulations <- 5
+number_simulations <- 2
 
 swg_runs <- vector(mode = "list",length = number_simulations)
 
@@ -180,3 +174,30 @@ for (i in seq_len(number_simulations)) {
 
 ```
 
+
+```{r eval=FALSE}
+# Moyenner les estimations pas par saison
+mean_gf_par <- function(x) {
+  ref <- x[[1]]
+
+  if (is.list(ref)) {
+    result <- ref
+    result[] <- lapply(
+      seq_along(ref),
+      function(i) mean_gf_par(lapply(x, `[[`, i))
+    )
+    return(result)
+  }
+  ref
+}
+
+gf_par_mean <- mean_gf_par(
+  lapply(
+    swg_runs,
+    function(fit) fit$swg$s1$gf_par
+  )
+)
+
+gf_par_mean
+
+```
