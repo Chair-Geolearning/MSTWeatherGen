@@ -195,16 +195,16 @@ compute_rho2 <- function(parm, names, cr) {
     # denom = w2,ij = cc - rho1ij*w1
     denom <- cc - rho1ij * w1
       
-    # Formule (9) avec garde-fous
-    if (is.na(denom) || is.nan(denom) || abs(denom) < 0.01) {
-      # w2 trop petit → terme spatiotemporel négligeable → rho2ij = 0
-      rho2ij <- 0
+    rho2ij <- (cr[v1, v2] - rho1ij * w1) / denom
+    
+    if (v1 == v2) {
+      # La diagonale bornée entre 0 et 1. 
+      rho2ij <- min(max(rho2ij, 10e-6), 0.999)
     } else {
-      rho2ij <- (cr[v1, v2] - rho1ij * w1) / denom
-      # Borner rho2ij à des valeurs raisonnables (covariance, pas corrélation)
-      rho2ij <- pmax(pmin(rho2ij, 5), -5)
+      # Hors diagonale [-1, 1] 
+      rho2ij <- min(max(rho2ij, -0.999), 0.999)
     }
-      
+    
     rho2[v1, v2] <- rho2[v2, v1] <- rho2ij
   }
   
