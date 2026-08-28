@@ -1,20 +1,24 @@
-# Define spatial and temporal resolutions
-source("/home/aboualam/MSTWeatherGen/R/NSMuST_test3v.R")
+# 1. Chargement des fonctions ----
+source(file.path("R", "NSMuST_test3v.R"))
+
+# 2. Version originale spatio-temporelle ------------------
 # Define spatial and temporal resolutions
 spatial_resolution  = 0.4
 temporal_resolution = 1
 
-# Generate spatial grid for simulation Versuion originale
+# Générer la grille spatiale pour la simulation — version originale IGNORER
 s1_seq = seq(0, 10, by = spatial_resolution)
 s2_seq = seq(0, 8, by = spatial_resolution)
 grid_spatial = expand.grid(s1 = s1_seq, s2 = s2_seq)
 spatial_coordinates = as.matrix(grid_spatial) 
 ns <- nrow(spatial_coordinates)
 
-## SPATIAL 
-# Version pour faire correspondre a nos nombre de location ie 108
-# Charger les 108 coordonnées originales pour faire correspondre en terme de dates fictives
-utils::data(
+# 2. Version adaptée à nos 108 sites. ---------------------
+## Spatial
+# 
+# Charger les coordonnées originales des 108 sites afin d’assurer
+# leur correspondance avec les données simulées.
+data(
   "coordinates",
   package = "MSTWeatherGen"
 )
@@ -23,28 +27,30 @@ spatial_coordinates <- as.matrix(
 )
 ns <- nrow(spatial_coordinates)
 
-## TEMPORELLE
+## Temporelle
 # Define temporal sequence A changer ici la taille ici, correpondance avec la taille de data sur la plage 2018-2021.
 # Mettre 4018 pour avoir la plage complete de 2011 a 2021
+ 
+
+#t_seq = seq(1, 4018, by = temporal_resolution)
+# Dates : 2011-01-01 à 2021-12-31
+#dates_Z1_full <- seq(
+#  from = as.Date("2011-01-01"),
+#  to   = as.Date("2021-12-31"),
+#  by   = "day")
 
 t_seq = seq(1, 1461, by = temporal_resolution)
-nt = length(t_seq)  
+nt = length(t_seq) 
+
 # Dates : 2018-01-01 à 2021-12-31
 dates_Z1 <- seq(
   from = as.Date("2018-01-01"),
   to   = as.Date("2021-12-31"),
   by   = "day"
 )
-nt <- length(dates_Z1)
 # Temps numérique utilisé par le simulateur
-temporal_resolution <- 1
-
-t_seq <- seq(
-  from = 1,
-  by = temporal_resolution,
-  length.out = nt
-)
-
+#temporal_resolution <- 1
+#t_seq <- seq(from = 1,by = temporal_resolution,length.out = nt)
 
 p = 3 # Number of variables
 L = 3000 # Number of waves
@@ -52,11 +58,14 @@ L = 3000 # Number of waves
 # Définition des Matern Portee et lissage
 rs = c(0.5,1,2) # paramètres ai dans le papier
 nu = c(0.5,1,2) # paramètres nui dans le papier
+
 rho_1 <- matrix(
   0.85,
   nrow = p,
   ncol = p
 )
+diag(rho_1) <- 1
+
 # Define Matern covariance function parameters
 matern_fun1 = function(t_val, s_coord) {
   list(nu=nu[1], r=rs[1])
