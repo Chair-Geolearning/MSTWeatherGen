@@ -45,7 +45,7 @@ the local project. For an installed package, the recommended location is
 `inst/extdata/Z1_V2.rds`.
 
 ```{r eval=FALSE}
-fichier_Z1 <- "/home/aboualam/MSTWeatherGen/data/Z1_V2.rds"
+fichier_Z1 <- "/home/aboualam/MSTWeatherGen/data/Z1_v3.rds"
 Z1 <- readRDS(fichier_Z1)
 
 if (length(dim(Z1)) != 3L) {
@@ -146,8 +146,13 @@ After running one of the estimation chunks, inspect and save the resulting
 object as follows:
 
 ```{r eval=FALSE}
-number_simulations <- 2
-
+number_simulations <- 5
+seasons <- list(
+  s1 = list(min_day = 1, max_day = 29, min_month = 12, max_month = 2),
+  s2 = list(min_day = 1, max_day = 31, min_month = 3, max_month = 5),
+  s3 = list(min_day = 1, max_day = 31, min_month = 6, max_month = 8),
+  s4 = list(min_day = 1, max_day = 30, min_month = 9, max_month = 11)
+)
 swg_runs <- vector(mode = "list",length = number_simulations)
 
 for (i in seq_len(number_simulations)) {
