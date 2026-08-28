@@ -120,31 +120,20 @@ update_rho1_parameters <- function(par_all, names, rho1) {
     rownames(a) <- colnames(a) <- names
     
     # Seule contrainte physique : diagonale strictement positive (variance > 0)
-    diag(a) <- pmax(pmin(diag(a), 1e-6), 0)      # diagonale ∈ [0, 1]
-    rho1 <- tryCatch(
-      Matrix::nearPD(a)$mat,
-      error = function(e) {
-        diag_mat <- diag(rep(0.01, length(names)))
-        rownames(diag_mat) <- colnames(diag_mat) <- names
-        Matrix::Matrix(diag_mat)
-      }
-    )
-    
+    diag(a) <- pmax(pmin(diag(a), 0.999), 1e-6)   # diagonale ∈ [0, 1]
+    a[row(a) != col(a)] <- pmax(pmin(a[row(a) != col(a)], 1), -1) # hors-diagonale ∈ [-1, 1]
+    rho1 <- Matrix::nearPD(a)$mat
+      
   } else {
     if (any(diag(rho1) < 0)) {
       warning("rho1 contient des valeurs negatives avant nearPD : ",
               paste(as.numeric(rho1), collapse = ", "))
     }
     # Seule contrainte physique : diagonale strictement positive (variance > 0)
-    diag(rho1) <- pmax(diag(as.matrix(rho1)), 1e-6)
-    rho1 <- tryCatch(
-      Matrix::nearPD(rho1)$mat,
-      error = function(e) {
-        diag_mat <- diag(rep(0.01, length(names)))
-        rownames(diag_mat) <- colnames(diag_mat) <- names
-        Matrix::Matrix(diag_mat)
-      }
-    )
+    diag(rho1) <- pmax(pmin(diag(as.matrix(rho1),0.999), 1e-6))  # diagonale ∈ [0, 1]
+    a[row(a) != col(a)] <- pmax(pmin(a[row(a) != col(a)], 1), -1) # hors-diagonale ∈ [-1, 1]
+    
+    rho1 <- Matrix::nearPD(rho1)$mat
   }
   
   colnames(rho1) <- rownames(rho1) <- names
