@@ -149,13 +149,6 @@ for (i in seq_len(ns)){
 }
 
 
-
-
-
-
-
-
-
 # Plot the variable
 x_coords = spatial_coordinates[, 1]
 y_coords = spatial_coordinates[, 2]
