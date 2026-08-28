@@ -120,7 +120,7 @@ update_rho1_parameters <- function(par_all, names, rho1) {
     rownames(a) <- colnames(a) <- names
     
     # Seule contrainte physique : diagonale strictement positive (variance > 0)
-    diag(a) <- pmax(diag(a), 1e-6)
+    diag(a) <- pmax(pmin(diag(a), 1e-6), 0)      # diagonale ∈ [0, 1]
     rho1 <- tryCatch(
       Matrix::nearPD(a)$mat,
       error = function(e) {
