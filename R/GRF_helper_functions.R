@@ -416,6 +416,12 @@ optimize_temporal_parameters <- function(par_all, data, names, Vi, uh, cr, max_i
   n_r2ii   <- length(names)
   n_rho1ij <- length(pairs)
   
+  # Nouvelles bornes apres Update.
+  lower_rho1 <- rep(-1, n_rho1ij)
+  lower_rho1[ep[,1] == ep[,2]] <- 0  
+  
+  upper_rho1 <- rep(1, n_rho1ij)
+  
   lower <- c(
     1e-6,                      # a > 0
     1e-6,                      # 0 < b <= 1
@@ -425,7 +431,7 @@ optimize_temporal_parameters <- function(par_all, data, names, Vi, uh, cr, max_i
     rep(0,    n_Ai),           # 0 <= Ai < 1
     rep(1e-6, n_r1ii),         # r1ii > 0
     rep(1e-6, n_r2ii),         # r2ii > 0
-    rep(-Inf, n_rho1ij)        # rho1ij : covariance, sans borne
+    lower_rho1                 # rho1ij : self-pairs [0,1], cross [-1,1]
   )
   upper <- c(
     Inf,                       # a
@@ -436,7 +442,7 @@ optimize_temporal_parameters <- function(par_all, data, names, Vi, uh, cr, max_i
     rep(0.9999, n_Ai),         # Ai < 1
     rep(Inf,    n_r1ii),       # r1ii
     rep(Inf,    n_r2ii),       # r2ii
-    rep(Inf,    n_rho1ij)      # rho1ij : covariance, sans borne
+    upper_rho1     # rho1ij : covariance, sans borne
   )
   
   optimized_par <- optim(
