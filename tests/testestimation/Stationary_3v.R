@@ -1,6 +1,5 @@
 # Define spatial and temporal resolutions
-source("MSTWeatherGen/R/NSMuST_test3v.R")
-
+source("/home/aboualam/MSTWeatherGen/R/NSMuST_test3v.R")
 # Define spatial and temporal resolutions
 spatial_resolution  = 0.4
 temporal_resolution = 1
@@ -50,10 +49,14 @@ t_seq <- seq(
 p = 3 # Number of variables
 L = 3000 # Number of waves
 
-# Définition des Matern
+# Définition des Matern Portee et lissage
 rs = c(0.5,1,2) # paramètres ai dans le papier
 nu = c(0.5,1,2) # paramètres nui dans le papier
-
+rho_1 <- matrix(
+  0.85,
+  nrow = p,
+  ncol = p
+)
 # Define Matern covariance function parameters
 matern_fun1 = function(t_val, s_coord) {
   list(nu=nu[1], r=rs[1])
@@ -93,7 +96,10 @@ params = list(
   b = 1, # non-separability - does not exist in MSTWeatherGen
   anisotropies = anisotropies,
   SpectralPars = SpectralPars,
-  Sigma_fun    = Sigma_fun
+  Sigma_fun    = Sigma_fun,
+  rs = rs,
+  nu = nu,
+  rho_1 = rho_1
 )
 
 # Run spatio-temporal simulation. Generation de Z1_data.
