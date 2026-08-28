@@ -121,7 +121,7 @@ update_rho1_parameters <- function(par_all, names, rho1) {
     
     # Seule contrainte physique : diagonale strictement positive (variance > 0)
     diag(a) <- pmax(pmin(diag(a), 0.999), 1e-6)   # diagonale ∈ [0, 1]
-    a[row(a) != col(a)] <- pmax(pmin(a[row(a) != col(a)], 1), -1) # hors-diagonale ∈ [-1, 1]
+    a[row(a) != col(a)] <- pmax(pmin(a[row(a) != col(a)], 0.999), -0.999) # hors-diagonale ∈ [-1, 1]
     rho1 <- Matrix::nearPD(a)$mat
       
   } else {
@@ -131,7 +131,7 @@ update_rho1_parameters <- function(par_all, names, rho1) {
     }
     # Seule contrainte physique : diagonale strictement positive (variance > 0)
     diag(rho1) <- pmax(pmin(diag(as.matrix(rho1),0.999), 1e-6))  # diagonale ∈ [0, 1]
-    a[row(a) != col(a)] <- pmax(pmin(a[row(a) != col(a)], 1), -1) # hors-diagonale ∈ [-1, 1]
+    a[row(a) != col(a)] <- pmax(pmin(a[row(a) != col(a)], 0.999), -0.999) # hors-diagonale ∈ [-1, 1]
     
     rho1 <- Matrix::nearPD(rho1)$mat
   }
