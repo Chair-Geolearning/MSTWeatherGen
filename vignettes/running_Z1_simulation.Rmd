@@ -145,36 +145,102 @@ swg_Z1 <- MSTWeatherGen_Estim(
 After running one of the estimation chunks, inspect and save the resulting
 object as follows:
 
-```{r eval=FALSE}
-number_simulations <- 5
-seasons <- list(
-  s1 = list(min_day = 1, max_day = 29, min_month = 12, max_month = 2),
-  s2 = list(min_day = 1, max_day = 31, min_month = 3, max_month = 5),
-  s3 = list(min_day = 1, max_day = 31, min_month = 6, max_month = 8),
-  s4 = list(min_day = 1, max_day = 30, min_month = 9, max_month = 11)
-)
-swg_runs <- vector(mode = "list",length = number_simulations)
+## Preambule
 
-for (i in seq_len(number_simulations)) {
-  message(sprintf("Estimation %d/%d", i,number_simulations))
-  
-  set.seed(14347 + i)
-  
-  swg_runs[[i]] <-
-    MSTWeatherGen_Estim(
-        data                = Z1,
-        seasons             = seasons,
-        dates               = dates,
-        names               = names,
-        by_season           = TRUE,
-        scale               = FALSE,
-        precipitation       = FALSE,
-        names_weather_types = names,
-        coordinates         = coordinates,
-        max_it              = 100,
-        tmax                 = 1,
-        n1                   = 3,
-        n2                   = 3)
+
+```{r eval=FALSE}
+ # --- Paramètres ---
+n1     <- 3
+n2     <- 3
+tmax   <- 1
+max_it <- 100
+season <- seasons[["s1"]]
+
+# --- Filtrer les données pour la saison ---
+filtered <- filter_season_data(data, dates, season, names)
+data_s   <- filtered$data_filtered
+dates_s  <- filtered$dates_filtered
+rm(filtered)
+
+# --- Types de temps ---
+wt_obj <- weather_types(
+  data          = data_s,
+  variables     = names,
+  dates         = dates_s,
+  coordinates   = coordinates,
+  max_number_wt = 6,
+  return_plots  = FALSE
+)
+wt <- wt_obj$cluster
+K  <- length(unique(wt))
+
+lmbd             <- estimate_lambda_transformations(
+  data = data_s, wt = wt, names = names, coordinates = coordinates)
+threshold_precip <- lmbd$threshold_precip
+lmbd             <- lmbd$lambda_transformations
+data_s           <- transformations(
+  data = data_s, wt = wt, names = names, coordinates = coordinates, lmbd = lmbd)
+
+dst <- sapply(1:nrow(coordinates), function(i) {
+  sapply(1:nrow(coordinates), function(j) {
+    geosphere::distHaversine(coordinates[i,], coordinates[j,]) / 1000
+  })
+})
+
+cr <- sapply(names, function(v1) {
+  sapply(names, function(v2) {
+    mean(sapply(1:dim(data_s)[2], function(j)
+      cor(data_s[,j,v1], data_s[,j,v2], use="complete.obs")), na.rm=TRUE)
+  })
+})
+cr <- matrix(cr, nrow=length(names), ncol=length(names))
+colnames(cr) <- rownames(cr) <- names
+
+ep <- generate_variable_index_pairs(names)
+rho1_init <- data.frame(
+  v1  = ep[,1],
+  v2  = ep[,2],
+  cov = ifelse(ep[,1] == ep[,2], 1, 0.1),
+  stringsAsFactors = FALSE
+)
+
+```
+
+## Preambule
+
+```{r eval=FALSE}
+number_simulations <- 3
+
+# Stocker tous les résultats dans une liste nommée
+# Structure : estim_results[[k]][[i]] = résultat du run i pour le type de temps k
+estim_results <- vector(mode="list", length=K)
+
+for (k in 1:K) {
+
+  wt_id <- which(wt == k)
+  wt_id <- wt_id[wt_id > tmax + 1]
+
+  estim_results[[k]] <- vector(mode="list", length=number_simulations)
+  names(estim_results[[k]]) <- paste0("run_", 1:number_simulations)
+
+  for (i in seq_len(number_simulations)) {
+    message(sprintf("  k=%d — Run %d/%d", k, i, number_simulations))
+    set.seed(14347 + i)
+
+    estim_results[[k]][[i]] <- estimation_gf(
+      data             = data_s,
+      wt_id            = wt_id,
+      max_it           = max_it,
+      dates            = dates_s,
+      tmax             = tmax,
+      names            = names,
+      coordinates      = coordinates,
+      n1               = n1,
+      n2               = n2,
+      rho1             = rho1_init,
+      cr               = cr,
+      threshold_precip = threshold_precip[[k]]
+    )
 }
 
 ```
