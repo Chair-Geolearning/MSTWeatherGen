@@ -199,10 +199,10 @@ compute_rho2 <- function(parm, names, cr) {
     
     if (v1 == v2) {
       # La diagonale bornée entre 0 et 1. 
-      rho2ij <- min(max(rho2ij, 10e-6), 0.999)
+      rho2ij <- min(max(rho2ij, 0), 1)
     } else {
       # Hors diagonale [-1, 1] 
-      rho2ij <- min(max(rho2ij, -0.999), 0.999)
+      rho2ij <- min(max(rho2ij, -1), 1)
     }
     
     rho2[v1, v2] <- rho2[v2, v1] <- rho2ij
