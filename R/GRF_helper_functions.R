@@ -307,7 +307,6 @@ optimize_spatial_parameters <- function(par_all, data, names, Vi, uh, cr, max_it
 #' @keywords internal
 #' @importFrom stringr str_split
 #' @importFrom stats optim
-## TODO a réécrire
 optimize_spatiotemporal_parameters <- function(par_all, data, names, Vi, uh, cr, max_it, ep) {
 
   # Ici on va optimiser les valeurs des parametres
@@ -315,46 +314,42 @@ optimize_spatiotemporal_parameters <- function(par_all, data, names, Vi, uh, cr,
   # Ai
   parms <- c(
     "a", "b", "c", "d", "e",
-    paste(names, "Ai",     sep=":")
+    paste(names, "Ai", sep=":")
   )
 
-  ## old code qui fait une distinction entre self-pair et non self-pair
-  # pour pourrait utiliser loglik au lieu de loglike_pair ?
-  pairs <- paste(ep[, 1], ep[, 2], sep = "-")
-  # Optimize model parameters for each pair of variables using the log-likelihood function
-  for (i in seq(nrow(ep))) {
-    pair <- pairs[i]
-    sp <- unlist(stringr::str_split(pair, "-"))
-    if (sp[1] == sp[2]) {
-      parms <- c(
-        paste(sp[1], "ci", sep = ":"), paste(sp[2], "ci", sep = ":"), ## Plus utilisé
-        paste(sp[1], "ai", sep = ":"), paste(sp[2], "ai", sep = ":"), ## les Ai
-        paste(pair, "ax", sep = ":"), ## Plus utilisé (ancien rho2)
-        paste(pair, "rij", sep = ":"), paste(pair, "vij", sep = ":") 
-      )
-      par_all[parms] <- optim(par_all[parms],
-        fn = loglik_pair, data = data, pair = pair, parms = parms,
-        par_all = par_all, ep = ep, names = names,
-        Vi = Vi, uh = uh, cr = cr,
-        control = list(maxit = max_it)
-      )$par
-    } else {
-      pair <- paste(ep[i, 1], ep[i, 1], sep = "-")
-      parms <- c(
-        paste(sp[1], "ci", sep = ":"), paste(sp[2], "ci", sep = ":"),
-        paste(sp[1], "ai", sep = ":"), paste(sp[2], "ai", sep = ":")
-      )
-      # pair <- paste(ep[i,2],ep[i,2], sep = "-")
-      # parms <- c(parms, paste(pair, "aij", sep = ":"))
-      par_all[parms] <- optim(par_all[parms],
-        fn = loglik_pair, data = data, pair = pairs[i], parms = parms,
-        par_all = par_all, ep = ep, names = names,
-        Vi = Vi, uh = uh, cr = cr,
-        control = list(maxit = max_it)
-      )$par
-    }
-  }
+  n_Ai     <- length(names)
+
+  lower <- c(
+    1e-6,                      # a > 0
+    1e-6,                      # 0 < b <= 1
+    0,                         # 0 <= c <= 1
+    1e-6,                      # d > 0
+    1e-6,                      # 0 < e <= 1
+    rep(0,    n_Ai)            # 0 <= Ai < 1
+  )
+  upper <- c(
+    Inf,                       # a
+    1,                         # b <= 1
+    1,                         # c <= 1
+    Inf,                       # d
+    1,                         # e <= 1
+    rep(0.9999, n_Ai)          # Ai < 1
+  )
+
+  optimized_par <- optim(
+    par_all[parms],
+    fn     = loglik,
+    method = "L-BFGS-B",
+    lower  = lower,
+    upper  = upper,
+    data   = data, parms = parms, par_all = par_all,
+    ep = ep, names = names, Vi = Vi, uh = uh, cr = cr,
+    control = list(maxit = max_it)
+  )$par
+  
+  par_all[parms] <- optimized_par
   return(par_all)
+
 }
 
 #' Optimize Temporal Parameters Across All Variable Pairs
@@ -393,14 +388,11 @@ optimize_spatiotemporal_parameters <- function(par_all, data, names, Vi, uh, cr,
 optimize_temporal_parameters <- function(par_all, data, names, Vi, uh, cr, max_it, ep) {
   pairs <- paste(ep[,1], ep[,2], sep="-")
   parms <- c(
-    "a", "b", "c", "d", "e",
-    paste(names, "Ai",     sep=":"),
     paste(names, "r1ii",   sep=":"),
     paste(names, "r2ii",   sep=":"),
     paste(pairs, "rho1ij", sep=":")
   )
   
-  n_Ai     <- length(names)
   n_r1ii   <- length(names)
   n_r2ii   <- length(names)
   n_rho1ij <- length(pairs)
@@ -412,23 +404,11 @@ optimize_temporal_parameters <- function(par_all, data, names, Vi, uh, cr, max_i
   upper_rho1 <- rep(1, n_rho1ij)
   
   lower <- c(
-    1e-6,                      # a > 0
-    1e-6,                      # 0 < b <= 1
-    0,                         # 0 <= c <= 1
-    1e-6,                      # d > 0
-    1e-6,                      # 0 < e <= 1
-    rep(0,    n_Ai),           # 0 <= Ai < 1
     rep(1e-6, n_r1ii),         # r1ii > 0
     rep(1e-6, n_r2ii),         # r2ii > 0
     lower_rho1                 # rho1ij : self-pairs [0,1], cross [-1,1]
   )
   upper <- c(
-    Inf,                       # a
-    1,                         # b <= 1
-    1,                         # c <= 1
-    Inf,                       # d
-    1,                         # e <= 1
-    rep(0.9999, n_Ai),         # Ai < 1
     rep(Inf,    n_r1ii),       # r1ii
     rep(Inf,    n_r2ii),       # r2ii
     upper_rho1     # rho1ij : covariance, sans borne
@@ -518,6 +498,7 @@ estimation_gf <- function(data, wt_id, max_it, dates, tmax, names, par_all = NUL
 
     # Optimize spatotemporal parameters
     #par_all <- optimize_spatiotemporal_parameters(par_all, data, names, Vi, uh=[uh[,1] <= 2,], cr, max_it, ep)
+    par_all <- optimize_spatiotemporal_parameters(par_all, data, names, Vi, uh, cr, max_it, ep)
   }
 
   # Construct parameter and beta matrices
