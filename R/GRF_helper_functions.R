@@ -768,12 +768,17 @@ estimate_gaussian_field_params <- function(data, wt, names, coordinates, tmax, m
   for (k in 1:K) {
     wt_id <- which(wt == k)
     wt_id <- wt_id[wt_id > tmax + 1]
-
+    
+    
+    # Après — structure identique à vgm mais avec matrice identité
+    rho1_init <- vgm[vgm$lagtime == 0 & vgm$dist == max(vgm$dist), ]
+    rho1_init$cov <- ifelse(rho1_init$v1 == rho1_init$v2, 1, 0.1)
+    
     # Estimate Gaussian field parameters
     gf_par[[k]] <- estimation_gf(
       data = data, wt_id = wt_id, max_it = max_it, dates = dates,
       tmax = tmax, names = names, coordinates = coordinates, n1 = n1,
-      n2 = n2, rho1 = vgm[vgm$lagtime == 0 & vgm$dist == max(vgm$dist), ],
+      n2 = n2, rho1 = rho1_init,
       cr = cr, threshold_precip = threshold_precip[[k]]
     )$parm
   }
