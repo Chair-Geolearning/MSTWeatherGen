@@ -254,11 +254,11 @@ optimize_spatial_parameters <- function(par_all, data, names, Vi, uh, cr, max_it
   
   lower <- c(
     rep(1e-3, n_aii),    # aii > 0 (minimum raisonnable)
-    rep(0.1,  n_nuii)    # nuii >= 0.1 (Matérn valide)
+    rep(0.25,  n_nuii)    # nuii >= 0.1 (Matérn valide)
   )
   upper <- c(
     rep(Inf, n_aii),     # aii sans borne supérieure
-    rep(5,   n_nuii)     # nuii <= 5 (suffisant physiquement)
+    rep(3,   n_nuii)     # nuii <= 5 (suffisant physiquement)
   )
   
   optimized_par <- optim(
