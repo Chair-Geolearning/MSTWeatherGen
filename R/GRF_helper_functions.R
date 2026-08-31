@@ -129,9 +129,12 @@ update_rho1_parameters <- function(par_all, names, rho1) {
       warning("rho1 contient des valeurs negatives avant nearPD : ",
               paste(as.numeric(rho1), collapse = ", "))
     }
+    rho1 <- as.matrix(rho1)
+    
     # Seule contrainte physique : diagonale strictement positive (variance > 0)
-    diag(rho1) <- pmax(pmin(diag(as.matrix(rho1),0.999), 1e-6))  # diagonale ∈ [0, 1]
-    a[row(a) != col(a)] <- pmax(pmin(a[row(a) != col(a)], 0.999), -0.999) # hors-diagonale ∈ [-1, 1]
+    diag(rho1) <- pmax(pmin(diag(rho1), 0.999), 1e-6)  # diagonale ∈ [0, 1]
+    rho1[row(rho1) != col(rho1)] <- pmax(pmin(
+    rho1[row(rho1) != col(rho1)], 0.999), -0.999) # hors-diagonale ∈ [-1, 1]
     
     rho1 <- Matrix::nearPD(rho1)$mat
   }
