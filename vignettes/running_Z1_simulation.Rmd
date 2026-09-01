@@ -23,16 +23,13 @@ knitr::opts_chunk$set(
 This vignette shows how to load a simulated three-dimensional array named
 `Z1`, inspect its structure, plot one of its variables through time, and fit a
 non-seasonal `MSTWeatherGen` model. It uses only the simulated `Z1` dataset and
-the 108 spatial coordinates supplied with the package. The original SAFRAN
-weather array is not loaded or used.
+the 108 spatial coordinates supplied with the package. 
 
 The expected organization of `Z1` is:
 
-```text
-Z1[time, spatial location, variable]
-```
+`Z1[time, spatial location, variable]`
 
-For the example considered here, its expected dimensions are 1,461 days, 108
+Here the dimensions are like the original vignette 1,461 days, 108
 spatial locations, and 3 variables.
 
 ## Load MSTWeatherGen
@@ -47,87 +44,42 @@ The code below searches for `Z1_V2.rds` from either the package source tree or
 the local project. For an installed package, the recommended location is
 `inst/extdata/Z1_V2.rds`.
 
-```{r read-z1}
-# Lecture du fichier Z1
-fichier_Z1 <- "/home/aboualam/MSTWeatherGen/data/Z1_V2.rds"
-
-# Vérification et lecture
-stopifnot(file.exists(fichier_Z1))
+```{r eval=FALSE}
+fichier_Z1 <- "/home/aboualam/MSTWeatherGen/data/Z1_v3.rds"
 Z1 <- readRDS(fichier_Z1)
 
 if (length(dim(Z1)) != 3L) {
   stop("Z1 must be a three-dimensional array: time, location, variable.")
 }
-
-dim(Z1)
+# Meme dimension que data utilise dans la vignette originale.
 ```
 
 ## Part 2 : Define dates, coordinates, and variable names
 
-The simulation covers the period from 1 January 2018 to 31 December 2021.
-The coordinates distributed with `MSTWeatherGen` contain the 108 locations
-used here.
-
-```{r define-metadata}
-dates_Z1 <- seq(
-  from = as.Date("2018-01-01"),
-  to   = as.Date("2021-12-31"),
-  by   = "day"
-)
-
-utils::data("coordinates", package = "MSTWeatherGen")
-
+```{r eval=FALSE}
+data("coordinates", package = "MSTWeatherGen")
+dates <- seq(as.Date("2018-01-01"), as.Date("2021-12-31"), by = "day")
+names <- c("Precipitation", "Wind", "Temp_max")
 coordinates_Z1 <- coordinates[, c("longitude", "latitude")]
 
-weather_names <- c(
-  "Precipitation",
-  "Wind",
-  "Temp_max"
-)
+dimnames(Z1)[[3]] <- names
 
-expected_dimensions <- c(
-  length(dates_Z1),
-  nrow(coordinates_Z1),
-  length(weather_names)
-)
-
-dimnames(Z1)[[3]] <- weather_names
-
-dim(Z1)
-head(dates_Z1)
-head(coordinates_Z1)
 ```
 
 
-## Plot one variable through time A reverifier.
+## Plot one variable through time A reverifier et pas obligatoire dans la vignette. Signal gaussien observe.
 
 The following function plots one variable at one spatial location. The
 defaults display the third variable (`Temp_max`) at the first location.
 
-```{r plot-function}
+```{r eval=FALSE}
 plot_Z1_variable <- function(
   Z,
   dates,
   variable = 3,
-  position = 1,
+  spatial_position = 1,
   variable_names = dimnames(Z)[[3]]
 ) {
-  if (length(dim(Z)) != 3L) {
-    stop("Z must have dimensions: time, location, variable.")
-  }
-
-  if (length(dates) != dim(Z)[1]) {
-    stop("The number of dates must equal the first dimension of Z.")
-  }
-
-  if (variable < 1L || variable > dim(Z)[3]) {
-    stop("The requested variable does not exist.")
-  }
-
-  if (position < 1L || position > dim(Z)[2]) {
-    stop("The requested spatial position does not exist.")
-  }
-
   variable_label <- if (is.null(variable_names)) {
     paste("Variable", variable)
   } else {
@@ -136,24 +88,18 @@ plot_Z1_variable <- function(
 
   plot(
     dates,
-    Z[, position, variable],
+    Z[, spatial_position, variable],
     type = "l",
     lwd = 1,
     col = "steelblue4",
     xlab = "Date",
     ylab = variable_label,
-    main = paste(variable_label, "- spatial location", position)
+    main = paste(variable_label, "- spatial location", spatial_position)
   )
 }
-```
-
-```{r plot-z1}
-plot_Z1_variable(
-  Z = Z1,
-  dates = dates_Z1,
-  variable = 3,
-  position = 1
-)
+variable = 1
+# Plotter une variable i entre 1 et 3 par rapport au temps ici precipitation vs
+plot_Z1_variable(Z = Z1, dates = dates, variable = variable, spatial_position = 1)
 ```
 
 ## Estimate a non-seasonal model
@@ -169,7 +115,7 @@ The following computation can take time, so this chunk is not run while the
 vignette is built. Remove `eval=FALSE` or run the code interactively to perform
 the estimation.
 
-```{r estimate-z1, eval=FALSE}
+```{r eval=FALSE}
 seasons <- list(
   s1 = list(min_day = 1, max_day = 29, min_month = 12, max_month = 2),
   s2 = list(min_day = 1, max_day = 31, min_month = 3, max_month = 5),
@@ -180,12 +126,12 @@ seasons <- list(
 swg_Z1 <- MSTWeatherGen_Estim(
   data                = Z1,
   seasons             = seasons,
-  dates               = dates_Z1,
-  names               = weather_names,
+  dates               = dates,
+  names               = names,
   by_season           = TRUE,
   scale               = FALSE,
   precipitation       = FALSE,
-  names_weather_types = weather_names,
+  names_weather_types = names,
   coordinates         = coordinates,
   max_it              = 100,
   tmax                 = 1,
@@ -194,50 +140,138 @@ swg_Z1 <- MSTWeatherGen_Estim(
 )
 ```
 
-If the first variable is a Gaussian field containing negative values rather
-than a non-negative precipitation field, rename it and disable the special
-precipitation treatment before estimation:
-
-```{r estimate-gaussian-z1, eval=FALSE}
-gaussian_names <- c("Variable_1", "Wind", "Temp_max")
-dimnames(Z1)[[3]] <- gaussian_names
-
-swg_Z1 <- MSTWeatherGen_Estim(
-  data                = Z1,
-  dates               = dates_Z1,
-  names               = gaussian_names,
-  by_season           = FALSE,
-  scale               = FALSE,
-  precipitation       = FALSE,
-  names_weather_types = gaussian_names,
-  coordinates         = coordinates_Z1,
-  max_it              = 100,
-  tmax                 = 1,
-  n1                   = 3,
-  n2                   = 3
-)
-```
-
-## Inspect and save the fitted model
+## Estimate and mean of many simulations
 
 After running one of the estimation chunks, inspect and save the resulting
 object as follows:
 
-```{r save-estimation, eval=FALSE}
-str(swg_Z1, max.level = 2)
+## Preambule
 
-saveRDS(
-  swg_Z1,
-  file = "swg_Z1_estimation.rds"
+
+```{r eval=FALSE}
+ # --- Paramètres ---
+n1     <- 3
+n2     <- 3
+tmax   <- 1
+max_it <- 100
+season <- seasons[["s1"]]
+
+# --- Filtrer les données pour la saison ---
+filtered <- filter_season_data(data, dates, season, names)
+data_s   <- filtered$data_filtered
+dates_s  <- filtered$dates_filtered
+rm(filtered)
+
+# --- Types de temps ---
+wt_obj <- weather_types(
+  data          = data_s,
+  variables     = names,
+  dates         = dates_s,
+  coordinates   = coordinates,
+  max_number_wt = 6,
+  return_plots  = FALSE
 )
+wt <- wt_obj$cluster
+K  <- length(unique(wt))
+
+lmbd             <- estimate_lambda_transformations(
+  data = data_s, wt = wt, names = names, coordinates = coordinates)
+threshold_precip <- lmbd$threshold_precip
+lmbd             <- lmbd$lambda_transformations
+data_s           <- transformations(
+  data = data_s, wt = wt, names = names, coordinates = coordinates, lmbd = lmbd)
+
+dst <- sapply(1:nrow(coordinates), function(i) {
+  sapply(1:nrow(coordinates), function(j) {
+    geosphere::distHaversine(coordinates[i,], coordinates[j,]) / 1000
+  })
+})
+
+cr <- sapply(names, function(v1) {
+  sapply(names, function(v2) {
+    mean(sapply(1:dim(data_s)[2], function(j)
+      cor(data_s[,j,v1], data_s[,j,v2], use="complete.obs")), na.rm=TRUE)
+  })
+})
+cr <- matrix(cr, nrow=length(names), ncol=length(names))
+colnames(cr) <- rownames(cr) <- names
+
+ep <- generate_variable_index_pairs(names)
+rho1_init <- data.frame(
+  v1  = ep[,1],
+  v2  = ep[,2],
+  cov = ifelse(ep[,1] == ep[,2], 1, 0.1),
+  stringsAsFactors = FALSE
+)
+
 ```
 
-## Summary
+## Lancer les simulations
 
-This workflow:
+```{r eval=FALSE}
+number_simulations <- 3
 
-1. loads only the simulated `Z1` array;
-2. associates it with 1,461 dates and 108 coordinates;
-3. validates its `time x location x variable` structure;
-4. plots a selected variable through time; and
-5. estimates one non-seasonal `MSTWeatherGen` model over the complete period.
+# Stocker tous les résultats dans une liste nommée
+# Structure : estim_results[[k]][[i]] = résultat du run i pour le type de temps k
+estim_results <- vector(mode="list", length=K)
+
+for (k in 1:K) {
+
+  wt_id <- which(wt == k)
+  wt_id <- wt_id[wt_id > tmax + 1]
+
+  estim_results[[k]] <- vector(mode="list", length=number_simulations)
+  names(estim_results[[k]]) <- paste0("run_", 1:number_simulations)
+
+  for (i in seq_len(number_simulations)) {
+    message(sprintf("  k=%d — Run %d/%d", k, i, number_simulations))
+    set.seed(14347 + i)
+
+    estim_results[[k]][[i]] <- estimation_gf(
+      data             = data_s,
+      wt_id            = wt_id,
+      max_it           = max_it,
+      dates            = dates_s,
+      tmax             = tmax,
+      names            = names,
+      coordinates      = coordinates,
+      n1               = n1,
+      n2               = n2,
+      rho1             = rho1_init,
+      cr               = cr,
+      threshold_precip = threshold_precip[[k]]
+    )
+}
+
+```
+
+
+```{r eval=FALSE}
+# ============================================================
+# PARTIE 3 — Moyennes des paramètres estimés
+# ============================================================
+
+cols_num <- c("a","b","c","d","e","Ai","Aj","aii","ajj",
+              "nuii","nujj","r1ii","r1jj","r2ii","r2jj",
+              "rho1ij","rho2ij")
+
+# Moyenne sur les runs pour chaque type de temps
+mean_by_wt <- lapply(1:K, function(k) {
+  if (is.null(estim_results[[k]])) return(NULL)
+  parm_all_runs <- do.call(rbind, lapply(estim_results[[k]], function(run) run$parm))
+  aggregate(parm_all_runs[, cols_num], 
+            by = list(v1=parm_all_runs$v1, v2=parm_all_runs$v2), 
+            FUN = mean, na.rm = TRUE)
+})
+names(mean_by_wt) <- paste0("wt_", 1:K)
+
+# Moyenne globale sur tous les types de temps et tous les runs
+parm_all <- do.call(rbind, lapply(1:K, function(k) {
+  if (is.null(estim_results[[k]])) return(NULL)
+  do.call(rbind, lapply(estim_results[[k]], function(run) run$parm))
+}))
+
+mean_global <- aggregate(parm_all[, cols_num],
+                         by = list(v1=parm_all$v1, v2=parm_all$v2),
+                         FUN = mean, na.rm = TRUE)
+```
