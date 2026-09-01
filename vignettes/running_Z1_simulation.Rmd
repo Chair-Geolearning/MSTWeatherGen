@@ -206,7 +206,7 @@ rho1_init <- data.frame(
 
 ```
 
-## Preambule
+## Lancer les simulations
 
 ```{r eval=FALSE}
 number_simulations <- 3
@@ -247,28 +247,31 @@ for (k in 1:K) {
 
 
 ```{r eval=FALSE}
-# Moyenner les estimations pas par saison
-mean_gf_par <- function(x) {
-  ref <- x[[1]]
+# ============================================================
+# PARTIE 3 — Moyennes des paramètres estimés
+# ============================================================
 
-  if (is.list(ref)) {
-    result <- ref
-    result[] <- lapply(
-      seq_along(ref),
-      function(i) mean_gf_par(lapply(x, `[[`, i))
-    )
-    return(result)
-  }
-  ref
-}
+cols_num <- c("a","b","c","d","e","Ai","Aj","aii","ajj",
+              "nuii","nujj","r1ii","r1jj","r2ii","r2jj",
+              "rho1ij","rho2ij")
 
-gf_par_mean <- mean_gf_par(
-  lapply(
-    swg_runs,
-    function(fit) fit$swg$s1$gf_par
-  )
-)
+# Moyenne sur les runs pour chaque type de temps
+mean_by_wt <- lapply(1:K, function(k) {
+  if (is.null(estim_results[[k]])) return(NULL)
+  parm_all_runs <- do.call(rbind, lapply(estim_results[[k]], function(run) run$parm))
+  aggregate(parm_all_runs[, cols_num], 
+            by = list(v1=parm_all_runs$v1, v2=parm_all_runs$v2), 
+            FUN = mean, na.rm = TRUE)
+})
+names(mean_by_wt) <- paste0("wt_", 1:K)
 
-gf_par_mean
+# Moyenne globale sur tous les types de temps et tous les runs
+parm_all <- do.call(rbind, lapply(1:K, function(k) {
+  if (is.null(estim_results[[k]])) return(NULL)
+  do.call(rbind, lapply(estim_results[[k]], function(run) run$parm))
+}))
 
+mean_global <- aggregate(parm_all[, cols_num],
+                         by = list(v1=parm_all$v1, v2=parm_all$v2),
+                         FUN = mean, na.rm = TRUE)
 ```
