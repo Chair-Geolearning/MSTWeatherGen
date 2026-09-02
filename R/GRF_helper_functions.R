@@ -255,14 +255,10 @@ optimize_spatial_parameters <- function(par_all, data, names, Vi, uh, cr, max_it
   n_aii  <- length(names)
   n_nuii <- length(names)
   
-  lower <- c(
-    rep(1e-6, n_aii),    # aii > 0 (minimum raisonnable)
-    rep(0.25,  n_nuii)    # nuii >= 0.1 (Matérn valide)
-  )
-  upper <- c(
-    rep(Inf, n_aii),     # aii sans borne supérieure
-    rep(3,   n_nuii)     # nuii <= 3 (suffisant physiquement)
-  )
+  lower <- c(rep(.lower[.aii],  n_aii),
+             rep(.lower[.nuii], n_nuii))
+  upper <- c(rep(.upper[.aii],  n_aii),
+             rep(.upper[.nuii], n_nuii))
   
   optimized_par <- optim(
     par_all[parms],
@@ -326,20 +322,12 @@ optimize_spatiotemporal_parameters <- function(par_all, data, names, Vi, uh, cr,
   n_Ai     <- length(names)
 
   lower <- c(
-    1e-6,                      # a > 0
-    1e-6,                      # 0 < b <= 1
-    0,                         # 0 <= c <= 1
-    1e-6,                      # d > 0
-    1e-6,                      # 0 < e <= 1
-    rep(0,    n_Ai)            # 0 <= Ai < 1
+    .lower[.a], .lower[.b], .lower[.c], .lower[.d], .lower[.e],
+    rep(.lower[.Ai], n_Ai)
   )
   upper <- c(
-    Inf,                       # a
-    1,                         # b <= 1
-    1,                         # c <= 1
-    Inf,                       # d
-    1,                         # e <= 1
-    rep(1-1e-6, n_Ai)          # Ai < 1
+    .upper[.a], .upper[.b], .upper[.c], .upper[.d], .upper[.e],
+    rep(.upper[.Ai], n_Ai)
   )
 
   optimized_par <- optim(
@@ -403,22 +391,18 @@ optimize_temporal_parameters <- function(par_all, data, names, Vi, uh, cr, max_i
   n_r2ii   <- length(names)
   n_rho1ij <- length(pairs)
   
-  # Nouvelles bornes apres Update.
-  lower_rho1 <- rep(-1, n_rho1ij)
-  lower_rho1[ep[,1] == ep[,2]] <- 0  
+  ## rho1ij : self-pairs [0, 1-1e-6], cross-pairs [-1, 1-1e-6]
+  lower_rho1 <- rep(.lower[.rho1ij], n_rho1ij)
+  lower_rho1[ep[,1] == ep[,2]] <- 0
   
-  upper_rho1 <- rep(1-1e-6, n_rho1ij)
+  upper_rho1 <- rep(.upper[.rho1ij], n_rho1ij)
   
-  lower <- c(
-    rep(1e-6, n_r1ii),         # r1ii > 0
-    rep(1e-6, n_r2ii),         # r2ii > 0
-    lower_rho1                 # rho1ij : self-pairs [0,1], cross [-1,1]
-  )
-  upper <- c(
-    rep(Inf,    n_r1ii),       # r1ii
-    rep(Inf,    n_r2ii),       # r2ii
-    upper_rho1     # rho1ij : covariance, sans borne
-  )
+  lower <- c(rep(.lower[.r1ii], n_r1ii),
+             rep(.lower[.r2ii], n_r2ii),
+             lower_rho1)
+  upper <- c(rep(.upper[.r1ii], n_r1ii),
+             rep(.upper[.r2ii], n_r2ii),
+             upper_rho1)
   
   optimized_par <- optim(
     par_all[parms],
