@@ -325,7 +325,7 @@ loglik <- function(par, parms, par_all, data, names, Vi, h, u, uh, ep, cr) {
         l1 <- l2 <- l3 <- l4 <- 0
         par <- parmm[[v]]
         # A rajouter les cas ou ca peut etre egale a 0 au detail genre nuii qui vaut 0.5. A rechecker le par feu sur rho1ij
-        if (any(par[c(.a:.nujj, .r2ii:.r1jj)] < 0) | any(par[c(.Ai:.Aj)] > 1) | abs(par[.rho1ij]) > 1) {
+        if (any(par[c(.a:.nujj, .r2ii:.r1jj)] < 0) | any(par[c(.Ai:.Aj)] > 1) | abs(par[.rho1ij]) > 1+ 1e-9) {
           return(1e20)                                          # ← fini pour L-BFGS-B
         } else {
           cij <- Gneiting(h = h, u = u, par = par, rho2ij = rho2[Vi[v, 1], Vi[v, 2]])
@@ -373,7 +373,7 @@ loglik <- function(par, parms, par_all, data, names, Vi, h, u, uh, ep, cr) {
       ll <- parallel::mclapply(1:nrow(Vi), function(v) {
         l1 <- l2 <- l3 <- l4 <- 0
         par <- parmm[[v]]
-        if (any(par[c(.a:.nujj, .r2ii:.r1jj)] < 0) | any(par[c(.Ai:.Aj)] > 1) | abs(par[.rho1ij]) > 1 + 1e-9) {
+        if (any(par[c(.a:.nujj, .r2ii:.r1jj)] < 1e-6) | any(par[c(.Ai:.Aj)] > 1+ 1e-9) | abs(par[.rho1ij]) > 1 + 1e-9) {
           return(1e20)
         } else {
           cij <- Gneiting(h = h, u = u, par = par, rho2ij = rho2[Vi[v, 1], Vi[v, 2]])
