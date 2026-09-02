@@ -307,6 +307,7 @@ loglik <- function(par, parms, par_all, data, names, Vi, h, u, uh, ep, cr) {
   parm <- create_df_param(par_all, names)
   parm <- create_df_param(update_rho1_parameters(par_all, names, extract_rho1(parm, names)), names)
   rho2 <- try(compute_rho2(parm, names, cr), silent = T)
+  # A rechecker
   be   <- try(chol(rho2), silent = TRUE)
   
   if (!is.character(be)) {
@@ -323,12 +324,13 @@ loglik <- function(par, parms, par_all, data, names, Vi, h, u, uh, ep, cr) {
       ll <- lapply(1:nrow(Vi), function(v) {
         l1 <- l2 <- l3 <- l4 <- 0
         par <- parmm[[v]]
+        # A rajouter les cas ou ca peut etre egale a 0 au detail genre nuii qui vaut 0.5. A rechecker le par feu sur rho1ij
         if (any(par[c(.a:.nujj, .r2ii:.r1jj)] < 0) | any(par[c(.Ai:.Aj)] > 1) | abs(par[.rho1ij]) > 1) {
           return(1e20)                                          # ← fini pour L-BFGS-B
         } else {
           cij <- Gneiting(h = h, u = u, par = par, rho2ij = rho2[Vi[v, 1], Vi[v, 2]])
-          cij   <- pmax(pmin(cij, 0.9999999), -0.9999999)     # ← borner cij
-          delta <- pmax(1 - cij^2, 1e-10)                     # ← éviter delta=0
+          cij   <- pmax(pmin(cij, 0.99), -0.99)     # ← borner cij
+          delta <- pmax(1 - cij^2, 0.01)                     # ← éviter delta=0
           v1 <- data[, , Vi[v, 1]]
           v1 <- v1[cbind(uh[, 3], uh[, 5])]
           v2 <- data[, , Vi[v, 2]]
@@ -338,12 +340,13 @@ loglik <- function(par, parms, par_all, data, names, Vi, h, u, uh, ep, cr) {
           delta <- delta[dz]
           v1    <- v1[dz]
           v2    <- v2[dz]
-          uh_dz <- uh[dz, ]                                    # ← uh_dz au lieu de uh
+          uh_dz <- uh[dz, ]                                    #TODO ← uh_dz au lieu de uh
           
           id1 <- (v1 == 0) & (!v2 == 0) & (Vi[v, 1] == "Precipitation")
           id2 <- (!v1 == 0) & (v2 == 0) & (Vi[v, 2] == "Precipitation")
           id4 <- (!v1 == 0) & (!v2 == 0)
           id3 <- (v1 == 0) & (v2 == 0) & (Vi[v, 1] == "Precipitation") & (Vi[v, 2] == "Precipitation")
+          #TODO ← A checker pourquoi on regarde 8 et 7
           uh_dz[, 8][which(uh_dz[, 8] == -Inf)] <- -2.282295
           uh_dz[, 7][which(uh_dz[, 7] == -Inf)] <- -2.282295
           
@@ -370,12 +373,12 @@ loglik <- function(par, parms, par_all, data, names, Vi, h, u, uh, ep, cr) {
       ll <- parallel::mclapply(1:nrow(Vi), function(v) {
         l1 <- l2 <- l3 <- l4 <- 0
         par <- parmm[[v]]
-        if (any(par[c(1:11, 13:16)] < 0) | any(par[c(6:7)] > 1) | abs(par[12]) > 1) {
-          return(1e20)                                          # ← fini pour L-BFGS-B
+        if (any(par[c(.a:.nujj, .r2ii:.r1jj)] < 0) | any(par[c(.Ai:.Aj)] > 1) | abs(par[.rho1ij]) > 1 + 1e-9) {
+          return(1e20)
         } else {
           cij <- Gneiting(h = h, u = u, par = par, rho2ij = rho2[Vi[v, 1], Vi[v, 2]])
-          cij   <- pmax(pmin(cij, 0.9999999), -0.9999999)     # ← borner cij
-          delta <- pmax(1 - cij^2, 1e-10)                     # ← éviter delta=0
+          cij   <- pmax(pmin(cij, 0.99), -0.99)     # ← borner cij
+          delta <- pmax(1 - cij^2, 0.01)                     # ← éviter delta=0
           v1 <- data[, , Vi[v, 1]]
           v1 <- v1[cbind(uh[, 3], uh[, 5])]
           v2 <- data[, , Vi[v, 2]]
