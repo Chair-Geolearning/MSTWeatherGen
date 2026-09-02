@@ -102,44 +102,6 @@ variable = 1
 plot_Z1_variable(Z = Z1, dates = dates, variable = variable, spatial_position = 1)
 ```
 
-## Estimate a non-seasonal model
-
-The estimation is performed over the full 2018--2021 period. Consequently,
-`by_season` is set to `FALSE` and no `seasons` argument is supplied.
-
-`scale` is also set to `FALSE`: the internal seasonal standardization requires
-more than five years of observations, whereas this example contains four
-years.
-
-The following computation can take time, so this chunk is not run while the
-vignette is built. Remove `eval=FALSE` or run the code interactively to perform
-the estimation.
-
-```{r eval=FALSE}
-seasons <- list(
-  s1 = list(min_day = 1, max_day = 29, min_month = 12, max_month = 2),
-  s2 = list(min_day = 1, max_day = 31, min_month = 3, max_month = 5),
-  s3 = list(min_day = 1, max_day = 31, min_month = 6, max_month = 8),
-  s4 = list(min_day = 1, max_day = 30, min_month = 9, max_month = 11)
-)
-
-swg_Z1 <- MSTWeatherGen_Estim(
-  data                = Z1,
-  seasons             = seasons,
-  dates               = dates,
-  names               = names,
-  by_season           = TRUE,
-  scale               = FALSE,
-  precipitation       = FALSE,
-  names_weather_types = names,
-  coordinates         = coordinates,
-  max_it              = 100,
-  tmax                 = 1,
-  n1                   = 3,
-  n2                   = 3
-)
-```
-
 ## Estimate and mean of many simulations
 
 After running one of the estimation chunks, inspect and save the resulting
@@ -149,6 +111,13 @@ object as follows:
 
 
 ```{r eval=FALSE}
+seasons <- list(
+  s1 = list(min_day = 1, max_day = 29, min_month = 12, max_month = 2),
+  s2 = list(min_day = 1, max_day = 31, min_month = 3, max_month = 5),
+  s3 = list(min_day = 1, max_day = 31, min_month = 6, max_month = 8),
+  s4 = list(min_day = 1, max_day = 30, min_month = 9, max_month = 11)
+)
+
  # --- Paramètres ---
 n1     <- 3
 n2     <- 3
@@ -241,6 +210,7 @@ for (k in 1:K) {
       cr               = cr,
       threshold_precip = threshold_precip[[k]]
     )
+  }
 }
 
 ```
