@@ -60,10 +60,10 @@
 # Valeurs initiales
 # ============================================================
 .init <- c(
-  0.5,     # a = 1 (validé par Denis)
+  0.5,     # a = 1 
   0.5,   # b = 0.5 (milieu de (0,1])
   0.5,   # c = 0.5 (milieu de [0,1])
-  0.5,     # d = 1 (validé par Denis)
+  0.5,     # d = 1 
   0.5,   # e = 0.5 (milieu de (0,1])
   0.1,   # Ai
   0.1,   # Aj
