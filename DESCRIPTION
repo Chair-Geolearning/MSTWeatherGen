@@ -46,4 +46,4 @@ VignetteBuilder: knitr, rmarkdown, maps
 Encoding: UTF-8
 LazyData: true
 Config/Needs/website: rmarkdown, pkgnet, pkgdown
-Config/roxygen2/version: 8.0.0
+Config/roxygen2/version: 8.1.0

@@ -60,9 +60,9 @@ initialize_par_all_if_missing <- function(par_all, names, pairs, par_s, rho1, cr
     par_all[paste(pairs[1:length(names)], "rho2ij", sep = ":")] <- 1 
     par_all[paste(pairs[1:length(names)], "aii", sep = ":")] <- par_s[1, ]
     par_all[paste(pairs[1:length(names)], "nuii", sep = ":")] <- par_s[2, ]
-    par_all[paste(pairs[1:length(names)], "rho1ij", sep = ":")] <- 1 
+    par_all[paste(pairs[1:length(names)], "rho1ij", sep = ":")] <- 0.9
     parm_eta <- c("a", "b", "c", "d", "e")  
-    par_all[parm_eta] <- rep(1, length(parm_eta))
+    par_all[parm_eta] <- rep(0.5, length(parm_eta))
   }
 
   # Update rho1 parameters based on covariance information
@@ -72,11 +72,14 @@ initialize_par_all_if_missing <- function(par_all, names, pairs, par_s, rho1, cr
   # partie 'check je pense'
   parm <- create_df_param(par_all, names)   #  a renommer en create_df_param
   rho2 <- try(compute_rho2(parm, names, cr), silent = T)
+  # A rechecker sur le try de cholesky car on fait nearPD dans rho2
   ch <- try(chol(rho2), silent = T)
+  # TO-RECHECK
   if (is.character(ch)) {
     #par_s <- matrix(rep(1, length(names)^2), ncol = length(names), nrow = length(names))
     par_all[paste(pairs[1:length(names)], "aii", sep = ":")] <- 1
     par_all[paste(pairs[1:length(names)], "nuii", sep = ":")] <- 1
+    # Utile ou pas ?? a rechecker!
     par_all <- update_rho1_parameters(par_all, names, rho1)
   }
   
@@ -98,12 +101,15 @@ initialize_par_all_if_missing <- function(par_all, names, pairs, par_s, rho1, cr
 #' @keywords internal
 #' @noRd
 #' @importFrom Matrix nearPD
+#' @keywords internal
+#' @noRd
+#' @importFrom Matrix nearPD
 update_rho1_parameters <- function(par_all, names, rho1) {
-  # Update the `rho1ij` parameters in `par_all` based on the covariance information in `rho1`
   if (!is.matrix(rho1)) {
     for (v1 in names) {
       for (v2 in names) {
-        par_all[paste(paste(v1, v2, sep = "-"), "rho1ij", sep = ":")] <- rho1$cov[rho1$v1 == v1 & rho1$v2 == v2 | rho1$v2 == v1 & rho1$v1 == v2]
+        par_all[paste(paste(v1, v2, sep = "-"), "rho1ij", sep = ":")] <-
+          rho1$cov[rho1$v1 == v1 & rho1$v2 == v2 | rho1$v2 == v1 & rho1$v1 == v2]
       }
     }
     a <- sapply(names, function(v1) {
@@ -115,17 +121,27 @@ update_rho1_parameters <- function(par_all, names, rho1) {
     })
     a <- matrix(a, nrow = length(names), ncol = length(names))
     rownames(a) <- colnames(a) <- names
-    rho1 = Matrix::nearPD(a)$mat
-  }else{
+    
+    # Seule contrainte physique : diagonale strictement positive (variance > 0)
+    diag(a) <- pmax(pmin(diag(a), 1), 0)   # diagonale ∈ [0, 1]
+    a[row(a) != col(a)] <- pmax(pmin(a[row(a) != col(a)], 0.9999), -0.9999) # hors-diagonale ∈ [-1, 1]
+    rho1 <- Matrix::nearPD(a)$mat
+      
+  } else {
     if (any(diag(rho1) < 0)) {
-      warning("rho1 contient des valeurs negatives avant nearPD : ", paste(as.numeric(rho1), collapse = ", "))
+      warning("rho1 contient des valeurs negatives avant nearPD : ",
+              paste(as.numeric(rho1), collapse = ", "))
     }
-    rho1 <- if (length(names) == 1) {
-      Matrix::Matrix(max(as.numeric(rho1), 1e-6), nrow = 1, ncol = 1, dimnames = list(names, names))
-    } else {
-      Matrix::nearPD(rho1)$mat
-    }
+    rho1 <- as.matrix(rho1)
+    
+    # Seule contrainte physique : diagonale strictement positive (variance > 0)
+    diag(rho1) <- pmax(pmin(diag(rho1), 0.9999), 0)  # diagonale ∈ [0, 1]
+    rho1[row(rho1) != col(rho1)] <- pmax(pmin(
+    rho1[row(rho1) != col(rho1)], -0.9999), 0.9999) # hors-diagonale ∈ [-1, 1]
+    
+    rho1 <- Matrix::nearPD(rho1)$mat
   }
+  
   colnames(rho1) <- rownames(rho1) <- names
   for (v1 in names) {
     for (v2 in names) {
@@ -230,20 +246,36 @@ init_space_par <- function(data, names, h, uh, max_it = 2000) {
 #' @importFrom stringr str_split
 #' @importFrom stats optim
 optimize_spatial_parameters <- function(par_all, data, names, Vi, uh, cr, max_it, ep) {
-  pairs <- paste(ep[, 1], ep[, 2], sep = "-")
+  pairs <- paste(ep[,1], ep[,2], sep="-")
   parms <- c(
-    paste(pairs[1:length(names)], "aii", sep = ":"),
-    paste(pairs[1:length(names)], "nuii", sep = ":")
+    paste(pairs[1:length(names)], "aii",  sep=":"),
+    paste(pairs[1:length(names)], "nuii", sep=":")
   )
-  optimized_par <- optim(par_all[parms],
-    fn = loglik, data = data, parms = parms,
-    par_all = par_all, ep = ep, names = names,
-    Vi = Vi, uh = uh, cr = cr,
+  
+  n_aii  <- length(names)
+  n_nuii <- length(names)
+  
+  lower <- c(rep(.lower[.aii],  n_aii),
+             rep(.lower[.nuii], n_nuii))
+  upper <- c(rep(.upper[.aii],  n_aii),
+             rep(.upper[.nuii], n_nuii))
+  
+  optimized_par <- optim(
+    par_all[parms],
+    fn     = loglik,
+    method = "L-BFGS-B",
+    lower  = lower,
+    upper  = upper,
+    data   = data, parms = parms, par_all = par_all,
+    ep = ep, names = names, Vi = Vi, uh = uh, cr = cr,
     control = list(maxit = max_it)
   )$par
+  
   par_all[parms] <- optimized_par
-  return(update_rho1_parameters(par_all, names, extract_rho1(create_df_param(par_all, names), names)))
+  return(update_rho1_parameters(par_all, names,
+                                extract_rho1(create_df_param(par_all, names), names)))
 }
+
 #' Optimize Spatio-Temporal Parameters for Variable Pairs
 #'
 #' Optimizes spatio-temporal model parameters for each pair of variables to enhance the
@@ -277,43 +309,43 @@ optimize_spatial_parameters <- function(par_all, data, names, Vi, uh, cr, max_it
 #' @keywords internal
 #' @importFrom stringr str_split
 #' @importFrom stats optim
-optimize_pairs_spatiotemporal <- function(par_all, data, names, Vi, uh, cr, max_it, ep) {
-  pairs <- paste(ep[, 1], ep[, 2], sep = "-")
-  # Optimize model parameters for each pair of variables using the log-likelihood function
-  for (i in seq(nrow(ep))) {
-    pair <- pairs[i]
-    sp <- unlist(stringr::str_split(pair, "-"))
-    if (sp[1] == sp[2]) {
-      parms <- c(
-        paste(sp[1], "ci", sep = ":"), paste(sp[2], "ci", sep = ":"),
-        paste(sp[1], "ai", sep = ":"), paste(sp[2], "ai", sep = ":"),
-        paste(pair, "ax", sep = ":"),
-        paste(pair, "rij", sep = ":"), paste(pair, "vij", sep = ":")
-      )
-      par_all[parms] <- optim(par_all[parms],
-        fn = loglik_pair, data = data, pair = pair, parms = parms,
-        par_all = par_all, ep = ep, names = names,
-        Vi = Vi, uh = uh, cr = cr,
-        control = list(maxit = max_it)
-      )$par
-    } else {
-      pair <- paste(ep[i, 1], ep[i, 1], sep = "-")
-      parms <- c(
-        paste(sp[1], "ci", sep = ":"), paste(sp[2], "ci", sep = ":"),
-        paste(sp[1], "ai", sep = ":"), paste(sp[2], "ai", sep = ":")
-      )
-      # pair <- paste(ep[i,2],ep[i,2], sep = "-")
-      # parms <- c(parms, paste(pair, "aij", sep = ":"))
-      par_all[parms] <- optim(par_all[parms],
-        fn = loglik_pair, data = data, pair = pairs[i], parms = parms,
-        par_all = par_all, ep = ep, names = names,
-        Vi = Vi, uh = uh, cr = cr,
-        control = list(maxit = max_it)
-      )$par
-    }
-  }
+optimize_spatiotemporal_parameters <- function(par_all, data, names, Vi, uh, cr, max_it, ep) {
+
+  # Ici on va optimiser les valeurs des parametres
+  # a, b , c , d , e
+  # Ai
+  parms <- c(
+    "a", "b", "c", "d", "e",
+    paste(names, "Ai", sep=":")
+  )
+
+  n_Ai     <- length(names)
+
+  lower <- c(
+    .lower[.a], .lower[.b], .lower[.c], .lower[.d], .lower[.e],
+    rep(.lower[.Ai], n_Ai)
+  )
+  upper <- c(
+    .upper[.a], .upper[.b], .upper[.c], .upper[.d], .upper[.e],
+    rep(.upper[.Ai], n_Ai)
+  )
+
+  optimized_par <- optim(
+    par_all[parms],
+    fn     = loglik,
+    method = "L-BFGS-B",
+    lower  = lower,
+    upper  = upper,
+    data   = data, parms = parms, par_all = par_all,
+    ep = ep, names = names, Vi = Vi, uh = uh, cr = cr,
+    control = list(maxit = max_it)
+  )$par
+  
+  par_all[parms] <- optimized_par
   return(par_all)
+
 }
+
 #' Optimize Temporal Parameters Across All Variable Pairs
 #'
 #' Performs a final optimization step to refine the temporal parameters of the model,
@@ -348,21 +380,41 @@ optimize_pairs_spatiotemporal <- function(par_all, data, names, Vi, uh, cr, max_
 #' @keywords internal
 #' @importFrom stats optim
 optimize_temporal_parameters <- function(par_all, data, names, Vi, uh, cr, max_it, ep) {
-  # Final optimization step for the subset of parameters across all variable pairs
+  pairs <- paste(ep[,1], ep[,2], sep="-")
   parms <- c(
-    "a", "b", "c", "d", "e",           # paramètres globaux de etaij
-    paste(names, "Ai", sep = ":"),      
-    paste(names, "r1ii", sep = ":"),
-    paste(names, "r2ii", sep = ":"),
-    paste(pairs, "rho1ij", sep = ":")
+    paste(names, "r1ii",   sep=":"),
+    paste(names, "r2ii",   sep=":"),
+    paste(pairs, "rho1ij", sep=":")
   )
   
-  optimized_par <- optim(par_all[parms],
-    fn = loglik, data = data, parms = parms,
-    par_all = par_all, ep = ep, names = names,
-    Vi = Vi, uh = uh, cr = cr,
+  n_r1ii   <- length(names)
+  n_r2ii   <- length(names)
+  n_rho1ij <- length(pairs)
+  
+  ## rho1ij : self-pairs [0, 1-1e-6], cross-pairs [-1, 1-1e-6]
+  lower_rho1 <- rep(.lower[.rho1ij], n_rho1ij)
+  lower_rho1[ep[,1] == ep[,2]] <- 0
+  
+  upper_rho1 <- rep(.upper[.rho1ij], n_rho1ij)
+  
+  lower <- c(rep(.lower[.r1ii], n_r1ii),
+             rep(.lower[.r2ii], n_r2ii),
+             lower_rho1)
+  upper <- c(rep(.upper[.r1ii], n_r1ii),
+             rep(.upper[.r2ii], n_r2ii),
+             upper_rho1)
+  
+  optimized_par <- optim(
+    par_all[parms],
+    fn     = loglik,
+    method = "L-BFGS-B",
+    lower  = lower,
+    upper  = upper,
+    data   = data, parms = parms, par_all = par_all,
+    ep = ep, names = names, Vi = Vi, uh = uh, cr = cr,
     control = list(maxit = max_it)
   )$par
+  
   par_all[parms] <- optimized_par
   return(par_all)
 }
@@ -418,36 +470,32 @@ estimation_gf <- function(data, wt_id, max_it, dates, tmax, names, par_all = NUL
   par_s <- init_space_par(data = data, names = names, h = h[u == 0], uh = uh[u == 0, ], max_it = max_it)
   par_s <- do.call(cbind, par_s)
 
-  'par_s rend  le vecteur 
-  c(range = valeur_estimee_de_par_1,
-  smoothness = valeur_estimee_de_par_2) qui sont les aij et nuij dans le papier 
-  c("range", "smoothness")
-  aii = range et nuii = smoothness
-  qui sont les parametres spatiaux mis dans optim spatial'
-  
   # Construct parameter matrix for covariance model
   ep <- generate_variable_index_pairs(names)
   pairs <- paste(ep[, 1], ep[, 2], sep = "-")
 
   # Check and initialize par_all if missing
   par_all <- initialize_par_all_if_missing(par_all, names, pairs, par_s, rho1, cr = cr)
-  'par_all normalement contient tous les params autre que les spatiaux ie les temporels dans optim temporal'
   
   par_all <- optimize_spatial_parameters(par_all, data, names, Vi, uh[uh[, 1] == 0, ], cr, max_it, ep)
 
   for (v in 1:2) {
     # Optimize temporal parameters
     par_all <- optimize_temporal_parameters(par_all, data, names, Vi, uh, cr, max_it, ep)
+    
     # Optimize spatial parameters
     par_all <- optimize_spatial_parameters(par_all, data, names, Vi, uh, cr, max_it, ep)
+
+    # Optimize spatotemporal parameters
+    #par_all <- optimize_spatiotemporal_parameters(par_all, data, names, Vi, uh=[uh[,1] <= 2,], cr, max_it, ep)
+    par_all <- optimize_spatiotemporal_parameters(par_all, data, names, Vi, uh, cr, max_it, ep)
   }
 
   # Construct parameter and beta matrices
+  # rho1 in par_all already update in optimize_spatial_parameters
   par_all <- update_rho1_parameters(par_all, names, extract_rho1(create_df_param(par_all, names), names))
   parm <- create_df_param(par_all, names)
-  beta <- compute_rho2(parm, names, cr)
-  beta <- sapply(1:nrow(ep), function(i) beta[ep[i, 1], ep[i, 2]])
-  par_all[1:length(beta)] <- beta
+  par_all <- update_rho2_parameters(par_all,names, compute_rho2(parm, names, cr))
   parm <- create_df_param(par_all, names)
 
   return(list(parm = parm, par_all = par_all))
@@ -707,12 +755,17 @@ estimate_gaussian_field_params <- function(data, wt, names, coordinates, tmax, m
   for (k in 1:K) {
     wt_id <- which(wt == k)
     wt_id <- wt_id[wt_id > tmax + 1]
-
+    
+    
+    rho1_init <- vgm[vgm$lagtime == 0 & vgm$dist == max(vgm$dist), ]
+    # Après — structure identique à vgm mais avec matrice identité avec 0.1 sur la diag
+    rho1_init$cov <- ifelse(rho1_init$v1 == rho1_init$v2, 1, 0.1)
+    
     # Estimate Gaussian field parameters
     gf_par[[k]] <- estimation_gf(
       data = data, wt_id = wt_id, max_it = max_it, dates = dates,
       tmax = tmax, names = names, coordinates = coordinates, n1 = n1,
-      n2 = n2, rho1 = vgm[vgm$lagtime == 0 & vgm$dist == max(vgm$dist), ],
+      n2 = n2, rho1 = rho1_init,
       cr = cr, threshold_precip = threshold_precip[[k]]
     )$parm
   }
