@@ -60,9 +60,13 @@ initialize_par_all_if_missing <- function(par_all, names, pairs, par_s, rho1, cr
     par_all[paste(pairs[1:length(names)], "rho2ij", sep = ":")] <- 1 
     par_all[paste(pairs[1:length(names)], "aii", sep = ":")] <- par_s[1, ]
     par_all[paste(pairs[1:length(names)], "nuii", sep = ":")] <- par_s[2, ]
-    par_all[paste(pairs[1:length(names)], "rho1ij", sep = ":")] <- 0.9
+    par_all[paste(pairs[1:length(names)], "rho1ij", sep = ":")] <- .init[.rho1ij] 
+    par_all[paste(names, "Ai", sep=":")] <- .init[.Ai]
+    par_all[paste(names, "r2ii", sep=":")] <- .init[.r2ii]
+    par_all[paste(names, "r1ii", sep=":")] <- .init[.r1ii]
+    
     parm_eta <- c("a", "b", "c", "d", "e")  
-    par_all[parm_eta] <- rep(0.5, length(parm_eta))
+    par_all[parm_eta] <- c(.init[.a], .init[.b], .init[.c], .init[.d], .init[.e])
   }
 
   # Update rho1 parameters based on covariance information
