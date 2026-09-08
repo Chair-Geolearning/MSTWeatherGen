@@ -459,7 +459,7 @@ loglik_spatial <- function(par, data, h, uh, v) {
     l1 <- l2 <- l3 <- l4 <- 0
 
     # Compute covariances using the Matérn function based on spatial distances 'h'.
-    cij <- Matern(h, r = par[1], v = par[2])
+    cij <- Matern(h, r = par[.matern_a] , v = par[.matern_nu])
     delta <- 1 - cij^2
 
     # Extract paired observations for variable 'v' based on spatial-temporal indices in 'uh'.
