@@ -194,7 +194,7 @@ init_space_par <- function(data, names, h, uh, max_it = 2000) {
     par <- parallel::parLapply(cl, names, function(v) {
       assign(".Random.seed", parent_seed, envir = .GlobalEnv)
       optim(
-        par = c(1, 1),
+        par = .init_spatial,
         fn = loglik_spatial,
         data = data,
         v = v,
@@ -207,7 +207,7 @@ init_space_par <- function(data, names, h, uh, max_it = 2000) {
     # Fonctionne sur Linux/Mac :  mclapply
     par <- parallel::mclapply(names, function(v) {
       optim(
-        par = c(1, 1),
+        par = .init_spatial,
         fn = loglik_spatial,
         data = data,
         v = v,

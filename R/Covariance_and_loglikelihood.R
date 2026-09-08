@@ -449,7 +449,8 @@ loglik <- function(par, parms, par_all, data, names, Vi, h, u, uh, ep, cr) {
 #' @keywords internal
 loglik_spatial <- function(par, data, h, uh, v) {
   # Penalize negative parameters to enforce model constraints.
-  if (par[1] < 0 | par[2] < 0) {
+  if (par[.matern_a]  < .lower_spatial[.matern_a]  |
+      par[.matern_nu] < .lower_spatial[.matern_nu]) {
     return(abs(rnorm(1)) * 1e+20)
   } else {
     # Initialize components of the log-likelihood calculation.

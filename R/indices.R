@@ -16,8 +16,24 @@
 .r1jj    <- 16
 
 # ============================================================
+# indices locaux de init_space_par
+# ============================================================
+.matern_a   <- 1   # portée Matérn dans loglik_spatial
+.matern_nu  <- 2   # lissage Matérn dans loglik_spatial
+
+# ============================================================
 # Bornes sup et inf
 # ============================================================
+
+# Pour loglik_spatial
+.lower_spatial <- c(
+  1e-6,    # .matern_a  : portée > 0 (1/taille domaine)
+  0.25     # .matern_nu : lissage >= 0.25 Viens de Denis a rechecker
+)
+.upper_spatial <- c(
+  Inf,     # .matern_a  : pas de borne supérieure
+  3        # .matern_nu : lissage <= 3
+)
 .lower <- c(
   1e-6,    # a > 0
   1e-6,    # 0 < b <= 1
@@ -59,6 +75,11 @@
 # ============================================================
 # Valeurs initiales
 # ============================================================
+.init_spatial <- c(
+  1,       # .matern_a  : valeur initiale portée
+  1      # .matern_nu : valeur initiale lissage
+)
+
 .init <- c(
   0.5,     # a = 1 
   0.5,   # b = 0.5 (milieu de (0,1])
@@ -69,8 +90,8 @@
   0.1,   # Aj
   1,     # aii (depuis par_s)
   1,     # ajj (depuis par_s)
-  1.1,   # nuii (depuis par_s)
-  1.1,   # nujj (depuis par_s)
+  1,   # nuii (depuis par_s)
+  1,   # nujj (depuis par_s)
   0.9, # rho1ij self-pair
   1,     # r2ii
   1,     # r2jj
