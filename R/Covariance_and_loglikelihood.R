@@ -483,10 +483,10 @@ loglik_spatial <- function(par, data, h, uh, v) {
     v2 <- v2[dz]
 
     # Identify scenarios based on zero and non-zero observations and compute respective components.
-    id1 <- (v1 == 0) & (!v2 == 0)
-    id2 <- (!v1 == 0) & (v2 == 0)
-    id4 <- (!v1 == 0) & (!v2 == 0)
-    id3 <- (v1 == 0) & (v2 == 0)
+    id1 <- (v1 == 0) & (!v2 == 0) # Z(s1,t) ≤ T  et Z(s2,t) > T
+    id2 <- (!v1 == 0) & (v2 == 0) # Z(s1,t) > T  et Z(s2,t) ≤ T
+    id4 <- (!v1 == 0) & (!v2 == 0)  # Z(s1,t) > T  et Z(s2,t) > T
+    id3 <- (v1 == 0) & (v2 == 0) # Z(s1,t) ≤ T  et Z(s2,t) ≤ T
 
     # Aggregate log-likelihood components considering the identified scenarios.
     if (!length(which(id4 == T)) == 0) {
@@ -496,7 +496,7 @@ loglik_spatial <- function(par, data, h, uh, v) {
     } else if (!length(which(id1 == T)) == 0) {
       l1 <- sum(log(pnorm((-cij[id1] * v2[id1]) / sqrt(delta[id1]))))
     } else if (!length(which(id3 == T)) == 0) {
-      l3 <- sum(pbinorm(uh[id3, 7], uh[id3, 8], var1 = 1, var2 = 1, cov12 = cij[id3]))
+      l3 <- sum(log(pbinorm(uh[id3, 7], uh[id3, 8], var1 = 1, var2 = 1, cov12 = cij[id3])))
     }
 
     # Return the aggregated negative log-likelihood, adjusting for errors or infinite values.
