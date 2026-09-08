@@ -14,6 +14,7 @@
 .r2jj    <- 14  # décroissance exp. spatiotemporelle variable j
 .r1ii    <- 15  # décroissance exp. temporelle variable i
 .r1jj    <- 16
+.rho2ij  <- 17
 
 # ============================================================
 # indices locaux de init_space_par
@@ -50,7 +51,8 @@
   1e-6,    # r2ii > 0
   1e-6,    # r2jj > 0
   1e-6,    # r1ii > 0
-  1e-6     # r1jj > 0
+  1e-6,    # r1jj > 0
+  -Inf      # rho2ij
 )
 
 .upper <- c(
@@ -59,17 +61,18 @@
   1,          # c <= 1
   Inf,        # d
   1,          # e <= 1
-  1 - 1e-6,  # Ai < 1
-  1 - 1e-6,  # Aj < 1
+  1 - 1e-6,   # Ai < 1
+  1 - 1e-6,   # Aj < 1
   Inf,        # aii (max = 1/taille pixel) A rechecker
   Inf,        # ajj
   3,          # nuii <= 3 (suffisant physiquement)
   3,          # nujj <= 3
-  1 - 1e-6,  # rho1ij <= 1 (self et cross)
+  1 - 1e-6,   # rho1ij <= 1 (self et cross)
   Inf,        # r2ii
   Inf,        # r2jj
   Inf,        # r1ii
-  Inf         # r1jj
+  Inf,        # r1jj
+  Inf         # rho2ij
 )
 
 # ============================================================
@@ -96,7 +99,8 @@
   1,     # r2ii
   1,     # r2jj
   1,     # r1ii
-  1      # r1jj
+  1,     # r1jj
+  1      #rho2ij
 )
 
 #' Check parameters validities
