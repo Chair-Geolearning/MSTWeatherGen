@@ -255,7 +255,7 @@ optimize_spatial_parameters <- function(par_all, data, names, Vi, uh, cr, max_it
     paste(pairs[1:length(names)], "aii",  sep=":"),
     paste(pairs[1:length(names)], "nuii", sep=":")
   )
-  
+
   n_aii  <- length(names)
   n_nuii <- length(names)
   
@@ -390,7 +390,7 @@ optimize_temporal_parameters <- function(par_all, data, names, Vi, uh, cr, max_i
     paste(names, "r2ii",   sep=":"),
     paste(pairs, "rho1ij", sep=":")
   )
-  
+
   n_r1ii   <- length(names)
   n_r2ii   <- length(names)
   n_rho1ij <- length(pairs)

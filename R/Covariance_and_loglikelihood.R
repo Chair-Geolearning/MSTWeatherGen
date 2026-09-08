@@ -119,7 +119,7 @@ create_df_param <- function(par, names) {
   J <- length(pairs)
   u <- data.frame(v1 = ep$v1, v2 = ep$v2, stringsAsFactors = FALSE)
 
-  # For Parameters order see indices.R to keep the right order
+  # For Parameters order see parameters.R to keep the right order
   # Assign common temporal parameters to all pairs
   u$a <- par["a"]
   u$b <- par["b"]
@@ -309,7 +309,7 @@ loglik <- function(par, parms, par_all, data, names, Vi, h, u, uh, ep, cr) {
   rho2 <- try(compute_rho2(parm, names, cr), silent = T)
   # A rechecker
   be   <- try(chol(rho2), silent = TRUE)
-  
+
   if (!is.character(be)) {
     
     parmm <- lapply(1:nrow(Vi), function(v) {
@@ -318,14 +318,15 @@ loglik <- function(par, parms, par_all, data, names, Vi, h, u, uh, ep, cr) {
     })
     u <- uh[, 1]
     h <- uh[, 2]
-    
+
     ncores <- getCores()
     if (.Platform$OS.type == "windows") {
       ll <- lapply(1:nrow(Vi), function(v) {
         l1 <- l2 <- l3 <- l4 <- 0
         par <- parmm[[v]]
+        if( !check_parameters_validity(par, parms) ){
         # A rajouter les cas ou ca peut etre egale a 0 au detail genre nuii qui vaut 0.5. A rechecker le par feu sur rho1ij
-        if (any(par[c(.a:.nujj, .r2ii:.r1jj)] < 0) | any(par[c(.Ai:.Aj)] > 1) | abs(par[.rho1ij]) > 1+ 1e-9) {
+        #if (any(par[c(.a:.nujj, .r2ii:.r1jj)] < 0) | any(par[c(.Ai:.Aj)] > 1) | abs(par[.rho1ij]) > 1+ 1e-9) {
           return(1e20)                                          # ← fini pour L-BFGS-B
         } else {
           cij <- Gneiting(h = h, u = u, par = par, rho2ij = rho2[Vi[v, 1], Vi[v, 2]])
@@ -373,7 +374,8 @@ loglik <- function(par, parms, par_all, data, names, Vi, h, u, uh, ep, cr) {
       ll <- parallel::mclapply(1:nrow(Vi), function(v) {
         l1 <- l2 <- l3 <- l4 <- 0
         par <- parmm[[v]]
-        if (any(par[c(.a:.nujj, .r2ii:.r1jj)] < 1e-6) | any(par[c(.Ai:.Aj)] > 1+ 1e-9) | abs(par[.rho1ij]) > 1 + 1e-9) {
+        if( !check_parameters_validity(par, parms) ){
+        #if (any(par[c(.a:.nujj, .r2ii:.r1jj)] < 1e-6) | any(par[c(.Ai:.Aj)] > 1+ 1e-9) | abs(par[.rho1ij]) > 1 + 1e-9) {
           return(1e20)
         } else {
           cij <- Gneiting(h = h, u = u, par = par, rho2ij = rho2[Vi[v, 1], Vi[v, 2]])

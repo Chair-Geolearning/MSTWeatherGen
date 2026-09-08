@@ -98,3 +98,26 @@
   1,     # r1ii
   1      # r1jj
 )
+
+#' Check parameters validities
+#' @param parameters_values a vector of parameters ordered as in parameters.R
+#' @param parameters_id a vector of parameters to check
+#' @description
+#' Check specific parameters `parameters_id` in a vector of parameters values 
+#' `parameters_values` ordered as in parameters.R indices.
+#' @return TRUE if all parameters are in theirs boundatries, otherwise FALSE
+check_parameters_validity <- function(parameters_values, parameters_id){
+
+  # get variable name in parameters.R (ex: .a)
+  parameters_name <- unique(paste0(".",sub("^[^:]*:", "", parameters_id)))
+  # check each parameters is under boundaries
+  validities <- sapply(parameters_name, function(p){
+    #print(parameters_values[get(p)])
+    param_id <- get(p)
+    return(.lower[param_id] <= parameters_values[param_id]
+        && parameters_values[param_id] <= .upper[param_id] )
+  })
+  
+  # return FALSE if any is FALSE
+  return(all(validities))
+}
