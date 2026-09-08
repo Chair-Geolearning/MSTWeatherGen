@@ -292,7 +292,7 @@ extract_rho1 <- function(parm, names) {
 #' @param cr Initial correlation matrix across variables.
 #  rho2: Precomputed rho2 cross-correlation matrix for all pairs.
 #'
-#' @return Total log-likelihood value for the observed data given the current model parameters.
+#' @return Negatif total log-likelihood value for the observed data given the current model parameters.
 #'
 #' @importFrom VGAM pbinorm
 #' @importFrom parallel mclapply
@@ -311,7 +311,7 @@ loglik <- function(par, parms, par_all, data, names, Vi, h, u, uh, ep, cr) {
   be   <- try(chol(rho2), silent = TRUE)
 
   if (!is.character(be)) {
-    
+
     parmm <- lapply(1:nrow(Vi), function(v) {
       as.numeric(parm[(parm$v1 == Vi[v, 1] & parm$v2 == Vi[v, 2]) |
                         (parm$v1 == Vi[v, 2] & parm$v2 == Vi[v, 1]), ][, -c(1, 2)])
@@ -444,7 +444,7 @@ loglik <- function(par, parms, par_all, data, names, Vi, h, u, uh, ep, cr) {
 #' @param uh Matrix specifying indices for pairing spatial observations for which the log-likelihood is calculated.
 #' @param v Index of the variable within `data` for which the log-likelihood is computed.
 #'
-#' @return Log-likelihood value for the spatial data under the Matérn covariance model.
+#' @return negatif Log-likelihood value for the spatial data under the Matérn covariance model.
 #'
 #' @importFrom VGAM pbinorm
 #' @importFrom stats rnorm pnorm

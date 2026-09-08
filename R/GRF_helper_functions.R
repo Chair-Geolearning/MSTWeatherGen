@@ -391,6 +391,9 @@ optimize_temporal_parameters <- function(par_all, data, names, Vi, uh, cr, max_i
     paste(pairs, "rho1ij", sep=":")
   )
 
+  print("temporal")
+  print(parms)
+
   n_r1ii   <- length(names)
   n_r2ii   <- length(names)
   n_rho1ij <- length(pairs)

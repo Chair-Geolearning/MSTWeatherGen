@@ -40,7 +40,12 @@ Suggests:
     rmarkdown,
     maps,
     testthat (>= 3.0.0),
-    pkgnet
+    pkgnet,
+    MASS,
+    gridExtra,
+    invgamma,
+    patchwork,
+    parallel
 Config/testthat/edition: 3
 VignetteBuilder: knitr, rmarkdown, maps
 Encoding: UTF-8

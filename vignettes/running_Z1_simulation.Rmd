@@ -18,7 +18,12 @@ knitr::opts_chunk$set(
 )
 ```
 
+> Le plan : Introduction, generation de Z1, lancer l'estimation du modèle, comparer les paramètres et valeurs retourné. 
+
 ## Introduction
+
+> expliquer ce qu'on veut faire
+> warning utilisation de fonction interne au package + temps d'execution
 
 This vignette shows how to load a simulated three-dimensional array named
 `Z1`, inspect its structure, plot one of its variables through time, and fit a
@@ -32,29 +37,33 @@ The expected organization of `Z1` is:
 Here the dimensions are like the original vignette 1,461 days, 108
 spatial locations, and 3 variables.
 
-## Load MSTWeatherGen
+## Generate Z1
+
+> How to...
+
+## Run estimation
+
+> Howo to...
 
 ```{r load-package, message=FALSE, warning=FALSE}
 library(MSTWeatherGen)
 ```
 
-## Part 1 :  Read the Z1 simulation data
+## Compart parameters and estimations values
 
-The code below searches for `Z1_V2.rds` from either the package source tree or
-the local project. For an installed package, the recommended location is
-`inst/extdata/Z1_V2.rds`.
+> comment on compare les résultats
+
+### Part 1 :  Read the Z1 simulation data
 
 ```{r eval=FALSE}
-fichier_Z1 <- "/home/aboualam/MSTWeatherGen/data/Z1_v3.rds"
-Z1 <- readRDS(fichier_Z1)
+data("Z1", package = "MSTWeatherGen")
 
 if (length(dim(Z1)) != 3L) {
   stop("Z1 must be a three-dimensional array: time, location, variable.")
 }
-# Meme dimension que data utilise dans la vignette originale.
 ```
 
-## Part 2 : Define dates, coordinates, and variable names
+### Part 2 : Define dates, coordinates, and variable names
 
 ```{r eval=FALSE}
 data("coordinates", package = "MSTWeatherGen")
@@ -67,7 +76,7 @@ dimnames(Z1)[[3]] <- names
 ```
 
 
-## Plot one variable through time A reverifier et pas obligatoire dans la vignette. Signal gaussien observe.
+### Plot one variable through time A reverifier et pas obligatoire dans la vignette. Signal gaussien observe.
 
 The following function plots one variable at one spatial location. The
 defaults display the third variable (`Temp_max`) at the first location.

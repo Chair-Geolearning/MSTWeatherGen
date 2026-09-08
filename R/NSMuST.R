@@ -1,12 +1,3 @@
-library(MASS)
-library(ggplot2)
-library(dplyr)
-library(gridExtra)
-library(invgamma)
-library(patchwork)
-library(parallel)
-
-
 ############################ Main function #########################
 
 SimulateParsimNS = function(L, ns, nt, p, params, spatial_coordinates, SpectralDensity, 
