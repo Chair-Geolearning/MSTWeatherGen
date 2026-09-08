@@ -460,14 +460,21 @@ loglik_spatial <- function(par, data, h, uh, v) {
 
     # Compute covariances using the Matérn function based on spatial distances 'h'.
     cij <- Matern(h, r = par[.matern_a] , v = par[.matern_nu])
-    delta <- 1 - cij^2
+    # cij peut valoir 1 et donc delta valoir 0 et donc log(0) = probleme et c'est atteint surtout quand h 
+    # est nul ou tres petit 
+    # sauf que le parfeu ensuite est fait avec la ligne dz <- !(h == 0). Mais il faut mettre un garde fou car 
+    # h petit et arrondi on peut atteindre le cas 1 donc il faut un parfeu
 
+    delta <- pmax(1 - cij^2, 1e-6)
+    
     # Extract paired observations for variable 'v' based on spatial-temporal indices in 'uh'.
     v1 <- data[, , v]
-    v1 <- v1[cbind(uh[, 3], uh[, 5])]
+    v1 <- v1[cbind(uh[, 3], uh[, 5])] # uh[,3] indice temps du premier élément t1,uh[,5]  indice site du premier élément s1
     v2 <- data[, , v]
-    v2 <- v2[cbind(uh[, 4], uh[, 6])]
-
+    v2 <- v2[cbind(uh[, 4], uh[, 6])] # uh[,4] indice temps du deuxième élément t2, uh[,6] indice site du deuxième élément s2
+    # mais comme on est a lag temporel nul on a toujours t1=t2
+    # EXEMPLE ICI on a v1 ou v2 qui est → observation Z(site=68, temps=6) pour variable v. Car 
+    
     # Exclude stationary points to focus on spatial variation.
     dz <- !(h == 0)
     cij <- cij[dz]
