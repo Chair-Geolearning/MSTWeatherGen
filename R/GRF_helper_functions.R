@@ -461,11 +461,19 @@ estimation_gf <- function(data, wt_id, max_it, dates, tmax, names, par_all = NUL
   Nv <- dim(data)[3] # Number of variables
 
   # Generate spatial, temporal, and variable index pairs
+  # pair by row , cols spatial indice (s1,s2)
   Si <- generate_spatial_index_pairs(coordinates, n1 = n1, n2 = n2)
+  # pair by row with time lag (t1,t2,u)
   Ti <- generate_temporal_index_pairs(wt_id, dates, tmax)
+  # pair of variable by row (V1,V2)
   Vi <- generate_variable_index_pairs(names)
 
   # Preprocess data to adjust for thresholds and compute distances
+  # a data.frame with u, h and uh
+  # length (nrow) -> nrow(Ti) x nrow(Si) -> each times lag by each spatial indice
+  # u : time lag
+  # h : distance between 2 coordinates
+  # uh (u, h, Ti, Tj, Sk, Sl) T and S are indices in dates ans coordinates
   preprocessed_data <- preprocess_data(Ti, Si, coordinates)
   uh <- preprocessed_data$uh
   uh <- cbind(uh, threshold_precip[uh[, 5]], threshold_precip[uh[, 6]])
@@ -477,6 +485,7 @@ estimation_gf <- function(data, wt_id, max_it, dates, tmax, names, par_all = NUL
   par_s <- do.call(cbind, par_s)
 
   # Construct parameter matrix for covariance model
+  # ep == Vi
   ep <- generate_variable_index_pairs(names)
   pairs <- paste(ep[, 1], ep[, 2], sep = "-")
 
@@ -618,7 +627,6 @@ generate_spatial_index_pairs <- function(coordinates, n1, n2) {
 #' represent the indices of the paired time points, and 'u' represents the time lag between them.
 #'
 #' @keywords internal
-
 generate_temporal_index_pairs <- function(wt_id, dates, tmax) {
   Ti <- lapply(0:tmax, function(i) {
     Ti <- cbind(wt_id - i, wt_id, i)
