@@ -391,8 +391,8 @@ optimize_temporal_parameters <- function(par_all, data, names, Vi, uh, cr, max_i
     paste(pairs, "rho1ij", sep=":")
   )
 
-  print("temporal")
-  print(parms)
+  # print("temporal")
+  # print(parms)
 
   n_r1ii   <- length(names)
   n_r2ii   <- length(names)
@@ -471,7 +471,6 @@ estimation_gf <- function(data, wt_id, max_it, dates, tmax, names, par_all = NUL
   uh <- cbind(uh, threshold_precip[uh[, 5]], threshold_precip[uh[, 6]])
   u <- preprocessed_data$u
   h <- preprocessed_data$h
-
 
   # Initialize spatial parameters
   par_s <- init_space_par(data = data, names = names, h = h[u == 0], uh = uh[u == 0, ], max_it = max_it)
