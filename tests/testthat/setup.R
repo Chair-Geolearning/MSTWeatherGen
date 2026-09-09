@@ -10,9 +10,9 @@ result_test <- readRDS(test_path("saved_results/estimation_gf_results_v1.rds"))
 
 par_all <- readRDS(testthat::test_path("saved_results/par_all.rds"))
 Vi <- readRDS(testthat::test_path("saved_results/Vi.rds"))
-uh <- readRDS(testthat::test_path("saved_results/uh.rds"))
+uh <- readRDS(testthat::test_path("saved_results/uh1.rds"))
 cr <- readRDS(testthat::test_path("saved_results/cr.rds"))
 ep <- readRDS(testthat::test_path("saved_results/ep.rds"))
-h <- readRDS(testthat::test_path("saved_results/h.rds"))
+h <- readRDS(testthat::test_path("saved_results/h1.rds"))
 
 wt_cluster <- readRDS(testthat::test_path("saved_results/wt_cluster.rds"))
