@@ -488,8 +488,8 @@ loglik_spatial <- function(par, data, h, uh, v) {
     # Identify scenarios based on zero and non-zero observations and compute respective components.
     id1 <- (v1 == 0) & (!v2 == 0) & (v == "Precipitation")# Z(s1,t) ≤ T  et Z(s2,t) > T
     id2 <- (!v1 == 0) & (v2 == 0) & (v == "Precipitation")# Z(s1,t) > T  et Z(s2,t) ≤ T
-    id4 <- (!v1 == 0) & (!v2 == 0) & (v == "Precipitation") # Z(s1,t) > T  et Z(s2,t) > T
-    id3 <- (v1 == 0) & (v2 == 0) # Z(s1,t) ≤ T  et Z(s2,t) ≤ T
+    id3 <- (v1 == 0) & (v2 == 0) & (v == "Precipitation") # Z(s1,t) ≤ T  et Z(s2,t) ≤ T
+    id4 <- (!v1 == 0) & (!v2 == 0)  # Z(s1,t) > T  et Z(s2,t) > T
 
     
     # Aggregate log-likelihood components considering the identified scenarios.
