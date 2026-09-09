@@ -14,5 +14,6 @@ uh <- readRDS(testthat::test_path("saved_results/uh1.rds"))
 cr <- readRDS(testthat::test_path("saved_results/cr.rds"))
 ep <- readRDS(testthat::test_path("saved_results/ep.rds"))
 h <- readRDS(testthat::test_path("saved_results/h1.rds"))
+u <- readRDS(testthat::test_path("saved_results/u.rds"))
 
 wt_cluster <- readRDS(testthat::test_path("saved_results/wt_cluster.rds"))
