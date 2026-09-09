@@ -341,12 +341,13 @@ loglik <- function(par, parms, par_all, data, names, Vi, h, u, uh, ep, cr) {
           delta <- delta[dz]
           v1    <- v1[dz]
           v2    <- v2[dz]
-          uh_dz <- uh[dz, ]                                    #TODO ← uh_dz au lieu de uh
+          uh <- uh[dz, ] #TODO ← uh_dz au lieu de uh
           
-          id1 <- (v1 == 0) & (!v2 == 0) & (Vi[v, 1] == "Precipitation")
-          id2 <- (!v1 == 0) & (v2 == 0) & (Vi[v, 2] == "Precipitation")
-          id4 <- (!v1 == 0) & (!v2 == 0)
-          id3 <- (v1 == 0) & (v2 == 0) & (Vi[v, 1] == "Precipitation") & (Vi[v, 2] == "Precipitation")
+          id1 <- (v1 == 0) & (!v2 == 0) & (Vi[v, 1] == "Precipitation") # Z(s1,t) ≤ T1 et Z(s2,t) > T2
+          id2 <- (!v1 == 0) & (v2 == 0) & (Vi[v, 2] == "Precipitation") # Z(s1,t) > T1 et Z(s2,t) ≤ T2
+          id4 <- (!v1 == 0) & (!v2 == 0)                                # Z(s1,t) > T1 et Z(s2,t) > T2
+          id3 <- (v1 == 0) & (v2 == 0) & (Vi[v, 1] == "Precipitation") & (Vi[v, 2] == "Precipitation") # Z(s1,t) ≤ T1 et Z(s2,t) ≤ T2
+          
           #TODO ← A checker pourquoi on regarde 8 et 7
           uh_dz[, 8][which(uh_dz[, 8] == -Inf)] <- -2.282295
           uh_dz[, 7][which(uh_dz[, 7] == -Inf)] <- -2.282295
@@ -359,7 +360,7 @@ loglik <- function(par, parms, par_all, data, names, Vi, h, u, uh, ep, cr) {
           }
           if (!length(which(id3 == TRUE)) == 0) {
             rho_bound <- pmin(pmax(cij[id3], -0.99999999), 0.99999999)
-            l3 <- sum(log(pbinorm(uh_dz[id3, 7], uh_dz[id3, 8], var1 = 1, var2 = 1, cov12 = rho_bound)), na.rm = TRUE)
+            l3 <- sum(log(pbinorm(uh_dz[id3, 7], uh[id3, 8], var1 = 1, var2 = 1, cov12 = rho_bound)), na.rm = TRUE)
           }
           if (!length(which(id4 == TRUE)) == 0) {
             l4 <- sum((-1 / 2) * (log(delta[id4]) + (v1[id4]^2 - (2 * cij[id4] * v1[id4] * v2[id4]) + v2[id4]^2) / delta[id4]), na.rm = TRUE)
@@ -380,22 +381,22 @@ loglik <- function(par, parms, par_all, data, names, Vi, h, u, uh, ep, cr) {
         } else {
           cij <- Gneiting(h = h, u = u, par = par, rho2ij = rho2[Vi[v, 1], Vi[v, 2]])
           cij   <- pmax(pmin(cij, 0.99), -0.99)     # ← borner cij
-          delta <- pmax(1 - cij^2, 0.01)                     # ← éviter delta=0
+          delta <- pmax(1 - cij^2, 0.01)                     # ← éviter delta=0 double par feu
           v1 <- data[, , Vi[v, 1]]
           v1 <- v1[cbind(uh[, 3], uh[, 5])]
           v2 <- data[, , Vi[v, 2]]
           v2 <- v2[cbind(uh[, 4], uh[, 6])]
-          dz <- !(h == 0 & u == 0 & Vi[v, 1] == Vi[v, 2])
+          dz <- !(h == 0 & u == 0 & Vi[v, 1] == Vi[v, 2])  #(même site) et (même temps) et (même variable) 
           cij   <- cij[dz]
           delta <- delta[dz]
           v1    <- v1[dz]
           v2    <- v2[dz]
-          uh_dz <- uh[dz, ]                                    # ← uh_dz au lieu de uh
+          uh_dz <- uh[dz, ]  # uh_dz au lieu de uh
           
-          id1 <- (v1 == 0) & (!v2 == 0) & (Vi[v, 1] == "Precipitation")
-          id2 <- (!v1 == 0) & (v2 == 0) & (Vi[v, 2] == "Precipitation")
-          id4 <- (!v1 == 0) & (!v2 == 0)
-          id3 <- (v1 == 0) & (v2 == 0) & (Vi[v, 1] == "Precipitation") & (Vi[v, 2] == "Precipitation")
+          id1 <- (v1 == 0) & (!v2 == 0) & (Vi[v, 1] == "Precipitation") # Z(s1,t) ≤ T1 et Z(s2,t) > T2
+          id2 <- (!v1 == 0) & (v2 == 0) & (Vi[v, 2] == "Precipitation") # Z(s1,t) > T1 et Z(s2,t) ≤ T2
+          id4 <- (!v1 == 0) & (!v2 == 0)                                # Z(s1,t) > T1 et Z(s2,t) > T2
+          id3 <- (v1 == 0) & (v2 == 0) & (Vi[v, 1] == "Precipitation") & (Vi[v, 2] == "Precipitation") # Z(s1,t) ≤ T1 et Z(s2,t) ≤ T2
           uh_dz[, 8][which(uh_dz[, 8] == -Inf)] <- -2.282295
           uh_dz[, 7][which(uh_dz[, 7] == -Inf)] <- -2.282295
           
@@ -476,7 +477,7 @@ loglik_spatial <- function(par, data, h, uh, v) {
     # EXEMPLE ICI on a v1 ou v2 qui est → observation Z(site=68, temps=6) pour variable v. Car 
     
     # Exclude stationary points to focus on spatial variation.
-    dz <- !(h == 0)
+    dz <- !(h == 0) #(même site)
     cij <- cij[dz]
     delta <- delta[dz]
     v1 <- v1[dz]
@@ -485,9 +486,9 @@ loglik_spatial <- function(par, data, h, uh, v) {
     uh_dz <- uh[dz, ]
     
     # Identify scenarios based on zero and non-zero observations and compute respective components.
-    id1 <- (v1 == 0) & (!v2 == 0) # Z(s1,t) ≤ T  et Z(s2,t) > T
-    id2 <- (!v1 == 0) & (v2 == 0) # Z(s1,t) > T  et Z(s2,t) ≤ T
-    id4 <- (!v1 == 0) & (!v2 == 0)  # Z(s1,t) > T  et Z(s2,t) > T
+    id1 <- (v1 == 0) & (!v2 == 0) & (v == "Precipitation")# Z(s1,t) ≤ T  et Z(s2,t) > T
+    id2 <- (!v1 == 0) & (v2 == 0) & (v == "Precipitation")# Z(s1,t) > T  et Z(s2,t) ≤ T
+    id4 <- (!v1 == 0) & (!v2 == 0) & (v == "Precipitation") # Z(s1,t) > T  et Z(s2,t) > T
     id3 <- (v1 == 0) & (v2 == 0) # Z(s1,t) ≤ T  et Z(s2,t) ≤ T
 
     
