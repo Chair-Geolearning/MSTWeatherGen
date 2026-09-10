@@ -341,7 +341,7 @@ loglik <- function(par, parms, par_all, data, names, Vi, h, u, uh, ep, cr) {
           delta <- delta[dz]
           v1    <- v1[dz]
           v2    <- v2[dz]
-          uh <- uh[dz, ] #TODO ← uh_dz au lieu de uh
+          uh_dz <- uh[dz, ] 
           
           id1 <- (v1 == 0) & (!v2 == 0) & (Vi[v, 1] == "Precipitation") # Z(s1,t) ≤ T1 et Z(s2,t) > T2
           id2 <- (!v1 == 0) & (v2 == 0) & (Vi[v, 2] == "Precipitation") # Z(s1,t) > T1 et Z(s2,t) ≤ T2
@@ -391,7 +391,7 @@ loglik <- function(par, parms, par_all, data, names, Vi, h, u, uh, ep, cr) {
           delta <- delta[dz]
           v1    <- v1[dz]
           v2    <- v2[dz]
-          uh_dz <- uh[dz, ]  # uh_dz au lieu de uh
+          uh_dz <- uh[dz, ]  
           
           id1 <- (v1 == 0) & (!v2 == 0) & (Vi[v, 1] == "Precipitation") # Z(s1,t) ≤ T1 et Z(s2,t) > T2
           id2 <- (!v1 == 0) & (v2 == 0) & (Vi[v, 2] == "Precipitation") # Z(s1,t) > T1 et Z(s2,t) ≤ T2
