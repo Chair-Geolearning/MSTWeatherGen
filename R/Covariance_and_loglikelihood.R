@@ -485,7 +485,9 @@ loglik_spatial <- function(par, data, h, uh, v) {
     # On filtre uh sur dz aussi
     uh_dz <- uh[dz, ]
     
-    # Identify scenarios based on zero and non-zero observations and compute respective components.
+    # Identify scenarios based on zero and non-zero observations and compute respective components. 
+    # Parfeu precipitation en plus car theoriquement v1 et v2 ne vaudront zero que pour la precipitation qui a threshold ou on atteint zero
+    # On obtient jamais v1 ou v2 mais des nombres tres petits mais jamais zero en soit.
     id1 <- (v1 == 0) & (!v2 == 0) & (v == "Precipitation")# Z(s1,t) ≤ T  et Z(s2,t) > T
     id2 <- (!v1 == 0) & (v2 == 0) & (v == "Precipitation")# Z(s1,t) > T  et Z(s2,t) ≤ T
     id3 <- (v1 == 0) & (v2 == 0) & (v == "Precipitation") # Z(s1,t) ≤ T  et Z(s2,t) ≤ T
