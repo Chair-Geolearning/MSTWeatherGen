@@ -360,7 +360,7 @@ loglik <- function(par, parms, par_all, data, names, Vi, h, u, uh, ep, cr) {
           }
           if (!length(which(id3 == TRUE)) == 0) {
             rho_bound <- pmin(pmax(cij[id3], -0.99999999), 0.99999999)
-            l3 <- sum(log(pbinorm(uh_dz[id3, 7], uh[id3, 8], var1 = 1, var2 = 1, cov12 = rho_bound)), na.rm = TRUE)
+            l3 <- sum(log(pbinorm(uh_dz[id3, 7], uh_dz[id3, 8], var1 = 1, var2 = 1, cov12 = rho_bound)), na.rm = TRUE)
           }
           if (!length(which(id4 == TRUE)) == 0) {
             l4 <- sum((-1 / 2) * (log(delta[id4]) + (v1[id4]^2 - (2 * cij[id4] * v1[id4] * v2[id4]) + v2[id4]^2) / delta[id4]), na.rm = TRUE)
