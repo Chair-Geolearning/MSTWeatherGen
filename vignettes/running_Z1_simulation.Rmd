@@ -239,9 +239,10 @@ rho1_init <- data.frame(
 
 ## PArt 2 Lancer les simulations. 
 Ici weather type environ vaut 5, donc number_simulations <- 3 implique total_sim = 3*5= 15 simulation au total. Des fois K vaut 6 ou 4.
+Mieux car diversifie les resultats sur les weather types.
 
 ```{r eval=FALSE}
-number_simulations <- 3
+number_simulations <- 1
 
 # Stocker tous les résultats dans une liste nommée
 # Structure : estim_results[[k]][[i]] = résultat du run i pour le type de temps k
@@ -278,9 +279,8 @@ for (k in 1:K) {
 
 ```
 
-## Comparing parameters and estimations values
 
-> comment on compare les résultats
+## PArt 3 MOyenner les simulation resultas finaux dans mean_global
 
 ```{r eval=FALSE}
 # ============================================================
@@ -311,3 +311,7 @@ mean_global <- aggregate(parm_all[, cols_num],
                          by = list(v1=parm_all$v1, v2=parm_all$v2),
                          FUN = mean, na.rm = TRUE)
 ```
+
+## Comparing parameters and estimations values
+
+> comment on compare les résultats
