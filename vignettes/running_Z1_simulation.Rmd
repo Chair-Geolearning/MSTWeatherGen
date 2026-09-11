@@ -22,7 +22,19 @@ knitr::opts_chunk$set(
 
 ## Introduction
 
-> expliquer ce qu'on veut faire
+The goal of this vignette is to test the estimation phase of MSTWeatherGen and especially the function estimation_gf 
+in GRF_helper_function which is an internal function 
+Here is how to load it : MSTWeatherGen:::estimation_gf() when you are going to call it after in the vignette.
+So you need to load the package first.
+
+```{r load-package, message=FALSE, warning=FALSE}
+library(MSTWeatherGen)
+source(file.path("R", "NSMuST.R"))
+devtools::load_all()
+setCores(1)
+```
+
+
 > warning utilisation de fonction interne au package + temps d'execution
 
 This vignette shows how to load a simulated three-dimensional array named
@@ -37,23 +49,101 @@ The expected organization of `Z1` is:
 Here the dimensions are like the original vignette 1,461 days, 108
 spatial locations, and 3 variables.
 
+## How to generate Z1
+
 ## Generate Z1
+Not to be touched by the user, necessary functions and data.
+```{r , eval=FALSE}
+# --- Coordonnées spatiales : 108 sites du package ---
+data("coordinates", package = "MSTWeatherGen")
+spatial_coordinates <- as.matrix(coordinates[, c("longitude", "latitude")])
+ns <- nrow(spatial_coordinates)
 
-> How to...
+# --- Fonctions de covariance Matérn (une par variable) ---
+matern_fun1 <- function(t_val, s_coord) list(nu = nu[1], r = rs[1])
+matern_fun2 <- function(t_val, s_coord) list(nu = nu[2], r = rs[2])
+matern_fun3 <- function(t_val, s_coord) list(nu = nu[3], r = rs[3])
+SpectralPars <- list(matern_fun1, matern_fun2, matern_fun3)
 
-## Run estimation
+# --- Corrélation croisée entre variables ---
+Sigma_fun <- function(t_val, s_coord) {
+  M <- matrix(0.85, ncol = p, nrow = p)
+  diag(M) <- 1
+  M
+}
 
-> Howo to...
+# --- Anisotropie (cas isotrope) ---
+aniso_fun1 <- aniso_fun2 <- aniso_fun3 <- function(t_val, s_coord) diag(2)
+anisotropies <- list(aniso_fun1, aniso_fun2, aniso_fun3)
 
-```{r load-package, message=FALSE, warning=FALSE}
-library(MSTWeatherGen)
+
 ```
 
-## Compart parameters and estimations values
+This chunk is the one to be modified by the user to generate the Z1 Gaussian data with known parameters that will be put in the entry of the estimation_gf and then we are going to compare the parameters obtained with the estimation and see the difference
+```{r , eval=FALSE}
+# --- Nombre de variables a estimer ---
+p <- 3
 
-> comment on compare les résultats
+# --- Séquence temporelle : 2018-01-01 à 2021-12-31 (1461 jours) ici changer si necessaie ---
+temporal_resolution <- 1
+t_seq <- seq(1, 1461, by = temporal_resolution)
+dates_Z1 <- seq(as.Date("2018-01-01"), as.Date("2021-12-31"), by = "day")
 
-### Part 1 :  Read the Z1 simulation data
+# For the whole data range
+#t_seq <- seq(1, 1461, by = temporal_resolution)
+#dates_Z1 <- seq(as.Date("2011-01-01"), as.Date("2021-12-31"), by = "day")
+nt <- length(t_seq)
+
+# --- Parameters to change by the user ---
+L  <- 3000            # nombre d'ondes (méthode spectrale)
+rs <- c(0.5, 1, 2)     # range Matérn (a_i)
+nu <- c(0.5, 1, 2)     # smooth Matérn (nu_i)
+
+rho_1 <- matrix(0.85, nrow = p, ncol = p)
+diag(rho_1) <- 1
+
+params = list(
+  p = p,
+  nt = nt,
+  t = t_seq,
+  A = c(0.2,0.5,0.8), # paramètres A_i
+  a = 1/2,   # a=d
+  alpha = 1, # b=e, with c=f=1
+  delta = 0, # does not exist in MSTWeatherGen
+  b = 1, # non-separability - does not exist in MSTWeatherGen
+  anisotropies = anisotropies,
+  SpectralPars = SpectralPars,
+  Sigma_fun    = Sigma_fun,
+  rs = rs,
+  nu = nu,
+  rho_1 = rho_1
+)
+
+```
+
+
+
+```{r , eval=FALSE}
+source(file.path("R", "NSMuST.R"))
+#library(invgamma) Des fois necessaire pour generer Z1
+
+# Set seed if you want
+set.seed(14347)
+# Do not load if you do
+Z1 <- SimulateParsimNS(
+  L = L, ns = ns, nt = nt, p = p,
+  params = params,
+  spatial_coordinates = spatial_coordinates,
+  SpectralDensity = MSTWeatherGen:::MaternSpectralDensity3D,
+  parallelize = FALSE, batch_size = 100, n_cores = 4
+)
+#Takes 5 five minutes approx 
+```
+
+## Run estimation
+This is how to run estimation 
+
+### Part 1 :  Read the already saved Z1 simulation data otherwise change the path
 
 ```{r eval=FALSE}
 data("Z1", package = "MSTWeatherGen")
@@ -63,7 +153,7 @@ if (length(dim(Z1)) != 3L) {
 }
 ```
 
-### Part 2 : Define dates, coordinates, and variable names
+### Part 2 : Define dates, coordinates, and variable names to suit the data set
 
 ```{r eval=FALSE}
 data("coordinates", package = "MSTWeatherGen")
@@ -75,49 +165,12 @@ dimnames(Z1)[[3]] <- names
 
 ```
 
-
-### Plot one variable through time A reverifier et pas obligatoire dans la vignette. Signal gaussien observe.
-
-The following function plots one variable at one spatial location. The
-defaults display the third variable (`Temp_max`) at the first location.
-
-```{r eval=FALSE}
-plot_Z1_variable <- function(
-  Z,
-  dates,
-  variable = 3,
-  spatial_position = 1,
-  variable_names = dimnames(Z)[[3]]
-) {
-  variable_label <- if (is.null(variable_names)) {
-    paste("Variable", variable)
-  } else {
-    variable_names[variable]
-  }
-
-  plot(
-    dates,
-    Z[, spatial_position, variable],
-    type = "l",
-    lwd = 1,
-    col = "steelblue4",
-    xlab = "Date",
-    ylab = variable_label,
-    main = paste(variable_label, "- spatial location", spatial_position)
-  )
-}
-variable = 1
-# Plotter une variable i entre 1 et 3 par rapport au temps ici precipitation vs
-plot_Z1_variable(Z = Z1, dates = dates, variable = variable, spatial_position = 1)
-```
-
 ## Estimate and mean of many simulations
 
 After running one of the estimation chunks, inspect and save the resulting
 object as follows:
 
-## Preambule
-
+## PArt 1 Preambule function and parameters necesary for the estimation. Chunk 1
 
 ```{r eval=FALSE}
 seasons <- list(
@@ -184,7 +237,8 @@ rho1_init <- data.frame(
 
 ```
 
-## Lancer les simulations
+## PArt 2 Lancer les simulations. 
+Ici weather type environ vaut 5, donc number_simulations <- 3 implique total_sim = 3*5= 15 simulation au total. Des fois K vaut 6 ou 4.
 
 ```{r eval=FALSE}
 number_simulations <- 3
@@ -224,6 +278,9 @@ for (k in 1:K) {
 
 ```
 
+## Comparing parameters and estimations values
+
+> comment on compare les résultats
 
 ```{r eval=FALSE}
 # ============================================================

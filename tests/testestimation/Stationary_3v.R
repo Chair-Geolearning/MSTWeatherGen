@@ -1,5 +1,5 @@
 # 1. Chargement des fonctions ----
-source(file.path("R", "NSMuST_test3v.R"))
+source(file.path("R", "NSMuST.R"))
 
 # 2. Version originale spatio-temporelle ------------------
 # Define spatial and temporal resolutions
