@@ -312,6 +312,94 @@ mean_global <- aggregate(parm_all[, cols_num],
                          FUN = mean, na.rm = TRUE)
 ```
 
-## Comparing parameters and estimations values
 
-> comment on compare les résultats
+## PARt 4 Comparing parameters and estimations values
+
+On met les parametres initiaux dans un dataframe qui ressemble a mean global
+```{r eval=FALSE}
+# --- Table des vraies valeurs, structurée comme mean_global ---
+
+# Toutes les paires (v1, v2), diagonale + hors-diagonale, comme dans mean_global
+var_pairs <- expand.grid(v1 = names, v2 = names, stringsAsFactors = FALSE)
+var_pairs <- var_pairs[as.character(var_pairs$v1) <= as.character(var_pairs$v2), ]
+
+# Indices correspondants dans rs / nu / A (dans l'ordre de `names`)
+i <- match(var_pairs$v1, names)
+j <- match(var_pairs$v2, names)
+
+true_params <- data.frame(
+  v1     = var_pairs$v1,
+  v2     = var_pairs$v2,
+  a      = params$a,      
+  b      = params$alpha,   
+  c      = 1,              
+  d      = params$a,       
+  e      = params$alpha,   
+  Ai     = params$A[i],
+  Aj     = params$A[j],
+  aii    = params$rs[i],
+  ajj    = params$rs[j],
+  nuii   = params$nu[i],
+  nujj   = params$nu[j],
+  rho1ij = mapply(function(a, b) rho_1[a, b], i, j)
+)
+
+true_params #les params mis dans Z1 mais sous forme df
+#avoir les df cote a cote
+mean_global
+```
+
+## PARt 5 Plotting:
+
+Plotting first de Denis generique avec des params tres simple il montre que les variable de Z1 suivent une meme trajectoire mais c'est pas les params de Z1 generer mais des params simple a=rep(1,p),nu=rep(1,p),A=rep(0,p))
+
+```{r eval=FALSE}
+nb_points = 30 #Si plus risque d'etre illisible
+
+r_t = c(0.2,0.4,0.6)
+rho  = Sigma_fun(1,1)
+Z_T1 = TemporalSim(nt,r_t,rho,a=rep(1,p),nu=rep(1,p),A=rep(0,p))
+plot(1:nb_points, Z_T1[1:nb_points, 1], type = "l")
+points(1:nb_points, Z_T1[1:nb_points, 2], type = "l", lty = 2)
+points(1:nb_points, Z_T1[1:nb_points, 3], type = "l", lty = 3)
+```
+
+Plotting second de Denis mais avec Z1 parameters simule. Pb de Cholesky. Donc a rechecker.
+
+```{r eval=FALSE}
+# --- Récupérer les vrais paramètres par variable (diagonale v1 == v2) ---
+diag_true <- true_params[true_params$v1 == true_params$v2, ]
+diag_true <- diag_true[match(names, diag_true$v1), ]  
+
+rs_true <- diag_true$aii
+nu_true <- diag_true$nuii
+A_true  <- diag_true$Ai
+
+# --- Trajectoire temporelle avec les vrais paramètres ---
+Z_T2_true <- TemporalSim(nt, r_t, rho, a = rs_true, nu = nu_true, A = A_true)
+
+plot(1:nb_points, Z_T2_true[1:nb_points, 1], type = "l")
+points(1:nb_points, Z_T2_true[1:nb_points, 2], type = "l", lty = 2)
+points(1:nb_points, Z_T2_true[1:nb_points, 3], type = "l", lty = 3)
+```
+
+Plotting ici pour nos simulations, si je ne me trompe pas les courbes doivent suivre la meme tendance mais je sais pas comment interpreter car 
+v1 est cense etre precipitation chez nous avec bcp de 0. A rechecker
+```{r eval=FALSE}
+# --- Récupérer les paramètres estimés par variable (diagonale v1 == v2) ---
+diag_est <- mean_global[mean_global$v1 == mean_global$v2, ]
+diag_est <- diag_est[match(names, diag_est$v1), ]  # remettre dans l'ordre de `names`
+
+rs_est <- diag_est$aii
+nu_est <- diag_est$nuii
+A_est  <- diag_est$Ai
+
+# --- Trajectoire temporelle avec les paramètres estimés ---
+Z_T2_est <- TemporalSim(nt, r_t, rho, a = rs_est, nu = nu_est, A = A_est)
+
+plot(1:nb_points, Z_T2_est[1:nb_points, 1], type = "l")
+points(1:nb_points, Z_T2_est[1:nb_points, 2], type = "l", lty = 2)
+points(1:nb_points, Z_T2_est[1:nb_points, 3], type = "l", lty = 3)
+```
+
+
