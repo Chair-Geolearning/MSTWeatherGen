@@ -1,0 +1,405 @@
+---
+title: "Estimating MSTWeatherGen from a Z1 simulation"
+description: "Load, inspect, plot, and estimate a non-seasonal MSTWeatherGen model from Z1"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Estimating MSTWeatherGen from a Z1 simulation}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options:
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+> Le plan : Introduction, generation de Z1, lancer l'estimation du modèle, comparer les paramètres et valeurs retourné. 
+
+## Introduction
+
+The goal of this vignette is to test the estimation phase of MSTWeatherGen and especially the function estimation_gf 
+in GRF_helper_function which is an internal function 
+Here is how to load it : MSTWeatherGen:::estimation_gf() when you are going to call it after in the vignette.
+So you need to load the package first.
+
+```{r load-package, message=FALSE, warning=FALSE}
+library(MSTWeatherGen)
+source(file.path("R", "NSMuST.R"))
+devtools::load_all()
+setCores(1)
+```
+
+
+> warning utilisation de fonction interne au package + temps d'execution
+
+This vignette shows how to load a simulated three-dimensional array named
+`Z1`, inspect its structure, plot one of its variables through time, and fit a
+non-seasonal `MSTWeatherGen` model. It uses only the simulated `Z1` dataset and
+the 108 spatial coordinates supplied with the package. 
+
+The expected organization of `Z1` is:
+
+`Z1[time, spatial location, variable]`
+
+Here the dimensions are like the original vignette 1,461 days, 108
+spatial locations, and 3 variables.
+
+## How to generate Z1
+
+## Generate Z1
+Not to be touched by the user, necessary functions and data.
+```{r , eval=FALSE}
+# --- Coordonnées spatiales : 108 sites du package ---
+data("coordinates", package = "MSTWeatherGen")
+spatial_coordinates <- as.matrix(coordinates[, c("longitude", "latitude")])
+ns <- nrow(spatial_coordinates)
+
+# --- Fonctions de covariance Matérn (une par variable) ---
+matern_fun1 <- function(t_val, s_coord) list(nu = nu[1], r = rs[1])
+matern_fun2 <- function(t_val, s_coord) list(nu = nu[2], r = rs[2])
+matern_fun3 <- function(t_val, s_coord) list(nu = nu[3], r = rs[3])
+SpectralPars <- list(matern_fun1, matern_fun2, matern_fun3)
+
+# --- Corrélation croisée entre variables ---
+Sigma_fun <- function(t_val, s_coord) {
+  M <- matrix(0.85, ncol = p, nrow = p)
+  diag(M) <- 1
+  M
+}
+
+# --- Anisotropie (cas isotrope) ---
+aniso_fun1 <- aniso_fun2 <- aniso_fun3 <- function(t_val, s_coord) diag(2)
+anisotropies <- list(aniso_fun1, aniso_fun2, aniso_fun3)
+
+
+```
+
+This chunk is the one to be modified by the user to generate the Z1 Gaussian data with known parameters that will be put in the entry of the estimation_gf and then we are going to compare the parameters obtained with the estimation and see the difference
+```{r , eval=FALSE}
+# --- Nombre de variables a estimer ---
+p <- 3
+
+# --- Séquence temporelle : 2018-01-01 à 2021-12-31 (1461 jours) ici changer si necessaie ---
+temporal_resolution <- 1
+t_seq <- seq(1, 1461, by = temporal_resolution)
+dates_Z1 <- seq(as.Date("2018-01-01"), as.Date("2021-12-31"), by = "day")
+
+# For the whole data range
+#t_seq <- seq(1, 1461, by = temporal_resolution)
+#dates_Z1 <- seq(as.Date("2011-01-01"), as.Date("2021-12-31"), by = "day")
+nt <- length(t_seq)
+
+# --- Parameters to change by the user ---
+L  <- 3000            # nombre d'ondes (méthode spectrale)
+rs <- c(0.5, 1, 2)     # range Matérn (a_i)
+nu <- c(0.5, 1, 2)     # smooth Matérn (nu_i)
+
+rho_1 <- matrix(0.85, nrow = p, ncol = p)
+diag(rho_1) <- 1
+
+params = list(
+  p = p,
+  nt = nt,
+  t = t_seq,
+  A = c(0.2,0.5,0.8), # paramètres A_i
+  a = 1/2,   # a=d
+  alpha = 1, # b=e, with c=f=1
+  delta = 0, # does not exist in MSTWeatherGen
+  b = 1, # non-separability - does not exist in MSTWeatherGen
+  anisotropies = anisotropies,
+  SpectralPars = SpectralPars,
+  Sigma_fun    = Sigma_fun,
+  rs = rs,
+  nu = nu,
+  rho_1 = rho_1
+)
+
+```
+
+
+
+```{r , eval=FALSE}
+source(file.path("R", "NSMuST.R"))
+#library(invgamma) Des fois necessaire pour generer Z1
+
+# Set seed if you want
+set.seed(14347)
+# Do not load if you do
+Z1 <- SimulateParsimNS(
+  L = L, ns = ns, nt = nt, p = p,
+  params = params,
+  spatial_coordinates = spatial_coordinates,
+  SpectralDensity = MSTWeatherGen:::MaternSpectralDensity3D,
+  parallelize = FALSE, batch_size = 100, n_cores = 4
+)
+#Takes 5 five minutes approx 
+```
+
+## Run estimation
+This is how to run estimation 
+
+### Part 1 :  Read the already saved Z1 simulation data otherwise change the path
+
+```{r eval=FALSE}
+data("Z1", package = "MSTWeatherGen")
+
+if (length(dim(Z1)) != 3L) {
+  stop("Z1 must be a three-dimensional array: time, location, variable.")
+}
+```
+
+### Part 2 : Define dates, coordinates, and variable names to suit the data set
+
+```{r eval=FALSE}
+data("coordinates", package = "MSTWeatherGen")
+dates <- seq(as.Date("2018-01-01"), as.Date("2021-12-31"), by = "day")
+names <- c("Precipitation", "Wind", "Temp_max")
+coordinates_Z1 <- coordinates[, c("longitude", "latitude")]
+
+dimnames(Z1)[[3]] <- names
+
+```
+
+## Estimate and mean of many simulations
+
+After running one of the estimation chunks, inspect and save the resulting
+object as follows:
+
+## PArt 1 Preambule function and parameters necesary for the estimation. Chunk 1
+
+```{r eval=FALSE}
+seasons <- list(
+  s1 = list(min_day = 1, max_day = 29, min_month = 12, max_month = 2),
+  s2 = list(min_day = 1, max_day = 31, min_month = 3, max_month = 5),
+  s3 = list(min_day = 1, max_day = 31, min_month = 6, max_month = 8),
+  s4 = list(min_day = 1, max_day = 30, min_month = 9, max_month = 11)
+)
+
+ # --- Paramètres ---
+n1     <- 3
+n2     <- 3
+tmax   <- 1
+max_it <- 100
+season <- seasons[["s1"]]
+
+# --- Filtrer les données pour la saison ---
+filtered <- filter_season_data(data, dates, season, names)
+data_s   <- filtered$data_filtered
+dates_s  <- filtered$dates_filtered
+rm(filtered)
+
+# --- Types de temps ---
+wt_obj <- weather_types(
+  data          = data_s,
+  variables     = names,
+  dates         = dates_s,
+  coordinates   = coordinates,
+  max_number_wt = 6,
+  return_plots  = FALSE
+)
+wt <- wt_obj$cluster
+K  <- length(unique(wt))
+
+lmbd             <- estimate_lambda_transformations(
+  data = data_s, wt = wt, names = names, coordinates = coordinates)
+threshold_precip <- lmbd$threshold_precip
+lmbd             <- lmbd$lambda_transformations
+data_s           <- transformations(
+  data = data_s, wt = wt, names = names, coordinates = coordinates, lmbd = lmbd)
+
+dst <- sapply(1:nrow(coordinates), function(i) {
+  sapply(1:nrow(coordinates), function(j) {
+    geosphere::distHaversine(coordinates[i,], coordinates[j,]) / 1000
+  })
+})
+
+cr <- sapply(names, function(v1) {
+  sapply(names, function(v2) {
+    mean(sapply(1:dim(data_s)[2], function(j)
+      cor(data_s[,j,v1], data_s[,j,v2], use="complete.obs")), na.rm=TRUE)
+  })
+})
+cr <- matrix(cr, nrow=length(names), ncol=length(names))
+colnames(cr) <- rownames(cr) <- names
+
+ep <- generate_variable_index_pairs(names)
+rho1_init <- data.frame(
+  v1  = ep[,1],
+  v2  = ep[,2],
+  cov = ifelse(ep[,1] == ep[,2], 1, 0.1),
+  stringsAsFactors = FALSE
+)
+
+```
+
+## PArt 2 Lancer les simulations. 
+Ici weather type environ vaut 5, donc number_simulations <- 3 implique total_sim = 3*5= 15 simulation au total. Des fois K vaut 6 ou 4.
+Mieux car diversifie les resultats sur les weather types.
+
+```{r eval=FALSE}
+number_simulations <- 1
+
+# Stocker tous les résultats dans une liste nommée
+# Structure : estim_results[[k]][[i]] = résultat du run i pour le type de temps k
+estim_results <- vector(mode="list", length=K)
+
+for (k in 1:K) {
+
+  wt_id <- which(wt == k)
+  wt_id <- wt_id[wt_id > tmax + 1]
+
+  estim_results[[k]] <- vector(mode="list", length=number_simulations)
+  names(estim_results[[k]]) <- paste0("run_", 1:number_simulations)
+
+  for (i in seq_len(number_simulations)) {
+    message(sprintf("  k=%d — Run %d/%d", k, i, number_simulations))
+    set.seed(14347 + i)
+
+    estim_results[[k]][[i]] <- estimation_gf(
+      data             = data_s,
+      wt_id            = wt_id,
+      max_it           = max_it,
+      dates            = dates_s,
+      tmax             = tmax,
+      names            = names,
+      coordinates      = coordinates,
+      n1               = n1,
+      n2               = n2,
+      rho1             = rho1_init,
+      cr               = cr,
+      threshold_precip = threshold_precip[[k]]
+    )
+  }
+}
+
+```
+
+
+## PArt 3 MOyenner les simulation resultas finaux dans mean_global
+
+```{r eval=FALSE}
+# ============================================================
+# PARTIE 3 — Moyennes des paramètres estimés
+# ============================================================
+
+cols_num <- c("a","b","c","d","e","Ai","Aj","aii","ajj",
+              "nuii","nujj","r1ii","r1jj","r2ii","r2jj",
+              "rho1ij","rho2ij")
+
+# Moyenne sur les runs pour chaque type de temps
+mean_by_wt <- lapply(1:K, function(k) {
+  if (is.null(estim_results[[k]])) return(NULL)
+  parm_all_runs <- do.call(rbind, lapply(estim_results[[k]], function(run) run$parm))
+  aggregate(parm_all_runs[, cols_num], 
+            by = list(v1=parm_all_runs$v1, v2=parm_all_runs$v2), 
+            FUN = mean, na.rm = TRUE)
+})
+names(mean_by_wt) <- paste0("wt_", 1:K)
+
+# Moyenne globale sur tous les types de temps et tous les runs
+parm_all <- do.call(rbind, lapply(1:K, function(k) {
+  if (is.null(estim_results[[k]])) return(NULL)
+  do.call(rbind, lapply(estim_results[[k]], function(run) run$parm))
+}))
+
+mean_global <- aggregate(parm_all[, cols_num],
+                         by = list(v1=parm_all$v1, v2=parm_all$v2),
+                         FUN = mean, na.rm = TRUE)
+```
+
+
+## PARt 4 Comparing parameters and estimations values
+
+On met les parametres initiaux dans un dataframe qui ressemble a mean global
+```{r eval=FALSE}
+# --- Table des vraies valeurs, structurée comme mean_global ---
+
+# Toutes les paires (v1, v2), diagonale + hors-diagonale, comme dans mean_global
+var_pairs <- expand.grid(v1 = names, v2 = names, stringsAsFactors = FALSE)
+var_pairs <- var_pairs[as.character(var_pairs$v1) <= as.character(var_pairs$v2), ]
+
+# Indices correspondants dans rs / nu / A (dans l'ordre de `names`)
+i <- match(var_pairs$v1, names)
+j <- match(var_pairs$v2, names)
+
+true_params <- data.frame(
+  v1     = var_pairs$v1,
+  v2     = var_pairs$v2,
+  a      = params$a,      
+  b      = params$alpha,   
+  c      = 1,              
+  d      = params$a,       
+  e      = params$alpha,   
+  Ai     = params$A[i],
+  Aj     = params$A[j],
+  aii    = params$rs[i],
+  ajj    = params$rs[j],
+  nuii   = params$nu[i],
+  nujj   = params$nu[j],
+  rho1ij = mapply(function(a, b) rho_1[a, b], i, j)
+)
+
+true_params #les params mis dans Z1 mais sous forme df
+#avoir les df cote a cote
+mean_global
+```
+
+## PARt 5 Plotting:
+
+Plotting first de Denis generique avec des params tres simple il montre que les variable de Z1 suivent une meme trajectoire mais c'est pas les params de Z1 generer mais des params simple a=rep(1,p),nu=rep(1,p),A=rep(0,p))
+
+```{r eval=FALSE}
+nb_points = 30 #Si plus risque d'etre illisible
+
+r_t = c(0.2,0.4,0.6)
+rho  = Sigma_fun(1,1)
+Z_T1 = TemporalSim(nt,r_t,rho,a=rep(1,p),nu=rep(1,p),A=rep(0,p))
+plot(1:nb_points, Z_T1[1:nb_points, 1], type = "l")
+points(1:nb_points, Z_T1[1:nb_points, 2], type = "l", lty = 2)
+points(1:nb_points, Z_T1[1:nb_points, 3], type = "l", lty = 3)
+```
+
+Plotting second de Denis mais avec Z1 parameters simule. Pb de Cholesky. Donc a rechecker.
+
+```{r eval=FALSE}
+# --- Récupérer les vrais paramètres par variable (diagonale v1 == v2) ---
+diag_true <- true_params[true_params$v1 == true_params$v2, ]
+diag_true <- diag_true[match(names, diag_true$v1), ]  
+
+rs_true <- diag_true$aii
+nu_true <- diag_true$nuii
+A_true  <- diag_true$Ai
+
+# --- Trajectoire temporelle avec les vrais paramètres ---
+Z_T2_true <- TemporalSim(nt, r_t, rho, a = rs_true, nu = nu_true, A = A_true)
+
+plot(1:nb_points, Z_T2_true[1:nb_points, 1], type = "l")
+points(1:nb_points, Z_T2_true[1:nb_points, 2], type = "l", lty = 2)
+points(1:nb_points, Z_T2_true[1:nb_points, 3], type = "l", lty = 3)
+```
+
+Plotting ici pour nos simulations, si je ne me trompe pas les courbes doivent suivre la meme tendance mais je sais pas comment interpreter car 
+v1 est cense etre precipitation chez nous avec bcp de 0. A rechecker
+```{r eval=FALSE}
+# --- Récupérer les paramètres estimés par variable (diagonale v1 == v2) ---
+diag_est <- mean_global[mean_global$v1 == mean_global$v2, ]
+diag_est <- diag_est[match(names, diag_est$v1), ]  # remettre dans l'ordre de `names`
+
+rs_est <- diag_est$aii
+nu_est <- diag_est$nuii
+A_est  <- diag_est$Ai
+
+# --- Trajectoire temporelle avec les paramètres estimés ---
+Z_T2_est <- TemporalSim(nt, r_t, rho, a = rs_est, nu = nu_est, A = A_est)
+
+plot(1:nb_points, Z_T2_est[1:nb_points, 1], type = "l")
+points(1:nb_points, Z_T2_est[1:nb_points, 2], type = "l", lty = 2)
+points(1:nb_points, Z_T2_est[1:nb_points, 3], type = "l", lty = 3)
+```
+
+
