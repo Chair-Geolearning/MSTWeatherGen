@@ -348,9 +348,9 @@ loglik <- function(par, parms, par_all, data, names, Vi, h, u, uh, ep, cr) {
           id4 <- (!v1 == 0) & (!v2 == 0)                                # Z(s1,t) > T1 et Z(s2,t) > T2
           id3 <- (v1 == 0) & (v2 == 0) & (Vi[v, 1] == "Precipitation") & (Vi[v, 2] == "Precipitation") # Z(s1,t) ≤ T1 et Z(s2,t) ≤ T2
           
-          #TODO ← A checker pourquoi on regarde 8 et 7
-          uh_dz[, 8][which(uh_dz[, 8] == -Inf)] <- -2.282295
-          uh_dz[, 7][which(uh_dz[, 7] == -Inf)] <- -2.282295
+          #threshold can't be -Inf (0.99 quantile -> -2.58)
+          uh_dz[, 8][which(uh_dz[, 8] == -Inf)] <- -2.58
+          uh_dz[, 7][which(uh_dz[, 7] == -Inf)] <- -2.58
           
           if (!length(which(id1 == TRUE)) == 0) {
             l1 <- sum(log(pnorm((uh_dz[id1, 7] - cij[id1] * v2[id1]) / sqrt(delta[id1]))), na.rm = TRUE)
@@ -397,8 +397,9 @@ loglik <- function(par, parms, par_all, data, names, Vi, h, u, uh, ep, cr) {
           id2 <- (!v1 == 0) & (v2 == 0) & (Vi[v, 2] == "Precipitation") # Z(s1,t) > T1 et Z(s2,t) ≤ T2
           id4 <- (!v1 == 0) & (!v2 == 0)                                # Z(s1,t) > T1 et Z(s2,t) > T2
           id3 <- (v1 == 0) & (v2 == 0) & (Vi[v, 1] == "Precipitation") & (Vi[v, 2] == "Precipitation") # Z(s1,t) ≤ T1 et Z(s2,t) ≤ T2
-          uh_dz[, 8][which(uh_dz[, 8] == -Inf)] <- -2.282295
-          uh_dz[, 7][which(uh_dz[, 7] == -Inf)] <- -2.282295
+          #Threshold can't be -Inf (0.99 quantile -> -2.58)
+          uh_dz[, 8][which(uh_dz[, 8] == -Inf)] <- -2.58
+          uh_dz[, 7][which(uh_dz[, 7] == -Inf)] <- -2.58
           
           if (!length(which(id1 == TRUE)) == 0) {
             l1 <- sum(log(pnorm((uh_dz[id1, 7] - cij[id1] * v2[id1]) / sqrt(delta[id1]))), na.rm = TRUE)
@@ -492,6 +493,9 @@ loglik_spatial <- function(par, data, h, uh, v) {
     id2 <- (!v1 == 0) & (v2 == 0) & (v == "Precipitation")# Z(s1,t) > T  et Z(s2,t) ≤ T
     id3 <- (v1 == 0) & (v2 == 0) & (v == "Precipitation") # Z(s1,t) ≤ T  et Z(s2,t) ≤ T
     id4 <- (!v1 == 0) & (!v2 == 0)  # Z(s1,t) > T  et Z(s2,t) > T
+    # threshold
+    uh_dz[, 8][which(uh_dz[, 8] == -Inf)] <- -2.58
+    uh_dz[, 7][which(uh_dz[, 7] == -Inf)] <- -2.58
 
     
     # Aggregate log-likelihood components considering the identified scenarios.

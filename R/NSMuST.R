@@ -441,7 +441,7 @@ pdfXi = function(x){
   # Returns:
   #   The value(s) of the inverse-gamma PDF at x (shape=1).
   
-  return(dinvgamma(x, shape = 1))
+  return(invgamma::dinvgamma(x, shape = 1))
 }
 
 
@@ -454,7 +454,7 @@ SimulateXi = function(n){
   # Returns:
   #   A numeric vector of length n sampled from the inverse-gamma distribution (shape=1).
   
-  return(rinvgamma(n, shape = 1))
+  return(invgamma::rinvgamma(n, shape = 1))
 }
 
 

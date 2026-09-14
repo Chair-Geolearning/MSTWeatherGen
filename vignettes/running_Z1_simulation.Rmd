@@ -23,36 +23,28 @@ knitr::opts_chunk$set(
 ## Introduction
 
 The goal of this vignette is to test the estimation phase of MSTWeatherGen and especially the function estimation_gf 
-in GRF_helper_function which is an internal function 
-Here is how to load it : MSTWeatherGen:::estimation_gf() when you are going to call it after in the vignette.
-So you need to load the package first.
+in GRF_helper_function which is an internal function.  
+Here is how to load the package internal function that is use.
 
 ```{r load-package, message=FALSE, warning=FALSE}
-library(MSTWeatherGen)
-source(file.path("R", "NSMuST.R"))
 devtools::load_all()
-setCores(1)
+# Set the number of cores to use
+cores_nb <- setCores(1)
 ```
 
+## Estimate from know parameters
 
-> warning utilisation de fonction interne au package + temps d'execution
-
-This vignette shows how to load a simulated three-dimensional array named
-`Z1`, inspect its structure, plot one of its variables through time, and fit a
-non-seasonal `MSTWeatherGen` model. It uses only the simulated `Z1` dataset and
-the 108 spatial coordinates supplied with the package. 
-
-The expected organization of `Z1` is:
-
+Here we shows how to create a simulated three-dimensional array named
+`Z1` that fit a non-seasonal `MSTWeatherGen` model estimation.  
+The expected organization of `Z1` is:  
 `Z1[time, spatial location, variable]`
 
-Here the dimensions are like the original vignette 1,461 days, 108
-spatial locations, and 3 variables.
+> Here the dimensions are like the original vignette 1,461 days, 108
+spatial locations, and 3 variables c("Precipitation", "Wind", "Temp_max").
 
-## How to generate Z1
+### Generate Z1
 
-## Generate Z1
-Not to be touched by the user, necessary functions and data.
+This part doesn't have to be executed. `Z1` is already available as a data by the package.  
 ```{r , eval=FALSE}
 # --- Coordonnées spatiales : 108 sites du package ---
 data("coordinates", package = "MSTWeatherGen")
@@ -85,19 +77,18 @@ This chunk is the one to be modified by the user to generate the Z1 Gaussian dat
 p <- 3
 
 # --- Séquence temporelle : 2018-01-01 à 2021-12-31 (1461 jours) ici changer si necessaie ---
-temporal_resolution <- 1
-t_seq <- seq(1, 1461, by = temporal_resolution)
-dates_Z1 <- seq(as.Date("2018-01-01"), as.Date("2021-12-31"), by = "day")
-
-# For the whole data range
-#t_seq <- seq(1, 1461, by = temporal_resolution)
+# the whole dates availables
 #dates_Z1 <- seq(as.Date("2011-01-01"), as.Date("2021-12-31"), by = "day")
-nt <- length(t_seq)
+# Part of the whole dates data
+dates_Z1 <- seq(as.Date("2018-01-01"), as.Date("2021-12-31"), by = "day")
+nt <- length(dates_Z1)
+temporal_resolution <- 1
+t_seq <- seq(1, nt, by = temporal_resolution)
 
 # --- Parameters to change by the user ---
-L  <- 3000            # nombre d'ondes (méthode spectrale)
-rs <- c(0.5, 1, 2)     # range Matérn (a_i)
-nu <- c(0.5, 1, 2)     # smooth Matérn (nu_i)
+L  <- 3000             # nombre d'ondes (méthode spectrale)
+rs <- c(0.5, 1, 2)     # range Matérn (a_ii)
+nu <- c(0.5, 1, 2)     # smooth Matérn (nu_ii)
 
 rho_1 <- matrix(0.85, nrow = p, ncol = p)
 diag(rho_1) <- 1
@@ -124,8 +115,7 @@ params = list(
 
 
 ```{r , eval=FALSE}
-source(file.path("R", "NSMuST.R"))
-#library(invgamma) Des fois necessaire pour generer Z1
+#library(invgamma) may be necessary
 
 # Set seed if you want
 set.seed(14347)
@@ -135,15 +125,15 @@ Z1 <- SimulateParsimNS(
   params = params,
   spatial_coordinates = spatial_coordinates,
   SpectralDensity = MSTWeatherGen:::MaternSpectralDensity3D,
-  parallelize = FALSE, batch_size = 100, n_cores = 4
+  parallelize = FALSE, batch_size = 100, n_cores = cores_nb
 )
-#Takes 5 five minutes approx 
+#Takes 5 five minutes to run
 ```
 
-## Run estimation
+### Run estimation  
 This is how to run estimation 
 
-### Part 1 :  Read the already saved Z1 simulation data otherwise change the path
+#### Part 1 : Read the already saved Z1 simulation data 
 
 ```{r eval=FALSE}
 data("Z1", package = "MSTWeatherGen")
@@ -153,11 +143,15 @@ if (length(dim(Z1)) != 3L) {
 }
 ```
 
-### Part 2 : Define dates, coordinates, and variable names to suit the data set
+#### Part 2 : Define dates, coordinates, and variable names to suit the data set
 
 ```{r eval=FALSE}
 data("coordinates", package = "MSTWeatherGen")
-dates <- seq(as.Date("2018-01-01"), as.Date("2021-12-31"), by = "day")
+dates <- seq(as.Date("2011-01-01"), as.Date("2021-12-31"), by = "day")
+dates_used <- seq(as.Date("2018-01-01"), as.Date("2021-12-31"), by = "day")
+index_dates <- dates_used %in% dates
+data <- data[index_dates,,]
+dates <- dates_used
 names <- c("Precipitation", "Wind", "Temp_max")
 coordinates_Z1 <- coordinates[, c("longitude", "latitude")]
 
@@ -165,7 +159,11 @@ dimnames(Z1)[[3]] <- names
 
 ```
 
-## Estimate and mean of many simulations
+#### Part 3 create parameters
+
+ <!-- estimation_gf <- function(data, wt_id, max_it, dates, tmax, names, par_all = NULL,
+                          coordinates, n1, n2, rho1, cr, threshold_precip)
+                           -->
 
 After running one of the estimation chunks, inspect and save the resulting
 object as follows:
@@ -173,31 +171,20 @@ object as follows:
 ## PArt 1 Preambule function and parameters necesary for the estimation. Chunk 1
 
 ```{r eval=FALSE}
-seasons <- list(
-  s1 = list(min_day = 1, max_day = 29, min_month = 12, max_month = 2),
-  s2 = list(min_day = 1, max_day = 31, min_month = 3, max_month = 5),
-  s3 = list(min_day = 1, max_day = 31, min_month = 6, max_month = 8),
-  s4 = list(min_day = 1, max_day = 30, min_month = 9, max_month = 11)
-)
-
  # --- Paramètres ---
-n1     <- 3
-n2     <- 3
-tmax   <- 1
-max_it <- 100
-season <- seasons[["s1"]]
+season <- list(min_day = 1, max_day = 31, min_month = 1, max_month = 12)  # One season - 1 year
+n1     <- 3   # The number of points to uniformly distribute across the spatial domain.
+n2     <- 3   # The number of points to select based on proximity to each of the n1 points.
+tmax   <- 1   # Maximun time lag
+max_it <- 100 # Maximum number of iteration for optimisation process
 
-# --- Filtrer les données pour la saison ---
-filtered <- filter_season_data(data, dates, season, names)
-data_s   <- filtered$data_filtered
-dates_s  <- filtered$dates_filtered
-rm(filtered)
+## TODO : Jeff reprise ici.
 
 # --- Types de temps ---
 wt_obj <- weather_types(
-  data          = data_s,
+  data          = data,
   variables     = names,
-  dates         = dates_s,
+  dates         = dates,
   coordinates   = coordinates,
   max_number_wt = 6,
   return_plots  = FALSE
@@ -205,18 +192,13 @@ wt_obj <- weather_types(
 wt <- wt_obj$cluster
 K  <- length(unique(wt))
 
-lmbd             <- estimate_lambda_transformations(
-  data = data_s, wt = wt, names = names, coordinates = coordinates)
+lmbd <- estimate_lambda_transformations(
+  data = data, wt = wt, names = names,
+  coordinates = coordinates)
 threshold_precip <- lmbd$threshold_precip
 lmbd             <- lmbd$lambda_transformations
-data_s           <- transformations(
-  data = data_s, wt = wt, names = names, coordinates = coordinates, lmbd = lmbd)
-
-dst <- sapply(1:nrow(coordinates), function(i) {
-  sapply(1:nrow(coordinates), function(j) {
-    geosphere::distHaversine(coordinates[i,], coordinates[j,]) / 1000
-  })
-})
+data_t <- transformations(
+  data = data, wt = wt, names = names, coordinates = coordinates, lmbd = lmbd)
 
 cr <- sapply(names, function(v1) {
   sapply(names, function(v2) {
@@ -227,19 +209,13 @@ cr <- sapply(names, function(v1) {
 cr <- matrix(cr, nrow=length(names), ncol=length(names))
 colnames(cr) <- rownames(cr) <- names
 
-ep <- generate_variable_index_pairs(names)
-rho1_init <- data.frame(
-  v1  = ep[,1],
-  v2  = ep[,2],
-  cov = ifelse(ep[,1] == ep[,2], 1, 0.1),
-  stringsAsFactors = FALSE
-)
-
+p <- 3 # nb of variables
+rho_1 <- matrix(0.85, nrow = p, ncol = p)
+diag(rho_1) <- 1
 ```
 
 ## PArt 2 Lancer les simulations. 
-Ici weather type environ vaut 5, donc number_simulations <- 3 implique total_sim = 3*5= 15 simulation au total. Des fois K vaut 6 ou 4.
-Mieux car diversifie les resultats sur les weather types.
+Ici weather type environ vaut 6, donc number_simulations <- 3 implique total_sim = 3*6= 18 simulation au total. Des fois K vaut 4 ou 5.
 
 ```{r eval=FALSE}
 number_simulations <- 1
@@ -260,11 +236,13 @@ for (k in 1:K) {
     message(sprintf("  k=%d — Run %d/%d", k, i, number_simulations))
     set.seed(14347 + i)
 
+## TODO doit-on utiliser le rho1_init au lieu de celui qu'o nrecreer
+## a revoir c'est pas itéra correctement et la moyenne
     estim_results[[k]][[i]] <- estimation_gf(
-      data             = data_s,
+      data             = data_t,
       wt_id            = wt_id,
       max_it           = max_it,
-      dates            = dates_s,
+      dates            = dates,
       tmax             = tmax,
       names            = names,
       coordinates      = coordinates,
@@ -273,7 +251,7 @@ for (k in 1:K) {
       rho1             = rho1_init,
       cr               = cr,
       threshold_precip = threshold_precip[[k]]
-    )
+    )$parm
   }
 }
 
@@ -281,6 +259,8 @@ for (k in 1:K) {
 
 
 ## PArt 3 MOyenner les simulation resultas finaux dans mean_global
+
+### TODO a revoir
 
 ```{r eval=FALSE}
 # ============================================================

@@ -473,7 +473,7 @@ estimation_gf <- function(data, wt_id, max_it, dates, tmax, names, par_all = NUL
   # length (nrow) -> nrow(Ti) x nrow(Si) -> each times lag by each spatial indice
   # u : time lag
   # h : distance between 2 coordinates
-  # uh (u, h, Ti, Tj, Sk, Sl) T and S are indices in dates ans coordinates
+  # uh (u, h, Ti, Tj, Sk, Sl) T and S are indices in dates and coordinates
   preprocessed_data <- preprocess_data(Ti, Si, coordinates)
   uh <- preprocessed_data$uh
   uh <- cbind(uh, threshold_precip[uh[, 5]], threshold_precip[uh[, 6]])
@@ -773,6 +773,7 @@ estimate_gaussian_field_params <- function(data, wt, names, coordinates, tmax, m
     
     rho1_init <- vgm[vgm$lagtime == 0 & vgm$dist == max(vgm$dist), ]
     # Après — structure identique à vgm mais avec matrice identité avec 0.1 sur la diag
+    # rho1_init$cov ne semble jamais utilisé
     rho1_init$cov <- ifelse(rho1_init$v1 == rho1_init$v2, 1, 0.1)
     
     # Estimate Gaussian field parameters
