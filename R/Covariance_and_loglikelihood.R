@@ -497,7 +497,6 @@ loglik_spatial <- function(par, data, h, uh, v) {
     uh_dz[, 8][which(uh_dz[, 8] == -Inf)] <- -2.58
     uh_dz[, 7][which(uh_dz[, 7] == -Inf)] <- -2.58
 
-    
     # Aggregate log-likelihood components considering the identified scenarios.
     if (!length(which(id4 == T)) == 0) {
       l4 <- sum((-1 / 2) * (log(delta[id4]) + (v1[id4]^2 - (2 * cij[id4] * v1[id4] * v2[id4]) + v2[id4]^2) / delta[id4]))

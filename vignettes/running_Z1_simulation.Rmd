@@ -149,7 +149,7 @@ if (length(dim(Z1)) != 3L) {
 data("coordinates", package = "MSTWeatherGen")
 dates <- seq(as.Date("2011-01-01"), as.Date("2021-12-31"), by = "day")
 dates_used <- seq(as.Date("2018-01-01"), as.Date("2021-12-31"), by = "day")
-index_dates <- dates_used %in% dates
+index_dates <- dates %in% dates_used
 data <- data[index_dates,,]
 dates <- dates_used
 names <- c("Precipitation", "Wind", "Temp_max")
@@ -159,16 +159,7 @@ dimnames(Z1)[[3]] <- names
 
 ```
 
-#### Part 3 create parameters
-
- <!-- estimation_gf <- function(data, wt_id, max_it, dates, tmax, names, par_all = NULL,
-                          coordinates, n1, n2, rho1, cr, threshold_precip)
-                           -->
-
-After running one of the estimation chunks, inspect and save the resulting
-object as follows:
-
-## PArt 1 Preambule function and parameters necesary for the estimation. Chunk 1
+#### Part 3 Preambule function and parameters necesary for the estimation.
 
 ```{r eval=FALSE}
  # --- Paramètres ---
@@ -177,8 +168,6 @@ n1     <- 3   # The number of points to uniformly distribute across the spatial 
 n2     <- 3   # The number of points to select based on proximity to each of the n1 points.
 tmax   <- 1   # Maximun time lag
 max_it <- 100 # Maximum number of iteration for optimisation process
-
-## TODO : Jeff reprise ici.
 
 # --- Types de temps ---
 wt_obj <- weather_types(
@@ -202,23 +191,24 @@ data_t <- transformations(
 
 cr <- sapply(names, function(v1) {
   sapply(names, function(v2) {
-    mean(sapply(1:dim(data_s)[2], function(j)
-      cor(data_s[,j,v1], data_s[,j,v2], use="complete.obs")), na.rm=TRUE)
+    mean(sapply(1:dim(data_t)[2], function(j)
+      cor(data_t[,j,v1], data_t[,j,v2], use="complete.obs")), na.rm=TRUE)
   })
 })
 cr <- matrix(cr, nrow=length(names), ncol=length(names))
 colnames(cr) <- rownames(cr) <- names
 
 p <- 3 # nb of variables
-rho_1 <- matrix(0.85, nrow = p, ncol = p)
-diag(rho_1) <- 1
+rho1_init <- matrix(0.85, nrow = p, ncol = p)
+diag(rho1_init) <- 1
 ```
 
-## PArt 2 Lancer les simulations. 
+#### Part 4 Simulations. 
+
 Ici weather type environ vaut 6, donc number_simulations <- 3 implique total_sim = 3*6= 18 simulation au total. Des fois K vaut 4 ou 5.
 
 ```{r eval=FALSE}
-number_simulations <- 1
+number_simulations <- 2
 
 # Stocker tous les résultats dans une liste nommée
 # Structure : estim_results[[k]][[i]] = résultat du run i pour le type de temps k
@@ -236,8 +226,6 @@ for (k in 1:K) {
     message(sprintf("  k=%d — Run %d/%d", k, i, number_simulations))
     set.seed(14347 + i)
 
-## TODO doit-on utiliser le rho1_init au lieu de celui qu'o nrecreer
-## a revoir c'est pas itéra correctement et la moyenne
     estim_results[[k]][[i]] <- estimation_gf(
       data             = data_t,
       wt_id            = wt_id,
@@ -255,17 +243,9 @@ for (k in 1:K) {
   }
 }
 
-```
+save(estim_results, file="estimation_Z1.rda")
 
-
-## PArt 3 MOyenner les simulation resultas finaux dans mean_global
-
-### TODO a revoir
-
-```{r eval=FALSE}
-# ============================================================
-# PARTIE 3 — Moyennes des paramètres estimés
-# ============================================================
+# Moyenner les simulations
 
 cols_num <- c("a","b","c","d","e","Ai","Aj","aii","ajj",
               "nuii","nujj","r1ii","r1jj","r2ii","r2jj",
@@ -274,7 +254,7 @@ cols_num <- c("a","b","c","d","e","Ai","Aj","aii","ajj",
 # Moyenne sur les runs pour chaque type de temps
 mean_by_wt <- lapply(1:K, function(k) {
   if (is.null(estim_results[[k]])) return(NULL)
-  parm_all_runs <- do.call(rbind, lapply(estim_results[[k]], function(run) run$parm))
+  parm_all_runs <- do.call(rbind, lapply(estim_results[[k]], function(run) run))
   aggregate(parm_all_runs[, cols_num], 
             by = list(v1=parm_all_runs$v1, v2=parm_all_runs$v2), 
             FUN = mean, na.rm = TRUE)
@@ -293,7 +273,7 @@ mean_global <- aggregate(parm_all[, cols_num],
 ```
 
 
-## PARt 4 Comparing parameters and estimations values
+## Comparing parameters and estimations values
 
 On met les parametres initiaux dans un dataframe qui ressemble a mean global
 ```{r eval=FALSE}

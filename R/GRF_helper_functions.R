@@ -465,6 +465,7 @@ estimation_gf <- function(data, wt_id, max_it, dates, tmax, names, par_all = NUL
   Si <- generate_spatial_index_pairs(coordinates, n1 = n1, n2 = n2)
   # pair by row with time lag (t1,t2,u)
   Ti <- generate_temporal_index_pairs(wt_id, dates, tmax)
+  print(Ti)
   # pair of variable by row (V1,V2)
   Vi <- generate_variable_index_pairs(names)
 
@@ -480,6 +481,8 @@ estimation_gf <- function(data, wt_id, max_it, dates, tmax, names, par_all = NUL
   u <- preprocessed_data$u
   h <- preprocessed_data$h
 
+  write.csv2(uh,"uh.csv", row.names=F)
+  
   # Initialize spatial parameters
   par_s <- init_space_par(data = data, names = names, h = h[u == 0], uh = uh[u == 0, ], max_it = max_it)
   par_s <- do.call(cbind, par_s)
