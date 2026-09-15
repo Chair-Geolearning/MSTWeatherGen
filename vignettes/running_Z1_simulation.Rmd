@@ -262,11 +262,7 @@ mean_by_wt <- lapply(1:K, function(k) {
 names(mean_by_wt) <- paste0("wt_", 1:K)
 
 # Moyenne globale sur tous les types de temps et tous les runs
-parm_all <- do.call(rbind, lapply(1:K, function(k) {
-  if (is.null(estim_results[[k]])) return(NULL)
-  do.call(rbind, lapply(estim_results[[k]], function(run) run$parm))
-}))
-
+parm_all <- do.call(rbind, lapply(mean_by_wt, function(w) w))
 mean_global <- aggregate(parm_all[, cols_num],
                          by = list(v1=parm_all$v1, v2=parm_all$v2),
                          FUN = mean, na.rm = TRUE)
@@ -309,24 +305,28 @@ true_params #les params mis dans Z1 mais sous forme df
 mean_global
 ```
 
-## PARt 5 Plotting:
+## Plotting
 
-Plotting first de Denis generique avec des params tres simple il montre que les variable de Z1 suivent une meme trajectoire mais c'est pas les params de Z1 generer mais des params simple a=rep(1,p),nu=rep(1,p),A=rep(0,p))
+Plotting with know value (original Z1 parameters)
 
 ```{r eval=FALSE}
 nb_points = 30 #Si plus risque d'etre illisible
 
-r_t = c(0.2,0.4,0.6)
-rho  = Sigma_fun(1,1)
-Z_T1 = TemporalSim(nt,r_t,rho,a=rep(1,p),nu=rep(1,p),A=rep(0,p))
+r_t <- c(0.2,0.4,0.6)
+rho_1 <- Sigma_fun(1,1)
+s <- c(0.5, 1, 2)     # range Matérn (a_ii)
+nu <- c(0.5, 1, 2)     # smooth Matérn (nu_ii)
+Z_T1 <- TemporalSim(nt,r_t,rho,a=rs,nu=nu,A=c(0.2,0.5,0.8))
 plot(1:nb_points, Z_T1[1:nb_points, 1], type = "l")
 points(1:nb_points, Z_T1[1:nb_points, 2], type = "l", lty = 2)
 points(1:nb_points, Z_T1[1:nb_points, 3], type = "l", lty = 3)
 ```
 
-Plotting second de Denis mais avec Z1 parameters simule. Pb de Cholesky. Donc a rechecker.
+Same plot
 
 ```{r eval=FALSE}
+#Same things different way
+
 # --- Récupérer les vrais paramètres par variable (diagonale v1 == v2) ---
 diag_true <- true_params[true_params$v1 == true_params$v2, ]
 diag_true <- diag_true[match(names, diag_true$v1), ]  
@@ -334,17 +334,17 @@ diag_true <- diag_true[match(names, diag_true$v1), ]
 rs_true <- diag_true$aii
 nu_true <- diag_true$nuii
 A_true  <- diag_true$Ai
+rho_1  = Sigma_fun(1,1)
 
 # --- Trajectoire temporelle avec les vrais paramètres ---
-Z_T2_true <- TemporalSim(nt, r_t, rho, a = rs_true, nu = nu_true, A = A_true)
+Z_T2_true <- TemporalSim(nt, r_t, rho_1, a = rs_true, nu = nu_true, A = A_true)
 
 plot(1:nb_points, Z_T2_true[1:nb_points, 1], type = "l")
 points(1:nb_points, Z_T2_true[1:nb_points, 2], type = "l", lty = 2)
 points(1:nb_points, Z_T2_true[1:nb_points, 3], type = "l", lty = 3)
 ```
 
-Plotting ici pour nos simulations, si je ne me trompe pas les courbes doivent suivre la meme tendance mais je sais pas comment interpreter car 
-v1 est cense etre precipitation chez nous avec bcp de 0. A rechecker
+Plot with estimated parameters
 ```{r eval=FALSE}
 # --- Récupérer les paramètres estimés par variable (diagonale v1 == v2) ---
 diag_est <- mean_global[mean_global$v1 == mean_global$v2, ]
@@ -354,12 +354,99 @@ rs_est <- diag_est$aii
 nu_est <- diag_est$nuii
 A_est  <- diag_est$Ai
 
+rho1_est <- sapply(names, function(v1) {
+          sapply(names, function(v2) {
+      rho1ij <- mean_global[mean_global$v1 == v1 & mean_global$v2 == v2 | mean_global$v1 == v2 & mean_global$v2 == v1,]$rho1ij
+      return(rho1ij)
+    })
+  })
 # --- Trajectoire temporelle avec les paramètres estimés ---
-Z_T2_est <- TemporalSim(nt, r_t, rho, a = rs_est, nu = nu_est, A = A_est)
+Z_T2_est <- TemporalSim(nt, r_t, rho1_est, a = rs_est, nu = nu_est, A = A_est)
 
 plot(1:nb_points, Z_T2_est[1:nb_points, 1], type = "l")
 points(1:nb_points, Z_T2_est[1:nb_points, 2], type = "l", lty = 2)
 points(1:nb_points, Z_T2_est[1:nb_points, 3], type = "l", lty = 3)
 ```
 
+## Plotting at time 1 precipitation and Temp_max
 
+```{r eval=FALSE}
+ns <- nrow(spatial_coordinates)
+
+Z = Z1
+for (i in seq_len(ns)){
+  for (k in seq_len(p)){
+    Z[,i,k] = Z_T2_est[,k]*Z1[,i,k] + Z_T1[,k]
+  }
+}
+
+# Plot the variable
+x_coords = spatial_coordinates[, 1]
+y_coords = spatial_coordinates[, 2]
+
+df_v1 = data.frame(
+  ZZ1      = Z[1, , 2],
+  X        = x_coords,
+  Y        = y_coords,
+  Variable = paste("V1"),
+  Time     =  1
+)
+
+df_v2 = data.frame(
+  ZZ2      = Z[1, , 3],
+  X        = x_coords,
+  Y        = y_coords,
+  Variable = paste("V3"),
+  Time     =  1
+)
+
+
+df_list = list()
+df_list[[length(df_list) + 1]] = df_v1
+df_list[[length(df_list) + 1]] = df_v2
+df = dplyr::bind_rows(df_list)
+df = df %>% dplyr::mutate(Time = "Time 1")
+
+time_steps_vec = 1
+df_var1 = df %>% filter(Variable == "V1")
+df_var2 = df %>% filter(Variable == "V3")
+
+color_scale_fun = function(...) scale_fill_viridis_c(option = "H", ...)
+theme_fun = theme_bw
+
+p_1 = ggplot(df_var1, aes(x = X, y = Y, fill = ZZ1)) +
+  geom_tile(width = 0.1, height = 0.1) +
+  color_scale_fun(name = "Precipitation") +
+  #facet_wrap(~ Time, nrow = 1) +
+  theme_fun() +
+  labs(
+    title = paste("Precipitation ; time=1"),
+    x = "x coordinate",
+    y = "y coordinate",
+    fill = NULL
+  ) +
+  theme(
+    plot.title = element_text(hjust = 0.5, size = 12),
+    strip.text = element_text(size = 10)
+  )
+
+
+p_2 = ggplot(df_var2, aes(x = X, y = Y, fill = ZZ2)) +
+  #geom_raster() +
+  geom_tile(width = 0.1, height = 0.1) +
+  color_scale_fun(name = "Temp_max") +
+  #facet_wrap(~ Time, nrow = 1) +
+  theme_fun() +
+  labs(
+    title = paste("Temp_max ; time = 1"),
+    x = "x coordinate",
+    y = "y coordinate",
+    fill = NULL
+  ) +
+  theme(
+    plot.title = element_text(hjust = 0.5, size = 12),
+    strip.text = element_text(size = 10)
+  ) 
+pl = p_1 + p_2 + plot_layout(guides = 'collect')
+pl
+```
