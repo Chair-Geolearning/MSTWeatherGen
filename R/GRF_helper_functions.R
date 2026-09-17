@@ -391,9 +391,6 @@ optimize_temporal_parameters <- function(par_all, data, names, Vi, uh, cr, max_i
     paste(pairs, "rho1ij", sep=":")
   )
 
-  # print("temporal")
-  # print(parms)
-
   n_r1ii   <- length(names)
   n_r2ii   <- length(names)
   n_rho1ij <- length(pairs)
@@ -423,6 +420,9 @@ optimize_temporal_parameters <- function(par_all, data, names, Vi, uh, cr, max_i
   )$par
   
   par_all[parms] <- optimized_par
+  par_all <- update_rho1_parameters(par_all, names,
+                                    extract_rho1(create_df_param(par_all, names), names))
+  
   return(par_all)
 }
 #' Estimate Geostatistical Parameters for Multivariate Spatio-Temporal Data
