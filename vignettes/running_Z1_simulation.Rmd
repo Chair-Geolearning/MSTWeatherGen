@@ -18,7 +18,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-> Le plan : Introduction, generation de Z1, lancer l'estimation du modèle, comparer les paramètres et valeurs retourné. 
+> Le plan : Introduction, generation de Z1, lancer l'estimation du modèle, comparer les paramètres et valeurs retourné.
 
 ## Introduction
 
@@ -46,69 +46,11 @@ spatial locations, and 3 variables c("Precipitation", "Wind", "Temp_max").
 
 This part doesn't have to be executed. `Z1` is already available as a data by the package.  
 ```{r , eval=FALSE}
-# --- Coordonnées spatiales : 108 sites du package ---
-data("coordinates", package = "MSTWeatherGen")
-spatial_coordinates <- as.matrix(coordinates[, c("longitude", "latitude")])
-ns <- nrow(spatial_coordinates)
-
-# --- Fonctions de covariance Matérn (une par variable) ---
-matern_fun1 <- function(t_val, s_coord) list(nu = nu[1], r = rs[1])
-matern_fun2 <- function(t_val, s_coord) list(nu = nu[2], r = rs[2])
-matern_fun3 <- function(t_val, s_coord) list(nu = nu[3], r = rs[3])
-SpectralPars <- list(matern_fun1, matern_fun2, matern_fun3)
-
-# --- Corrélation croisée entre variables ---
-Sigma_fun <- function(t_val, s_coord) {
-  M <- matrix(0.85, ncol = p, nrow = p)
-  diag(M) <- 1
-  M
-}
-
-# --- Anisotropie (cas isotrope) ---
-aniso_fun1 <- aniso_fun2 <- aniso_fun3 <- function(t_val, s_coord) diag(2)
-anisotropies <- list(aniso_fun1, aniso_fun2, aniso_fun3)
-
-
 ```
 
 This chunk is the one to be modified by the user to generate the Z1 Gaussian data with known parameters that will be put in the entry of the estimation_gf and then we are going to compare the parameters obtained with the estimation and see the difference
 ```{r , eval=FALSE}
 # --- Nombre de variables a estimer ---
-p <- 3
-
-# --- Séquence temporelle : 2018-01-01 à 2021-12-31 (1461 jours) ici changer si necessaie ---
-# the whole dates availables
-#dates_Z1 <- seq(as.Date("2011-01-01"), as.Date("2021-12-31"), by = "day")
-# Part of the whole dates data
-dates_Z1 <- seq(as.Date("2018-01-01"), as.Date("2021-12-31"), by = "day")
-nt <- length(dates_Z1)
-temporal_resolution <- 1
-t_seq <- seq(1, nt, by = temporal_resolution)
-
-# --- Parameters to change by the user ---
-L  <- 3000             # nombre d'ondes (méthode spectrale)
-rs <- c(0.5, 1, 2)     # range Matérn (a_ii)
-nu <- c(0.5, 1, 2)     # smooth Matérn (nu_ii)
-
-rho_1 <- matrix(0.85, nrow = p, ncol = p)
-diag(rho_1) <- 1
-
-params = list(
-  p = p,
-  nt = nt,
-  t = t_seq,
-  A = c(0.2,0.5,0.8), # paramètres A_i
-  a = 1/2,   # a=d
-  alpha = 1, # b=e, with c=f=1
-  delta = 0, # does not exist in MSTWeatherGen
-  b = 1, # non-separability - does not exist in MSTWeatherGen
-  anisotropies = anisotropies,
-  SpectralPars = SpectralPars,
-  Sigma_fun    = Sigma_fun,
-  rs = rs,
-  nu = nu,
-  rho_1 = rho_1
-)
 
 ```
 
@@ -120,12 +62,83 @@ params = list(
 # Set seed if you want
 set.seed(14347)
 # Do not load if you do
-Z1 <- SimulateParsimNS(
-  L = L, ns = ns, nt = nt, p = p,
-  params = params,
+
+# Define spatial and temporal resolutions
+spatial_resolution  = 0.4
+temporal_resolution = 1
+
+# Generate spatial grid for simulation
+s1_seq = seq(0, 10, by = spatial_resolution)
+s2_seq = seq(0, 8, by = spatial_resolution)
+grid_spatial = expand.grid(s1 = s1_seq, s2 = s2_seq)
+spatial_coordinates = as.matrix(grid_spatial) 
+ns = nrow(spatial_coordinates)   
+
+# Define temporal sequence
+t_seq = seq(1, 30, by = temporal_resolution)
+nt = length(t_seq)  
+
+p = 3 # Number of variables
+L = 3000 # Number of waves
+
+# Définition des Matern
+rs = c(0.5,1,2) # paramètres a dans le papier
+nu = c(0.5,1,2) 
+# Define Matern covariance function parameters
+matern_fun1 = function(t_val, s_coord) {
+  list(nu=nu[1], r=rs[1])
+}
+matern_fun2 = function(t_val, s_coord) {
+  list(nu=nu[2], r=rs[2])
+}
+matern_fun3 = function(t_val, s_coord) {
+  list(nu=nu[3], r=rs[3])
+}
+SpectralPars = list(matern_fun1, matern_fun2, matern_fun3)
+
+
+# Define covariance structure (between variables) function
+Sigma_fun = function(t_val, s_coord) {
+  M = matrix(0.85,ncol=3,nrow=3)
+  diag(M) = 1
+  return(M)
+}
+
+# Define anisotropy functions for Isotropic case
+aniso_fun1 = aniso_fun2 = aniso_fun3 = function(t_val, s_coord) {
+  diag(2)
+}
+anisotropies = list(aniso_fun1, aniso_fun2, aniso_fun3)
+
+
+# Define simulation parameters
+params = list(
+  p = p,
+  nt = nt,
+  t = t_seq,
+  A = c(0.2,0.5,0.8), # paramètres A_i
+  a = 1/2,   # a=d
+  alpha = 1, # b=e, with c=f=1
+  delta = 0, # does not exist in MSTWeatherGen
+  b = 1, # non-separability - does not exist in MSTWeatherGen
+  anisotropies = anisotropies,
+  SpectralPars = SpectralPars,
+  Sigma_fun    = Sigma_fun
+)
+
+# Run spatio-temporal simulation 
+set.seed(14347)
+Z1 = SimulateParsimNS(
+  L                  = L,
+  ns                 = ns,
+  nt                 = nt,
+  p                  = p,
+  params             = params,
   spatial_coordinates = spatial_coordinates,
-  SpectralDensity = MSTWeatherGen:::MaternSpectralDensity3D,
-  parallelize = FALSE, batch_size = 100, n_cores = cores_nb
+  SpectralDensity = MaternSpectralDensity3D,
+  parallelize        = F, 
+  batch_size = 100,
+  n_cores = 4
 )
 #Takes 5 five minutes to run
 ```
@@ -146,61 +159,35 @@ if (length(dim(Z1)) != 3L) {
 #### Part 2 : Define dates, coordinates, and variable names to suit the data set
 
 ```{r eval=FALSE}
-data("coordinates", package = "MSTWeatherGen")
-dates <- seq(as.Date("2011-01-01"), as.Date("2021-12-31"), by = "day")
-dates_used <- seq(as.Date("2018-01-01"), as.Date("2021-12-31"), by = "day")
-index_dates <- dates %in% dates_used
-data <- data[index_dates,,]
-dates <- dates_used
-names <- c("Precipitation", "Wind", "Temp_max")
-coordinates_Z1 <- coordinates[, c("longitude", "latitude")]
+wt_id = 5:(dim(Z1)[1]-5)
+tmax   <- 3   
+max_it <- 100 # Maximum number of iteration for optimisation process
 
-dimnames(Z1)[[3]] <- names
+dates = seq(as.Date('2018-01-01'),as.Date('2018-01-30'),by = 'day')
+names = c('v1','v2','v3')
+n1 = 10
+n2 = 10
+spatial_coordinates = as.data.frame(spatial_coordinates)
+coordinates = spatial_coordinates
+names(coordinates) = c('longitude','latitude')
 
+rho1_init <- matrix(0.85, nrow = p, ncol = p)
+diag(rho1_init) <- 1
+dimnames(Z1)[[3]] = names
+
+cr <- sapply(names, function(v1) {
+  sapply(names, function(v2) {
+    mean(sapply(1:dim(Z1)[2], function(j)
+      cor(Z1[,j,v1], Z1[,j,v2], use="complete.obs")), na.rm=TRUE)
+  })
+})
+cr <- matrix(cr, nrow=length(names), ncol=length(names))
+colnames(cr) <- rownames(cr) <- names
 ```
 
 #### Part 3 Preambule function and parameters necesary for the estimation.
 
 ```{r eval=FALSE}
- # --- Paramètres ---
-season <- list(min_day = 1, max_day = 31, min_month = 1, max_month = 12)  # One season - 1 year
-n1     <- 3   # The number of points to uniformly distribute across the spatial domain.
-n2     <- 3   # The number of points to select based on proximity to each of the n1 points.
-tmax   <- 1   # Maximun time lag
-max_it <- 100 # Maximum number of iteration for optimisation process
-
-# --- Types de temps ---
-wt_obj <- weather_types(
-  data          = data,
-  variables     = names,
-  dates         = dates,
-  coordinates   = coordinates,
-  max_number_wt = 6,
-  return_plots  = FALSE
-)
-wt <- wt_obj$cluster
-K  <- length(unique(wt))
-
-lmbd <- estimate_lambda_transformations(
-  data = data, wt = wt, names = names,
-  coordinates = coordinates)
-threshold_precip <- lmbd$threshold_precip
-lmbd             <- lmbd$lambda_transformations
-data_t <- transformations(
-  data = data, wt = wt, names = names, coordinates = coordinates, lmbd = lmbd)
-
-cr <- sapply(names, function(v1) {
-  sapply(names, function(v2) {
-    mean(sapply(1:dim(data_t)[2], function(j)
-      cor(data_t[,j,v1], data_t[,j,v2], use="complete.obs")), na.rm=TRUE)
-  })
-})
-cr <- matrix(cr, nrow=length(names), ncol=length(names))
-colnames(cr) <- rownames(cr) <- names
-
-p <- 3 # nb of variables
-rho1_init <- matrix(0.85, nrow = p, ncol = p)
-diag(rho1_init) <- 1
 ```
 
 #### Part 4 Simulations. 
@@ -208,26 +195,8 @@ diag(rho1_init) <- 1
 Ici weather type environ vaut 6, donc number_simulations <- 3 implique total_sim = 3*6= 18 simulation au total. Des fois K vaut 4 ou 5.
 
 ```{r eval=FALSE}
-number_simulations <- 2
-
-# Stocker tous les résultats dans une liste nommée
-# Structure : estim_results[[k]][[i]] = résultat du run i pour le type de temps k
-estim_results <- vector(mode="list", length=K)
-
-for (k in 1:K) {
-
-  wt_id <- which(wt == k)
-  wt_id <- wt_id[wt_id > tmax + 1]
-
-  estim_results[[k]] <- vector(mode="list", length=number_simulations)
-  names(estim_results[[k]]) <- paste0("run_", 1:number_simulations)
-
-  for (i in seq_len(number_simulations)) {
-    message(sprintf("  k=%d — Run %d/%d", k, i, number_simulations))
-    set.seed(14347 + i)
-
-    estim_results[[k]][[i]] <- estimation_gf(
-      data             = data_t,
+estim_results <- estimation_gf(
+      data             = Z1,
       wt_id            = wt_id,
       max_it           = max_it,
       dates            = dates,
@@ -238,12 +207,8 @@ for (k in 1:K) {
       n2               = n2,
       rho1             = rho1_init,
       cr               = cr,
-      threshold_precip = threshold_precip[[k]]
-    )$parm
-  }
-}
+      threshold_precip = threshold_precip[[k]])
 
-save(estim_results, file="estimation_Z1.rda")
 
 # Moyenner les simulations
 
