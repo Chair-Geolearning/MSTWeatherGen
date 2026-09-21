@@ -777,7 +777,7 @@ estimate_gaussian_field_params <- function(data, wt, names, coordinates, tmax, m
     rho1_init <- vgm[vgm$lagtime == 0 & vgm$dist == max(vgm$dist), ]
     # Après — structure identique à vgm mais avec matrice identité avec 0.1 sur la diag
     # rho1_init$cov ne semble jamais utilisé
-    rho1_init$cov <- ifelse(rho1_init$v1 == rho1_init$v2, 1, 0.1)
+    rho1_init$cov <- ifelse(rho1_init$v1 == rho1_init$v2, 0.5, 0.1)
     
     # Estimate Gaussian field parameters
     gf_par[[k]] <- estimation_gf(
