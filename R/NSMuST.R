@@ -201,9 +201,9 @@ TemporalSim = function(nt,r_t,rho,a,nu,A){
   
   # In case of c^(2) as in Eq. (8)
   nu_ij = 0.5*(outer(nu,nu,'+'))
-  nu_factor = gamma(nu)/outer(sqrt(gamma(nu)),sqrt(gamma(nu)),'*')
+  nu_factor = gamma(nu_ij)/outer(sqrt(gamma(nu)),sqrt(gamma(nu)),'*')
   a2_ij = 0.5*outer(a^2,a^2,'+')
-  x_ij = a2_ij^(nu_ij)
+  x_ij = sqrt(a2_ij)^(nu_ij)
   x = a^nu
   a_factor = outer(x,x,'*')/x_ij
   A_ij = sqrt(outer(1-A^2,1-A^2,'*'))
