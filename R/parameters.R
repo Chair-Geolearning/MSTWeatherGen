@@ -95,7 +95,7 @@
   1,     # ajj (depuis par_s)
   1,   # nuii (depuis par_s)
   1,   # nujj (depuis par_s)
-  0.9, # rho1ij self-pair
+  0.5, # rho1ij self-pair
   1,     # r2ii
   1,     # r2jj
   1,     # r1ii
