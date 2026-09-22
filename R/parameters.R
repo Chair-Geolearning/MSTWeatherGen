@@ -43,8 +43,8 @@
   1e-6,    # 0 < e <= 1
   0,       # 0 <= Ai < 1
   0,       # 0 <= Aj < 1
-  1e-6,    # aii > 0 (min = 1/taille domaine) A changer ensuite pour paufiner
-  1e-6,    # ajj > 0
+  1/12.80625,    # aii > 0 Temporaire ici spatial_coordinatesr
+  1/12.80625,    # ajj > 0 Temporaire ici spatial_coordinates
   0.25,    # nuii >= 0.25 (Matérn valide)
   0.25,    # nujj >= 0.25
   -1,      # rho1ij >= -1 (cross-pair) — remplacé par 0 pour self-pair A rechecker pour les cas
@@ -63,15 +63,15 @@
   1,          # e <= 1
   1 - 1e-6,   # Ai < 1
   1 - 1e-6,   # Aj < 1
-  Inf,        # aii (max = 1/taille pixel) A rechecker
-  Inf,        # ajj
+  1/0.4,        # aii (max = 1/taille pixel) Temporaire ici spatial_coordinates
+  1/0.4,        # ajj Temporaire ici spatial_coordinates
   3,          # nuii <= 3 (suffisant physiquement)
   3,          # nujj <= 3
   1 - 1e-6,   # rho1ij <= 1 (self et cross)
-  Inf,        # r2ii
-  Inf,        # r2jj
-  Inf,        # r1ii
-  Inf,        # r1jj
+  5,        # r2ii
+  5,        # r2jj
+  5,        # r1ii
+  5,        # r1jj
   Inf         # rho2ij
 )
 
