@@ -67,11 +67,11 @@
   1/0.4,        # ajj Temporaire ici spatial_coordinates
   3,          # nuii <= 3 (suffisant physiquement)
   3,          # nujj <= 3
-  1 - 1e-6,   # rho1ij <= 1 (self et cross)
-  5,        # r2ii
-  5,        # r2jj
-  5,        # r1ii
-  5,        # r1jj
+  1,        # rho1ij <= 1 (self et cross)
+  5,        # r2ii < 5
+  5,        # r2jj < 5
+  5,        # r1ii < 5 
+  5,        # r1jj < 5
   Inf         # rho2ij
 )
 

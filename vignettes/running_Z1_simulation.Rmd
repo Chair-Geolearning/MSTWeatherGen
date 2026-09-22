@@ -255,7 +255,7 @@ n2 = 10
 coordinates = as.data.frame(spatial_coordinates)
 names(coordinates) = c('longitude','latitude')
 
-rho1_init <- matrix(0.1, nrow = p, ncol = p)
+rho1_init <- matrix(0.1, nrow = length(names), ncol = length(names))
 diag(rho1_init) <- 0.5
 dimnames(Z)[[3]] = names
 
