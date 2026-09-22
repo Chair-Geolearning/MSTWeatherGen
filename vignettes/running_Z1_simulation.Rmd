@@ -368,7 +368,7 @@ true_params <- data.frame(
   nujj   = params$nu[j],
   rho1ij = mapply(function(a, b) rho_1[a, b], i, j),
   r2ii   = r_t[i],
-  r2jj   = r[_tj],
+  r2jj   = r_t[j],
   r1ii   = r_t[i],
   r1jj   = r_t[j],
   rho2ij = mapply(function(a, b) rho_1[a, b], i, j)
