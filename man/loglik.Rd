@@ -30,7 +30,7 @@ loglik(par, parms, par_all, data, names, Vi, h, u, uh, ep, cr)
 \item{cr}{Initial correlation matrix across variables.}
 }
 \value{
-Total log-likelihood value for the observed data given the current model parameters.
+Negatif total log-likelihood value for the observed data given the current model parameters.
 }
 \description{
 Calculates the total log-likelihood for spatial or spatio-temporal data across all variable pairs.
