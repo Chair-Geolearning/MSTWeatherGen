@@ -270,7 +270,7 @@ colnames(cr) <- rownames(cr) <- names
 
 ```{r eval=FALSE}
 
-nb_estimation <- 2
+nb_estimation <- 30
 estim_results <- list()
 
 for( it in 1:nb_estimation) {
@@ -321,20 +321,18 @@ cols_num <- c("a","b","c","d","e","Ai","Aj","aii","ajj",
 
 # Moyenne
 parm_all_runs <- do.call(rbind, lapply(1:nb_estimation, function(k) estim_results[[k]]$parm))
-  aggregate(parm_all_runs[, cols_num], 
+parm_mean <- aggregate(parm_all_runs[, cols_num], 
             by = list(v1=parm_all_runs$v1, v2=parm_all_runs$v2), 
             FUN = mean, na.rm = TRUE)
-parm_all_runs
+parm_mean
 ```
 
 
 ## Comparing parameters and estimations values
 
-### TODO
-
-On met les parametres initiaux dans un dataframe qui ressemble a mean global
+On met les parametres initiaux dans un dataframe
 ```{r eval=FALSE}
-# --- Table des vraies valeurs, structurée comme mean_global ---
+# --- Table des vraies valeurs, structurée comme parm_mean ---
 
 # Toutes les paires (v1, v2), diagonale + hors-diagonale, comme dans mean_global
 var_pairs <- expand.grid(v1 = names, v2 = names, stringsAsFactors = FALSE)
@@ -344,6 +342,7 @@ var_pairs <- var_pairs[as.character(var_pairs$v1) <= as.character(var_pairs$v2),
 i <- match(var_pairs$v1, names)
 j <- match(var_pairs$v2, names)
 
+rho_1  = Sigma_fun(1,1)
 true_params <- data.frame(
   v1     = var_pairs$v1,
   v2     = var_pairs$v2,
@@ -358,74 +357,14 @@ true_params <- data.frame(
   ajj    = params$rs[j],
   nuii   = params$nu[i],
   nujj   = params$nu[j],
-  rho1ij = mapply(function(a, b) rho_1[a, b], i, j)
+  rho1ij = mapply(function(a, b) rho_1[a, b], i, j),
+  r2ii   = 0,
+  r2jj   = 0,
+  r1ii   = 0,
+  r1jj   = 0,
+  rho2ij = 0
 )
 
-true_params #les params mis dans Z1 mais sous forme df
-#avoir les df cote a cote
-mean_global
-```
-
-## Plotting
-
-Plotting with know value (original Z1 parameters)
-
-```{r eval=FALSE}
-nb_points = 30 #Si plus risque d'etre illisible
-
-nt <- length(dates)
-r_t <- c(0.2,0.4,0.6)
-rho_1 <- Sigma_fun(1,1)
-rs <- c(0.5, 1, 2)     # range Matérn (a_ii)
-nu <- c(0.5, 1, 2)     # smooth Matérn (nu_ii)
-Z_T1 <- TemporalSim(nt,r_t,rho,a=rs,nu=nu,A=c(0.2,0.5,0.8))
-plot(1:nb_points, Z_T1[1:nb_points, 1], type = "l")
-points(1:nb_points, Z_T1[1:nb_points, 2], type = "l", lty = 2)
-points(1:nb_points, Z_T1[1:nb_points, 3], type = "l", lty = 3)
-```
-
-Same plot
-
-```{r eval=FALSE}
-#Same things different way
-
-# --- Récupérer les vrais paramètres par variable (diagonale v1 == v2) ---
-diag_true <- true_params[true_params$v1 == true_params$v2, ]
-diag_true <- diag_true[match(names, diag_true$v1), ]  
-
-rs_true <- diag_true$aii
-nu_true <- diag_true$nuii
-A_true  <- diag_true$Ai
-rho_1  = Sigma_fun(1,1)
-
-# --- Trajectoire temporelle avec les vrais paramètres ---
-Z_T2_true <- TemporalSim(nt, r_t, rho_1, a = rs_true, nu = nu_true, A = A_true)
-
-plot(1:nb_points, Z_T2_true[1:nb_points, 1], type = "l")
-points(1:nb_points, Z_T2_true[1:nb_points, 2], type = "l", lty = 2)
-points(1:nb_points, Z_T2_true[1:nb_points, 3], type = "l", lty = 3)
-```
-
-Plot with estimated parameters
-```{r eval=FALSE}
-# --- Récupérer les paramètres estimés par variable (diagonale v1 == v2) ---
-diag_est <- mean_global[mean_global$v1 == mean_global$v2, ]
-diag_est <- diag_est[match(names, diag_est$v1), ]  # remettre dans l'ordre de `names`
-
-rs_est <- diag_est$aii
-nu_est <- diag_est$nuii
-A_est  <- diag_est$Ai
-
-rho1_est <- sapply(names, function(v1) {
-          sapply(names, function(v2) {
-      rho1ij <- mean_global[mean_global$v1 == v1 & mean_global$v2 == v2 | mean_global$v1 == v2 & mean_global$v2 == v1,]$rho1ij
-      return(rho1ij)
-    })
-  })
-# --- Trajectoire temporelle avec les paramètres estimés ---
-Z_T2_est <- TemporalSim(nt, r_t, rho1_est, a = rs_est, nu = nu_est, A = A_est)
-
-plot(1:nb_points, Z_T2_est[1:nb_points, 1], type = "l")
-points(1:nb_points, Z_T2_est[1:nb_points, 2], type = "l", lty = 2)
-points(1:nb_points, Z_T2_est[1:nb_points, 3], type = "l", lty = 3)
+# diff estimated vs true_params
+parm_mean[,-c(1,2)] - true_params[,-c(1,2)]
 ```
