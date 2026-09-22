@@ -46,28 +46,28 @@ library(invgamma)
 # Set seed if you want
 #set.seed(14347)
 
-generate_Z <- function(){
-  # Define spatial and temporal resolutions
-  spatial_resolution  = 0.4
-  temporal_resolution = 1 # nb of day
+# Define spatial and temporal resolutions
+spatial_resolution  = 0.4
+temporal_resolution = 1 # nb of day
 
   # Generate spatial grid for simulation
-  s1_seq = seq(0, 10, by = spatial_resolution)
-  s2_seq = seq(0, 8, by = spatial_resolution)
-  grid_spatial = expand.grid(s1 = s1_seq, s2 = s2_seq)
-  spatial_coordinates = as.matrix(grid_spatial) 
-  ns = nrow(spatial_coordinates)   
+s1_seq = seq(0, 10, by = spatial_resolution)
+s2_seq = seq(0, 8, by = spatial_resolution)
+grid_spatial = expand.grid(s1 = s1_seq, s2 = s2_seq)
+spatial_coordinates = as.matrix(grid_spatial) 
+# Define temporal sequence 30 days
+t_seq = seq(1, 30, by = temporal_resolution)
 
-  # Define temporal sequence 30 days
-  t_seq = seq(1, 30, by = temporal_resolution)
+generate_Z <- function(t_seq, spatial_coordinates){
+  ns = nrow(spatial_coordinates)   
   nt = length(t_seq)  
 
   p = 3 # Number of variables observed
   L = 3000 # Number of waves
 
   # Définition des Matern
-  rs = c(0.5,1,2) # paramètres a dans le papier
-  nu = c(0.5,1,2) 
+  rs = c(0.5,1,2) # paramètres aii dans le papier
+  nu = c(0.5,1,2) # nuii
 
   # Define Matern covariance function parameters
   matern_fun1 = function(t_val, s_coord) {
@@ -101,7 +101,7 @@ generate_Z <- function(){
     t = t_seq,
     A = c(0.2,0.5,0.8), # paramètres A_i
     a = 1/2,   # a=d
-    alpha = 1, # b=e, with c=f=1
+    alpha = 1, # b=e, with c=1
     delta = 0, # does not exist in MSTWeatherGen
     b = 1, # non-separability - does not exist in MSTWeatherGen
     anisotropies = anisotropies,
@@ -126,7 +126,7 @@ generate_Z <- function(){
 
   dimnames(Z1)[[3]] <- c("v1","v2","v3")
 
-  r_t = c(0.2,0.4,0.6)
+  r_t = c(0.2,0.4,0.6) # r¹ii et r²ii
   rho  = Sigma_fun(1,1)
   Z_T1 = TemporalSim(nt,r_t,rho,a=rep(1,p),nu=rep(1,p),A=rep(0,p))
   Z_T2 = TemporalSim(nt,r_t,rho,a=rs,nu=nu,A=c(0.2,0.5,0.8))
@@ -160,6 +160,8 @@ generate_Z <- function(){
 Plot two variables at a time T
 ```{r eval=FALSE}
 library(dplyr)
+
+Z = generate_Z(t_seq, spatial_coordinates)
 
 T = 1
 variables = c("v1","v3")
@@ -242,7 +244,7 @@ if (length(dim(Z)) != 3L) {
 
 ```{r eval=FALSE}
 tmax <- 3 # nb of days of lag
-wt_id = (tmax+1):(dim(Z)[1]) # 1 weather type , all indexes starting at tmax+1
+wt_id = (tmax+1):(dim(Z)[1]) # one weather type , all indexes starting at tmax+1 match t_seq and dates
 
 max_it <- 100 # Maximum number of iteration for optimisation process
 
@@ -250,8 +252,7 @@ dates = seq(as.Date('2018-01-01'),as.Date('2018-01-01')+dim(Z)[1]-1,by = 'day')
 names = c('v1','v2','v3')
 n1 = 10
 n2 = 10
-spatial_coordinates = as.data.frame(spatial_coordinates)
-coordinates = spatial_coordinates
+coordinates = as.data.frame(spatial_coordinates)
 names(coordinates) = c('longitude','latitude')
 
 rho1_init <- matrix(0.1, nrow = p, ncol = p)
@@ -278,7 +279,7 @@ estim_results <- list()
 for( it in 1:nb_estimation) {
 
   #set.seed(14357+it)
-  Z <- generate_Z()
+  Z <- generate_Z(t_seq, spatial_coordinates)
 
   estim_results[[it]] <- estimation_gf(
       data             = Z,
@@ -348,6 +349,9 @@ i <- match(var_pairs$v1, names)
 j <- match(var_pairs$v2, names)
 
 rho_1  = Sigma_fun(1,1)
+
+r_t = c(0.2,0.4,0.6)
+
 true_params <- data.frame(
   v1     = var_pairs$v1,
   v2     = var_pairs$v2,
@@ -363,11 +367,11 @@ true_params <- data.frame(
   nuii   = params$nu[i],
   nujj   = params$nu[j],
   rho1ij = mapply(function(a, b) rho_1[a, b], i, j),
-  r2ii   = 1,
-  r2jj   = 1,
-  r1ii   = 1,
-  r1jj   = 1,
-  rho2ij = 0
+  r2ii   = r_t[i],
+  r2jj   = r[_tj],
+  r1ii   = r_t[i],
+  r1jj   = r_t[j],
+  rho2ij = mapply(function(a, b) rho_1[a, b], i, j)
 )
 
 # diff estimated vs true_params
