@@ -58,7 +58,7 @@ generate_Z <- function(){
   spatial_coordinates = as.matrix(grid_spatial) 
   ns = nrow(spatial_coordinates)   
 
-  # Define temporal sequence
+  # Define temporal sequence 30 days
   t_seq = seq(1, 30, by = temporal_resolution)
   nt = length(t_seq)  
 
@@ -224,11 +224,13 @@ pl
 
 
 ### Run estimation  
-This is how to run estimation 
+
+This is how to run Z simulation and estimation.
 
 #### Part 1 : Read the already saved Z simulation data 
 
 ```{r eval=FALSE}
+# to check, Z is simulated later
 data("Z", package = "MSTWeatherGen")
 
 if (length(dim(Z)) != 3L) {
@@ -236,7 +238,7 @@ if (length(dim(Z)) != 3L) {
 }
 ```
 
-#### Part 2 : Define dates, coordinates, and variable names to suit the data set
+#### Part 2 : Define estimation_gf parameters
 
 ```{r eval=FALSE}
 tmax <- 3 # nb of days of lag
@@ -266,7 +268,7 @@ cr <- matrix(cr, nrow=length(names), ncol=length(names))
 colnames(cr) <- rownames(cr) <- names
 ```
 
-#### Part 4 Simulations. 
+#### Part 3 Simulations. 
 
 ```{r eval=FALSE}
 
@@ -295,7 +297,9 @@ for( it in 1:nb_estimation) {
 }
 ```
 
-#### Simulation and estimation statistiques
+### Comparing parameters values
+
+#### Parameters values from estimation
 
 ```{r eval=FALSE}
 # get all par_all values from all estimation
@@ -319,16 +323,17 @@ cols_num <- c("a","b","c","d","e","Ai","Aj","aii","ajj",
               "nuii","nujj","r1ii","r1jj","r2ii","r2jj",
               "rho1ij","rho2ij")
 
-# Moyenne
+# Mean
 parm_all_runs <- do.call(rbind, lapply(1:nb_estimation, function(k) estim_results[[k]]$parm))
 parm_mean <- aggregate(parm_all_runs[, cols_num], 
             by = list(v1=parm_all_runs$v1, v2=parm_all_runs$v2), 
             FUN = mean, na.rm = TRUE)
+
+# estimated parameters mean values
 parm_mean
 ```
 
-
-## Comparing parameters and estimations values
+#### Comparing real parameters and estimated parameters values
 
 On met les parametres initiaux dans un dataframe
 ```{r eval=FALSE}
@@ -358,10 +363,10 @@ true_params <- data.frame(
   nuii   = params$nu[i],
   nujj   = params$nu[j],
   rho1ij = mapply(function(a, b) rho_1[a, b], i, j),
-  r2ii   = 0,
-  r2jj   = 0,
-  r1ii   = 0,
-  r1jj   = 0,
+  r2ii   = 1,
+  r2jj   = 1,
+  r1ii   = 1,
+  r1jj   = 1,
   rho2ij = 0
 )
 
