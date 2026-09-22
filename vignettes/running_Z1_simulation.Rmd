@@ -22,9 +22,9 @@ knitr::opts_chunk$set(
 
 ## Introduction
 
-The goal of this vignette is to test the estimation phase of MSTWeatherGen and especially the function estimation_gf 
+The goal of this vignette is to test the estimation phase of MSTWeatherGen and especially the function `estimation_gf` 
 in GRF_helper_function which is an internal function.  
-Here is how to load the package internal function that is use.
+Here is how to load the package internal function that is used.
 
 ```{r load-package, message=FALSE, warning=FALSE}
 devtools::load_all()
@@ -34,38 +34,27 @@ cores_nb <- setCores(1)
 
 ## Estimate from know parameters
 
-Here we shows how to create a simulated three-dimensional array named
-`Z1` that fit a non-seasonal `MSTWeatherGen` model estimation.  
-The expected organization of `Z1` is:  
-`Z1[time, spatial location, variable]`
+Here we shows how to create a simulated three-dimensional array named `Z` that fit a non-seasonal `MSTWeatherGen` model estimation.  
+The expected organization of `Z` is:  
+`Z[time, spatial location, variable]`
 
-> Here the dimensions are like the original vignette 1,461 days, 108
-spatial locations, and 3 variables c("Precipitation", "Wind", "Temp_max").
+### Generate Z
 
-### Generate Z1
-
-This part doesn't have to be executed. `Z1` is already available as a data by the package.  
+This part doesn't have to be executed. `Z` is already available as a data by the package.  
 ```{r , eval=FALSE}
 ```
 
-This chunk is the one to be modified by the user to generate the Z1 Gaussian data with known parameters that will be put in the entry of the estimation_gf and then we are going to compare the parameters obtained with the estimation and see the difference
-```{r , eval=FALSE}
-# --- Nombre de variables a estimer ---
-
-```
-
-
+This chunk is the one to be modified by the user to generate the Z Gaussian data with known parameters that will be put in the entry of the estimation_gf and then we are going to compare the parameters obtained with the estimation and see the difference
 
 ```{r , eval=FALSE}
-#library(invgamma) may be necessary
+library(invgamma)
 
 # Set seed if you want
 set.seed(14347)
-# Do not load if you do
 
 # Define spatial and temporal resolutions
 spatial_resolution  = 0.4
-temporal_resolution = 1
+temporal_resolution = 1 # nb of day
 
 # Generate spatial grid for simulation
 s1_seq = seq(0, 10, by = spatial_resolution)
@@ -78,15 +67,13 @@ ns = nrow(spatial_coordinates)
 t_seq = seq(1, 30, by = temporal_resolution)
 nt = length(t_seq)  
 
-p = 3 # Number of variables
+p = 3 # Number of variables observed
 L = 3000 # Number of waves
 
 # Définition des Matern
 rs = c(0.5,1,2) # paramètres a dans le papier
 nu = c(0.5,1,2) 
 
-rho_1 <- matrix(0.7, nrow = p, ncol = p)
-diag(rho_1) <- 1
 # Define Matern covariance function parameters
 matern_fun1 = function(t_val, s_coord) {
   list(nu=nu[1], r=rs[1])
@@ -98,7 +85,6 @@ matern_fun3 = function(t_val, s_coord) {
   list(nu=nu[3], r=rs[3])
 }
 SpectralPars = list(matern_fun1, matern_fun2, matern_fun3)
-
 
 # Define covariance structure (between variables) function
 Sigma_fun = function(t_val, s_coord) {
@@ -131,7 +117,6 @@ params = list(
   nu = nu)
 
 # Run spatio-temporal simulation 
-set.seed(14347)
 Z1 = SimulateParsimNS(
   L                  = L,
   ns                 = ns,
@@ -144,6 +129,8 @@ Z1 = SimulateParsimNS(
   batch_size = 100,
   n_cores = 4
 )
+
+dimnames(Z1)[[3]] <- c("v1","v2","v3")
 
 r_t = c(0.2,0.4,0.6)
 rho  = Sigma_fun(1,1)
@@ -176,11 +163,12 @@ if (length(dim(Z)) != 3L) {
 #### Part 2 : Define dates, coordinates, and variable names to suit the data set
 
 ```{r eval=FALSE}
-wt_id = 5:(dim(Z)[1]-5)
-tmax   <- 3   
+tmax <- 3 # nb of days of lag
+wt_id = (tmax+1):(dim(Z)[1]) # 1 weather type , all indexes starting at tmax+1
+
 max_it <- 100 # Maximum number of iteration for optimisation process
 
-dates = seq(as.Date('2018-01-01'),as.Date('2018-01-30'),by = 'day')
+dates = seq(as.Date('2018-01-01'),as.Date('2018-01-01')+dim(Z)[1]-1,by = 'day')
 names = c('v1','v2','v3')
 n1 = 10
 n2 = 10
@@ -202,16 +190,11 @@ cr <- matrix(cr, nrow=length(names), ncol=length(names))
 colnames(cr) <- rownames(cr) <- names
 ```
 
-#### Part 3 Preambule function and parameters necesary for the estimation.
-
-```{r eval=FALSE}
-```
-
 #### Part 4 Simulations. 
 
-Ici weather type environ vaut 6, donc number_simulations <- 3 implique total_sim = 3*6= 18 simulation au total. Des fois K vaut 4 ou 5.
-
 ```{r eval=FALSE}
+
+## TODO bug ref colonne ou taille index / tableau
 estim_results <- estimation_gf(
       data             = Z,
       wt_id            = wt_id,
@@ -224,7 +207,8 @@ estim_results <- estimation_gf(
       n2               = n2,
       rho1             = rho1_init,
       cr               = cr,
-      threshold_precip = threshold_precip[[k]])
+      threshold_precip = list(rep(-2,11448))
+)
 
 
 # Moyenner les simulations
