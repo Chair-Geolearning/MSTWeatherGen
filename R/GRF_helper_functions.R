@@ -77,9 +77,9 @@ initialize_par_all_if_missing <- function(par_all, names, pairs, par_s, rho1, cr
   parm <- create_df_param(par_all, names)   #  a renommer en create_df_param
   rho2 <- try(compute_rho2(parm, names, cr), silent = T)
   # A rechecker sur le try de cholesky car on fait nearPD dans rho2
-  ch <- try(chol(rho2), silent = T)
+  #ch <- try(chol(rho2), silent = T)
   # TO-RECHECK
-  if (is.character(ch)) {
+  if (is.character(rho2)) {
     #par_s <- matrix(rep(1, length(names)^2), ncol = length(names), nrow = length(names))
     par_all[paste(pairs[1:length(names)], "aii", sep = ":")] <- 1
     par_all[paste(pairs[1:length(names)], "nuii", sep = ":")] <- 1
@@ -181,8 +181,22 @@ update_rho1_parameters <- function(par_all, names, rho1) {
 #' @importFrom stats optim
 init_space_par <- function(data, names, h, uh, max_it = 2000) {
   
+  cat("Initialize spatial parameters\n")
+  pairs <- paste(names, names, sep="-")
+  parms <- c(
+    paste(pairs[1:length(names)], "aii",  sep=":"),
+    paste(pairs[1:length(names)], "nuii", sep=":")
+  )
+  print(parms)
+  cat("Processing...")
+
   ncores <- getCores()
 
+  lower <- c(.lower_spatial[.matern_a],
+             .lower_spatial[.matern_nu])
+  upper <- c(.upper_spatial[.matern_a],
+             .upper_spatial[.matern_nu])
+  
   if (.Platform$OS.type == "windows") {
     cl <- parallel::makeCluster(ncores)
     on.exit(parallel::stopCluster(cl), add = TRUE)
@@ -196,11 +210,14 @@ init_space_par <- function(data, names, h, uh, max_it = 2000) {
       optim(
         par = .init_spatial,
         fn = loglik_spatial,
+        method = .optim_method,
+        lower  = lower,
+        upper  = upper,
         data = data,
         v = v,
         h = h,
         uh = uh,
-        control = list(maxit = max_it, trace = 2)
+        control = list(maxit = max_it, trace = 0)
       )$par
     })
   } else {
@@ -209,14 +226,19 @@ init_space_par <- function(data, names, h, uh, max_it = 2000) {
       optim(
         par = .init_spatial,
         fn = loglik_spatial,
+        method = .optim_method,
+        lower  = lower,
+        upper  = upper,
         data = data,
         v = v,
         h = h,
         uh = uh,
-        control = list(maxit = max_it, trace = 2)
+        control = list(maxit = max_it, trace = 0)
       )$par
     }, mc.cores = ncores, mc.set.seed = FALSE)
   }
+
+  cat("... done\n")
 
   return(par)
 }
@@ -249,12 +271,16 @@ init_space_par <- function(data, names, h, uh, max_it = 2000) {
 #' @keywords internal
 #' @importFrom stringr str_split
 #' @importFrom stats optim
-optimize_spatial_parameters <- function(par_all, data, names, Vi, uh, cr, max_it, ep) {
-  pairs <- paste(ep[,1], ep[,2], sep="-")
+optimize_spatial_parameters <- function(par_all, data, names, Vi, uh, cr, max_it) {
+  pairs <- paste(Vi[,1], Vi[,2], sep="-")
   parms <- c(
     paste(pairs[1:length(names)], "aii",  sep=":"),
     paste(pairs[1:length(names)], "nuii", sep=":")
   )
+
+  cat("Spatial parameters optimization\n")
+  print(parms)
+  cat("Processing...")
 
   n_aii  <- length(names)
   n_nuii <- length(names)
@@ -267,14 +293,16 @@ optimize_spatial_parameters <- function(par_all, data, names, Vi, uh, cr, max_it
   optimized_par <- optim(
     par_all[parms],
     fn     = loglik,
-    method = "L-BFGS-B",
+    method = .optim_method,
     lower  = lower,
     upper  = upper,
     data   = data, parms = parms, par_all = par_all,
-    ep = ep, names = names, Vi = Vi, uh = uh, cr = cr,
-    control = list(maxit = max_it)
+    names = names, Vi = Vi, uh = uh, cr = cr,
+    control = list(maxit = max_it, trace = 0)
   )$par
   
+  cat("... done\n")
+
   par_all[parms] <- optimized_par
   return(update_rho1_parameters(par_all, names,
                                 extract_rho1(create_df_param(par_all, names), names)))
@@ -313,7 +341,7 @@ optimize_spatial_parameters <- function(par_all, data, names, Vi, uh, cr, max_it
 #' @keywords internal
 #' @importFrom stringr str_split
 #' @importFrom stats optim
-optimize_spatiotemporal_parameters <- function(par_all, data, names, Vi, uh, cr, max_it, ep) {
+optimize_spatiotemporal_parameters <- function(par_all, data, names, Vi, uh, cr, max_it) {
 
   # Ici on va optimiser les valeurs des parametres
   # a, b , c , d , e
@@ -322,6 +350,10 @@ optimize_spatiotemporal_parameters <- function(par_all, data, names, Vi, uh, cr,
     "a", "b", "c", "d", "e",
     paste(names, "Ai", sep=":")
   )
+
+  cat("SpatioTemporal parameters optimization\n")
+  print(parms)
+  cat("Processing...")
 
   n_Ai     <- length(names)
 
@@ -337,14 +369,16 @@ optimize_spatiotemporal_parameters <- function(par_all, data, names, Vi, uh, cr,
   optimized_par <- optim(
     par_all[parms],
     fn     = loglik,
-    method = "L-BFGS-B",
+    method = .optim_method,
     lower  = lower,
     upper  = upper,
     data   = data, parms = parms, par_all = par_all,
-    ep = ep, names = names, Vi = Vi, uh = uh, cr = cr,
-    control = list(maxit = max_it)
+    names = names, Vi = Vi, uh = uh, cr = cr,
+    control = list(maxit = max_it, trace = 0)
   )$par
   
+  cat("... done\n")
+
   par_all[parms] <- optimized_par
   return(par_all)
 
@@ -383,13 +417,18 @@ optimize_spatiotemporal_parameters <- function(par_all, data, names, Vi, uh, cr,
 #'
 #' @keywords internal
 #' @importFrom stats optim
-optimize_temporal_parameters <- function(par_all, data, names, Vi, uh, cr, max_it, ep) {
-  pairs <- paste(ep[,1], ep[,2], sep="-")
+optimize_temporal_parameters <- function(par_all, data, names, Vi, uh, cr, max_it) {
+  pairs <- paste(Vi[,1], Vi[,2], sep="-")
   parms <- c(
     paste(names, "r1ii",   sep=":"),
     paste(names, "r2ii",   sep=":"),
     paste(pairs, "rho1ij", sep=":")
   )
+
+  cat("Temporal parameters optimization\n")
+  print(parms)
+  cat("Processing...")
+
 
   n_r1ii   <- length(names)
   n_r2ii   <- length(names)
@@ -397,7 +436,7 @@ optimize_temporal_parameters <- function(par_all, data, names, Vi, uh, cr, max_i
   
   ## rho1ij : self-pairs [0, 1-1e-6], cross-pairs [-1, 1-1e-6]
   lower_rho1 <- rep(.lower[.rho1ij], n_rho1ij)
-  lower_rho1[ep[,1] == ep[,2]] <- 0
+  lower_rho1[Vi[,1] == Vi[,2]] <- 0
   
   upper_rho1 <- rep(.upper[.rho1ij], n_rho1ij)
   
@@ -411,14 +450,16 @@ optimize_temporal_parameters <- function(par_all, data, names, Vi, uh, cr, max_i
   optimized_par <- optim(
     par_all[parms],
     fn     = loglik,
-    method = "L-BFGS-B",
+    method = .optim_method,
     lower  = lower,
     upper  = upper,
     data   = data, parms = parms, par_all = par_all,
-    ep = ep, names = names, Vi = Vi, uh = uh, cr = cr,
-    control = list(maxit = max_it)
+    names = names, Vi = Vi, uh = uh, cr = cr,
+    control = list(maxit = max_it, trace = 0)
   )$par
   
+  cat("... done\n")
+
   par_all[parms] <- optimized_par
   par_all <- update_rho1_parameters(par_all, names,
                                     extract_rho1(create_df_param(par_all, names), names))
@@ -485,25 +526,23 @@ estimation_gf <- function(data, wt_id, max_it, dates, tmax, names, par_all = NUL
   par_s <- do.call(cbind, par_s)
 
   # Construct parameter matrix for covariance model
-  # ep == Vi
-  ep <- generate_variable_index_pairs(names)
-  pairs <- paste(ep[, 1], ep[, 2], sep = "-")
+  pairs <- paste(Vi[, 1], Vi[, 2], sep = "-")
 
   # Check and initialize par_all if missing
   par_all <- initialize_par_all_if_missing(par_all, names, pairs, par_s, rho1, cr = cr)
   
-  par_all <- optimize_spatial_parameters(par_all, data, names, Vi, uh[uh[, 1] == 0, ], cr, max_it, ep)
+  par_all <- optimize_spatial_parameters(par_all, data, names, Vi, uh[uh[, 1] == 0, ], cr, max_it)
 
   for (v in 1:2) {
     # Optimize temporal parameters
-    par_all <- optimize_temporal_parameters(par_all, data, names, Vi, uh, cr, max_it, ep)
+    par_all <- optimize_temporal_parameters(par_all, data, names, Vi, uh, cr, max_it)
     
     # Optimize spatial parameters
-    par_all <- optimize_spatial_parameters(par_all, data, names, Vi, uh, cr, max_it, ep)
+    par_all <- optimize_spatial_parameters(par_all, data, names, Vi, uh, cr, max_it)
 
     # Optimize spatotemporal parameters
     #par_all <- optimize_spatiotemporal_parameters(par_all, data, names, Vi, uh=[uh[,1] <= 2,], cr, max_it, ep)
-    par_all <- optimize_spatiotemporal_parameters(par_all, data, names, Vi, uh, cr, max_it, ep)
+    par_all <- optimize_spatiotemporal_parameters(par_all, data, names, Vi, uh, cr, max_it)
   }
 
   # Construct parameter and beta matrices

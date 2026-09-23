@@ -298,19 +298,18 @@ extract_rho1 <- function(parm, names) {
 #' @importFrom parallel mclapply
 #' @importFrom stats rnorm pnorm
 #' @keywords internal
-loglik <- function(par, parms, par_all, data, names, Vi, h, u, uh, ep, cr) {
+loglik <- function(par, parms, par_all, data, names, Vi, h, u, uh, cr) {
   J <- length(names)
-  pairs <- paste(ep[, 1], ep[, 2], sep = "-")
-  
+  pairs <- paste(Vi[, 1], Vi[, 2], sep = "-")
   par_all[parms] <- par
   
   parm <- create_df_param(par_all, names)
   parm <- create_df_param(update_rho1_parameters(par_all, names, extract_rho1(parm, names)), names)
   rho2 <- try(compute_rho2(parm, names, cr), silent = T)
   # A rechecker
-  be   <- try(chol(rho2), silent = TRUE)
+  #be   <- try(chol(rho2), silent = TRUE)
 
-  if (!is.character(be)) {
+  if (!is.character(rho2)) {
 
     parmm <- lapply(1:nrow(Vi), function(v) {
       as.numeric(parm[(parm$v1 == Vi[v, 1] & parm$v2 == Vi[v, 2]) |

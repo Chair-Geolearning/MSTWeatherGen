@@ -55,8 +55,8 @@ s1_seq = seq(0, 10, by = spatial_resolution)
 s2_seq = seq(0, 8, by = spatial_resolution)
 grid_spatial = expand.grid(s1 = s1_seq, s2 = s2_seq)
 spatial_coordinates = as.matrix(grid_spatial) 
-# Define temporal sequence 30 days
-t_seq = seq(1, 30, by = temporal_resolution)
+# Define temporal sequence 40 days
+t_seq = seq(1, 40, by = temporal_resolution)
 
 generate_Z <- function(t_seq, spatial_coordinates){
   ns = nrow(spatial_coordinates)   
@@ -244,11 +244,11 @@ if (length(dim(Z)) != 3L) {
 
 ```{r eval=FALSE}
 tmax <- 3 # nb of days of lag
-wt_id = (tmax+1):(dim(Z)[1]) # one weather type , all indexes starting at tmax+1 match t_seq and dates
+wt_id = (tmax+1):(length(t_seq)) # one weather type , all indexes starting at tmax+1 match t_seq and dates
 
 max_it <- 100 # Maximum number of iteration for optimisation process
 
-dates = seq(as.Date('2018-01-01'),as.Date('2018-01-01')+dim(Z)[1]-1,by = 'day')
+dates = seq(as.Date('2018-01-01'),as.Date('2018-01-01')+(length(t_seq)-1),by = 'day')
 names = c('v1','v2','v3')
 n1 = 10
 n2 = 10

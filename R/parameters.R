@@ -103,6 +103,12 @@
   1      #rho2ij
 )
 
+# Optimization method to use in optim
+.optim_method = "BFGS"
+#.optim_method = "L-BFGS-B"
+#.optim_method = "CG"
+
+
 #' Check parameters validities
 #' @param parameters_values a vector of parameters ordered as in parameters.R
 #' @param parameters_id a vector of parameters to check
@@ -114,14 +120,15 @@ check_parameters_validity <- function(parameters_values, parameters_id){
 
   # get variable name in parameters.R (ex: .a)
   parameters_name <- unique(paste0(".",sub("^[^:]*:", "", parameters_id)))
+
   # check each parameters is under boundaries
   validities <- sapply(parameters_name, function(p){
-    #print(parameters_values[get(p)])
     param_id <- get(p)
     return(.lower[param_id] <= parameters_values[param_id]
         && parameters_values[param_id] <= .upper[param_id] )
   })
   
+  if(all(validities) == FALSE) warning(paste("Parameters boundaries unvalide",paste(parameters_name, collapse = " ")))
   # return FALSE if any is FALSE
   return(all(validities))
 }
