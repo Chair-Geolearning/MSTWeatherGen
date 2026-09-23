@@ -104,8 +104,8 @@
 )
 
 # Optimization method to use in optim
-.optim_method = "BFGS"
-#.optim_method = "L-BFGS-B"
+#.optim_method = "BFGS"
+.optim_method = "L-BFGS-B"
 #.optim_method = "CG"
 
 
@@ -128,7 +128,7 @@ check_parameters_validity <- function(parameters_values, parameters_id){
         && parameters_values[param_id] <= .upper[param_id] )
   })
   
-  if(all(validities) == FALSE) warning(paste("Parameters boundaries unvalide",paste(parameters_name, collapse = " ")))
+  if(all(validities) == FALSE) warning(paste("Parameters boundaries unvalid",paste(parameters_name, collapse = " ")))
   # return FALSE if any is FALSE
   return(all(validities))
 }
