@@ -289,6 +289,7 @@ optimize_spatial_parameters <- function(par_all, data, names, Vi, uh, cr, max_it
              rep(.lower[.nuii], n_nuii))
   upper <- c(rep(.upper[.aii],  n_aii),
              rep(.upper[.nuii], n_nuii))
+  cat("=== PRE OPTIM spatial ===\n")
   
   optimized_par <- optim(
     par_all[parms],
@@ -300,6 +301,11 @@ optimize_spatial_parameters <- function(par_all, data, names, Vi, uh, cr, max_it
     names = names, Vi = Vi, uh = uh, cr = cr,
     control = list(maxit = max_it, trace = 0)
   )$par
+  
+  # Print paramètres post-optimisation
+  cat("=== POST OPTIM spatial ===\n")
+  cat("aii  :", round(optimized_par[1:n_aii], 4), "\n")
+  cat("nuii :", round(optimized_par[(n_aii+1):(n_aii+n_nuii)], 4), "\n")
   
   cat("... done\n")
 
@@ -531,9 +537,16 @@ estimation_gf <- function(data, wt_id, max_it, dates, tmax, names, par_all = NUL
   # Check and initialize par_all if missing
   par_all <- initialize_par_all_if_missing(par_all, names, pairs, par_s, rho1, cr = cr)
   
+  cat("=== VALEURS INITIALES ===\n")
+  cat("aii  :", round(par_all[paste(paste(names, names, sep="-"), "aii",  sep=":")], 4), "\n")
+  cat("nuii :", round(par_all[paste(paste(names, names, sep="-"), "nuii", sep=":")], 4), "\n")
+  
+  cat("\n=== Premiere Optimisation Spatiale\n")
   par_all <- optimize_spatial_parameters(par_all, data, names, Vi, uh[uh[, 1] == 0, ], cr, max_it)
 
   for (v in 1:2) {
+    
+    cat("\n=== BOUCLE v =", v, "===\n")
     # Optimize temporal parameters
     par_all <- optimize_temporal_parameters(par_all, data, names, Vi, uh, cr, max_it)
     
@@ -544,6 +557,10 @@ estimation_gf <- function(data, wt_id, max_it, dates, tmax, names, par_all = NUL
     #par_all <- optimize_spatiotemporal_parameters(par_all, data, names, Vi, uh=[uh[,1] <= 2,], cr, max_it, ep)
     par_all <- optimize_spatiotemporal_parameters(par_all, data, names, Vi, uh, cr, max_it)
   }
+  
+  cat("=== VALEURS FINALES APRES TOUTES LES LOOPS ===\n")
+  cat("aii  :", round(par_all[paste(paste(names, names, sep="-"), "aii",  sep=":")], 4), "\n")
+  cat("nuii :", round(par_all[paste(paste(names, names, sep="-"), "nuii", sep=":")], 4), "\n")
 
   # Construct parameter and beta matrices
   # rho1 in par_all already update in optimize_spatial_parameters

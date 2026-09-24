@@ -299,6 +299,16 @@ extract_rho1 <- function(parm, names) {
 #' @importFrom stats rnorm pnorm
 #' @keywords internal
 loglik <- function(par, parms, par_all, data, names, Vi, h, u, uh, cr) {
+  # Print aii et nuii si on est dans optimize_spatial
+  aii_names  <- paste(paste(names, names, sep="-"), "aii",  sep=":")
+  nuii_names <- paste(paste(names, names, sep="-"), "nuii", sep=":")
+  
+  if (any(aii_names %in% parms)) {
+    
+    cat("aii :", round(par[parms %in% aii_names], 4),
+        "nuii :", round(par[parms %in% nuii_names], 4), "\n")
+  }
+  
   J <- length(names)
   pairs <- paste(Vi[, 1], Vi[, 2], sep = "-")
   par_all[parms] <- par
@@ -420,6 +430,10 @@ loglik <- function(par, parms, par_all, data, names, Vi, h, u, uh, cr) {
         }
       }, mc.cores = ncores, mc.set.seed = FALSE)
     }
+    # Print des paramètres aii et nuii testés
+    aii_names  <- paste(paste(names, names, sep="-"), "aii",  sep=":")
+    nuii_names <- paste(paste(names, names, sep="-"), "nuii", sep=":")
+    
     
     result <- -sum(unlist(ll))
     if (!is.finite(result)) return(1e20)                       # ← protection finale globale
