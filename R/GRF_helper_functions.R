@@ -522,6 +522,12 @@ init_monitoring <- function(names) {
   )
   assign(".log_file_temp", log_file_temp, envir=.GlobalEnv)
   assign(".log_iter_temp", 0L,            envir=.GlobalEnv)
+  
+  return(list(
+    log_file      = log_file,
+    log_file_st   = log_file_st,
+    log_file_temp = log_file_temp
+  ))
 }
 
 stop_monitoring <- function() {
@@ -611,6 +617,7 @@ estimation_gf <- function(data, wt_id, max_it, dates, tmax, names, par_all = NUL
   Vi <- generate_variable_index_pairs(names)
   
   logs <- init_monitoring(names)
+  cat("class(logs) :", class(logs), "\n")
   
   'log_file <- "monitoring_aii_nuii.txt"
   writeLines(
