@@ -595,17 +595,11 @@ estimation_gf <- function(data, wt_id, max_it, dates, tmax, names, par_all = NUL
   write_spatial_params(par_all, names, "init_spatial_params", log_file)
   write_st_params(par_all, names, "init_spatio_temp", log_file_st)
   
-  cat("=== VALEURS INITIALES ===\n")
-  cat("aii  :", round(par_all[paste(paste(names, names, sep="-"), "aii",  sep=":")], 4), "\n")
-  cat("nuii :", round(par_all[paste(paste(names, names, sep="-"), "nuii", sep=":")], 4), "\n")
-  
-  cat("\n=== Premiere Optimisation Spatiale\n")
   par_all <- optimize_spatial_parameters(par_all, data, names, Vi, uh[uh[, 1] == 0, ], cr, max_it)
   write_spatial_params(par_all, names, paste0("valeur_spatial_finale_pre_loop"), log_file)
   
   for (v in 1:2) {
     
-    cat("\n=== BOUCLE v =", v, "===\n")
     # Optimize temporal parameters
     par_all <- optimize_temporal_parameters(par_all, data, names, Vi, uh, cr, max_it)
     write_temp_params(par_all, names, paste0("valeur_finale_temporal_loop_n", v), log_file_temp)
@@ -619,13 +613,6 @@ estimation_gf <- function(data, wt_id, max_it, dates, tmax, names, par_all = NUL
     write_st_params(par_all, names, paste0("valeur_finale_spatiotemp_loop_", v), log_file_st)
   }
   
-  cat("=== VALEURS FINALES APRES TOUTES LES LOOPS ===\n")
-  cat("aii  :", round(par_all[paste(paste(names, names, sep="-"), "aii",  sep=":")], 4), "\n")
-  cat("nuii :", round(par_all[paste(paste(names, names, sep="-"), "nuii", sep=":")], 4), "\n")
-  
-  assign(".log_file", NULL, envir=.GlobalEnv)
-  assign(".log_file_st", NULL, envir=.GlobalEnv)
-  assign(".log_file_temp", NULL, envir=.GlobalEnv)
   # Construct parameter and beta matrices
   # rho1 in par_all already update in optimize_spatial_parameters
   par_all <- update_rho1_parameters(par_all, names, extract_rho1(create_df_param(par_all, names), names))
