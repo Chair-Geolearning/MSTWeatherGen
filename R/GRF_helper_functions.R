@@ -468,7 +468,7 @@ optimize_temporal_parameters <- function(par_all, data, names, Vi, uh, cr, max_i
 }
 
 
-write_spatial_params <- function(par_all, names, label, log_file) {
+'write_spatial_params <- function(par_all, names, label, log_file) {
   aii_names  <- paste(paste(names, names, sep="-"), "aii",  sep=":")
   nuii_names <- paste(paste(names, names, sep="-"), "nuii", sep=":")
   line <- paste(c(label,
@@ -496,7 +496,77 @@ write_temp_params <- function(par_all, names, label, log_file) {
                   round(par_all[r2ii_names], 6)),
                 collapse=";")
   write(line, file=log_file, append=TRUE)
+}'
+
+init_monitoring <- function(names) {
+  log_file <- "monitoring_aii_nuii.txt"
+  writeLines(
+    paste(c("label", paste0("aii_", names), paste0("nuii_", names)), collapse=";"),
+    log_file
+  )
+  assign(".log_file", log_file, envir=.GlobalEnv)
+  assign(".log_iter", 0L,       envir=.GlobalEnv)
+  
+  log_file_st <- "monitoring_spatiotemporal.txt"
+  writeLines(
+    paste(c("label", "a","b","c","d","e", paste0("Ai_", names)), collapse=";"),
+    log_file_st
+  )
+  assign(".log_file_st", log_file_st, envir=.GlobalEnv)
+  assign(".log_iter_st", 0L,          envir=.GlobalEnv)
+  
+  log_file_temp <- "monitoring_temporal.txt"
+  writeLines(
+    paste(c("label", paste0("r1ii_", names), paste0("r2ii_", names)), collapse=";"),
+    log_file_temp
+  )
+  assign(".log_file_temp", log_file_temp, envir=.GlobalEnv)
+  assign(".log_iter_temp", 0L,            envir=.GlobalEnv)
+  
+  invisible(list(
+    log_file      = log_file,
+    log_file_st   = log_file_st,
+    log_file_temp = log_file_temp
+  ))
 }
+
+log_params <- function(par_all, names, label, log_file, log_file_st, log_file_temp, which = c("spatial", "st", "temp")) {
+  
+  
+  # aii et nuii
+  if ("spatial" %in% which) {
+    
+    aii_names  <- paste(paste(names, names, sep="-"), "aii",  sep=":")
+    nuii_names <- paste(paste(names, names, sep="-"), "nuii", sep=":")
+    line <- paste(c(label,
+                    round(par_all[aii_names],  6),
+                    round(par_all[nuii_names], 6)),
+                  collapse=";")
+    write(line, file=log_file, append=TRUE)
+  }
+  
+  # a,b,c,d,e et Ai
+  if ("st" %in% which) {
+  
+    Ai_names <- paste(names, "Ai", sep=":")
+    line <- paste(c(label,
+                    round(par_all[c("a","b","c","d","e")], 6),
+                    round(par_all[Ai_names], 6)),
+                  collapse=";")
+    write(line, file=log_file_st, append=TRUE)
+  }
+  
+  # r1ii et r2ii
+  if ("temp" %in% which) {
+    
+    line <- paste(c(label,
+                    round(par_all[paste(names, "r1ii", sep=":")], 6),
+                    round(par_all[paste(names, "r2ii", sep=":")], 6)),
+                  collapse=";")
+    write(line, file=log_file_temp, append=TRUE)
+  }
+}
+
 #' Estimate Geostatistical Parameters for Multivariate Spatio-Temporal Data
 #'
 #' This function estimates the geostatistical parameters for a multivariate space-time model
@@ -539,7 +609,7 @@ estimation_gf <- function(data, wt_id, max_it, dates, tmax, names, par_all = NUL
   Ti <- generate_temporal_index_pairs(wt_id, dates, tmax)
   # pair of variable by row (V1,V2)
   Vi <- generate_variable_index_pairs(names)
-
+  
   log_file <- "monitoring_aii_nuii.txt"
   writeLines(
     paste(c("label", paste0("aii_", names), paste0("nuii_", names)), collapse=";"),
@@ -586,26 +656,37 @@ estimation_gf <- function(data, wt_id, max_it, dates, tmax, names, par_all = NUL
   # Check and initialize par_all if missing
   par_all <- initialize_par_all_if_missing(par_all, names, pairs, par_s, rho1, cr = cr)
   
-  write_spatial_params(par_all, names, "init_spatial_params", log_file)
-  write_st_params(par_all, names, "init_spatio_temp", log_file_st)
-  write_temp_params(par_all,    names, "init_temporal",       log_file_temp)
+  #write_spatial_params(par_all, names, "init_spatial_params", log_file)
+  #write_st_params(par_all, names, "init_spatio_temp", log_file_st)
+  #write_temp_params(par_all,    names, "init_temporal",       log_file_temp)
+  log_params(par_all, names, "init", log_file, log_file_st, log_file_temp)
   
   par_all <- optimize_spatial_parameters(par_all, data, names, Vi, uh[uh[, 1] == 0, ], cr, max_it)
-  write_spatial_params(par_all, names, paste0("valeur_spatial_finale_pre_loop"), log_file)
+  #write_spatial_params(par_all, names, paste0("valeur_spatial_finale_pre_loop"), log_file)
+  log_params(par_all, names, "valeur_spatial_finale_pre_loop", 
+             log_file, log_file_st, log_file_temp, which="spatial")
+  
   
   for (v in 1:2) {
     
     # Optimize temporal parameters
     par_all <- optimize_temporal_parameters(par_all, data, names, Vi, uh, cr, max_it)
-    write_temp_params(par_all, names, paste0("valeur_finale_temporal_loop_n", v), log_file_temp)
+    #write_temp_params(par_all, names, paste0("valeur_finale_temporal_loop_n", v), log_file_temp)
+    log_params(par_all, names, paste0("valeur_finale_spatiotemp_loop_", v),
+               log_file, log_file_st, log_file_temp, which="st")
+    
     # Optimize spatial parameters
     par_all <- optimize_spatial_parameters(par_all, data, names, Vi, uh, cr, max_it)
-    write_spatial_params(par_all, names, paste0("valeur_finale_spatial_loop_n", v), log_file)
+    #write_spatial_params(par_all, names, paste0("valeur_finale_spatial_loop_n", v), log_file)
+    log_params(par_all, names, paste0("valeur_finale_spatial_loop_n", v),
+               log_file, log_file_st, log_file_temp, which="spatial")
     
     # Optimize spatotemporal parameters
     #par_all <- optimize_spatiotemporal_parameters(par_all, data, names, Vi, uh=[uh[,1] <= 2,], cr, max_it, ep)
     par_all <- optimize_spatiotemporal_parameters(par_all, data, names, Vi, uh, cr, max_it)
-    write_st_params(par_all, names, paste0("valeur_finale_spatiotemp_loop_", v), log_file_st)
+    #write_st_params(par_all, names, paste0("valeur_finale_spatiotemp_loop_", v), log_file_st)
+    log_params(par_all, names, paste0("valeur_finale_spatiotemp_loop_", v),
+               log_file, log_file_st, log_file_temp, which="st")
   }
   
   assign(".log_file",      NULL, envir=.GlobalEnv)
