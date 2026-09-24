@@ -289,8 +289,7 @@ optimize_spatial_parameters <- function(par_all, data, names, Vi, uh, cr, max_it
              rep(.lower[.nuii], n_nuii))
   upper <- c(rep(.upper[.aii],  n_aii),
              rep(.upper[.nuii], n_nuii))
-  cat("=== PRE OPTIM spatial ===\n")
-  
+
   optimized_par <- optim(
     par_all[parms],
     fn     = loglik,
@@ -301,11 +300,6 @@ optimize_spatial_parameters <- function(par_all, data, names, Vi, uh, cr, max_it
     names = names, Vi = Vi, uh = uh, cr = cr,
     control = list(maxit = max_it, trace = 0)
   )$par
-  
-  # Print paramètres post-optimisation
-  cat("=== POST OPTIM spatial ===\n")
-  cat("aii  :", round(optimized_par[1:n_aii], 4), "\n")
-  cat("nuii :", round(optimized_par[(n_aii+1):(n_aii+n_nuii)], 4), "\n")
   
   cat("... done\n")
 
@@ -594,6 +588,7 @@ estimation_gf <- function(data, wt_id, max_it, dates, tmax, names, par_all = NUL
   
   write_spatial_params(par_all, names, "init_spatial_params", log_file)
   write_st_params(par_all, names, "init_spatio_temp", log_file_st)
+  write_temp_params(par_all,    names, "init_temporal",       log_file_temp)
   
   par_all <- optimize_spatial_parameters(par_all, data, names, Vi, uh[uh[, 1] == 0, ], cr, max_it)
   write_spatial_params(par_all, names, paste0("valeur_spatial_finale_pre_loop"), log_file)
@@ -613,13 +608,17 @@ estimation_gf <- function(data, wt_id, max_it, dates, tmax, names, par_all = NUL
     write_st_params(par_all, names, paste0("valeur_finale_spatiotemp_loop_", v), log_file_st)
   }
   
+  assign(".log_file",      NULL, envir=.GlobalEnv)
+  assign(".log_file_st",   NULL, envir=.GlobalEnv)
+  assign(".log_file_temp", NULL, envir=.GlobalEnv)
+  
   # Construct parameter and beta matrices
   # rho1 in par_all already update in optimize_spatial_parameters
   par_all <- update_rho1_parameters(par_all, names, extract_rho1(create_df_param(par_all, names), names))
   parm <- create_df_param(par_all, names)
   par_all <- update_rho2_parameters(par_all,names, compute_rho2(parm, names, cr))
   parm <- create_df_param(par_all, names)
-
+  
   return(list(parm = parm, par_all = par_all))
 }
 
