@@ -522,12 +522,12 @@ init_monitoring <- function(names) {
   )
   assign(".log_file_temp", log_file_temp, envir=.GlobalEnv)
   assign(".log_iter_temp", 0L,            envir=.GlobalEnv)
-  
-  invisible(list(
-    log_file      = log_file,
-    log_file_st   = log_file_st,
-    log_file_temp = log_file_temp
-  ))
+}
+
+stop_monitoring <- function() {
+  assign(".log_file",      NULL, envir=.GlobalEnv)
+  assign(".log_file_st",   NULL, envir=.GlobalEnv)
+  assign(".log_file_temp", NULL, envir=.GlobalEnv)
 }
 
 log_params <- function(par_all, names, label, log_file, log_file_st, log_file_temp, which = c("spatial", "st", "temp")) {
@@ -610,7 +610,9 @@ estimation_gf <- function(data, wt_id, max_it, dates, tmax, names, par_all = NUL
   # pair of variable by row (V1,V2)
   Vi <- generate_variable_index_pairs(names)
   
-  log_file <- "monitoring_aii_nuii.txt"
+  logs <- init_monitoring(names)
+  
+  'log_file <- "monitoring_aii_nuii.txt"
   writeLines(
     paste(c("label", paste0("aii_", names), paste0("nuii_", names)), collapse=";"),
     log_file
@@ -632,7 +634,7 @@ estimation_gf <- function(data, wt_id, max_it, dates, tmax, names, par_all = NUL
     log_file_temp
   )
   assign(".log_file_temp", log_file_temp, envir=.GlobalEnv)
-  assign(".log_iter_temp", 0L,            envir=.GlobalEnv)
+  assign(".log_iter_temp", 0L,            envir=.GlobalEnv)'
   
   # Preprocess data to adjust for thresholds and compute distances
   # a data.frame with u, h and uh
@@ -659,12 +661,12 @@ estimation_gf <- function(data, wt_id, max_it, dates, tmax, names, par_all = NUL
   #write_spatial_params(par_all, names, "init_spatial_params", log_file)
   #write_st_params(par_all, names, "init_spatio_temp", log_file_st)
   #write_temp_params(par_all,    names, "init_temporal",       log_file_temp)
-  log_params(par_all, names, "init", log_file, log_file_st, log_file_temp)
+  log_params(par_all, names, "init", logs$log_file, logs$log_file_st, logs$log_file_temp)
   
   par_all <- optimize_spatial_parameters(par_all, data, names, Vi, uh[uh[, 1] == 0, ], cr, max_it)
   #write_spatial_params(par_all, names, paste0("valeur_spatial_finale_pre_loop"), log_file)
   log_params(par_all, names, "valeur_spatial_finale_pre_loop", 
-             log_file, log_file_st, log_file_temp, which="spatial")
+             logs$log_file, logs$log_file_st, logs$log_file_temp, which="spatial")
   
   
   for (v in 1:2) {
@@ -673,25 +675,23 @@ estimation_gf <- function(data, wt_id, max_it, dates, tmax, names, par_all = NUL
     par_all <- optimize_temporal_parameters(par_all, data, names, Vi, uh, cr, max_it)
     #write_temp_params(par_all, names, paste0("valeur_finale_temporal_loop_n", v), log_file_temp)
     log_params(par_all, names, paste0("valeur_finale_spatiotemp_loop_", v),
-               log_file, log_file_st, log_file_temp, which="st")
+               logs$log_file, logs$log_file_st, logs$log_file_temp, which="st")
     
     # Optimize spatial parameters
     par_all <- optimize_spatial_parameters(par_all, data, names, Vi, uh, cr, max_it)
     #write_spatial_params(par_all, names, paste0("valeur_finale_spatial_loop_n", v), log_file)
     log_params(par_all, names, paste0("valeur_finale_spatial_loop_n", v),
-               log_file, log_file_st, log_file_temp, which="spatial")
+               logs$log_file, logs$log_file_st, logs$log_file_temp, which="spatial")
     
     # Optimize spatotemporal parameters
     #par_all <- optimize_spatiotemporal_parameters(par_all, data, names, Vi, uh=[uh[,1] <= 2,], cr, max_it, ep)
     par_all <- optimize_spatiotemporal_parameters(par_all, data, names, Vi, uh, cr, max_it)
     #write_st_params(par_all, names, paste0("valeur_finale_spatiotemp_loop_", v), log_file_st)
     log_params(par_all, names, paste0("valeur_finale_spatiotemp_loop_", v),
-               log_file, log_file_st, log_file_temp, which="st")
+               logs$log_file, logs$log_file_st, logs$log_file_temp, which="st")
   }
   
-  assign(".log_file",      NULL, envir=.GlobalEnv)
-  assign(".log_file_st",   NULL, envir=.GlobalEnv)
-  assign(".log_file_temp", NULL, envir=.GlobalEnv)
+  stop_monitoring()
   
   # Construct parameter and beta matrices
   # rho1 in par_all already update in optimize_spatial_parameters
