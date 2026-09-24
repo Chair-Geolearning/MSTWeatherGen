@@ -616,7 +616,11 @@ estimation_gf <- function(data, wt_id, max_it, dates, tmax, names, par_all = NUL
   # pair of variable by row (V1,V2)
   Vi <- generate_variable_index_pairs(names)
   
-  logs <- init_monitoring(names)
+  MONITOR <- isTRUE(as.logical(Sys.getenv("MONITOR")))
+  
+  if (MONITOR) {
+    logs <- init_monitoring(names)
+  }
   
   # Preprocess data to adjust for thresholds and compute distances
   # a data.frame with u, h and uh
@@ -643,11 +647,11 @@ estimation_gf <- function(data, wt_id, max_it, dates, tmax, names, par_all = NUL
   #write_spatial_params(par_all, names, "init_spatial_params", log_file)
   #write_st_params(par_all, names, "init_spatio_temp", log_file_st)
   #write_temp_params(par_all,    names, "init_temporal",       log_file_temp)
-  log_params(par_all, names, "init", logs$log_file, logs$log_file_st, logs$log_file_temp)
+  if (MONITOR) log_params(par_all, names, "init", logs$log_file, logs$log_file_st, logs$log_file_temp)
   
   par_all <- optimize_spatial_parameters(par_all, data, names, Vi, uh[uh[, 1] == 0, ], cr, max_it)
   #write_spatial_params(par_all, names, paste0("valeur_spatial_finale_pre_loop"), log_file)
-  log_params(par_all, names, "valeur_spatial_finale_pre_loop", 
+  if (MONITOR) log_params(par_all, names, "valeur_spatial_finale_pre_loop", 
              logs$log_file, logs$log_file_st, logs$log_file_temp, which="spatial")
   
   
@@ -656,24 +660,24 @@ estimation_gf <- function(data, wt_id, max_it, dates, tmax, names, par_all = NUL
     # Optimize temporal parameters
     par_all <- optimize_temporal_parameters(par_all, data, names, Vi, uh, cr, max_it)
     #write_temp_params(par_all, names, paste0("valeur_finale_temporal_loop_n", v), log_file_temp)
-    log_params(par_all, names, paste0("valeur_finale_temporal_loop_n", v),
+    if (MONITOR) log_params(par_all, names, paste0("valeur_finale_temporal_loop_n", v),
                logs$log_file, logs$log_file_st, logs$log_file_temp, which="temp")
     
     # Optimize spatial parameters
     par_all <- optimize_spatial_parameters(par_all, data, names, Vi, uh, cr, max_it)
     #write_spatial_params(par_all, names, paste0("valeur_finale_spatial_loop_n", v), log_file)
-    log_params(par_all, names, paste0("valeur_finale_spatial_loop_n", v),
+    if (MONITOR) log_params(par_all, names, paste0("valeur_finale_spatial_loop_n", v),
                logs$log_file, logs$log_file_st, logs$log_file_temp, which="spatial")
     
     # Optimize spatotemporal parameters
     #par_all <- optimize_spatiotemporal_parameters(par_all, data, names, Vi, uh=[uh[,1] <= 2,], cr, max_it, ep)
     par_all <- optimize_spatiotemporal_parameters(par_all, data, names, Vi, uh, cr, max_it)
     #write_st_params(par_all, names, paste0("valeur_finale_spatiotemp_loop_", v), log_file_st)
-    log_params(par_all, names, paste0("valeur_finale_spatiotemp_loop_", v),
+    if (MONITOR) log_params(par_all, names, paste0("valeur_finale_spatiotemp_loop_", v),
                logs$log_file, logs$log_file_st, logs$log_file_temp, which="st")
   }
   
-  stop_monitoring()
+  if (MONITOR) stop_monitoring()
   
   # Construct parameter and beta matrices
   # rho1 in par_all already update in optimize_spatial_parameters
