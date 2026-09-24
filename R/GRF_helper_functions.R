@@ -617,31 +617,6 @@ estimation_gf <- function(data, wt_id, max_it, dates, tmax, names, par_all = NUL
   Vi <- generate_variable_index_pairs(names)
   
   logs <- init_monitoring(names)
-  cat("class(logs) :", class(logs), "\n")
-  
-  'log_file <- "monitoring_aii_nuii.txt"
-  writeLines(
-    paste(c("label", paste0("aii_", names), paste0("nuii_", names)), collapse=";"),
-    log_file
-  )
-  assign(".log_file", log_file, envir=.GlobalEnv)
-  assign(".log_iter", 0L,       envir=.GlobalEnv)
-  
-  log_file_st <- "monitoring_spatiotemporal.txt"
-  writeLines(
-    paste(c("label", "a","b","c","d","e", paste0("Ai_", names)), collapse=";"),
-    log_file_st
-  )
-  assign(".log_file_st", log_file_st, envir=.GlobalEnv)
-  assign(".log_iter_st", 0L,          envir=.GlobalEnv)
-  
-  log_file_temp <- "monitoring_temporal.txt"
-  writeLines(
-    paste(c("label", paste0("r1ii_", names), paste0("r2ii_", names)), collapse=";"),
-    log_file_temp
-  )
-  assign(".log_file_temp", log_file_temp, envir=.GlobalEnv)
-  assign(".log_iter_temp", 0L,            envir=.GlobalEnv)'
   
   # Preprocess data to adjust for thresholds and compute distances
   # a data.frame with u, h and uh
@@ -681,8 +656,8 @@ estimation_gf <- function(data, wt_id, max_it, dates, tmax, names, par_all = NUL
     # Optimize temporal parameters
     par_all <- optimize_temporal_parameters(par_all, data, names, Vi, uh, cr, max_it)
     #write_temp_params(par_all, names, paste0("valeur_finale_temporal_loop_n", v), log_file_temp)
-    log_params(par_all, names, paste0("valeur_finale_spatiotemp_loop_", v),
-               logs$log_file, logs$log_file_st, logs$log_file_temp, which="st")
+    log_params(par_all, names, paste0("valeur_finale_temporal_loop_n", v),
+               logs$log_file, logs$log_file_st, logs$log_file_temp, which="temp")
     
     # Optimize spatial parameters
     par_all <- optimize_spatial_parameters(par_all, data, names, Vi, uh, cr, max_it)
