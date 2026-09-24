@@ -304,9 +304,14 @@ loglik <- function(par, parms, par_all, data, names, Vi, h, u, uh, cr) {
   nuii_names <- paste(paste(names, names, sep="-"), "nuii", sep=":")
   
   if (any(aii_names %in% parms)) {
-    
-    cat("aii :", round(par[parms %in% aii_names], 4),
-        "nuii :", round(par[parms %in% nuii_names], 4), "\n")
+    iter <- get(".log_iter", envir=.GlobalEnv) + 1L
+    assign(".log_iter", iter, envir=.GlobalEnv)
+    line <- paste(c(
+      paste0("iter_", iter),
+      round(par[parms %in% aii_names],  6),
+      round(par[parms %in% nuii_names], 6)
+    ), collapse=";")
+    write(line, file=get(".log_file", envir=.GlobalEnv), append=TRUE)
   }
   
   J <- length(names)

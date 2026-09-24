@@ -472,6 +472,17 @@ optimize_temporal_parameters <- function(par_all, data, names, Vi, uh, cr, max_i
   
   return(par_all)
 }
+
+
+write_spatial_params <- function(par_all, names, label, log_file) {
+  aii_names  <- paste(paste(names, names, sep="-"), "aii",  sep=":")
+  nuii_names <- paste(paste(names, names, sep="-"), "nuii", sep=":")
+  line <- paste(c(label,
+                  round(par_all[aii_names],  6),
+                  round(par_all[nuii_names], 6)),
+                collapse=";")
+  write(line, file=log_file, append=TRUE)
+}
 #' Estimate Geostatistical Parameters for Multivariate Spatio-Temporal Data
 #'
 #' This function estimates the geostatistical parameters for a multivariate space-time model
@@ -515,6 +526,13 @@ estimation_gf <- function(data, wt_id, max_it, dates, tmax, names, par_all = NUL
   # pair of variable by row (V1,V2)
   Vi <- generate_variable_index_pairs(names)
 
+  log_file <- "monitoring_aii_nuii.txt"
+  writeLines(
+    paste(c("label", paste0("aii_", names), paste0("nuii_", names)), collapse=";"),
+    log_file
+  )
+  assign(".log_file", log_file, envir=.GlobalEnv)
+  assign(".log_iter", 0L,       envir=.GlobalEnv)
   # Preprocess data to adjust for thresholds and compute distances
   # a data.frame with u, h and uh
   # length (nrow) -> nrow(Ti) x nrow(Si) -> each times lag by each spatial indice
@@ -533,9 +551,11 @@ estimation_gf <- function(data, wt_id, max_it, dates, tmax, names, par_all = NUL
 
   # Construct parameter matrix for covariance model
   pairs <- paste(Vi[, 1], Vi[, 2], sep = "-")
-
+  
   # Check and initialize par_all if missing
   par_all <- initialize_par_all_if_missing(par_all, names, pairs, par_s, rho1, cr = cr)
+  
+  write_spatial_params(par_all, names, "init_spatial_params", log_file)
   
   cat("=== VALEURS INITIALES ===\n")
   cat("aii  :", round(par_all[paste(paste(names, names, sep="-"), "aii",  sep=":")], 4), "\n")
@@ -543,7 +563,8 @@ estimation_gf <- function(data, wt_id, max_it, dates, tmax, names, par_all = NUL
   
   cat("\n=== Premiere Optimisation Spatiale\n")
   par_all <- optimize_spatial_parameters(par_all, data, names, Vi, uh[uh[, 1] == 0, ], cr, max_it)
-
+  write_spatial_params(par_all, names, paste0("valeur_spatial_finale_pre_loop"), log_file)
+  
   for (v in 1:2) {
     
     cat("\n=== BOUCLE v =", v, "===\n")
@@ -552,7 +573,8 @@ estimation_gf <- function(data, wt_id, max_it, dates, tmax, names, par_all = NUL
     
     # Optimize spatial parameters
     par_all <- optimize_spatial_parameters(par_all, data, names, Vi, uh, cr, max_it)
-
+    write_spatial_params(par_all, names, paste0("valeur_finale_spatial_loop_n", v), log_file)
+    
     # Optimize spatotemporal parameters
     #par_all <- optimize_spatiotemporal_parameters(par_all, data, names, Vi, uh=[uh[,1] <= 2,], cr, max_it, ep)
     par_all <- optimize_spatiotemporal_parameters(par_all, data, names, Vi, uh, cr, max_it)
@@ -561,7 +583,9 @@ estimation_gf <- function(data, wt_id, max_it, dates, tmax, names, par_all = NUL
   cat("=== VALEURS FINALES APRES TOUTES LES LOOPS ===\n")
   cat("aii  :", round(par_all[paste(paste(names, names, sep="-"), "aii",  sep=":")], 4), "\n")
   cat("nuii :", round(par_all[paste(paste(names, names, sep="-"), "nuii", sep=":")], 4), "\n")
-
+  
+  assign(".log_file", NULL, envir=.GlobalEnv)
+  
   # Construct parameter and beta matrices
   # rho1 in par_all already update in optimize_spatial_parameters
   par_all <- update_rho1_parameters(par_all, names, extract_rho1(create_df_param(par_all, names), names))
