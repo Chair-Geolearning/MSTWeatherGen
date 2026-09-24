@@ -300,18 +300,22 @@ extract_rho1 <- function(parm, names) {
 #' @keywords internal
 loglik <- function(par, parms, par_all, data, names, Vi, h, u, uh, cr) {
   
+  # Spatio 
   aii_names  <- paste(paste(names, names, sep="-"), "aii",  sep=":")
   nuii_names <- paste(paste(names, names, sep="-"), "nuii", sep=":")
   
   if (any(aii_names %in% parms)) {
-    iter <- get(".log_iter", envir=.GlobalEnv) + 1L
-    assign(".log_iter", iter, envir=.GlobalEnv)
-    line <- paste(c(
-      paste0("iter_", iter),
-      round(par[parms %in% aii_names],  6),
-      round(par[parms %in% nuii_names], 6)
-    ), collapse=";")
-    write(line, file=get(".log_file", envir=.GlobalEnv), append=TRUE)
+    log_f <- tryCatch(get(".log_file", envir=.GlobalEnv), error=function(e) NULL)
+    if (!is.null(log_f) && is.character(log_f)) {
+      iter <- tryCatch(get(".log_iter", envir=.GlobalEnv), error=function(e) 0L) + 1L
+      assign(".log_iter", iter, envir=.GlobalEnv)
+      line <- paste(c(
+        paste0("iter_", iter),
+        round(par[parms %in% aii_names],  6),
+        round(par[parms %in% nuii_names], 6)
+      ), collapse=";")
+      tryCatch(write(line, file=log_f, append=TRUE), error=function(e) NULL)
+    }
   }
   
   # Spatio Temp
@@ -331,6 +335,7 @@ loglik <- function(par, parms, par_all, data, names, Vi, h, u, uh, cr) {
       tryCatch(write(line, file=log_f, append=TRUE), error=function(e) NULL)
     }
   }
+  # Temp
   
   r1ii_names <- paste(names, "r1ii", sep=":")
   r2ii_names <- paste(names, "r2ii", sep=":")
