@@ -483,6 +483,26 @@ write_spatial_params <- function(par_all, names, label, log_file) {
                 collapse=";")
   write(line, file=log_file, append=TRUE)
 }
+
+write_st_params <- function(par_all, names, label, log_file) {
+  abcde_names <- c("a","b","c","d","e")
+  Ai_names    <- paste(names, "Ai", sep=":")
+  line <- paste(c(label,
+                  round(par_all[abcde_names], 6),
+                  round(par_all[Ai_names],    6)),
+                collapse=";")
+  write(line, file=log_file, append=TRUE)
+}
+
+write_temp_params <- function(par_all, names, label, log_file) {
+  r1ii_names <- paste(names, "r1ii", sep=":")
+  r2ii_names <- paste(names, "r2ii", sep=":")
+  line <- paste(c(label,
+                  round(par_all[r1ii_names], 6),
+                  round(par_all[r2ii_names], 6)),
+                collapse=";")
+  write(line, file=log_file, append=TRUE)
+}
 #' Estimate Geostatistical Parameters for Multivariate Spatio-Temporal Data
 #'
 #' This function estimates the geostatistical parameters for a multivariate space-time model
@@ -533,6 +553,23 @@ estimation_gf <- function(data, wt_id, max_it, dates, tmax, names, par_all = NUL
   )
   assign(".log_file", log_file, envir=.GlobalEnv)
   assign(".log_iter", 0L,       envir=.GlobalEnv)
+  
+  log_file_st <- "monitoring_spatiotemporal.txt"
+  writeLines(
+    paste(c("label", "a","b","c","d","e", paste0("Ai_", names)), collapse=";"),
+    log_file_st
+  )
+  assign(".log_file_st", log_file_st, envir=.GlobalEnv)
+  assign(".log_iter_st", 0L,          envir=.GlobalEnv)
+  
+  log_file_temp <- "monitoring_temporal.txt"
+  writeLines(
+    paste(c("label", paste0("r1ii_", names), paste0("r2ii_", names)), collapse=";"),
+    log_file_temp
+  )
+  assign(".log_file_temp", log_file_temp, envir=.GlobalEnv)
+  assign(".log_iter_temp", 0L,            envir=.GlobalEnv)
+  
   # Preprocess data to adjust for thresholds and compute distances
   # a data.frame with u, h and uh
   # length (nrow) -> nrow(Ti) x nrow(Si) -> each times lag by each spatial indice
@@ -556,6 +593,7 @@ estimation_gf <- function(data, wt_id, max_it, dates, tmax, names, par_all = NUL
   par_all <- initialize_par_all_if_missing(par_all, names, pairs, par_s, rho1, cr = cr)
   
   write_spatial_params(par_all, names, "init_spatial_params", log_file)
+  write_st_params(par_all, names, "init_spatio_temp", log_file_st)
   
   cat("=== VALEURS INITIALES ===\n")
   cat("aii  :", round(par_all[paste(paste(names, names, sep="-"), "aii",  sep=":")], 4), "\n")
@@ -570,7 +608,7 @@ estimation_gf <- function(data, wt_id, max_it, dates, tmax, names, par_all = NUL
     cat("\n=== BOUCLE v =", v, "===\n")
     # Optimize temporal parameters
     par_all <- optimize_temporal_parameters(par_all, data, names, Vi, uh, cr, max_it)
-    
+    write_temp_params(par_all, names, paste0("valeur_finale_temporal_loop_n", v), log_file_temp)
     # Optimize spatial parameters
     par_all <- optimize_spatial_parameters(par_all, data, names, Vi, uh, cr, max_it)
     write_spatial_params(par_all, names, paste0("valeur_finale_spatial_loop_n", v), log_file)
@@ -578,6 +616,7 @@ estimation_gf <- function(data, wt_id, max_it, dates, tmax, names, par_all = NUL
     # Optimize spatotemporal parameters
     #par_all <- optimize_spatiotemporal_parameters(par_all, data, names, Vi, uh=[uh[,1] <= 2,], cr, max_it, ep)
     par_all <- optimize_spatiotemporal_parameters(par_all, data, names, Vi, uh, cr, max_it)
+    write_st_params(par_all, names, paste0("valeur_finale_spatiotemp_loop_", v), log_file_st)
   }
   
   cat("=== VALEURS FINALES APRES TOUTES LES LOOPS ===\n")
@@ -585,7 +624,8 @@ estimation_gf <- function(data, wt_id, max_it, dates, tmax, names, par_all = NUL
   cat("nuii :", round(par_all[paste(paste(names, names, sep="-"), "nuii", sep=":")], 4), "\n")
   
   assign(".log_file", NULL, envir=.GlobalEnv)
-  
+  assign(".log_file_st", NULL, envir=.GlobalEnv)
+  assign(".log_file_temp", NULL, envir=.GlobalEnv)
   # Construct parameter and beta matrices
   # rho1 in par_all already update in optimize_spatial_parameters
   par_all <- update_rho1_parameters(par_all, names, extract_rho1(create_df_param(par_all, names), names))

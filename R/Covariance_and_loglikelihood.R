@@ -299,7 +299,7 @@ extract_rho1 <- function(parm, names) {
 #' @importFrom stats rnorm pnorm
 #' @keywords internal
 loglik <- function(par, parms, par_all, data, names, Vi, h, u, uh, cr) {
-  # Print aii et nuii si on est dans optimize_spatial
+  
   aii_names  <- paste(paste(names, names, sep="-"), "aii",  sep=":")
   nuii_names <- paste(paste(names, names, sep="-"), "nuii", sep=":")
   
@@ -314,6 +314,40 @@ loglik <- function(par, parms, par_all, data, names, Vi, h, u, uh, cr) {
     write(line, file=get(".log_file", envir=.GlobalEnv), append=TRUE)
   }
   
+  # Spatio Temp
+  abcde_names <- c("a", "b", "c", "d", "e")
+  Ai_names    <- paste(names, "Ai", sep=":")
+  
+  if (any(abcde_names %in% parms)) {
+    log_f <- tryCatch(get(".log_file_st", envir=.GlobalEnv), error=function(e) NULL)
+    if (!is.null(log_f) && is.character(log_f)) {
+      iter <- tryCatch(get(".log_iter_st", envir=.GlobalEnv), error=function(e) 0L) + 1L
+      assign(".log_iter_st", iter, envir=.GlobalEnv)
+      line <- paste(c(
+        paste0("iter_", iter),
+        round(par[parms %in% abcde_names], 6),
+        round(par[parms %in% Ai_names],    6)
+      ), collapse=";")
+      tryCatch(write(line, file=log_f, append=TRUE), error=function(e) NULL)
+    }
+  }
+  
+  r1ii_names <- paste(names, "r1ii", sep=":")
+  r2ii_names <- paste(names, "r2ii", sep=":")
+  
+  if (any(r1ii_names %in% parms)) {
+    log_f <- tryCatch(get(".log_file_temp", envir=.GlobalEnv), error=function(e) NULL)
+    if (!is.null(log_f) && is.character(log_f)) {
+      iter <- tryCatch(get(".log_iter_temp", envir=.GlobalEnv), error=function(e) 0L) + 1L
+      assign(".log_iter_temp", iter, envir=.GlobalEnv)
+      line <- paste(c(
+        paste0("iter_", iter),
+        round(par[parms %in% r1ii_names], 6),
+        round(par[parms %in% r2ii_names], 6)
+      ), collapse=";")
+      tryCatch(write(line, file=log_f, append=TRUE), error=function(e) NULL)
+    }
+  }
   J <- length(names)
   pairs <- paste(Vi[, 1], Vi[, 2], sep = "-")
   par_all[parms] <- par
