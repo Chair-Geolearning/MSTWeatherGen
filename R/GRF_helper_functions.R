@@ -467,43 +467,6 @@ optimize_temporal_parameters <- function(par_all, data, names, Vi, uh, cr, max_i
   return(par_all)
 }
 
-log_params <- function(par_all, names, label, log_file, log_file_st, log_file_temp, which = c("spatial", "st", "temp")) {
-  
-  
-  # aii et nuii
-  if ("spatial" %in% which) {
-    
-    aii_names  <- paste(paste(names, names, sep="-"), "aii",  sep=":")
-    nuii_names <- paste(paste(names, names, sep="-"), "nuii", sep=":")
-    line <- paste(c(label,
-                    round(par_all[aii_names],  6),
-                    round(par_all[nuii_names], 6)),
-                  collapse=";")
-    write(line, file=log_file, append=TRUE)
-  }
-  
-  # a,b,c,d,e et Ai
-  if ("st" %in% which) {
-  
-    Ai_names <- paste(names, "Ai", sep=":")
-    line <- paste(c(label,
-                    round(par_all[c("a","b","c","d","e")], 6),
-                    round(par_all[Ai_names], 6)),
-                  collapse=";")
-    write(line, file=log_file_st, append=TRUE)
-  }
-  
-  # r1ii et r2ii
-  if ("temp" %in% which) {
-    
-    line <- paste(c(label,
-                    round(par_all[paste(names, "r1ii", sep=":")], 6),
-                    round(par_all[paste(names, "r2ii", sep=":")], 6)),
-                  collapse=";")
-    write(line, file=log_file_temp, append=TRUE)
-  }
-}
-
 #' Estimate Geostatistical Parameters for Multivariate Spatio-Temporal Data
 #'
 #' This function estimates the geostatistical parameters for a multivariate space-time model
