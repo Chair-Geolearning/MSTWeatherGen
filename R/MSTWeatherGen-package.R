@@ -66,7 +66,7 @@
 "_PACKAGE"
 
 .pkgenv <- new.env(parent = emptyenv())
-.pkgenv$nbcores <- 2L
+.pkgenv$nbcores <- 1L
 
 #' @title Get Package and System Information
 #'
@@ -135,10 +135,10 @@ setCores <- function(n = NULL) {
   }
 
   if (is.null(n)) {
-    .pkgenv$nbcores <- max(1L, total_cores - 2)
+    .pkgenv$nbcores <- 1L #max(1L, total_cores - 2)
     packageStartupMessage(
       "Number of cores set to ", .pkgenv$nbcores,
-      " (total: ", total_cores, ", reserved: 2)"
+      " (total: ", total_cores, ", reserved: 1)"
     )
     packageStartupMessage("To change manually the number of cores, use: setCores(n)")
     packageStartupMessage("To check how many cores you are using, use: getCores()")

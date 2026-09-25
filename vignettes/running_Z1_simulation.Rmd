@@ -1,0 +1,380 @@
+---
+title: "Estimating MSTWeatherGen from a Z1 simulation"
+description: "Load, inspect, plot, and estimate a non-seasonal MSTWeatherGen model from Z1"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Estimating MSTWeatherGen from a Z1 simulation}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options:
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+> Le plan : Introduction, generation de Z1, lancer l'estimation du modèle, comparer les paramètres et valeurs retourné.
+
+## Introduction
+
+The goal of this vignette is to test the estimation phase of MSTWeatherGen and especially the function `estimation_gf` 
+in GRF_helper_function which is an internal function.  
+Here is how to load the package internal function that is used.
+
+```{r load-package, message=FALSE, warning=FALSE}
+devtools::load_all()
+# Set the number of cores to use
+cores_nb <- setCores(1)
+```
+
+## Estimate from know parameters
+
+Here we shows how to create a simulated a latent gaussien random field named `Z` of three-dimensional array that fit a non-seasonal `MSTWeatherGen` model estimation.  
+The expected organization of `Z` is:  
+`Z[time, spatial location, variable]`
+
+### Generate Z
+
+```{r , eval=FALSE}
+library(invgamma)
+
+# Set seed if you want
+#set.seed(14347)
+
+# Define spatial and temporal resolutions
+spatial_resolution  = 0.4
+temporal_resolution = 1 # nb of day
+
+  # Generate spatial grid for simulation
+s1_seq = seq(0, 10, by = spatial_resolution)
+s2_seq = seq(0, 8, by = spatial_resolution)
+grid_spatial = expand.grid(s1 = s1_seq, s2 = s2_seq)
+spatial_coordinates = as.matrix(grid_spatial) 
+# Define temporal sequence 40 days
+t_seq = seq(1, 40, by = temporal_resolution)
+
+generate_Z <- function(t_seq, spatial_coordinates){
+  ns = nrow(spatial_coordinates)   
+  nt = length(t_seq)  
+
+  p = 3 # Number of variables observed
+  L = 3000 # Number of waves
+
+  # Définition des Matern
+  rs = c(0.5,1,2) # paramètres aii dans le papier
+  nu = c(0.5,1,2) # nuii
+
+  # Define Matern covariance function parameters
+  matern_fun1 = function(t_val, s_coord) {
+    list(nu=nu[1], r=rs[1])
+  }
+  matern_fun2 = function(t_val, s_coord) {
+    list(nu=nu[2], r=rs[2])
+  }
+  matern_fun3 = function(t_val, s_coord) {
+    list(nu=nu[3], r=rs[3])
+  }
+  SpectralPars = list(matern_fun1, matern_fun2, matern_fun3)
+
+  # Define covariance structure (between variables) function
+  Sigma_fun = function(t_val, s_coord) {
+    M = matrix(0.7,ncol=3,nrow=3)
+    diag(M) = 1
+    return(M)
+  }
+
+  # Define anisotropy functions for Isotropic case
+  aniso_fun1 = aniso_fun2 = aniso_fun3 = function(t_val, s_coord) {
+    diag(2)
+  }
+  anisotropies = list(aniso_fun1, aniso_fun2, aniso_fun3)
+
+  # Define simulation parameters
+  params = list(
+    p = p,
+    nt = nt,
+    t = t_seq,
+    A = c(0.2,0.5,0.8), # paramètres A_i
+    a = 1/2,   # a=d
+    alpha = 1, # b=e, with c=1
+    delta = 0, # does not exist in MSTWeatherGen
+    b = 1, # non-separability - does not exist in MSTWeatherGen
+    anisotropies = anisotropies,
+    SpectralPars = SpectralPars,
+    Sigma_fun    = Sigma_fun,
+    rs = rs,
+    nu = nu)
+
+  # Run spatio-temporal simulation 
+  Z1 = SimulateParsimNS(
+    L                  = L,
+    ns                 = ns,
+    nt                 = nt,
+    p                  = p,
+    params             = params,
+    spatial_coordinates = spatial_coordinates,
+    SpectralDensity = MaternSpectralDensity3D,
+    parallelize        = F, 
+    batch_size = 100,
+    n_cores = 4
+  )
+
+  dimnames(Z1)[[3]] <- c("v1","v2","v3")
+
+  r_t = c(0.2,0.4,0.6) # r¹ii et r²ii
+  rho  = Sigma_fun(1,1)
+  Z_T1 = TemporalSim(nt,r_t,rho,a=rep(1,p),nu=rep(1,p),A=rep(0,p))
+  Z_T2 = TemporalSim(nt,r_t,rho,a=rs,nu=nu,A=c(0.2,0.5,0.8))
+
+  Z = Z1
+  for (i in seq_len(ns)) {
+    for (k in seq_len(p)){
+      Z[,i,k] = 0.707*(Z_T2[,k]*Z1[,i,k] + Z_T1[,k])
+    }
+  }
+
+  #plot(1:40,Z_T1[,1],type="l")
+  #points(1:40,Z_T1[,2],type="l",lty=2)
+  #points(1:40,Z_T1[,3],type="l",lty=3)
+
+  #plot(1:40,Z_T2[,1],type="l")
+  #points(1:40,Z_T2[,2],type="l",lty=2)
+  #points(1:40,Z_T2[,3],type="l",lty=3)
+
+  #plot(1:40,Z[,1,1],type="l")
+  #points(1:40,Z[,1,2],type="l",lty=2)
+  #points(1:40,Z[,1,3],type="l",lty=3)
+
+  return(Z)
+}
+
+```
+
+### Check Z
+
+Plot two variables at a time T
+```{r eval=FALSE}
+library(dplyr)
+
+Z = generate_Z(t_seq, spatial_coordinates)
+
+T = 1
+variables = c("v1","v3")
+x_coords = spatial_coordinates[, 1]
+y_coords = spatial_coordinates[, 2]
+
+df_v1 = data.frame(
+  ZZ1      = Z[T, , 2],
+  X        = x_coords,
+  Y        = y_coords,
+  Variable = paste(variables[1]),
+  Time     =  1
+)
+
+df_v2 = data.frame(
+  ZZ2      = Z[T, , 3],
+  X        = x_coords,
+  Y        = y_coords,
+  Variable = paste(variables[2]),
+  Time     =  T
+)
+
+color_scale_fun = function(...) scale_fill_viridis_c(option = "H", ...)
+theme_fun = theme_bw
+
+p_1 = ggplot(df_v1, aes(x = X, y = Y, fill = ZZ1)) +
+  geom_raster() +
+  color_scale_fun() +
+  #facet_wrap(~ Time, nrow = 1) +
+  theme_fun() +
+  labs(
+    title = paste("Variable=", variables[1] ,"; time=",T),
+    x = "x coordinate",
+    y = "y coordinate",
+    fill = NULL
+  ) +
+  theme(
+    plot.title = element_text(hjust = 0.5, size = 12),
+    strip.text = element_text(size = 10)
+  )
+
+
+p_2 = ggplot(df_v2, aes(x = X, y = Y, fill = ZZ2)) +
+  geom_raster() +
+  color_scale_fun() +
+  #facet_wrap(~ Time, nrow = 1) +
+  theme_fun() +
+  labs(
+    title = paste("variable=",variables[2],"; time = ",T),
+    x = "x coordinate",
+    y = "y coordinate",
+    fill = NULL
+  ) +
+  theme(
+    plot.title = element_text(hjust = 0.5, size = 12),
+    strip.text = element_text(size = 10)
+  ) 
+pl = p_1 + p_2 + plot_layout(guides = 'collect')
+pl
+
+```
+
+
+### Run estimation  
+
+This is how to run Z simulation and estimation.
+
+#### Part 1 : Read the already saved Z simulation data 
+
+```{r eval=FALSE}
+# to check, Z is simulated later
+data("Z", package = "MSTWeatherGen")
+
+if (length(dim(Z)) != 3L) {
+  stop("Z must be a three-dimensional array: time, location, variable.")
+}
+```
+
+#### Part 2 : Define estimation_gf parameters
+
+```{r eval=FALSE}
+tmax <- 3 # nb of days of lag
+wt_id = (tmax+1):(length(t_seq)) # one weather type , all indexes starting at tmax+1 match t_seq and dates
+
+max_it <- 100 # Maximum number of iteration for optimisation process
+
+dates = seq(as.Date('2018-01-01'),as.Date('2018-01-01')+(length(t_seq)-1),by = 'day')
+names = c('v1','v2','v3')
+n1 = 10
+n2 = 10
+coordinates = as.data.frame(spatial_coordinates)
+names(coordinates) = c('longitude','latitude')
+
+rho1_init <- matrix(0.1, nrow = length(names), ncol = length(names))
+diag(rho1_init) <- 0.5
+dimnames(Z)[[3]] = names
+
+cr <- sapply(names, function(v1) {
+  sapply(names, function(v2) {
+    mean(sapply(1:dim(Z)[2], function(j)
+      cor(Z[,j,v1], Z[,j,v2], use="complete.obs")), na.rm=TRUE)
+  })
+})
+cr <- matrix(cr, nrow=length(names), ncol=length(names))
+colnames(cr) <- rownames(cr) <- names
+```
+
+#### Part 3 Simulations. 
+
+```{r eval=FALSE}
+Sys.setenv(MONITOR = "TRUE")
+nb_estimation <- 1
+estim_results <- list()
+
+for( it in 1:nb_estimation) {
+
+  #set.seed(14357+it)
+  Z <- generate_Z(t_seq, spatial_coordinates)
+
+  estim_results[[it]] <- estimation_gf(
+      data             = Z,
+      wt_id            = wt_id,
+      max_it           = max_it,
+      dates            = dates,
+      tmax             = tmax,
+      names            = names,
+      coordinates      = coordinates,
+      n1               = n1,
+      n2               = n2,
+      rho1             = rho1_init,
+      cr               = cr,
+      threshold_precip = rep(0,dim(Z)[2])
+  )
+}
+
+```
+
+### Comparing parameters values
+
+#### Parameters values from estimation
+
+```{r eval=FALSE}
+# get all par_all values from all estimation
+all_estimations <- do.call(rbind,lapply(estim_results, function(est){return(est$par_all)}))
+
+all_estimations_stats <- data.frame(
+  moyenne = apply(all_estimations, 2, mean, na.rm = TRUE),
+  variance = apply(all_estimations, 2, var, na.rm = TRUE),
+  ecart_type = apply(all_estimations, 2, sd, na.rm = TRUE),
+  min = apply(all_estimations, 2, min, na.rm = TRUE),
+  max = apply(all_estimations, 2, max, na.rm = TRUE),
+  mediane = apply(all_estimations, 2, median, na.rm = TRUE)
+)
+
+all_estimations_stats
+
+```
+
+```{r eval=FALSE}
+cols_num <- c("a","b","c","d","e","Ai","Aj","aii","ajj",
+              "nuii","nujj","r1ii","r1jj","r2ii","r2jj",
+              "rho1ij","rho2ij")
+
+# Mean
+parm_all_runs <- do.call(rbind, lapply(1:nb_estimation, function(k) estim_results[[k]]$parm))
+parm_mean <- aggregate(parm_all_runs[, cols_num], 
+            by = list(v1=parm_all_runs$v1, v2=parm_all_runs$v2), 
+            FUN = mean, na.rm = TRUE)
+
+# estimated parameters mean values
+parm_mean
+```
+
+#### Comparing real parameters and estimated parameters values
+
+On met les parametres initiaux dans un dataframe
+```{r eval=FALSE}
+# --- Table des vraies valeurs, structurée comme parm_mean ---
+
+# Toutes les paires (v1, v2), diagonale + hors-diagonale, comme dans mean_global
+var_pairs <- expand.grid(v1 = names, v2 = names, stringsAsFactors = FALSE)
+var_pairs <- var_pairs[as.character(var_pairs$v1) <= as.character(var_pairs$v2), ]
+
+# Indices correspondants dans rs / nu / A (dans l'ordre de `names`)
+i <- match(var_pairs$v1, names)
+j <- match(var_pairs$v2, names)
+
+rho_1  = Sigma_fun(1,1)
+
+r_t = c(0.2,0.4,0.6)
+
+true_params <- data.frame(
+  v1     = var_pairs$v1,
+  v2     = var_pairs$v2,
+  a      = params$a,      
+  b      = params$alpha,   
+  c      = 1,              
+  d      = params$a,       
+  e      = params$alpha,   
+  Ai     = params$A[i],
+  Aj     = params$A[j],
+  aii    = params$rs[i],
+  ajj    = params$rs[j],
+  nuii   = params$nu[i],
+  nujj   = params$nu[j],
+  rho1ij = mapply(function(a, b) rho_1[a, b], i, j),
+  r2ii   = r_t[i],
+  r2jj   = r_t[j],
+  r1ii   = r_t[i],
+  r1jj   = r_t[j],
+  rho2ij = mapply(function(a, b) rho_1[a, b], i, j)
+)
+
+# diff estimated vs true_params
+parm_mean[,-c(1,2)] - true_params[,-c(1,2)]
+```

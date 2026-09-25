@@ -4,7 +4,7 @@
 \alias{optimize_spatial_parameters}
 \title{Optimize Spatial Parameters for Variable Pairs}
 \usage{
-optimize_spatial_parameters(par_all, data, names, Vi, uh, cr, max_it, ep)
+optimize_spatial_parameters(par_all, data, names, Vi, uh, cr, max_it)
 }
 \arguments{
 \item{par_all}{Initial set of all model parameters before optimization.}
