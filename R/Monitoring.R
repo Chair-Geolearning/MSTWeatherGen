@@ -1,3 +1,21 @@
+#' Initialiser et créer les fichiers de monitoring
+#'
+#' @description
+#' Crée les trois fichiers de suivi des paramètres spatiaux,
+#' spatio-temporels et temporels, puis écrit leurs en-têtes.
+#' Les fichiers existants sont écrasés.
+#'
+#' @param names Contient les trois noms de variables, par exemple : Precipitation.
+#'
+#' @details
+#' Les trois fichiers sont créés dans le répertoire de travail courant.
+#' Leurs chemins sont stockés dans .log_file, .log_file_st
+#' et .log_file_temp, dans .GlobalEnv.
+#' Les compteurs .log_iter, .log_iter_st et .log_iter_temp sont aussi ajoutés.
+#'
+#' @return Une liste contenant les chemins des fichiers :
+#' log_file, log_file_st et log_file_temp.
+
 init_monitoring <- function(names) {
   log_file <- "monitoring_aii_nuii_spatial.txt"
   writeLines(
@@ -29,6 +47,14 @@ init_monitoring <- function(names) {
     log_file_temp = log_file_temp
   ))
 }
+#' Fermer les variables dans l'environnement global après le monitoring.
+#'
+#' @description
+#' Met à NULL les chemins des fichiers de monitoring stockés
+#' dans .GlobalEnv, ce qui désactive les écritures.
+#' Ne retourne rien. À appeler à la fin du monitoring.
+#'
+#' @return Ne retourne rien. À appeler à la fin du monitoring.
 
 stop_monitoring <- function() {
   assign(".log_file",      NULL, envir=.GlobalEnv)
@@ -36,6 +62,23 @@ stop_monitoring <- function() {
   assign(".log_file_temp", NULL, envir=.GlobalEnv)
 }
 
+#' Écrire les paramètres dans les fichiers de monitoring avant/après chaque optimisation
+#'
+#' @description
+#' Ajoute une ligne étiquetée aux fichiers de monitoring sélectionnés.
+#' Les valeurs sont arrondies à six décimales et séparées par
+#' des points-virgules. Il y a le cas Init et le reste, c'est-à-dire
+#' le cas final après chaque loop et, pour le spatial, la preloop.
+#'
+#' @param par_all
+#' @param names
+#' @param label Chaîne de caractères identifiant la ligne à ajouter.
+#' @param log_file Chemin du fichier de suivi spatial.
+#' @param log_file_st Chemin du fichier de suivi spatio-temporel.
+#' @param log_file_temp Chemin du fichier de suivi temporel.
+#' @param which Vecteur de caractères sélectionnant les groupes à écrire (st, temp et spatial).
+#'
+#' @return NULL
 log_params <- function(par_all, names, label, log_file, log_file_st, log_file_temp, which = c("spatial", "st", "temp")) {
   
   
@@ -72,7 +115,19 @@ log_params <- function(par_all, names, label, log_file, log_file_st, log_file_te
     write(line, file=log_file_temp, append=TRUE)
   }
 }
-
+#' Permet de logger les paramètres tirés lors de l'optimisation
+#'
+#' @description
+#' Ce sont les paramètres proposés par l'optimiseur avant qu'ils soient validés.
+#'
+#' @param par
+#' @param parms
+#' @param names
+#'
+#' @details
+#' Elle est appelée dans loglik.
+#'
+#' @return \code{NULL}, de manière invisible.
 write_loglik_monitoring <- function(par, parms, names) {
   
   # Spatio — aii et nuii
