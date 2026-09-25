@@ -297,56 +297,6 @@ for( it in 1:nb_estimation) {
   )
 }
 
-library(ggplot2)
-
-# Lire le fichier
-spatial       <- read.csv("monitoring_aii_nuii_spatial.txt", sep=";")
-spatial_iters <- spatial[grepl("iter_", spatial$label), ]
-spatial_iters$iter <- seq_len(nrow(spatial_iters))
-
-# Colonnes aii et nuii
-aii_cols  <- grep("^aii_",  colnames(spatial_iters), value=TRUE)
-nuii_cols <- grep("^nuii_", colnames(spatial_iters), value=TRUE)
-
-# Format long pour aii
-df_aii <- data.frame(
-  iter     = rep(spatial_iters$iter, length(aii_cols)),
-  variable = rep(gsub("aii_", "", aii_cols), each=nrow(spatial_iters)),
-  value    = unlist(spatial_iters[, aii_cols])
-)
-
-# Format long pour nuii
-df_nuii <- data.frame(
-  iter     = rep(spatial_iters$iter, length(nuii_cols)),
-  variable = rep(gsub("nuii_", "", nuii_cols), each=nrow(spatial_iters)),
-  value    = unlist(spatial_iters[, nuii_cols])
-)
-
-# Filtrer jusqu'à l'itération 26
-df_aii_26  <- df_aii[df_aii$iter  <= 26, ]
-df_nuii_26 <- df_nuii[df_nuii$iter <= 26, ]
-
-# Plot aii jusqu'à iter 26
-# Plot aii jusqu'à iter 26
-p_aii_26 <- ggplot(df_aii_26, aes(x=iter, y=value, color=variable)) +
-  geom_line(alpha=0.7) +
-  theme_minimal() +
-  labs(title="Evolution de aii — iter 1 à 26", x="Itération", y="aii", color="Variable") +
-  theme(plot.title=element_text(hjust=0.5))
-
-# Plot nuii jusqu'à iter 26
-p_nuii_26 <- ggplot(df_nuii_26, aes(x=iter, y=value, color=variable)) +
-  geom_line(alpha=0.7) +
-  theme_minimal() +
-  labs(title="Evolution de nuii — iter 1 à 26", x="Itération", y="nuii", color="Variable") +
-  theme(plot.title=element_text(hjust=0.5))
-
-print(p_aii_26)
-print(p_nuii_26)
-
-print(p_aii_26)
-print(p_nuii_26)
-
 ```
 
 ### Comparing parameters values
