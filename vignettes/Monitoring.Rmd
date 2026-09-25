@@ -29,6 +29,15 @@ spatial$iter  <- seq_len(nrow(spatial))
 st$iter       <- seq_len(nrow(st))
 temporal$iter <- seq_len(nrow(temporal))
 
+# Séparer étapes clés et itérations
+spatial_steps  <- spatial[!grepl("iter_", spatial$label), ]
+spatial_iters  <- spatial[grepl("iter_",  spatial$label), ]
+
+st_steps       <- st[!grepl("iter_", st$label), ]
+st_iters       <- st[grepl("iter_",  st$label), ]
+
+temporal_steps <- temporal[!grepl("iter_", temporal$label), ]
+temporal_iters <- temporal[grepl("iter_",  temporal$label), ]
 
 ```
 
@@ -72,9 +81,7 @@ print(plot_params(spatial_iters, spatial_steps, aii_cols, "Evolution aii", "aii"
 ```{r }
 nuii_cols <- grep("^nuii_", colnames(spatial_iters), value=TRUE)
 plot_params(spatial_iters, spatial_steps, nuii_cols, "Evolution nuii", "nuii")
-
 ```
-
 
 
 # 3. TEMPORAL — r1ii
@@ -82,7 +89,6 @@ plot_params(spatial_iters, spatial_steps, nuii_cols, "Evolution nuii", "nuii")
 r1ii_cols <- grep("^r1ii_", colnames(temporal_iters), value=TRUE)
 plot_params(temporal_iters, temporal_steps, r1ii_cols, "Evolution r1ii", "r1ii")
 ```
-
 
 # 4. TEMPORAL — r2ii
 ```{r }
