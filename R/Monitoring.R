@@ -109,12 +109,12 @@ log_params <- function(par_all, names, label, log_file, log_file_st, log_file_te
   
   # r1ii et r2ii et rho1_ij
   if ("temp" %in% which) {
-    ep <- generate_variable_index_pairs(names)
+    ep         <- generate_variable_index_pairs(names)
     rho1_names <- paste(paste(ep[,1], ep[,2], sep="-"), "rho1ij", sep=":")
     line <- paste(c(label,
-                    round(par_all[paste(names, "r1ii", sep=":")], 6),
-                    round(par_all[paste(names, "r2ii", sep=":")], 6)),                  
-                    round(par_all[rho1_names],  6),  
+                    as.numeric(round(par_all[paste(names, "r1ii", sep=":")], 6)),
+                    as.numeric(round(par_all[paste(names, "r2ii", sep=":")], 6)),
+                    as.numeric(round(par_all[rho1_names], 6))),  # ← dans c()
                   collapse=";")
     write(line, file=log_file_temp, append=TRUE)
   }
