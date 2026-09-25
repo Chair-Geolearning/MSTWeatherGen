@@ -34,8 +34,10 @@ init_monitoring <- function(names) {
   assign(".log_iter_st", 0L,          envir=.GlobalEnv)
   
   log_file_temp <- "monitoring_r1ii_r2ii_temporal.txt"
+  ep <- generate_variable_index_pairs(names)
+  rho1_names <- paste(paste(ep[,1], ep[,2], sep="-"), "rho1ij", sep=":")
   writeLines(
-    paste(c("label", paste0("r1ii_", names), paste0("r2ii_", names)), collapse=";"),
+    paste(c("label", paste0("r1ii_", names), paste0("r2ii_", names), rho1_names), collapse=";"),
     log_file_temp
   )
   assign(".log_file_temp", log_file_temp, envir=.GlobalEnv)
@@ -105,12 +107,14 @@ log_params <- function(par_all, names, label, log_file, log_file_st, log_file_te
     write(line, file=log_file_st, append=TRUE)
   }
   
-  # r1ii et r2ii
+  # r1ii et r2ii et rho1_ij
   if ("temp" %in% which) {
-    
+    ep <- generate_variable_index_pairs(names)
+    rho1_names <- paste(paste(ep[,1], ep[,2], sep="-"), "rho1ij", sep=":")
     line <- paste(c(label,
                     round(par_all[paste(names, "r1ii", sep=":")], 6),
-                    round(par_all[paste(names, "r2ii", sep=":")], 6)),
+                    round(par_all[paste(names, "r2ii", sep=":")], 6)),                  
+                    round(par_all[rho1_names],  6),  
                   collapse=";")
     write(line, file=log_file_temp, append=TRUE)
   }
@@ -166,9 +170,11 @@ write_loglik_monitoring <- function(par, parms, names) {
     }
   }
   
-  # Temp — r1ii et r2ii
+  # Temp — r1ii et r2ii et rho1ij
   r1ii_names <- paste(names, "r1ii", sep=":")
   r2ii_names <- paste(names, "r2ii", sep=":")
+  ep <- generate_variable_index_pairs(names)
+  rho1_names  <- paste(paste(ep[,1], ep[,2], sep="-"), "rho1ij", sep=":")
   
   if (any(r1ii_names %in% parms)) {
     log_f <- tryCatch(get(".log_file_temp", envir=.GlobalEnv), error=function(e) NULL)
@@ -177,8 +183,9 @@ write_loglik_monitoring <- function(par, parms, names) {
       assign(".log_iter_temp", iter, envir=.GlobalEnv)
       line <- paste(c(
         paste0("iter_", iter),
-        round(par[parms %in% r1ii_names], 6),
-        round(par[parms %in% r2ii_names], 6)
+        round(par[parms %in% r1ii_names],  6),
+        round(par[parms %in% r2ii_names],  6),
+        round(par[parms %in% rho1_names],  6)   
       ), collapse=";")
       tryCatch(write(line, file=log_f, append=TRUE), error=function(e) NULL)
     }
