@@ -300,6 +300,8 @@ extract_rho1 <- function(parm, names) {
 #' @keywords internal
 loglik <- function(par, parms, par_all, data, names, Vi, h, u, uh, cr) {
   
+  MONITOR <- isTRUE(as.logical(Sys.getenv("MONITOR")))
+  
   if (MONITOR) {
   write_loglik_monitoring(par, parms, names)}
   
