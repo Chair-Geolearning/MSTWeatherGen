@@ -18,9 +18,12 @@ avant de lancer l'estimation`.
 ## Lecture des fichiers de monitoring
 
 ```{r }
-spatial  <- read.csv("/home/aboualam/MSTWeatherGen/monitoring_aii_nuii_spatial.txt", sep=";")
-st       <- read.csv("/home/aboualam/MSTWeatherGen/monitoring_abcde_Ai_st.txt",        sep=";")
-temporal <- read.csv("/home/aboualam/MSTWeatherGen/monitoring_r1ii_r2ii_temporal.txt", sep=";")
+library(here)
+
+spatial  <- read.csv(here("monitoring_aii_nuii_spatial.txt"),  sep=";")
+st       <- read.csv(here("monitoring_abcde_Ai_st.txt"),        sep=";")
+temporal <- read.csv(here("monitoring_r1ii_r2ii_temporal.txt"), sep=";")
+
 
 # Ajouter numéro d'itération global
 spatial$iter  <- seq_len(nrow(spatial))
