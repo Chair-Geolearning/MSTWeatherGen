@@ -24,20 +24,83 @@ spatial  <- read.csv(here("monitoring_aii_nuii_spatial.txt"),  sep=";")
 st       <- read.csv(here("monitoring_abcde_Ai_st.txt"),        sep=";")
 temporal <- read.csv(here("monitoring_r1ii_r2ii_temporal.txt"), sep=";")
 
-
 # Ajouter numéro d'itération global
 spatial$iter  <- seq_len(nrow(spatial))
 st$iter       <- seq_len(nrow(st))
 temporal$iter <- seq_len(nrow(temporal))
 
-# Étapes clés
-get_steps <- function(df) {
-  steps <- df[!grepl("iter_", df$label), ]
-  steps$iter_pos <- df$iter[!grepl("iter_", df$label)]
-  return(steps)
+
+```
+
+## Fonction de Plot Generique
+
+```{r }
+# Fonction générique
+plot_params <- function(df_iters, df_steps, cols, title, ylab) {
+  df_long <- data.frame(
+    iter     = rep(df_iters$iter, length(cols)),
+    variable = rep(gsub("^[a-z0-9]+_", "", cols), each=nrow(df_iters)),
+    value    = unlist(df_iters[, cols])
+  )
+  ggplot(df_long, aes(x=iter, y=value, color=variable)) +
+    geom_line(alpha=0.8) +
+    geom_vline(xintercept=df_steps$iter,
+               linetype="dashed", color="black", alpha=0.4) +
+    annotate("text",
+             x     = df_steps$iter,
+             y     = max(df_long$value, na.rm=TRUE),
+             label = df_steps$label,
+             angle = 90, hjust=1, size=2.5, color="black") +
+    theme_minimal() +
+    labs(title=title, x="Itération", y=ylab, color="Variable") +
+    theme(plot.title=element_text(hjust=0.5))
 }
 
-spatial_steps  <- get_steps(spatial)
-st_steps       <- get_steps(st)
-temporal_steps <- get_steps(temporal)
 ```
+
+## PLOTTING  
+# 1. SPATIAL — aii
+```{r }
+
+aii_cols <- grep("^aii_", colnames(spatial_iters), value=TRUE)
+print(plot_params(spatial_iters, spatial_steps, aii_cols, "Evolution aii", "aii"))
+
+```
+
+# 2. SPATIAL — nuii
+
+```{r }
+nuii_cols <- grep("^nuii_", colnames(spatial_iters), value=TRUE)
+plot_params(spatial_iters, spatial_steps, nuii_cols, "Evolution nuii", "nuii")
+
+```
+
+
+
+# 3. TEMPORAL — r1ii
+```{r }
+r1ii_cols <- grep("^r1ii_", colnames(temporal_iters), value=TRUE)
+plot_params(temporal_iters, temporal_steps, r1ii_cols, "Evolution r1ii", "r1ii")
+```
+
+
+# 4. TEMPORAL — r2ii
+```{r }
+r2ii_cols <- grep("^r2ii_", colnames(temporal_iters), value=TRUE)
+plot_params(temporal_iters, temporal_steps, r2ii_cols, "Evolution r2ii", "r2ii")
+```
+
+
+# 5. SPATIO-TEMPORAL — a,b,c,d,e
+```{r }
+abcde_cols <- c("a","b","c","d","e")
+plot_params(st_iters, st_steps, abcde_cols, "Evolution a,b,c,d,e", "valeur")
+```
+
+
+# 6. SPATIO-TEMPORAL — Ai
+```{r }
+Ai_cols <- grep("^Ai_", colnames(st_iters), value=TRUE)
+plot_params(st_iters, st_steps, Ai_cols, "Evolution Ai", "Ai")
+```
+
