@@ -4,7 +4,7 @@
 \alias{loglik}
 \title{Total Log-Likelihood Calculation}
 \usage{
-loglik(par, parms, par_all, data, names, Vi, h, u, uh, ep, cr)
+loglik(par, parms, par_all, data, names, Vi, h, u, uh, cr)
 }
 \arguments{
 \item{par}{Vector of parameter estimates currently being optimized.}
@@ -25,9 +25,9 @@ loglik(par, parms, par_all, data, names, Vi, h, u, uh, ep, cr)
 
 \item{uh}{Combined matrix of spatial and temporal distances with additional identifiers.}
 
-\item{ep}{Data frame defining variable pairs for analysis.}
-
 \item{cr}{Initial correlation matrix across variables.}
+
+\item{ep}{Data frame defining variable pairs for analysis.}
 }
 \value{
 Negatif total log-likelihood value for the observed data given the current model parameters.

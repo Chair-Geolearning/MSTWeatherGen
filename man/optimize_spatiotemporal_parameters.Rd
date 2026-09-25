@@ -4,16 +4,7 @@
 \alias{optimize_spatiotemporal_parameters}
 \title{Optimize Spatio-Temporal Parameters for Variable Pairs}
 \usage{
-optimize_spatiotemporal_parameters(
-  par_all,
-  data,
-  names,
-  Vi,
-  uh,
-  cr,
-  max_it,
-  ep
-)
+optimize_spatiotemporal_parameters(par_all, data, names, Vi, uh, cr, max_it)
 }
 \arguments{
 \item{par_all}{Initial comprehensive set of model parameters to be refined through optimization.}
