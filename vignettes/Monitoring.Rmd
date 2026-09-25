@@ -1,0 +1,40 @@
+---
+title: "Monitoring"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo=TRUE, warning=FALSE, message=FALSE)
+library(ggplot2)
+library(gridExtra)
+```
+
+## Introduction
+
+Cette vignette permet de visualiser l'évolution des paramètres d'optimisation 
+temporel, spatial et spatiotemporel.
+Il faut defnir la variable d'environnement `MONITOR=TRUE` dans le fichier `.Renviron`
+avant de lancer l'estimation`.
+
+## Lecture des fichiers de monitoring
+
+```{r }
+spatial  <- read.csv("/home/aboualam/MSTWeatherGen/monitoring_aii_nuii_spatial.txt", sep=";")
+st       <- read.csv("/home/aboualam/MSTWeatherGen/monitoring_abcde_Ai_st.txt",        sep=";")
+temporal <- read.csv("/home/aboualam/MSTWeatherGen/monitoring_r1ii_r2ii_temporal.txt", sep=";")
+
+# Ajouter numéro d'itération global
+spatial$iter  <- seq_len(nrow(spatial))
+st$iter       <- seq_len(nrow(st))
+temporal$iter <- seq_len(nrow(temporal))
+
+# Étapes clés
+get_steps <- function(df) {
+  steps <- df[!grepl("iter_", df$label), ]
+  steps$iter_pos <- df$iter[!grepl("iter_", df$label)]
+  return(steps)
+}
+
+spatial_steps  <- get_steps(spatial)
+st_steps       <- get_steps(st)
+temporal_steps <- get_steps(temporal)
+```
