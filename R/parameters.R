@@ -32,7 +32,7 @@
   0.25     # .matern_nu : lissage >= 0.25 Viens de Denis a rechecker
 )
 .upper_spatial <- c(
-  Inf,     # .matern_a  : pas de borne supérieure
+  1/0.4,     # .matern_a  : pas de borne supérieure
   3        # .matern_nu : lissage <= 3
 )
 .lower <- c(
