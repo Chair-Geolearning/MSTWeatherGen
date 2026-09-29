@@ -20,9 +20,9 @@ avant de lancer l'estimation`.
 ```{r }
 library(here)
 
-spatial  <- read.csv(here("monitoring_aii_nuii_spatial.txt"),  sep=";")
-st       <- read.csv(here("monitoring_abcde_Ai_st.txt"),        sep=";")
-temporal <- read.csv(here("monitoring_r1ii_r2ii_temporal.txt"), sep=";")
+spatial  <- read.csv2(here("monitoring_aii_nuii_spatial.txt"),  sep=";")
+st       <- read.csv2(here("monitoring_abcde_Ai_st.txt"),        sep=";")
+temporal <- read.csv2(here("monitoring_r1ii_r2ii_temporal.txt"), sep=";")
 
 # Ajouter numéro d'itération global
 spatial$iter  <- seq_len(nrow(spatial))
@@ -45,6 +45,7 @@ temporal_iters <- temporal[grepl("iter_",  temporal$label), ]
 
 ```{r }
 # Fonction générique
+
 plot_params <- function(df_iters, df_steps, cols, title, ylab) {
   df_long <- data.frame(
     iter     = rep(df_iters$iter, length(cols)),
