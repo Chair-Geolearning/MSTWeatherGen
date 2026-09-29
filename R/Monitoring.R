@@ -19,7 +19,7 @@
 init_monitoring <- function(names) {
   log_file <- "monitoring_aii_nuii_spatial.txt"
   writeLines(
-    paste(c("label", paste0("aii_", names), paste0("nuii_", names)), collapse=";"),
+    paste(c("label", "loglik", paste0("aii_", names), paste0("nuii_", names)), collapse=";"),
     log_file
   )
   assign(".log_file", log_file, envir=.GlobalEnv)
@@ -27,7 +27,7 @@ init_monitoring <- function(names) {
   
   log_file_st <- "monitoring_abcde_Ai_st.txt"
   writeLines(
-    paste(c("label", "a","b","c","d","e", paste0("Ai_", names)), collapse=";"),
+    paste(c("label", "loglik", "a","b","c","d","e", paste0("Ai_", names)), collapse=";"),
     log_file_st
   )
   assign(".log_file_st", log_file_st, envir=.GlobalEnv)
@@ -37,7 +37,7 @@ init_monitoring <- function(names) {
   ep <- generate_variable_index_pairs(names)
   rho1_names <- paste(paste(ep[,1], ep[,2], sep="-"), "rho1ij", sep=":")
   writeLines(
-    paste(c("label", paste0("r1ii_", names), paste0("r2ii_", names), rho1_names), collapse=";"),
+    paste(c("label", "loglik", paste0("r1ii_", names), paste0("r2ii_", names), rho1_names), collapse=";"),
     log_file_temp
   )
   assign(".log_file_temp", log_file_temp, envir=.GlobalEnv)
@@ -132,7 +132,7 @@ log_params <- function(par_all, names, label, log_file, log_file_st, log_file_te
 #' Elle est appelée dans loglik.
 #'
 #' @return \code{NULL}, de manière invisible.
-write_loglik_monitoring <- function(par, parms, names) {
+write_loglik_monitoring <- function(par, parms, names, val) {
   
   # Spatio — aii et nuii
   aii_names  <- paste(paste(names, names, sep="-"), "aii",  sep=":")
@@ -145,6 +145,7 @@ write_loglik_monitoring <- function(par, parms, names) {
       assign(".log_iter", iter, envir=.GlobalEnv)
       line <- paste(c(
         paste0("iter_", iter),
+        round(val, 3),
         round(par[parms %in% aii_names],  6),
         round(par[parms %in% nuii_names], 6)
       ), collapse=";")
@@ -163,6 +164,7 @@ write_loglik_monitoring <- function(par, parms, names) {
       assign(".log_iter_st", iter, envir=.GlobalEnv)
       line <- paste(c(
         paste0("iter_", iter),
+        round(val, 3),
         round(par[parms %in% abcde_names], 6),
         round(par[parms %in% Ai_names],    6)
       ), collapse=";")
@@ -183,6 +185,7 @@ write_loglik_monitoring <- function(par, parms, names) {
       assign(".log_iter_temp", iter, envir=.GlobalEnv)
       line <- paste(c(
         paste0("iter_", iter),
+        round(val, 3),
         round(par[parms %in% r1ii_names],  6),
         round(par[parms %in% r2ii_names],  6),
         round(par[parms %in% rho1_names],  6)   
