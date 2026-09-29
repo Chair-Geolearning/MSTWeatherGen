@@ -144,7 +144,7 @@ write_loglik_monitoring <- function(par, parms, names, val) {
       iter <- tryCatch(get(".log_iter", envir=.GlobalEnv), error=function(e) 0L) + 1L
       assign(".log_iter", iter, envir=.GlobalEnv)
       line <- paste(c(
-        paste0("iter_", iter),
+        paste0("eval_", iter),
         round(val, 3),
         round(par[parms %in% aii_names],  6),
         round(par[parms %in% nuii_names], 6)
@@ -163,7 +163,7 @@ write_loglik_monitoring <- function(par, parms, names, val) {
       iter <- tryCatch(get(".log_iter_st", envir=.GlobalEnv), error=function(e) 0L) + 1L
       assign(".log_iter_st", iter, envir=.GlobalEnv)
       line <- paste(c(
-        paste0("iter_", iter),
+        paste0("eval_", iter),
         round(val, 3),
         round(par[parms %in% abcde_names], 6),
         round(par[parms %in% Ai_names],    6)
@@ -184,7 +184,7 @@ write_loglik_monitoring <- function(par, parms, names, val) {
       iter <- tryCatch(get(".log_iter_temp", envir=.GlobalEnv), error=function(e) 0L) + 1L
       assign(".log_iter_temp", iter, envir=.GlobalEnv)
       line <- paste(c(
-        paste0("iter_", iter),
+        paste0("eval_", iter),
         round(val, 3),
         round(par[parms %in% r1ii_names],  6),
         round(par[parms %in% r2ii_names],  6),
