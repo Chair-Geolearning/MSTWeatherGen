@@ -302,9 +302,6 @@ loglik <- function(par, parms, par_all, data, names, Vi, h, u, uh, cr) {
   
   MONITOR <- isTRUE(as.logical(Sys.getenv("MONITOR")))
   
-  if (MONITOR) {
-  write_loglik_monitoring(par, parms, names)}
-  
   J <- length(names)
   pairs <- paste(Vi[, 1], Vi[, 2], sep = "-")
   par_all[parms] <- par
@@ -432,6 +429,7 @@ loglik <- function(par, parms, par_all, data, names, Vi, h, u, uh, cr) {
     
     
     result <- -sum(unlist(ll))
+    if (MONITOR) {write_loglik_monitoring(par, parms, names, result)}
     if (!is.finite(result)) return(1e20)                       # ← protection finale globale
     return(result)
     

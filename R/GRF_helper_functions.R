@@ -182,20 +182,19 @@ update_rho1_parameters <- function(par_all, names, rho1) {
 init_space_par <- function(data, names, h, uh, max_it = 2000) {
   
   cat("Initialize spatial parameters\n")
-  pairs <- paste(names, names, sep="-")
-  parms <- c(
-    paste(pairs[1:length(names)], "aii",  sep=":"),
-    paste(pairs[1:length(names)], "nuii", sep=":")
-  )
-  print(parms)
+  # On itere sur les names pour aii et nuii.
   cat("Processing...")
-
+ 
   ncores <- getCores()
 
   lower <- c(.lower_spatial[.matern_a],
              .lower_spatial[.matern_nu])
+  
   upper <- c(.upper_spatial[.matern_a],
              .upper_spatial[.matern_nu])
+  
+  parscale = c(.upper[.matern_a]-.lower[.matern_a],
+               .upper[.matern_nu]-.lower[.matern_nu])
   
   if (.Platform$OS.type == "windows") {
     cl <- parallel::makeCluster(ncores)
@@ -217,7 +216,7 @@ init_space_par <- function(data, names, h, uh, max_it = 2000) {
         v = v,
         h = h,
         uh = uh,
-        control = list(maxit = max_it, trace = 0)
+        control = list(maxit = max_it, trace = 0) #parscale = parscale
       )$par
     })
   } else {
@@ -289,7 +288,10 @@ optimize_spatial_parameters <- function(par_all, data, names, Vi, uh, cr, max_it
              rep(.lower[.nuii], n_nuii))
   upper <- c(rep(.upper[.aii],  n_aii),
              rep(.upper[.nuii], n_nuii))
-
+  
+  parscale = c(rep(.upper[.aii]-.lower[.aii],  n_aii),
+               rep(.upper[.nuii]-.lower[.nuii],  n_nuii))
+  
   optimized_par <- optim(
     par_all[parms],
     fn     = loglik,
@@ -365,7 +367,13 @@ optimize_spatiotemporal_parameters <- function(par_all, data, names, Vi, uh, cr,
     .upper[.a], .upper[.b], .upper[.c], .upper[.d], .upper[.e],
     rep(.upper[.Ai], n_Ai)
   )
-
+  parscale = c(.upper[.a]-.lower[.a],
+               .upper[.b]-.lower[.b],
+               .upper[.c]-.lower[.c],
+               .upper[.d]-.lower[.d],
+               .upper[.e]-.lower[.e],
+               rep(.upper[.Ai]-.lower[.Ai], n_Ai))
+  
   optimized_par <- optim(
     par_all[parms],
     fn     = loglik,
@@ -446,6 +454,11 @@ optimize_temporal_parameters <- function(par_all, data, names, Vi, uh, cr, max_i
   upper <- c(rep(.upper[.r1ii], n_r1ii),
              rep(.upper[.r2ii], n_r2ii),
              upper_rho1)
+  
+  parscale =  c(rep(.upper[.r1ii]-.lower[.r1ii], n_r1ii),
+                rep(.upper[.r2ii]-.lower[.r2ii], n_r2ii),
+                rep(.upper[.rho1ij]-.lower[.rho1ij], n_rho1ij))
+                
   
   optimized_par <- optim(
     par_all[parms],
