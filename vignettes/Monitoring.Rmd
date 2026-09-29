@@ -25,19 +25,19 @@ st       <- read.csv2(here("monitoring_abcde_Ai_st.txt"),        sep=";")
 temporal <- read.csv2(here("monitoring_r1ii_r2ii_temporal.txt"), sep=";")
 
 # Ajouter numéro d'itération global
-spatial$iter  <- seq_len(nrow(spatial))
-st$iter       <- seq_len(nrow(st))
-temporal$iter <- seq_len(nrow(temporal))
+spatial$eval  <- seq_len(nrow(spatial))
+st$eval       <- seq_len(nrow(st))
+temporal$eval <- seq_len(nrow(temporal))
 
 # Séparer étapes clés et itérations
-spatial_steps  <- spatial[!grepl("iter_", spatial$label), ]
-spatial_iters  <- spatial[grepl("iter_",  spatial$label), ]
+spatial_steps  <- spatial[!grepl("eval_", spatial$label), ]
+spatial_iters  <- spatial[grepl("eval_",  spatial$label), ]
 
-st_steps       <- st[!grepl("iter_", st$label), ]
-st_iters       <- st[grepl("iter_",  st$label), ]
+st_steps       <- st[!grepl("eval_", st$label), ]
+st_iters       <- st[grepl("eval_",  st$label), ]
 
-temporal_steps <- temporal[!grepl("iter_", temporal$label), ]
-temporal_iters <- temporal[grepl("iter_",  temporal$label), ]
+temporal_steps <- temporal[!grepl("eval_", temporal$label), ]
+temporal_iters <- temporal[grepl("eval_",  temporal$label), ]
 
 ```
 
@@ -48,21 +48,21 @@ temporal_iters <- temporal[grepl("iter_",  temporal$label), ]
 
 plot_params <- function(df_iters, df_steps, cols, title, ylab) {
   df_long <- data.frame(
-    iter     = rep(df_iters$iter, length(cols)),
+    eval     = rep(df_iters$eval, length(cols)),
     variable = rep(gsub("^[a-z0-9]+_", "", cols), each=nrow(df_iters)),
     value    = unlist(df_iters[, cols])
   )
-  ggplot(df_long, aes(x=iter, y=value, color=variable)) +
+  ggplot(df_long, aes(x=eval, y=value, color=variable)) +
     geom_line(alpha=0.8) +
-    geom_vline(xintercept=df_steps$iter,
+    geom_vline(xintercept=df_steps$eval,
                linetype="dashed", color="black", alpha=0.4) +
     annotate("text",
-             x     = df_steps$iter,
+             x     = df_steps$eval,
              y     = max(df_long$value, na.rm=TRUE),
              label = df_steps$label,
              angle = 90, hjust=1, size=2.5, color="black") +
     theme_minimal() +
-    labs(title=title, x="Itération", y=ylab, color="Variable") +
+    labs(title=title, x="Eval", y=ylab, color="Variable") +
     theme(plot.title=element_text(hjust=0.5))
 }
 
