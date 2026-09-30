@@ -155,8 +155,22 @@ update_rho1_parameters <- function(par_all, names, rho1) {
 }
 
 #' initialize the matrix rho1
-initialize_rho1 <- function() {
-  
+#' @description
+#' 
+#' \deqn{
+#'   \gamma_{ij}(\mathbf{h},0) = {\tt cr}_{ij} - C_{ij}(\mathbf{h},0)
+#' }
+#' \deqn{
+#'   \lim_{|\mathbf{h}|\to \infty} \gamma_{ij}(\mathbf{h},0) = {\tt cr}_{ij} - \rho_{ij}^{(1)}\left(r_{ii}^{(1)} r_{jj}^{(1)}\right)^{1/2} \left(r_{ij}^{(1)}\right)^{-1}
+#' }
+#' \deqn{
+#' \hat{\rho}_{ij}^{(1)} = \left(cr_{ij} - \lim_{|h|\to\infty}\gamma_{ij}(h,0)\right)\frac{r_{ij}^{(1)}}{\sqrt{r_{ii}^{(1)}r_{jj}^{(1)}}}
+#' }
+#' @param vgm a matrix
+#' 
+initialize_rho1 <- function(vgm, cr, rii, rjj) {
+
+   vgm[vgm$lagtime == 0 & vgm$dist == max(vgm$dist), ]
 }
 
 #' Initialize Spatial Parameters for Variables
