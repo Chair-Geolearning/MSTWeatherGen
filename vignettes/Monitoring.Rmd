@@ -20,9 +20,9 @@ avant de lancer l'estimation`.
 ```{r }
 library(here)
 
-spatial  <- read.csv(here("monitoring_aii_nuii_spatial.txt"),  sep=";", dec=".")
-st       <- read.csv(here("monitoring_abcde_Ai_st.txt"),        sep=";", dec=".")
-temporal <- read.csv(here("monitoring_r1ii_r2ii_temporal.txt"), sep=";", dec=".")
+spatial  <- read.csv2(here("monitoring_aii_nuii_spatial.txt"),  sep=";", dec=".")
+st       <- read.csv2(here("monitoring_abcde_Ai_st.txt"),        sep=";", dec=".")
+temporal <- read.csv2(here("monitoring_r1ii_r2ii_temporal.txt"), sep=";", dec=".")
 
 # Ajouter numéro d'itération global
 spatial$eval  <- seq_len(nrow(spatial))
@@ -83,7 +83,11 @@ print(plot_params(spatial_iters, spatial_steps, aii_cols, "Evolution aii", "aii"
 nuii_cols <- grep("^nuii_", colnames(spatial_iters), value=TRUE)
 plot_params(spatial_iters, spatial_steps, nuii_cols, "Evolution nuii", "nuii")
 ```
+### LOG-VRAISEMBLANCE SPATIALE
 
+```{r }
+print(plot_params(spatial_iters, spatial_steps, "loglik", "Evolution loglik spatial", "loglik"))
+```
 
 # 3. TEMPORAL — r1ii
 ```{r }
@@ -95,6 +99,12 @@ plot_params(temporal_iters, temporal_steps, r1ii_cols, "Evolution r1ii", "r1ii")
 ```{r }
 r2ii_cols <- grep("^r2ii_", colnames(temporal_iters), value=TRUE)
 plot_params(temporal_iters, temporal_steps, r2ii_cols, "Evolution r2ii", "r2ii")
+```
+
+### LOG-VRAISEMBLANCE TEMPORELLE
+
+```{r }
+print(plot_params(temporal_iters, temporal_steps, "loglik", "Evolution loglik temporelle", "loglik"))
 ```
 
 
@@ -111,3 +121,8 @@ Ai_cols <- grep("^Ai_", colnames(st_iters), value=TRUE)
 plot_params(st_iters, st_steps, Ai_cols, "Evolution Ai", "Ai")
 ```
 
+### 7. LOG-VRAISEMBLANCE SPATIO-TEMPORELLE
+
+```{r }
+print(plot_params(st_iters, st_steps, "loglik", "Evolution loglik spatio-temporelle", "loglik"))
+```
