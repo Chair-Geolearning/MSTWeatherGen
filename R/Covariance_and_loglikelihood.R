@@ -459,6 +459,8 @@ loglik <- function(par, parms, par_all, data, names, Vi, h, u, uh, cr) {
 #' @importFrom stats rnorm pnorm
 #' @keywords internal
 loglik_spatial <- function(par, data, h, uh, v) {
+  debut <- Sys.time()
+
   # Penalize negative parameters to enforce model constraints.
   if (par[.matern_a]  < .lower_spatial[.matern_a]  |
       par[.matern_nu] < .lower_spatial[.matern_nu]) {
@@ -520,6 +522,10 @@ loglik_spatial <- function(par, data, h, uh, v) {
     if (!length(which(id3 == T)) == 0) {
       l3 <- sum(log(pbinorm(uh_dz[id3, 7], uh_dz[id3, 8], var1 = 1, var2 = 1, cov12 = cij[id3])))
     }
+
+
+    temps <- as.numeric(Sys.time() - debut, units = "secs")
+    print(paste0("Temp loglik ",temps))
 
     # Return the aggregated negative log-likelihood, adjusting for errors or infinite values.
     ll <- try(-(l1 + l2 + l3 + l4), silent = TRUE)

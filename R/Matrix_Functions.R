@@ -10,7 +10,7 @@
 #' @param tol tolerance (default 1e-6)
 #'
 #' @return a boolean
-is_positive_definite <- function(M, tol = 1e-6) {
+is_positive_definite <- function(M, tol = .numeric_tolerance) {
   # Retrieve eigenvalues only .
   eigenvalues <- eigen(M, symmetric = TRUE)$values
   
@@ -38,7 +38,7 @@ is_positive_definite <- function(M, tol = 1e-6) {
 #' 
 #' @return a symmetric positive definite corrected matrix of the 
 #' same dimensions as the original 
-make_positive_definite <- function(M, epsilon = 1e-6) {
+make_positive_definite <- function(M, epsilon = .numeric_tolerance) {
   # Decompose M into eigenvalues and eigenvectors (exploiting symmetry)
   eigen_decomp <- eigen(M, symmetric = TRUE)
   values <- eigen_decomp$values  # numeric vector of eigenvalues

@@ -216,7 +216,7 @@ init_space_par <- function(data, names, h, uh, max_it = 2000) {
         v = v,
         h = h,
         uh = uh,
-        control = list(maxit = max_it, trace = 0) #parscale = parscale
+        control = list(maxit = max_it, trace = 2, parscale = parscale)
       )$par
     })
   } else {
@@ -232,7 +232,7 @@ init_space_par <- function(data, names, h, uh, max_it = 2000) {
         v = v,
         h = h,
         uh = uh,
-        control = list(maxit = max_it, trace = 0)
+        control = list(maxit = max_it, trace = 2, parscale = parscale)
       )$par
     }, mc.cores = ncores, mc.set.seed = FALSE)
   }
@@ -300,7 +300,7 @@ optimize_spatial_parameters <- function(par_all, data, names, Vi, uh, cr, max_it
     upper  = upper,
     data   = data, parms = parms, par_all = par_all,
     names = names, Vi = Vi, uh = uh, cr = cr,
-    control = list(maxit = max_it, trace = 0)
+    control = list(maxit = max_it, trace = 2, parscale = parscale)
   )$par
   
   cat("... done\n")
@@ -382,7 +382,7 @@ optimize_spatiotemporal_parameters <- function(par_all, data, names, Vi, uh, cr,
     upper  = upper,
     data   = data, parms = parms, par_all = par_all,
     names = names, Vi = Vi, uh = uh, cr = cr,
-    control = list(maxit = max_it, trace = 0)
+    control = list(maxit = max_it, trace = 2, parscale = parscale)
   )$par
   
   cat("... done\n")
@@ -468,7 +468,7 @@ optimize_temporal_parameters <- function(par_all, data, names, Vi, uh, cr, max_i
     upper  = upper,
     data   = data, parms = parms, par_all = par_all,
     names = names, Vi = Vi, uh = uh, cr = cr,
-    control = list(maxit = max_it, trace = 0)
+    control = list(maxit = max_it, trace = 2, parscale = parscale)
   )$par
   
   cat("... done\n")

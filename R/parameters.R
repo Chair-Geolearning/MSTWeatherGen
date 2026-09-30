@@ -1,3 +1,5 @@
+.numeric_tolerance <- 1e-6
+
 .a       <- 1
 .b       <- 2
 .c       <- 3
@@ -124,11 +126,12 @@ check_parameters_validity <- function(parameters_values, parameters_id){
   # check each parameters is under boundaries
   validities <- sapply(parameters_name, function(p){
     param_id <- get(p)
-    return(.lower[param_id] <= parameters_values[param_id]
-        && parameters_values[param_id] <= .upper[param_id] )
+    return(.lower[param_id] - .numeric_tolerance <= parameters_values[param_id]
+        && parameters_values[param_id] <= .upper[param_id] + .numeric_tolerance)
   })
   
   if(all(validities) == FALSE) warning(paste("Parameters boundaries unvalid",paste(parameters_name, collapse = " ")))
+    
   # return FALSE if any is FALSE
   return(all(validities))
 }
