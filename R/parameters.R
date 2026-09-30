@@ -17,6 +17,7 @@
 .r1ii    <- 15  # décroissance exp. temporelle variable i
 .r1jj    <- 16
 .rho2ij  <- 17
+.rho1ii  <- 18  # only used for boundarires and init values
 
 # ============================================================
 # indices locaux de init_space_par
@@ -49,12 +50,13 @@
   1/12.80625,    # ajj > 0 Temporaire ici spatial_coordinates
   0.25,    # nuii >= 0.25 (Matérn valide)
   0.25,    # nujj >= 0.25
-  -1,      # rho1ij >= -1 (cross-pair) — remplacé par 0 pour self-pair A rechecker pour les cas
+  -1,      # rho1ij >= -1 (cross-pair)
   1e-6,    # r2ii > 0
   1e-6,    # r2jj > 0
   1e-6,    # r1ii > 0
   1e-6,    # r1jj > 0
-  -Inf      # rho2ij
+  -Inf,    # rho2ij
+  0        # rho1ii self-pair rho1ii >= 0
 )
 
 .upper <- c(
@@ -74,7 +76,8 @@
   5,        # r2jj < 5
   5,        # r1ii < 5 
   5,        # r1jj < 5
-  Inf         # rho2ij
+  Inf,      # rho2ij
+  1         # rho1ii self-pair rho1ii <= 1
 )
 
 # ============================================================
@@ -97,18 +100,20 @@
   1,     # ajj (depuis par_s)
   1,   # nuii (depuis par_s)
   1,   # nujj (depuis par_s)
-  0.5, # rho1ij self-pair
+  0.1, # rho1ij self-pair
   1,     # r2ii
   1,     # r2jj
   1,     # r1ii
   1,     # r1jj
-  1      #rho2ij
+  1,      #rho2ij
+  0.5    # rho1ii
 )
 
 # Optimization method to use in optim
 #.optim_method = "BFGS"
 .optim_method = "L-BFGS-B"
 #.optim_method = "CG"
+#.optim_method = "SANN"
 
 
 #' Check parameters validities
@@ -126,11 +131,20 @@ check_parameters_validity <- function(parameters_values, parameters_id){
   # check each parameters is under boundaries
   validities <- sapply(parameters_name, function(p){
     param_id <- get(p)
+    ## TODO check if rho1ij or rho1ii v1 == v2 un parameters_id lower limit is not the same
     return(.lower[param_id] - .numeric_tolerance <= parameters_values[param_id]
         && parameters_values[param_id] <= .upper[param_id] + .numeric_tolerance)
   })
   
-  if(all(validities) == FALSE) warning(paste("Parameters boundaries unvalid",paste(parameters_name, collapse = " ")))
+  if(all(validities) == FALSE){
+    print(parameters_id)
+    print(parameters_values)
+    sapply(parameters_name, function(p){
+    param_id <- get(p)
+    sprintf("%s %.20f <= %.20f && %.20f <= %.20f",p, .lower[param_id],parameters_values[param_id], parameters_values[param_id], .upper[param_id])
+    })
+    warning(paste("Parameters boundaries unvalid",paste(parameters_name, collapse = " ")))
+    } 
     
   # return FALSE if any is FALSE
   return(all(validities))

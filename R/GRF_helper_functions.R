@@ -56,15 +56,14 @@ initialize_par_all_if_missing <- function(par_all, names, pairs, par_s, rho1, cr
     )
 
     par_all <- setNames(rep(0.1, length(names_par_all)), names_par_all)
-
     par_all[paste(pairs[1:length(names)], "rho2ij", sep = ":")] <- 1 
     par_all[paste(pairs[1:length(names)], "aii", sep = ":")] <- par_s[1, ]
     par_all[paste(pairs[1:length(names)], "nuii", sep = ":")] <- par_s[2, ]
-    par_all[paste(pairs[1:length(names)], "rho1ij", sep = ":")] <- .init[.rho1ij] 
+    par_all[paste(pairs[1:length(names)], "rho1ij", sep = ":")] <- .init[.rho1ii] 
+    par_all[paste(pairs[length(names)+1:length(pairs)], "rho1ij", sep = ":")] <- .init[.rho1ij] 
     par_all[paste(names, "Ai", sep=":")] <- .init[.Ai]
     par_all[paste(names, "r2ii", sep=":")] <- .init[.r2ii]
     par_all[paste(names, "r1ii", sep=":")] <- .init[.r1ii]
-    
     parm_eta <- c("a", "b", "c", "d", "e")  
     par_all[parm_eta] <- c(.init[.a], .init[.b], .init[.c], .init[.d], .init[.e])
   }
@@ -154,6 +153,12 @@ update_rho1_parameters <- function(par_all, names, rho1) {
   }
   return(par_all)
 }
+
+#' initialize the matrix rho1
+initialize_rho1 <- function() {
+  
+}
+
 #' Initialize Spatial Parameters for Variables
 #'
 #' Optimizes initial spatial parameters for each variable in a dataset. This function employs
@@ -444,7 +449,7 @@ optimize_temporal_parameters <- function(par_all, data, names, Vi, uh, cr, max_i
   
   ## rho1ij : self-pairs [0, 1-1e-6], cross-pairs [-1, 1-1e-6]
   lower_rho1 <- rep(.lower[.rho1ij], n_rho1ij)
-  lower_rho1[Vi[,1] == Vi[,2]] <- 0
+  lower_rho1[Vi[,1] == Vi[,2]] <- .lower[.rho1ij]
   
   upper_rho1 <- rep(.upper[.rho1ij], n_rho1ij)
   
@@ -562,7 +567,7 @@ estimation_gf <- function(data, wt_id, max_it, dates, tmax, names, par_all = NUL
              logs$log_file, logs$log_file_st, logs$log_file_temp, which="spatial")
   
   
-  for (v in 1:2) {
+  for (v in 1:3) {
     
     # Optimize temporal parameters
     par_all <- optimize_temporal_parameters(par_all, data, names, Vi, uh, cr, max_it)
@@ -851,10 +856,12 @@ estimate_gaussian_field_params <- function(data, wt, names, coordinates, tmax, m
     wt_id <- wt_id[wt_id > tmax + 1]
     
     
+    ## TODO valeur de rho1 à l'init vgm ou valeur par defaut ?
+    # on passe cela dans initialize_par_all
     rho1_init <- vgm[vgm$lagtime == 0 & vgm$dist == max(vgm$dist), ]
     # Après — structure identique à vgm mais avec matrice identité avec 0.1 sur la diag
-    # rho1_init$cov ne semble jamais utilisé
-    rho1_init$cov <- ifelse(rho1_init$v1 == rho1_init$v2, 0.5, 0.1)
+    # rho1_init$cov est utilisé dans initialize_par_all_if_missing ...
+    rho1_init$cov <- ifelse(rho1_init$v1 == rho1_init$v2, .init[.rho1ii], .init[.rho1ij])
     
     # Estimate Gaussian field parameters
     gf_par[[k]] <- estimation_gf(

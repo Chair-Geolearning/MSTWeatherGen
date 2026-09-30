@@ -278,6 +278,7 @@ estim_results <- list()
 
 for( it in 1:nb_estimation) {
 
+  print(paste("Estimation run :",it))
   #set.seed(14357+it)
   Z <- generate_Z(t_seq, spatial_coordinates)
 
