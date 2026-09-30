@@ -81,7 +81,7 @@ stop_monitoring <- function() {
 #' @param which Vecteur de caractères sélectionnant les groupes à écrire (st, temp et spatial).
 #'
 #' @return NULL
-log_params <- function(par_all, names, label, log_file, log_file_st, log_file_temp, which = c("spatial", "st", "temp")) {
+log_params <- function(par_all, names, label, log_file, log_file_st, log_file_temp, which = c("spatial", "st", "temp"), loglik_val=NA) {
   
   
   # aii et nuii
@@ -89,7 +89,7 @@ log_params <- function(par_all, names, label, log_file, log_file_st, log_file_te
     
     aii_names  <- paste(paste(names, names, sep="-"), "aii",  sep=":")
     nuii_names <- paste(paste(names, names, sep="-"), "nuii", sep=":")
-    line <- paste(c(label,
+    line <- paste(c(label, loglik_val,
                     round(par_all[aii_names],  6),
                     round(par_all[nuii_names], 6)),
                   collapse=";")
@@ -100,7 +100,7 @@ log_params <- function(par_all, names, label, log_file, log_file_st, log_file_te
   if ("st" %in% which) {
     
     Ai_names <- paste(names, "Ai", sep=":")
-    line <- paste(c(label,
+    line <- paste(c(label,loglik_val,
                     round(par_all[c("a","b","c","d","e")], 6),
                     round(par_all[Ai_names], 6)),
                   collapse=";")
@@ -111,7 +111,7 @@ log_params <- function(par_all, names, label, log_file, log_file_st, log_file_te
   if ("temp" %in% which) {
     ep         <- generate_variable_index_pairs(names)
     rho1_names <- paste(paste(ep[,1], ep[,2], sep="-"), "rho1ij", sep=":")
-    line <- paste(c(label,
+    line <- paste(c(label,loglik_val,
                     as.numeric(round(par_all[paste(names, "r1ii", sep=":")], 6)),
                     as.numeric(round(par_all[paste(names, "r2ii", sep=":")], 6)),
                     as.numeric(round(par_all[rho1_names], 6))),  # ← dans c()
