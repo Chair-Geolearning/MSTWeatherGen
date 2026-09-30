@@ -20,9 +20,9 @@ avant de lancer l'estimation`.
 ```{r }
 library(here)
 
-spatial  <- read.csv2(here("monitoring_aii_nuii_spatial.txt"),  sep=";")
-st       <- read.csv2(here("monitoring_abcde_Ai_st.txt"),        sep=";")
-temporal <- read.csv2(here("monitoring_r1ii_r2ii_temporal.txt"), sep=";")
+spatial  <- read.csv(here("monitoring_aii_nuii_spatial.txt"),  sep=";", dec=".")
+st       <- read.csv(here("monitoring_abcde_Ai_st.txt"),        sep=";", dec=".")
+temporal <- read.csv(here("monitoring_r1ii_r2ii_temporal.txt"), sep=";", dec=".")
 
 # Ajouter numéro d'itération global
 spatial$eval  <- seq_len(nrow(spatial))
