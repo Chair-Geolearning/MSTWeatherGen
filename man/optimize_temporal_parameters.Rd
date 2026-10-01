@@ -4,7 +4,7 @@
 \alias{optimize_temporal_parameters}
 \title{Optimize Temporal Parameters Across All Variable Pairs}
 \usage{
-optimize_temporal_parameters(par_all, data, names, Vi, uh, cr, max_it, ep)
+optimize_temporal_parameters(par_all, data, names, Vi, uh, cr, max_it)
 }
 \arguments{
 \item{par_all}{Comprehensive set of model parameters, including both spatial and temporal

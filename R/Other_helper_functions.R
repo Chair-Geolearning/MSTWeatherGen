@@ -129,40 +129,6 @@ filter_season_data <- function(data, dates, season, names) {
   # Return the filtered and ordered data along with the corresponding dates
   return(list(data_filtered = data_filtered, dates_filtered = dates_filtered))
 }
-#' Haversine Distance Calculation
-#'
-#' Computes the Haversine distance between two points given their coordinates.
-#'
-#' @param point1 Coordinates of the first point in decimal degrees (lon, lat).
-#' @param point2 Coordinates of the second point in decimal degrees (lon, lat).
-#'
-#' @return The Haversine distance between the two points in kilometers.
-#'
-#' @keywords internal
-haversine <- function(point1, point2) {
-  # Define the Haversine function
-  # Convert degrees to radians
-  lon1 <- c(point1[, 1] * pi / 180)
-  lat1 <- c(point1[, 2] * pi / 180)
-  lon2 <- c(point2[, 1] * pi / 180)
-  lat2 <- point2[, 2] * pi / 180
-
-  # Differences in coordinates
-  dlon <- lon2 - lon1
-  dlat <- lat2 - lat1
-
-  # Haversine formula
-  a <- as.numeric(sin(dlat / 2)^2 + cos(lat1) * cos(lat2) * sin(dlon / 2)^2)
-  c <- 2 * atan2(sqrt(a), sqrt(1 - a))
-
-  # Radius of Earth in kilometers
-  R <- 6371
-
-  # Distance in kilometers
-  d <- R * c
-
-  return(d)
-}
 
 #' Calculate Haversine Distance Between Two Coordinates
 #'

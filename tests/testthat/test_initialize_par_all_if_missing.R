@@ -33,7 +33,7 @@ par_all_TEST <- initialize_par_all_if_missing(
   names = names,
   pairs = pairs,
   par_s = par_s,
-  beta1 = ax,
+  rho1 = ax,
   cr = cr
 )
 
@@ -48,7 +48,7 @@ test_that("initialize_par_all_if_missing runs without error", {
       names = names,
       pairs = pairs,
       par_s = par_s,
-      beta1 = ax,
+      rho1 = ax,
       cr = cr
     )
   })
@@ -65,7 +65,7 @@ test_that("initialize_par_all_if_missing creates expected parameter names", {
     paste(pairs, "rho2ij", sep = ":"),
     paste(pairs, "aii", sep = ":"),
     paste(pairs, "nuii", sep = ":"),
-    paste(pairs, "beta1ij", sep = ":")
+    paste(pairs, "rho1ij", sep = ":")
   )
 
   expect_true(all(expected_names %in% names(par_all_TEST)))
@@ -80,7 +80,7 @@ test_that("existing par_all is not overwritten", {
     names = names,
     pairs = pairs,
     par_s = par_s,
-    beta1 = ax,
+    rho1 = ax,
     cr = cr
   )
 
@@ -89,7 +89,7 @@ test_that("existing par_all is not overwritten", {
     names = names,
     pairs = pairs,
     par_s = par_s,
-    beta1 = ax,
+    rho1 = ax,
     cr = cr
   )
 
@@ -119,7 +119,7 @@ test_that("par_s values are correctly assigned to rij and vij", {
 
 # 5.
 test_that("ax parameters are initialized to 0 then updated", {
-  ax_params <- paste(pairs, "beta1ij", sep = ":")
+  ax_params <- paste(pairs, "rho1ij", sep = ":")
 
   expect_true(all(ax_params %in% names(par_all_TEST)))
   expect_type(par_all_TEST[ax_params], "double")
@@ -148,7 +148,7 @@ test_that("par_all has expected length", {
     names = single_name,
     pairs = single_pairs,
     par_s = single_par_s,
-    beta1 = ax[1,],
+    rho1 = ax[1,],
     cr = cr[1, 1, drop = FALSE]
   )
 
