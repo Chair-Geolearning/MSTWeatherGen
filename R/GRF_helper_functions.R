@@ -237,7 +237,7 @@ init_space_par <- function(data, names, h, uh, max_it = 2000) {
         v = v,
         h = h,
         uh = uh,
-        control = list(maxit = max_it, trace = 2, parscale = parscale)
+        control = list(maxit = max_it, trace = 2, parscale = parscale, ndeps = c(0.01,0.01))
       )$par
     }, mc.cores = ncores, mc.set.seed = FALSE)
   }
@@ -296,7 +296,8 @@ optimize_spatial_parameters <- function(par_all, data, names, Vi, uh, cr, max_it
   
   parscale = c(rep(.upper[.aii]-.lower[.aii],  n_aii),
                rep(.upper[.nuii]-.lower[.nuii],  n_nuii))
-  
+  ndeps = c(rep(1, n_aii+n_nuii))
+  print(.optim_method)
   optimized_par <- optim(
     par_all[parms],
     fn     = loglik,
@@ -305,7 +306,7 @@ optimize_spatial_parameters <- function(par_all, data, names, Vi, uh, cr, max_it
     upper  = upper,
     data   = data, parms = parms, par_all = par_all,
     names = names, Vi = Vi, uh = uh, cr = cr,
-    control = list(maxit = max_it, trace = 2, parscale = parscale)
+    control = list(maxit = max_it, trace = 2, parscale = parscale, ndeps = ndeps)
   )$par
   
   cat("... done\n")
@@ -379,6 +380,8 @@ optimize_spatiotemporal_parameters <- function(par_all, data, names, Vi, uh, cr,
                .upper[.e]-.lower[.e],
                rep(.upper[.Ai]-.lower[.Ai], n_Ai))
   
+  ndeps = c(rep(0.1,5+n_Ai))
+  
   optimized_par <- optim(
     par_all[parms],
     fn     = loglik,
@@ -387,7 +390,7 @@ optimize_spatiotemporal_parameters <- function(par_all, data, names, Vi, uh, cr,
     upper  = upper,
     data   = data, parms = parms, par_all = par_all,
     names = names, Vi = Vi, uh = uh, cr = cr,
-    control = list(maxit = max_it, trace = 2, parscale = parscale)
+    control = list(maxit = max_it, trace = 2, parscale = parscale, ndeps = ndeps)
   )$par
   
   cat("... done\n")
@@ -464,7 +467,7 @@ optimize_temporal_parameters <- function(par_all, data, names, Vi, uh, cr, max_i
                 rep(.upper[.r2ii]-.lower[.r2ii], n_r2ii),
                 rep(.upper[.rho1ij]-.lower[.rho1ij], n_rho1ij))
                 
-  
+
   optimized_par <- optim(
     par_all[parms],
     fn     = loglik,
@@ -473,7 +476,7 @@ optimize_temporal_parameters <- function(par_all, data, names, Vi, uh, cr, max_i
     upper  = upper,
     data   = data, parms = parms, par_all = par_all,
     names = names, Vi = Vi, uh = uh, cr = cr,
-    control = list(maxit = max_it, trace = 2, parscale = parscale)
+    control = list(maxit = max_it, trace = 2, parscale = parscale, ndeps = ndeps)
   )$par
   
   cat("... done\n")
@@ -485,6 +488,25 @@ optimize_temporal_parameters <- function(par_all, data, names, Vi, uh, cr, max_i
   return(par_all)
 }
 
+set_spatial_bounds <- function(coordinates) {
+  # Calculer les distances entre tous les sites
+  dst <- as.matrix(dist(coordinates))
+  
+  dst_min <- min(dst) 
+  dst_max <- max(dst)
+  
+  lower_aii <- 1 / dst_max
+  upper_aii <- 1 / dst_min
+  
+  .lower[.aii] <- lower_aii
+  .lower[.ajj] <- lower_aii
+  .upper[.aii] <- upper_aii
+  .upper[.ajj] <- upper_aii
+  
+  .lower_spatial[.matern_a] <- lower_aii
+  .upper_spatial[.matern_a] <- upper_aii
+  
+}
 #' Estimate Geostatistical Parameters for Multivariate Spatio-Temporal Data
 #'
 #' This function estimates the geostatistical parameters for a multivariate space-time model
@@ -546,6 +568,7 @@ estimation_gf <- function(data, wt_id, max_it, dates, tmax, names, par_all = NUL
   u <- preprocessed_data$u
   h <- preprocessed_data$h
   
+  set_spatial_bounds(coordinates)
   # Initialize spatial parameters
   par_s <- init_space_par(data = data, names = names, h = h[u == 0], uh = uh[u == 0, ], max_it = max_it)
   par_s <- do.call(cbind, par_s)
