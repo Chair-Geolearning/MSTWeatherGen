@@ -296,8 +296,8 @@ optimize_spatial_parameters <- function(par_all, data, names, Vi, uh, cr, max_it
   
   parscale = c(rep(.upper[.aii]-.lower[.aii],  n_aii),
                rep(.upper[.nuii]-.lower[.nuii],  n_nuii))
-  ndeps = c(rep(1, n_aii+n_nuii))
-  print(.optim_method)
+  ndeps = c(rep(0.01, n_aii+n_nuii))
+
   optimized_par <- optim(
     par_all[parms],
     fn     = loglik,
@@ -380,7 +380,7 @@ optimize_spatiotemporal_parameters <- function(par_all, data, names, Vi, uh, cr,
                .upper[.e]-.lower[.e],
                rep(.upper[.Ai]-.lower[.Ai], n_Ai))
   
-  ndeps = c(rep(0.1,5+n_Ai))
+  ndeps = c(rep(0.01,5+n_Ai))
   
   optimized_par <- optim(
     par_all[parms],
@@ -467,7 +467,8 @@ optimize_temporal_parameters <- function(par_all, data, names, Vi, uh, cr, max_i
                 rep(.upper[.r2ii]-.lower[.r2ii], n_r2ii),
                 rep(.upper[.rho1ij]-.lower[.rho1ij], n_rho1ij))
                 
-
+  ndeps = c(rep(0.1,n_r1ii+n_r2ii+n_rho1ij))
+  
   optimized_par <- optim(
     par_all[parms],
     fn     = loglik,
@@ -505,6 +506,12 @@ set_spatial_bounds <- function(coordinates) {
   
   .lower_spatial[.matern_a] <- lower_aii
   .upper_spatial[.matern_a] <- upper_aii
+  
+  cat("=== Bornes spatiales calculées ===\n")
+  cat("Distance min (pixel)  :", dst_min,   "\n")
+  cat("Distance max (domaine):", dst_max,   "\n")
+  cat("lower aii             :", lower_aii, "\n")
+  cat("upper aii             :", upper_aii, "\n")
   
 }
 #' Estimate Geostatistical Parameters for Multivariate Spatio-Temporal Data
@@ -572,7 +579,7 @@ estimation_gf <- function(data, wt_id, max_it, dates, tmax, names, par_all = NUL
   # Initialize spatial parameters
   par_s <- init_space_par(data = data, names = names, h = h[u == 0], uh = uh[u == 0, ], max_it = max_it)
   par_s <- do.call(cbind, par_s)
-
+ 
   # Construct parameter matrix for covariance model
   pairs <- paste(Vi[, 1], Vi[, 2], sep = "-")
   
