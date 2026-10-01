@@ -493,7 +493,7 @@ set_spatial_bounds <- function(coordinates) {
   # Calculer les distances entre tous les sites
   dst <- as.matrix(dist(coordinates))
   
-  dst_min <- min(dst) 
+  dst_min <- min(dst[dst > 0]) 
   dst_max <- max(dst)
   
   lower_aii <- 1 / dst_max
