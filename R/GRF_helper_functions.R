@@ -168,9 +168,66 @@ update_rho1_parameters <- function(par_all, names, rho1) {
 #' }
 #' @param vgm a matrix
 #' 
-initialize_rho1 <- function(vgm, cr, rii, rjj) {
+initialize_rho1 <- function(vgm, cr) {
 
-   vgm[vgm$lagtime == 0 & vgm$dist == max(vgm$dist), ]
+  vgm[vgm$lagtime == 0 & vgm$dist == max(vgm$dist), ]
+   
+  
+  w1 <- (sqrt((.init[.r1ii]^2 + .init[.r1jj]^2) / 2)) / sqrt(.init[.r1ii]*.init[.r1jj])
+
+  temp <- lapply(1:length(name), function(i){
+    lapply(1:length(name), function(j){
+      (cr[i,j] - wgm[i,j]) * w1
+    } )
+  })
+
+  rho1_init <- as.matrix(temp)
+}
+  
+process_pseudo_variogramme <- function(data, dates, coordinates, wt_id, names){
+  ep <- generate_variable_index_pairs(names)
+  # Distance between points
+  dst <- sapply(1:nrow(coordinates), function(i) {
+    sapply(1:nrow(coordinates), function(j) {
+      geosphere::distHaversine(coordinates[i, ], coordinates[j, ]) / 1000
+    })
+  })
+
+  ##Variogram
+  vgm <- lapply(1:nrow(ep), function(i) {
+    variable <- unlist(ep[i, ])
+    dist <- sort(unique(c(floor(dst))))
+    # pourquoi concerver uniquement la valuer plus grande au ~2/3 ?
+    dist <- dist[seq(1, length(dist) / 1.5, length.out = 2)]
+    # lagtime à 0,
+    # wt_id on utilse la wt mais les dates , wt_id commence à 2 ? (correspond aux dates moins la premiers)
+    # idéalement on devrait utiliser les indices de wt_id (wt de la saison)
+    vgm <- spacetime_cov(
+      data = data[, , variable], wt_id = 2:dim(data)[1], locations = coordinates, ds = dst,
+      dates = dates, lagstime = 0, dist = dist, covgm = T
+    )
+    vgm$v <- paste(variable[1], variable[2], sep = "-")
+    vgm$v1 <- variable[1]
+    vgm$v2 <- variable[2]
+
+    return(vgm)
+  })
+  vgm <- do.call(rbind, vgm)
+}
+
+process_empirical_correlation <- function(data, names){
+  # la corrélation (coefficient de corrélation de Pearson) à distance spatiale h=0 et lag temporel u=0, moyennée spatialement.
+  # estimateur empirique de Cij(0,0) sur les Z empiriques (champ latent)
+  # qui est une covariance ponctuelle avec les Z 
+  cr <- sapply(names, function(v1) {
+    sapply(names, function(v2) {
+      mean(sapply(1:dim(data)[2], function(j) cor(data[, j, v1], data[, j, v2], use = "complete.obs")), na.rm = TRUE)
+    })
+  })
+  cr <- matrix(cr, nrow = length(names), ncol = length(names))
+  colnames(cr) <- rownames(cr) <- names
+
+  return(cr)
 }
 
 #' Initialize Spatial Parameters for Variables
@@ -538,6 +595,10 @@ estimation_gf <- function(data, wt_id, max_it, dates, tmax, names, par_all = NUL
   # pair by row , cols spatial indice (s1,s2)
   Si <- generate_spatial_index_pairs(coordinates, n1 = n1, n2 = n2)
   # pair by row with time lag (t1,t2,u)
+  
+  ## TODO les Ti doivent être issue des wt ? (les dates doivent être incluse dnas le wt)
+  # Ici on prend une dates a  wt_id - u (tmax) , qui n'est pas forcement dans le wt_id actuel
+  # wt_id = c(3,4) dans dates -> retourne 2 , 3, u=1 -> 2 n'est pas dans wt.
   Ti <- generate_temporal_index_pairs(wt_id, dates, tmax)
   # pair of variable by row (V1,V2)
   Vi <- generate_variable_index_pairs(names)
@@ -567,6 +628,10 @@ estimation_gf <- function(data, wt_id, max_it, dates, tmax, names, par_all = NUL
   # Construct parameter matrix for covariance model
   pairs <- paste(Vi[, 1], Vi[, 2], sep = "-")
   
+  ## vgm ici pour le moment avec données du wt
+
+  ## CR ici avec les données du wt
+  cr = process_empirical_correlation(data[wt_id,,], names)
   # Check and initialize par_all if missing
   par_all <- initialize_par_all_if_missing(par_all, names, pairs, par_s, rho1, cr = cr)
   
@@ -726,6 +791,7 @@ generate_spatial_index_pairs <- function(coordinates, n1, n2) {
 #' represent the indices of the paired time points, and 'u' represents the time lag between them.
 #'
 #' @keywords internal
+## TODO Vérifier qu'o ndoit bien rester dans les indice du wt_id
 generate_temporal_index_pairs <- function(wt_id, dates, tmax) {
   Ti <- lapply(0:tmax, function(i) {
     Ti <- cbind(wt_id - i, wt_id, i)
@@ -808,7 +874,7 @@ preprocess_data <- function(Ti, Si, coordinates) {
 #' This function implements the methods described in Section 3.3 of the article
 #' *Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8).
 #'
-#' @param data A 3D array containing weather data with dimensions [time, location, variable].
+#' @param data A 3D array containing weather data of the same season with dimensions [time, location, variable].
 #' @param wt Vector of weather type classifications for each time point in the data.
 #' @param names Vector of variable names in the data array.
 #' @param coordinates A matrix of geographic coordinates for the locations in the data.
@@ -830,6 +896,7 @@ estimate_gaussian_field_params <- function(data, wt, names, coordinates, tmax, m
 
   # Compute average pairwise correlations for each pair of variables across all locations
 
+  ## TODO voir fonction process_pseudo_variogramme
   ep <- generate_variable_index_pairs(names)
   # Estimate spatial covariance structures for each pair of variables
   dst <- sapply(1:nrow(coordinates), function(i) {
@@ -837,12 +904,14 @@ estimate_gaussian_field_params <- function(data, wt, names, coordinates, tmax, m
       geosphere::distHaversine(coordinates[i, ], coordinates[j, ]) / 1000
     })
   })
-  
   ##Variogram a checker
   vgm <- lapply(1:nrow(ep), function(i) {
     variable <- unlist(ep[i, ])
     dist <- sort(unique(c(floor(dst))))
+    # pourquoi concerver uniquement la valuer plus grande au ~2/3 ?
     dist <- dist[seq(1, length(dist) / 1.5, length.out = 2)]
+    # lagtime à 0,
+    # wt_id on utilse la wt mais les dates , wt_id commence à 2 ? (correspond aux dates moins la premiers)
     vgm <- spacetime_cov(
       data = data[, , variable], wt_id = 2:dim(data)[1], locations = coordinates, ds = dst,
       dates = dates, lagstime = 0, dist = dist, covgm = T
@@ -854,6 +923,9 @@ estimate_gaussian_field_params <- function(data, wt, names, coordinates, tmax, m
     return(vgm)
   })
   vgm <- do.call(rbind, vgm)
+  # la corrélation (coefficient de corrélation de Pearson) à distance spatiale h=0 et lag temporel u=0, moyennée spatialement.
+  # estimateur empirique de Cij(0,0) sur les Z empiriques (champ latent)
+  # qui est une covariance ponctuelle avec les Z 
   cr <- sapply(names, function(v1) {
     sapply(names, function(v2) {
       mean(sapply(1:dim(data)[2], function(j) cor(data[, j, v1], data[, j, v2], use = "complete.obs")), na.rm = TRUE)
@@ -864,13 +936,15 @@ estimate_gaussian_field_params <- function(data, wt, names, coordinates, tmax, m
 
   colnames(cr) <- rownames(cr) <- names
 
+  ## Ici data et dates sont filtré par saison déjà, wt correspond au wt des ces données
   # For each weather type, estimate Gaussian field parameters
   for (k in 1:K) {
     wt_id <- which(wt == k)
     wt_id <- wt_id[wt_id > tmax + 1]
     
     
-    ## TODO valeur de rho1 à l'init vgm ou valeur par defaut ?
+    ## TODO Cette partie va être calculé dans estimation_gf
+    rho1_init <- NULL
     # on passe cela dans initialize_par_all
     rho1_init <- vgm[vgm$lagtime == 0 & vgm$dist == max(vgm$dist), ]
     # Après — structure identique à vgm mais avec matrice identité avec 0.1 sur la diag
@@ -878,6 +952,7 @@ estimate_gaussian_field_params <- function(data, wt, names, coordinates, tmax, m
     rho1_init$cov <- ifelse(rho1_init$v1 == rho1_init$v2, .init[.rho1ii], .init[.rho1ij])
     
     # Estimate Gaussian field parameters
+    ## data de la saison, wt_id id du wt k , dates de la saison -> wt_id indice de wt k dans data et dates
     gf_par[[k]] <- estimation_gf(
       data = data, wt_id = wt_id, max_it = max_it, dates = dates,
       tmax = tmax, names = names, coordinates = coordinates, n1 = n1,
@@ -888,3 +963,4 @@ estimate_gaussian_field_params <- function(data, wt, names, coordinates, tmax, m
 
   return(gf_par)
 }
+  

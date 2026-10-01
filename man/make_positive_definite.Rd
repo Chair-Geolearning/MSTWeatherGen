@@ -4,7 +4,7 @@
 \alias{make_positive_definite}
 \title{Make a Matrix Positive Definite}
 \usage{
-make_positive_definite(M, epsilon = 1e-06)
+make_positive_definite(M, epsilon = .numeric_tolerance)
 }
 \arguments{
 \item{M}{a square, symmetric numeric matrix.}

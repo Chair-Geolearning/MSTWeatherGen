@@ -571,9 +571,12 @@ spacetime_cov <- function(data, wt_id, locations, ds = NULL, dates, lagstime, di
   id <- cbind(wt_id, wt_id)
   idx <- which(ds == 0, arr.ind = TRUE)
   e <- expand.grid(1:nrow(id), 1:nrow(idx))
+  # all times
   ide <- id[e[, 1], ]
+  # all points
   idxe <- idx[e[, 2], ]
 
+  ## Pourquoi x1 indice 2 et x2 indice 1 (cross qqch ?)
   if (covgm) {
     x1 <- data[, , 2]
     x2 <- data[, , 1]
@@ -582,11 +585,51 @@ spacetime_cov <- function(data, wt_id, locations, ds = NULL, dates, lagstime, di
     x2 <- c(data[cbind(ide[, 2], idxe[, 2])])
   }
 
-  # Baseline covariances for normalization
+  # Baseline covariances for normalization u=0 and h = 0
   c1 <- cov(x1[cbind(ide[, 1], idxe[, 1])], x1[cbind(ide[, 2], idxe[, 2])])
   c2 <- cov(x2[cbind(ide[, 1], idxe[, 1])], x2[cbind(ide[, 2], idxe[, 2])])
 
+  ## la matrice est symétrique mais pour prendre les +u on devrait enlever le abs
+  matrice_lag <- outer(dates, dates, function(d1,d2){
+    #abs(as.numeric(d2 - d1))
+    as.numeric(d2 - d1)
+  })
+
+  vgm_jeff <- lapply(lagstime, function(u){
+    # ids dates où lag == u
+    id_dates_at_lag <- which( matrice_lag == u, arr.ind = TRUE)
+    # pair id dates où lag == u et ids dans wt_id = k
+    id_dates_at_lag_wt <- id_dates_at_lag[which(id_dates_at_lag[,1] %in% wt_id & id_dates_at_lag[,2] %in% wt_id),]
+
+    # sur chaque distance évalué (ne doit pas prendre toutes les distance possibles ?)
+    cv <- sapply(1:length(dist), function(i) {
+      d <- dist[i]
+      # pair id coordinates avec distance d
+      idx <- which(ds > d - 1 & ds < d + 1, arr.ind = TRUE)
+      # toutes les dates du wt dans le lag u X coordinates pair id dans d
+      d_x_c <- expand.grid(1:nrow(id_dates_at_lag_wt), 1:nrow(idx))
+      # toutes les pairs de dates X combinaisons de pair id coordinates possibles
+      id_d <- id_dates_at_lag_wt[d_x_c[, 1], ]
+      # toutes les pair id de coordinates X combinaisons avec les pairs id dates
+      id_x <- idx[d_x_c[, 2], ]
+
+      if (covgm) {
+        x1 <- data[, , 2]
+        x2 <- data[, , 1]
+      } else {
+        x1 <- c(data[cbind(id_d[, 1], id_x[, 1])])
+        x2 <- c(data[cbind(id_d[, 2], id_x[, 2])])
+      }
+
+      # Compute normalized covariance
+      # cov(Zi(s,t) , Zj(s+h, t+u))
+      return(cov(x1[cbind(id_d[, 1], id_x[, 1])], x2[cbind(id_d[, 2], id_x[, 2])]) / sqrt(c1 * c2))
+    })
+    return(data.frame(lagtime = u, dist = dist, cov = cv))
+  })
+
   # Loop over lag times to compute covariances at different spatial distances
+  # problème d'itération du lagtime valeur de u peut faire sortir des tableaux a revoir
   vgm <- lapply(lagstime, function(u) {
     id <- cbind(wt_id - u, wt_id)
     diff <- dates[wt_id] - dates[wt_id - u]
@@ -613,6 +656,9 @@ spacetime_cov <- function(data, wt_id, locations, ds = NULL, dates, lagstime, di
 
     return(data.frame(lagtime = u, dist = dist, cov = cv))
   })
+
+  print(do.call(rbind, vgm))
+  print(do.call(rbind, vgm_jeff))
 
   # Combine and return results
   return(do.call(rbind, vgm))
