@@ -507,12 +507,6 @@ set_spatial_bounds <- function(coordinates) {
   .lower_spatial[.matern_a] <- lower_aii
   .upper_spatial[.matern_a] <- upper_aii
   
-  cat("=== Bornes spatiales calculées ===\n")
-  cat("Distance min (pixel)  :", dst_min,   "\n")
-  cat("Distance max (domaine):", dst_max,   "\n")
-  cat("lower aii             :", lower_aii, "\n")
-  cat("upper aii             :", upper_aii, "\n")
-  
 }
 #' Estimate Geostatistical Parameters for Multivariate Spatio-Temporal Data
 #'
