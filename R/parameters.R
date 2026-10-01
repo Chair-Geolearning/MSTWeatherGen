@@ -137,8 +137,8 @@ check_parameters_validity <- function(parameters_values, parameters_id){
   })
   
   if(all(validities) == FALSE){
-    print(parameters_id)
-    print(parameters_values)
+    #print(parameters_id)
+    #print(parameters_values)
     sapply(parameters_name, function(p){
     param_id <- get(p)
     sprintf("%s %.20f <= %.20f && %.20f <= %.20f",p, .lower[param_id],parameters_values[param_id], parameters_values[param_id], .upper[param_id])
