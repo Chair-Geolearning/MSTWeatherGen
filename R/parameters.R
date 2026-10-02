@@ -1,4 +1,4 @@
-.numeric_tolerance <- 1e-6
+.numeric_tolerance <- 1e-7
 
 .a       <- 1
 .b       <- 2
@@ -31,7 +31,7 @@
 
 # Pour loglik_spatial
 .lower_spatial <- c(
-  1e-6,    # .matern_a  : portée > 0 (1/taille domaine)
+  1/12.80625,    # .matern_a  : portée > 0 (1/taille domaine)
   0.25     # .matern_nu : lissage >= 0.25 Viens de Denis a rechecker
 )
 .upper_spatial <- c(
@@ -39,11 +39,11 @@
   3        # .matern_nu : lissage <= 3
 )
 .lower <- c(
-  1e-6,    # a > 0
-  1e-6,    # 0 < b <= 1
+  .numeric_tolerance,    # a > 0
+  .numeric_tolerance,    # 0 < b <= 1
   0,       # 0 <= c <= 1
-  1e-6,    # d > 0
-  1e-6,    # 0 < e <= 1
+  .numeric_tolerance,    # d > 0
+  .numeric_tolerance,    # 0 < e <= 1
   0,       # 0 <= Ai < 1
   0,       # 0 <= Aj < 1
   1/12.80625,    # aii > 0 Temporaire ici spatial_coordinatesr
@@ -51,10 +51,10 @@
   0.25,    # nuii >= 0.25 (Matérn valide)
   0.25,    # nujj >= 0.25
   -1,      # rho1ij >= -1 (cross-pair)
-  1e-6,    # r2ii > 0
-  1e-6,    # r2jj > 0
-  1e-6,    # r1ii > 0
-  1e-6,    # r1jj > 0
+  .numeric_tolerance,    # r2ii > 0
+  .numeric_tolerance,    # r2jj > 0
+  .numeric_tolerance,    # r1ii > 0
+  .numeric_tolerance,    # r1jj > 0
   -Inf,    # rho2ij
   0        # rho1ii self-pair rho1ii >= 0
 )
@@ -65,8 +65,8 @@
   1,          # c <= 1
   100,        # d
   1,          # e <= 1
-  1 - 1e-6,   # Ai < 1
-  1 - 1e-6,   # Aj < 1
+  1 - .numeric_tolerance,   # Ai < 1
+  1 - .numeric_tolerance,   # Aj < 1
   1/0.4,        # aii (max = 1/taille pixel) Temporaire ici spatial_coordinates
   1/0.4,        # ajj Temporaire ici spatial_coordinates
   3,          # nuii <= 3 (suffisant physiquement)
@@ -137,6 +137,7 @@ check_parameters_validity <- function(parameters_values, parameters_id){
   })
   
   if(all(validities) == FALSE){
+    print("Parameters boundaries unvalid")
     print(parameters_id)
     print(parameters_values)
     sapply(parameters_name, function(p){

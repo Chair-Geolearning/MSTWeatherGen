@@ -60,7 +60,7 @@ initialize_par_all_if_missing <- function(par_all, names, pairs, par_s, rho1, cr
     par_all[paste(pairs[1:length(names)], "aii", sep = ":")] <- par_s[1, ]
     par_all[paste(pairs[1:length(names)], "nuii", sep = ":")] <- par_s[2, ]
     par_all[paste(pairs[1:length(names)], "rho1ij", sep = ":")] <- .init[.rho1ii] 
-    par_all[paste(pairs[length(names)+1:length(pairs)], "rho1ij", sep = ":")] <- .init[.rho1ij] 
+    par_all[paste(pairs[(length(names)+1):length(pairs)], "rho1ij", sep = ":")] <- .init[.rho1ij] 
     par_all[paste(names, "Ai", sep=":")] <- .init[.Ai]
     par_all[paste(names, "r2ii", sep=":")] <- .init[.r2ii]
     par_all[paste(names, "r1ii", sep=":")] <- .init[.r1ii]
@@ -73,12 +73,13 @@ initialize_par_all_if_missing <- function(par_all, names, pairs, par_s, rho1, cr
   par_all <- update_rho1_parameters(par_all, names, rho1)
   
   # partie 'check je pense'
-  parm <- create_df_param(par_all, names)   #  a renommer en create_df_param
+  parm <- create_df_param(par_all, names)
   rho2 <- try(compute_rho2(parm, names, cr), silent = T)
   # A rechecker sur le try de cholesky car on fait nearPD dans rho2
   #ch <- try(chol(rho2), silent = T)
   # TO-RECHECK
   if (is.character(rho2)) {
+    print("RHO2ij pas bon !?")
     #par_s <- matrix(rep(1, length(names)^2), ncol = length(names), nrow = length(names))
     par_all[paste(pairs[1:length(names)], "aii", sep = ":")] <- 1
     par_all[paste(pairs[1:length(names)], "nuii", sep = ":")] <- 1
@@ -109,6 +110,7 @@ initialize_par_all_if_missing <- function(par_all, names, pairs, par_s, rho1, cr
 #' @importFrom Matrix nearPD
 update_rho1_parameters <- function(par_all, names, rho1) {
   if (!is.matrix(rho1)) {
+    print("rho1 n'est pas une matrice")
     for (v1 in names) {
       for (v2 in names) {
         par_all[paste(paste(v1, v2, sep = "-"), "rho1ij", sep = ":")] <-
@@ -138,17 +140,22 @@ update_rho1_parameters <- function(par_all, names, rho1) {
     rho1 <- as.matrix(rho1)
     
     # Seule contrainte physique : diagonale strictement positive (variance > 0)
-    diag(rho1) <- pmax(pmin(diag(rho1), 0.9999), 0)  # diagonale ∈ [0, 1]
-    rho1[row(rho1) != col(rho1)] <- pmax(pmin(
-    rho1[row(rho1) != col(rho1)], -0.9999), 0.9999) # hors-diagonale ∈ [-1, 1]
+    ## ATTENTION TODO Pourquoi on reborne rho1 ?
+    #diag(rho1) <- pmax(pmin(diag(rho1), 0.9999), 0)  # diagonale ∈ [0, 1]
+    # Il y a une erreur qui met tous a 0.9999, pmax et pmin sont inversé.
+    #rho1[row(rho1) != col(rho1)] <- pmax(pmin(
+    #rho1[row(rho1) != col(rho1)], -0.9999), 0.9999) # hors-diagonale ∈ [-1, 1]
+
+    diag(rho1) <- clamp(diag(rho1), 0, 1)
+    rho1 <- clamp(rho1,-1,1)
     
     rho1 <- Matrix::nearPD(rho1)$mat
   }
   
   colnames(rho1) <- rownames(rho1) <- names
-  for (v1 in names) {
-    for (v2 in names) {
-      par_all[paste(paste(v1, v2, sep = "-"), "rho1ij", sep = ":")] <- rho1[v1, v2]
+  for (v1 in 1:length(names)) {
+    for (v2 in v1:length(names)) {
+      par_all[paste(paste(names[v1], names[v2], sep = "-"), "rho1ij", sep = ":")] <- rho1[v1, v2]
     }
   }
   return(par_all)
@@ -168,20 +175,22 @@ update_rho1_parameters <- function(par_all, names, rho1) {
 #' }
 #' @param vgm a matrix
 #' 
-initialize_rho1 <- function(vgm, cr) {
+initialize_rho1 <- function(vgm, cr, names) {
 
-  vgm[vgm$lagtime == 0 & vgm$dist == max(vgm$dist), ]
-   
-  
+  vgm = vgm[vgm$lagtime == 0 & vgm$dist == max(vgm$dist), ]
+    
   w1 <- (sqrt((.init[.r1ii]^2 + .init[.r1jj]^2) / 2)) / sqrt(.init[.r1ii]*.init[.r1jj])
 
-  temp <- lapply(1:length(name), function(i){
-    lapply(1:length(name), function(j){
-      (cr[i,j] - wgm[i,j]) * w1
-    } )
-  })
+  temp <- sapply(names, function(name1){
+            sapply(names, function(name2){
+              (cr[name1,name2] - vgm[which(vgm$v1==name1 & vgm$v2 == name2),]$cov) * w1
+            })
+          })
+  rho1_init <- matrix(as.numeric(temp), nrow = length(names), ncol = length(names))
+  rho1_init[upper.tri(rho1_init)] <- rho1_init[lower.tri(rho1_init)]
+  rownames(rho1_init) <- colnames(rho1_init) <- names
 
-  rho1_init <- as.matrix(temp)
+  return(rho1_init)
 }
   
 process_pseudo_variogramme <- function(data, dates, coordinates, wt_id, names){
@@ -202,10 +211,17 @@ process_pseudo_variogramme <- function(data, dates, coordinates, wt_id, names){
     # lagtime à 0,
     # wt_id on utilse la wt mais les dates , wt_id commence à 2 ? (correspond aux dates moins la premiers)
     # idéalement on devrait utiliser les indices de wt_id (wt de la saison)
+    # ATTENTION wt_id est différent de l'original 
+    # avant wt_id = 2:dim(data)[1] <- toutes les dates de la saison
+    # maintenant wt_id = wt_id <- toutes les dates de la saison et du wt
     vgm <- spacetime_cov(
-      data = data[, , variable], wt_id = 2:dim(data)[1], locations = coordinates, ds = dst,
+      data = data[, , variable], wt_id = wt_id, locations = coordinates, ds = dst,
       dates = dates, lagstime = 0, dist = dist, covgm = T
     )
+    # vgm <- spacetime_cov(
+    #   data = data[, , variable], wt_id = 2:dim(data)[1], locations = coordinates, ds = dst,
+    #   dates = dates, lagstime = 0, dist = dist, covgm = T
+    # )
     vgm$v <- paste(variable[1], variable[2], sep = "-")
     vgm$v1 <- variable[1]
     vgm$v2 <- variable[2]
@@ -513,28 +529,31 @@ optimize_temporal_parameters <- function(par_all, data, names, Vi, uh, cr, max_i
   print(parms)
   cat("Processing...")
 
+  print(parms)
+  print(par_all[parms])
+
 
   n_r1ii   <- length(names)
   n_r2ii   <- length(names)
   n_rho1ij <- length(pairs)
   
-  ## rho1ij : self-pairs [0, 1-1e-6], cross-pairs [-1, 1-1e-6]
+  ## rho1ij : self-pairs [0, 1-1e-6], cross-pairs [-1 - 1e-6, 1-1e-6]
   lower_rho1 <- rep(.lower[.rho1ij], n_rho1ij)
-  lower_rho1[Vi[,1] == Vi[,2]] <- .lower[.rho1ij]
+  lower_rho1[1:length(names)] <- .lower[.rho1ii]
   
   upper_rho1 <- rep(.upper[.rho1ij], n_rho1ij)
   
   lower <- c(rep(.lower[.r1ii], n_r1ii),
              rep(.lower[.r2ii], n_r2ii),
              lower_rho1)
+  
   upper <- c(rep(.upper[.r1ii], n_r1ii),
              rep(.upper[.r2ii], n_r2ii),
              upper_rho1)
   
   parscale =  c(rep(.upper[.r1ii]-.lower[.r1ii], n_r1ii),
                 rep(.upper[.r2ii]-.lower[.r2ii], n_r2ii),
-                rep(.upper[.rho1ij]-.lower[.rho1ij], n_rho1ij))
-                
+                upper_rho1-lower_rho1)
   
   optimized_par <- optim(
     par_all[parms],
@@ -548,6 +567,7 @@ optimize_temporal_parameters <- function(par_all, data, names, Vi, uh, cr, max_i
   )$par
   
   cat("... done\n")
+
 
   par_all[parms] <- optimized_par
   par_all <- update_rho1_parameters(par_all, names,
@@ -596,7 +616,7 @@ estimation_gf <- function(data, wt_id, max_it, dates, tmax, names, par_all = NUL
   Si <- generate_spatial_index_pairs(coordinates, n1 = n1, n2 = n2)
   # pair by row with time lag (t1,t2,u)
   
-  ## TODO les Ti doivent être issue des wt ? (les dates doivent être incluse dnas le wt)
+  ## ATTENTION TODO les Ti doivent être issue des wt ? (les dates doivent être incluse dnas le wt)
   # Ici on prend une dates a  wt_id - u (tmax) , qui n'est pas forcement dans le wt_id actuel
   # wt_id = c(3,4) dans dates -> retourne 2 , 3, u=1 -> 2 n'est pas dans wt.
   Ti <- generate_temporal_index_pairs(wt_id, dates, tmax)
@@ -629,12 +649,17 @@ estimation_gf <- function(data, wt_id, max_it, dates, tmax, names, par_all = NUL
   pairs <- paste(Vi[, 1], Vi[, 2], sep = "-")
   
   ## vgm ici pour le moment avec données du wt
+  vgm <- process_pseudo_variogramme(data, dates, coordinates, wt_id, names)
 
   ## CR ici avec les données du wt
   cr = process_empirical_correlation(data[wt_id,,], names)
+
+  ## rho1 init
+  rho1_init <- initialize_rho1(vgm, cr, names)
+
   # Check and initialize par_all if missing
-  par_all <- initialize_par_all_if_missing(par_all, names, pairs, par_s, rho1, cr = cr)
-  
+  par_all <- initialize_par_all_if_missing(par_all, names, pairs, par_s, rho1_init, cr = cr)
+
   #write_spatial_params(par_all, names, "init_spatial_params", log_file)
   #write_st_params(par_all, names, "init_spatio_temp", log_file_st)
   #write_temp_params(par_all,    names, "init_temporal",       log_file_temp)
@@ -894,48 +919,6 @@ estimate_gaussian_field_params <- function(data, wt, names, coordinates, tmax, m
   # Initialize the Gaussian field parameters storage
   gf_par <- vector(mode = "list", length = K)
 
-  # Compute average pairwise correlations for each pair of variables across all locations
-
-  ## TODO voir fonction process_pseudo_variogramme
-  ep <- generate_variable_index_pairs(names)
-  # Estimate spatial covariance structures for each pair of variables
-  dst <- sapply(1:nrow(coordinates), function(i) {
-    sapply(1:nrow(coordinates), function(j) {
-      geosphere::distHaversine(coordinates[i, ], coordinates[j, ]) / 1000
-    })
-  })
-  ##Variogram a checker
-  vgm <- lapply(1:nrow(ep), function(i) {
-    variable <- unlist(ep[i, ])
-    dist <- sort(unique(c(floor(dst))))
-    # pourquoi concerver uniquement la valuer plus grande au ~2/3 ?
-    dist <- dist[seq(1, length(dist) / 1.5, length.out = 2)]
-    # lagtime à 0,
-    # wt_id on utilse la wt mais les dates , wt_id commence à 2 ? (correspond aux dates moins la premiers)
-    vgm <- spacetime_cov(
-      data = data[, , variable], wt_id = 2:dim(data)[1], locations = coordinates, ds = dst,
-      dates = dates, lagstime = 0, dist = dist, covgm = T
-    )
-    vgm$v <- paste(variable[1], variable[2], sep = "-")
-    vgm$v1 <- variable[1]
-    vgm$v2 <- variable[2]
-
-    return(vgm)
-  })
-  vgm <- do.call(rbind, vgm)
-  # la corrélation (coefficient de corrélation de Pearson) à distance spatiale h=0 et lag temporel u=0, moyennée spatialement.
-  # estimateur empirique de Cij(0,0) sur les Z empiriques (champ latent)
-  # qui est une covariance ponctuelle avec les Z 
-  cr <- sapply(names, function(v1) {
-    sapply(names, function(v2) {
-      mean(sapply(1:dim(data)[2], function(j) cor(data[, j, v1], data[, j, v2], use = "complete.obs")), na.rm = TRUE)
-    })
-  })
-
-  cr <- matrix(cr, nrow = length(names), ncol = length(names))
-
-  colnames(cr) <- rownames(cr) <- names
-
   ## Ici data et dates sont filtré par saison déjà, wt correspond au wt des ces données
   # For each weather type, estimate Gaussian field parameters
   for (k in 1:K) {
@@ -945,11 +928,12 @@ estimate_gaussian_field_params <- function(data, wt, names, coordinates, tmax, m
     
     ## TODO Cette partie va être calculé dans estimation_gf
     rho1_init <- NULL
+    cr <- NULL
     # on passe cela dans initialize_par_all
-    rho1_init <- vgm[vgm$lagtime == 0 & vgm$dist == max(vgm$dist), ]
+    #rho1_init <- vgm[vgm$lagtime == 0 & vgm$dist == max(vgm$dist), ]
     # Après — structure identique à vgm mais avec matrice identité avec 0.1 sur la diag
     # rho1_init$cov est utilisé dans initialize_par_all_if_missing ...
-    rho1_init$cov <- ifelse(rho1_init$v1 == rho1_init$v2, .init[.rho1ii], .init[.rho1ij])
+    #rho1_init$cov <- ifelse(rho1_init$v1 == rho1_init$v2, .init[.rho1ii], .init[.rho1ij])
     
     # Estimate Gaussian field parameters
     ## data de la saison, wt_id id du wt k , dates de la saison -> wt_id indice de wt k dans data et dates

@@ -362,7 +362,8 @@ loglik <- function(par, parms, par_all, data, names, Vi, h, u, uh, cr) {
           }
           if (!length(which(id3 == TRUE)) == 0) {
             rho_bound <- pmin(pmax(cij[id3], -0.99999999), 0.99999999)
-            l3 <- sum(log(pbinorm(uh_dz[id3, 7], uh_dz[id3, 8], var1 = 1, var2 = 1, cov12 = rho_bound)), na.rm = TRUE)
+            #l3 <- sum(log(pbinorm(uh_dz[id3, 7], uh_dz[id3, 8], var1 = 1, var2 = 1, cov12 = rho_bound)), na.rm = TRUE)
+            l3 <- sum(log(pmax(pmin(pbinorm(uh_dz[id3, 7], uh_dz[id3, 8], var1 = 1, var2 = 1, cov12 = rho_bound),1 - 1e-15), 1e-15)), na.rm = TRUE)
           }
           if (!length(which(id4 == TRUE)) == 0) {
             l4 <- sum((-1 / 2) * (log(delta[id4]) + (v1[id4]^2 - (2 * cij[id4] * v1[id4] * v2[id4]) + v2[id4]^2) / delta[id4]), na.rm = TRUE)
@@ -404,14 +405,16 @@ loglik <- function(par, parms, par_all, data, names, Vi, h, u, uh, cr) {
           uh_dz[, 7][which(uh_dz[, 7] == -Inf)] <- -2.58
           
           if (!length(which(id1 == TRUE)) == 0) {
-            l1 <- sum(log(pnorm((uh_dz[id1, 7] - cij[id1] * v2[id1]) / sqrt(delta[id1]))), na.rm = TRUE)
+            l1 <- sum(pnorm((uh_dz[id1, 7] - cij[id1] * v2[id1]) / sqrt(delta[id1]),log.p = TRUE), na.rm = TRUE)
           }
           if (!length(which(id2 == TRUE)) == 0) {
-            l2 <- sum(log(pnorm((uh_dz[id2, 8] - cij[id2] * v1[id2]) / sqrt(delta[id2]))), na.rm = TRUE)
+            l2 <- sum(pnorm((uh_dz[id2, 8] - cij[id2] * v1[id2]) / sqrt(delta[id2]), log.p = TRUE), na.rm = TRUE)
           }
           if (!length(which(id3 == TRUE)) == 0) {
+            # TODO c'est quoi ça ?
             rho_bound <- pmin(pmax(cij[id3], -0.99999999), 0.99999999)
-            l3 <- sum(log(pbinorm(uh_dz[id3, 7], uh_dz[id3, 8], var1 = 1, var2 = 1, cov12 = rho_bound)), na.rm = TRUE)
+            #l3 <- sum(log(pbinorm(uh_dz[id3, 7], uh_dz[id3, 8], var1 = 1, var2 = 1, cov12 = rho_bound)), na.rm = TRUE)
+            l3 <- sum(log(pmax(pmin(pbinorm(uh_dz[id3, 7], uh_dz[id3, 8], var1 = 1, var2 = 1, cov12 = rho_bound),1 - 1e-15), 1e-15)), na.rm = TRUE)
           }
           if (!length(which(id4 == TRUE)) == 0) {
             l4 <- sum((-1 / 2) * (log(delta[id4]) + (v1[id4]^2 - (2 * cij[id4] * v1[id4] * v2[id4]) + v2[id4]^2) / delta[id4]), na.rm = TRUE)
@@ -462,9 +465,12 @@ loglik_spatial <- function(par, data, h, uh, v) {
   #debut <- Sys.time()
 
   # Penalize negative parameters to enforce model constraints.
-  if (par[.matern_a]  < .lower_spatial[.matern_a]  |
-      par[.matern_nu] < .lower_spatial[.matern_nu]) {
-    return(abs(rnorm(1)) * 1e+20)
+  if (FALSE & par[.matern_a]  < .lower_spatial[.matern_a] - .numeric_tolerance  |
+      par[.matern_a] > .upper_spatial[.matern_a] + .numeric_tolerance |
+      par[.matern_nu] < .lower_spatial[.matern_nu] - .numeric_tolerance |
+      par[.matern_nu] > .upper_spatial[.matern_nu] + .numeric_tolerance ) {
+    print("########## loglik_spatial boundaries")
+    return(1e+20)
   } else {
     # Initialize components of the log-likelihood calculation.
     l1 <- l2 <- l3 <- l4 <- 0
@@ -512,15 +518,16 @@ loglik_spatial <- function(par, data, h, uh, v) {
     } 
 
     if (!length(which(id2 == T)) == 0) {
-      l2 <- sum(log(pnorm((-cij[id2] * v1[id2]) / sqrt(delta[id2]))))
+      l2 <- sum(pnorm((-cij[id2] * v1[id2]) / sqrt(delta[id2]),log.p = TRUE))
     } 
     
     if (!length(which(id1 == T)) == 0) {
-      l1 <- sum(log(pnorm((-cij[id1] * v2[id1]) / sqrt(delta[id1]))))
+      l1 <- sum(pnorm((-cij[id1] * v2[id1]) / sqrt(delta[id1]),log.p = TRUE))
     } 
     
     if (!length(which(id3 == T)) == 0) {
-      l3 <- sum(log(pbinorm(uh_dz[id3, 7], uh_dz[id3, 8], var1 = 1, var2 = 1, cov12 = cij[id3])))
+      #l3 <- sum(log(pbinorm(uh_dz[id3, 7], uh_dz[id3, 8], var1 = 1, var2 = 1, cov12 = cij[id3])))
+      l3 <- sum(log(pmax(pmin(pbinorm(uh_dz[id3, 7], uh_dz[id3, 8], var1 = 1, var2 = 1, cov12 = cij[id3]), 1 - 1e-15), 1e-15)), na.rm = TRUE)
     }
 
 
@@ -529,9 +536,12 @@ loglik_spatial <- function(par, data, h, uh, v) {
 
     # Return the aggregated negative log-likelihood, adjusting for errors or infinite values.
     ll <- try(-(l1 + l2 + l3 + l4), silent = TRUE)
-    if (is.character(ll) || is.infinite(ll)) ll <- abs(rnorm(1)) * 1e+20
+    if (is.character(ll) || is.infinite(ll)){
+      ll <- 1e+20
+      print("########## loglik_spatial ll error")
+    }
     return(ll)
-  }
+    }
 }
 
 #' @title Compute Spatio-Temporal Covariances
@@ -568,6 +578,11 @@ spacetime_cov <- function(data, wt_id, locations, ds = NULL, dates, lagstime, di
   }
 
   # Compute covariance for zero distance to establish a baseline
+  # Ici on calcul le dénominateur
+  # ATTENTION wt_id est différent de l'original 
+  # avant wt_id = 2:dim(data)[1] <- toutes les dates de la saison
+  # maintenant wt_id = wt_id <- toutes les dates de la saison et du wt
+  # Pour le calcul de c1 et c2 que doit-on prendre comme u et h (et wt_id)
   id <- cbind(wt_id, wt_id)
   idx <- which(ds == 0, arr.ind = TRUE)
   e <- expand.grid(1:nrow(id), 1:nrow(idx))
@@ -595,7 +610,7 @@ spacetime_cov <- function(data, wt_id, locations, ds = NULL, dates, lagstime, di
     as.numeric(d2 - d1)
   })
 
-  vgm_jeff <- lapply(lagstime, function(u){
+  vgm <- lapply(lagstime, function(u){
     # ids dates où lag == u
     id_dates_at_lag <- which( matrice_lag == u, arr.ind = TRUE)
     # pair id dates où lag == u et ids dans wt_id = k
@@ -627,38 +642,6 @@ spacetime_cov <- function(data, wt_id, locations, ds = NULL, dates, lagstime, di
     })
     return(data.frame(lagtime = u, dist = dist, cov = cv))
   })
-
-  # Loop over lag times to compute covariances at different spatial distances
-  # problème d'itération du lagtime valeur de u peut faire sortir des tableaux a revoir
-  vgm <- lapply(lagstime, function(u) {
-    id <- cbind(wt_id - u, wt_id)
-    diff <- dates[wt_id] - dates[wt_id - u]
-    id <- id[diff == u, ]
-
-    cv <- sapply(1:length(dist), function(i) {
-      d <- dist[i]
-      idx <- which(ds > d - 1 & ds < d + 1, arr.ind = TRUE)
-      e <- expand.grid(1:nrow(id), 1:nrow(idx))
-      ide <- id[e[, 1], ]
-      idxe <- idx[e[, 2], ]
-
-      if (covgm) {
-        x1 <- data[, , 2]
-        x2 <- data[, , 1]
-      } else {
-        x1 <- c(data[cbind(ide[, 1], idxe[, 1])])
-        x2 <- c(data[cbind(ide[, 2], idxe[, 2])])
-      }
-
-      # Compute normalized covariance
-      return(cov(x1[cbind(ide[, 1], idxe[, 1])], x2[cbind(ide[, 2], idxe[, 2])]) / sqrt(c1 * c2))
-    })
-
-    return(data.frame(lagtime = u, dist = dist, cov = cv))
-  })
-
-  print(do.call(rbind, vgm))
-  print(do.call(rbind, vgm_jeff))
 
   # Combine and return results
   return(do.call(rbind, vgm))

@@ -52,3 +52,25 @@ make_positive_definite <- function(M, epsilon = .numeric_tolerance) {
   M_corrected <- vectors %*% diag(corrected_values) %*% t(vectors)
   return(M_corrected)
 }
+
+
+#' Borne les valeurs d'une matrice entre des bornes min/max, avec une tolérance
+#'
+#' @param x      matrice (ou vecteur) à borner
+#' @param min    borne inférieure
+#' @param max    borne supérieure
+#' @param tol    tolérance (>= 0). Si NULL, aucune tolérance.
+#' @return       matrice de même dimension que x, avec valeurs bornées
+clamp <- function(x, min=-1, max=1, tol = .numeric_tolerance) {
+
+  if (!is.null(tol)) {
+    stopifnot(tol >= 0)
+    lo <- min - tol
+    hi <- max + tol
+  } else {
+    lo <- min
+    hi <- max
+  }
+
+  pmin(pmax(x, lo), hi)
+}
