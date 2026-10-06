@@ -1,4 +1,4 @@
-.numeric_tolerance <- 1e-7
+.numeric_tolerance <- 1e-6
 
 .a       <- 1
 .b       <- 2

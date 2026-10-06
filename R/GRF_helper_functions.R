@@ -146,8 +146,8 @@ update_rho1_parameters <- function(par_all, names, rho1) {
     #rho1[row(rho1) != col(rho1)] <- pmax(pmin(
     #rho1[row(rho1) != col(rho1)], -0.9999), 0.9999) # hors-diagonale ∈ [-1, 1]
 
-    diag(rho1) <- clamp(diag(rho1), 0, 1)
     rho1 <- clamp(rho1,-1,1)
+    diag(rho1) <- clamp(diag(rho1), 0, 1)
     
     rho1 <- Matrix::nearPD(rho1)$mat
   }
@@ -635,6 +635,7 @@ estimation_gf <- function(data, wt_id, max_it, dates, tmax, names, par_all = NUL
   # u : time lag
   # h : distance between 2 coordinates
   # uh (u, h, Ti, Tj, Sk, Sl) T and S are indices in dates and coordinates
+  # TODO check preprocessed_data et données utilisé dans vgm et cr
   preprocessed_data <- preprocess_data(Ti, Si, coordinates)
   uh <- preprocessed_data$uh
   uh <- cbind(uh, threshold_precip[uh[, 5]], threshold_precip[uh[, 6]])
