@@ -139,8 +139,10 @@ update_rho1_parameters <- function(par_all, names, rho1) {
     
     # Seule contrainte physique : diagonale strictement positive (variance > 0)
     diag(rho1) <- pmax(pmin(diag(rho1), 0.9999), 0)  # diagonale ∈ [0, 1]
-    rho1[row(rho1) != col(rho1)] <- pmax(pmin(
-    rho1[row(rho1) != col(rho1)], -0.9999), 0.9999) # hors-diagonale ∈ [-1, 1]
+    rho1[row(rho1) != col(rho1)] <- pmax(
+      pmin(rho1[row(rho1) != col(rho1)], 0.9999),
+      -0.9999
+    )
     
     rho1 <- Matrix::nearPD(rho1)$mat
   }
@@ -306,7 +308,7 @@ optimize_spatial_parameters <- function(par_all, data, names, Vi, uh, cr, max_it
     upper  = upper,
     data   = data, parms = parms, par_all = par_all,
     names = names, Vi = Vi, uh = uh, cr = cr,
-    control = list(maxit = max_it, trace = 2, parscale = parscale, ndeps = ndeps)
+    control = list(maxit = max_it, trace = 0, parscale = parscale, ndeps = ndeps)
   )$par
   
   cat("... done\n")
@@ -390,7 +392,7 @@ optimize_spatiotemporal_parameters <- function(par_all, data, names, Vi, uh, cr,
     upper  = upper,
     data   = data, parms = parms, par_all = par_all,
     names = names, Vi = Vi, uh = uh, cr = cr,
-    control = list(maxit = max_it, trace = 2, parscale = parscale, ndeps = ndeps)
+    control = list(maxit = max_it, trace = 0, parscale = parscale, ndeps = ndeps)
   )$par
   
   cat("... done\n")
@@ -477,7 +479,7 @@ optimize_temporal_parameters <- function(par_all, data, names, Vi, uh, cr, max_i
     upper  = upper,
     data   = data, parms = parms, par_all = par_all,
     names = names, Vi = Vi, uh = uh, cr = cr,
-    control = list(maxit = max_it, trace = 2, parscale = parscale, ndeps = ndeps)
+    control = list(maxit = max_it, trace = 0, parscale = parscale, ndeps = ndeps)
   )$par
   
   cat("... done\n")
@@ -573,7 +575,13 @@ estimation_gf <- function(data, wt_id, max_it, dates, tmax, names, par_all = NUL
   # Initialize spatial parameters
   par_s <- init_space_par(data = data, names = names, h = h[u == 0], uh = uh[u == 0, ], max_it = max_it)
   par_s <- do.call(cbind, par_s)
- 
+
+  par_s <- matrix(
+    c(1/0.4, 1/5, 1/12,   # aii = 1/taille domaine
+      1.5,       1.5,       1.5),         # nuii = 1.5 (milieu de [0.25, 3])
+    nrow=2, byrow=TRUE
+  )
+  
   # Construct parameter matrix for covariance model
   pairs <- paste(Vi[, 1], Vi[, 2], sep = "-")
   
