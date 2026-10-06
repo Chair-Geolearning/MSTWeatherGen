@@ -175,15 +175,16 @@ update_rho1_parameters <- function(par_all, names, rho1) {
 #' }
 #' @param vgm a matrix
 #' 
-initialize_rho1 <- function(vgm, cr, names) {
+initialize_rho1 <- function(corr_spacial, cr, names) {
 
-  vgm = vgm[vgm$lagtime == 0 & vgm$dist == max(vgm$dist), ]
+  corr_spacial = corr_spacial[corr_spacial$lagtime == 0 & corr_spacial$dist == max(corr_spacial$dist), ]
     
   w1 <- (sqrt((.init[.r1ii]^2 + .init[.r1jj]^2) / 2)) / sqrt(.init[.r1ii]*.init[.r1jj])
 
   temp <- sapply(names, function(name1){
             sapply(names, function(name2){
-              (cr[name1,name2] - vgm[which(vgm$v1==name1 & vgm$v2 == name2),]$cov) * w1
+              #(cr[name1,name2] - space_cov[which(space_cov$v1==name1 & space_cov$v2 == name2),]$cov) * w1
+              corr_spacial[which(corr_spacial$v1==name1 & corr_spacial$v2 == name2),]$cov * w1
             })
           })
   rho1_init <- matrix(as.numeric(temp), nrow = length(names), ncol = length(names))
@@ -193,7 +194,7 @@ initialize_rho1 <- function(vgm, cr, names) {
   return(rho1_init)
 }
   
-process_pseudo_variogramme <- function(data, dates, coordinates, wt_id, names){
+process_spatial_correlation <- function(data, dates, coordinates, wt_id, names){
   ep <- generate_variable_index_pairs(names)
   # Distance between points
   dst <- sapply(1:nrow(coordinates), function(i) {
@@ -202,8 +203,8 @@ process_pseudo_variogramme <- function(data, dates, coordinates, wt_id, names){
     })
   })
 
-  ##Variogram
-  vgm <- lapply(1:nrow(ep), function(i) {
+  ## space cov
+  corr_spacial <- lapply(1:nrow(ep), function(i) {
     variable <- unlist(ep[i, ])
     dist <- sort(unique(c(floor(dst))))
     # pourquoi concerver uniquement la valuer plus grande au ~2/3 ?
@@ -214,7 +215,7 @@ process_pseudo_variogramme <- function(data, dates, coordinates, wt_id, names){
     # ATTENTION wt_id est différent de l'original 
     # avant wt_id = 2:dim(data)[1] <- toutes les dates de la saison
     # maintenant wt_id = wt_id <- toutes les dates de la saison et du wt
-    vgm <- spacetime_cov(
+    space_time_cov <- spacetime_cov(
       data = data[, , variable], wt_id = wt_id, locations = coordinates, ds = dst,
       dates = dates, lagstime = 0, dist = dist, covgm = T
     )
@@ -222,13 +223,13 @@ process_pseudo_variogramme <- function(data, dates, coordinates, wt_id, names){
     #   data = data[, , variable], wt_id = 2:dim(data)[1], locations = coordinates, ds = dst,
     #   dates = dates, lagstime = 0, dist = dist, covgm = T
     # )
-    vgm$v <- paste(variable[1], variable[2], sep = "-")
-    vgm$v1 <- variable[1]
-    vgm$v2 <- variable[2]
+    space_time_cov$v <- paste(variable[1], variable[2], sep = "-")
+    space_time_cov$v1 <- variable[1]
+    space_time_cov$v2 <- variable[2]
 
-    return(vgm)
+    return(space_time_cov)
   })
-  vgm <- do.call(rbind, vgm)
+  corr_spacial <- do.call(rbind, corr_spacial)
 }
 
 process_empirical_correlation <- function(data, names){
@@ -649,14 +650,14 @@ estimation_gf <- function(data, wt_id, max_it, dates, tmax, names, par_all = NUL
   # Construct parameter matrix for covariance model
   pairs <- paste(Vi[, 1], Vi[, 2], sep = "-")
   
-  ## vgm ici pour le moment avec données du wt
-  vgm <- process_pseudo_variogramme(data, dates, coordinates, wt_id, names)
+  ## corr_spatial ici pour le moment avec données du wt
+  corr_spatial <- process_spatial_correlation(data, dates, coordinates, wt_id, names)
 
   ## CR ici avec les données du wt
   cr = process_empirical_correlation(data[wt_id,,], names)
 
   ## rho1 init
-  rho1_init <- initialize_rho1(vgm, cr, names)
+  rho1_init <- initialize_rho1(corr_spatial, cr, names)
 
   # Check and initialize par_all if missing
   par_all <- initialize_par_all_if_missing(par_all, names, pairs, par_s, rho1_init, cr = cr)
