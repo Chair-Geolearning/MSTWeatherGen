@@ -429,8 +429,9 @@ loglik <- function(par, parms, par_all, data, names, Vi, h, u, uh, cr) {
     
     
     result <- -sum(unlist(ll))
+
     if (MONITOR) {write_loglik_monitoring(par, parms, names, result)}
-    if (!is.finite(result)) return(1e20)                       # ← protection finale globale
+    if (!is.finite(result) || result < 0 ) return(1e20)                       # ← protection finale globale
     return(result)
     
   } else {
