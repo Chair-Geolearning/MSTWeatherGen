@@ -31,3 +31,29 @@ NULL
 #' data("coordinates", package = "MSTWeatherGen")
 #' str(coordinates)
 NULL
+
+#' Sequence of dates from the data
+#'
+#' @name dates
+#' @docType data
+#' @author Said Obakrim
+#' @format a vector with 4018 dates from 2011-01-01 to 2021-12-31
+#' @examples
+#' data("dates", package = "MSTWeatherGen")
+#' str(dates)
+NULL
+
+#' Simulated latent Gaussian random field
+#'
+#' @name Z
+#' @docType data
+#' @format a 3-dimensional array [days,coordinates,variables] as index
+#' \describe{
+#'   \item{days index}{first dimension : 30 days index}
+#'   \item{coordinates index}{second dimension : 456 coordinates index}
+#'   \item{variables index}{third dimension : 3 variables index v1, v2, v3}
+#' }
+#' @examples
+#' data("Z", package = "MSTWeatherGen")
+#' str(Z)
+NULL

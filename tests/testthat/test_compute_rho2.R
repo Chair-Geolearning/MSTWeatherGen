@@ -10,7 +10,7 @@ ep <- generate_variable_index_pairs(names)
 par_s <- do.call(cbind, par_s)
 variable <- "Wind"
 pairs <- c("Wind-Wind", "Wind-Temp", "Temp-Temp")
-parm <- param(par_all_TEST.rds, names)
+parm <- create_df_param(par_all_TEST.rds, names)
 
 
 cr <- sapply(names, function(v1) {

@@ -2,7 +2,7 @@
 % Please edit documentation in R/Covariance_and_loglikelihood.R
 \name{compute_rho2}
 \alias{compute_rho2}
-\title{Compute rho2ij Correlations}
+\title{Compute rho2 Correlations}
 \usage{
 compute_rho2(parm, names, cr)
 }

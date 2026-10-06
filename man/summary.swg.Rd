@@ -30,5 +30,6 @@ Summarize `MSTWeatherGen_Estim()`` function output (swg object class).
 \dontrun{
   swg <- MSTWeatherGen_estim()
   summary(swg)
+  summary.swg(swg)
 }
 }
