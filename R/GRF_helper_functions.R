@@ -495,20 +495,31 @@ set_spatial_bounds <- function(coordinates) {
   # Calculer les distances entre tous les sites
   dst <- as.matrix(dist(coordinates))
   
-  dst_min <- min(dst[dst > 0]) 
+  # Pour eviter que 1/0 = inf
+  dst_min <- min(dst[dst > 0])
   dst_max <- max(dst)
   
   lower_aii <- 1 / dst_max
   upper_aii <- 1 / dst_min
   
-  .lower[.aii] <- lower_aii
-  .lower[.ajj] <- lower_aii
-  .upper[.aii] <- upper_aii
-  .upper[.ajj] <- upper_aii
+  new_lower <- .lower
+  new_lower[.aii] <- lower_aii
+  new_lower[.ajj] <- lower_aii
   
-  .lower_spatial[.matern_a] <- lower_aii
-  .upper_spatial[.matern_a] <- upper_aii
+  new_upper <- .upper
+  new_upper[.aii] <- upper_aii
+  new_upper[.ajj] <- upper_aii
   
+  new_lower_spatial <- .lower_spatial
+  new_lower_spatial[.matern_a] <- lower_aii
+  
+  new_upper_spatial <- .upper_spatial
+  new_upper_spatial[.matern_a] <- upper_aii
+  
+  assignInMyNamespace(".lower", new_lower)
+  assignInMyNamespace(".upper", new_upper)
+  assignInMyNamespace(".lower_spatial", new_lower_spatial)
+  assignInMyNamespace(".upper_spatial", new_upper_spatial)
 }
 #' Estimate Geostatistical Parameters for Multivariate Spatio-Temporal Data
 #'
@@ -572,6 +583,8 @@ estimation_gf <- function(data, wt_id, max_it, dates, tmax, names, par_all = NUL
   h <- preprocessed_data$h
   
   set_spatial_bounds(coordinates)
+  cat("lower aii:", .lower[.aii], "\n")
+  cat("upper aii:", .upper[.aii], "\n")
   # Initialize spatial parameters
   par_s <- init_space_par(data = data, names = names, h = h[u == 0], uh = uh[u == 0, ], max_it = max_it)
   par_s <- do.call(cbind, par_s)
