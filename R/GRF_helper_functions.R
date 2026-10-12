@@ -576,11 +576,11 @@ estimation_gf <- function(data, wt_id, max_it, dates, tmax, names, par_all = NUL
   par_s <- init_space_par(data = data, names = names, h = h[u == 0], uh = uh[u == 0, ], max_it = max_it)
   par_s <- do.call(cbind, par_s)
 
-  par_s <- matrix(
+  'par_s <- matrix(
     c(1/0.4, 1/5, 1/12,   # aii = 1/taille domaine
       1.5,       1.5,       1.5),         # nuii = 1.5 (milieu de [0.25, 3])
     nrow=2, byrow=TRUE
-  )
+  )'
   
   # Construct parameter matrix for covariance model
   pairs <- paste(Vi[, 1], Vi[, 2], sep = "-")
@@ -761,9 +761,14 @@ generate_temporal_index_pairs <- function(wt_id, dates, tmax) {
   Ti <- lapply(0:tmax, function(i) {
     valid_indices    <- (wt_id - i) > 0
     wt_valid <- wt_id[valid_indices]
+    t1 <- wt_valid - i
+    # t1 doit aussi être dans wt_id (même weather type K)
+    in_wt <- t1 %in% wt_id
+    wt_valid      <- wt_valid[in_wt]
+    t1 <- t1[in_wt]
     
-    Ti <- cbind(wt_valid - i, wt_valid, i)
-    diff <- dates[wt_valid] - dates[wt_valid - i]
+    Ti <- cbind(t1, wt_valid, i)
+    diff <- dates[wt_valid] - dates[t1]
     Ti <- Ti[diff == i, ]
     
   })
