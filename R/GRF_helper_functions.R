@@ -588,6 +588,13 @@ estimation_gf <- function(data, wt_id, max_it, dates, tmax, names, par_all = NUL
   # Check and initialize par_all if missing
   par_all <- initialize_par_all_if_missing(par_all, names, pairs, par_s, rho1, cr = cr)
   
+  # ← ICI — loglik initiale
+  parms_all <- names(par_all)
+  ll_init <- loglik(par=par_all, parms=parms_all, par_all=par_all,
+                    data=data, names=names, Vi=Vi, uh=uh, cr=cr)
+  cat("=== Loglik initiale :", ll_init, "===\n")
+  
+  
   #write_spatial_params(par_all, names, "init_spatial_params", log_file)
   #write_st_params(par_all, names, "init_spatio_temp", log_file_st)
   #write_temp_params(par_all,    names, "init_temporal",       log_file_temp)
@@ -606,25 +613,31 @@ estimation_gf <- function(data, wt_id, max_it, dates, tmax, names, par_all = NUL
     #write_temp_params(par_all, names, paste0("valeur_finale_temporal_loop_n", v), log_file_temp)
     if (MONITOR) log_params(par_all, names, paste0("valeur_finale_temporal_loop_n", v),
                logs$log_file, logs$log_file_st, logs$log_file_temp, which="temp")
-    
+    cat("loglik après optimize_temporal", v, ":", loglik(par=par_all, parms=names(par_all), par_all=par_all, data=data, names=names, Vi=Vi, uh=uh, cr=cr), "\n")
     # Optimize spatial parameters
     par_all <- optimize_spatial_parameters(par_all, data, names, Vi, uh, cr, max_it)
     #write_spatial_params(par_all, names, paste0("valeur_finale_spatial_loop_n", v), log_file)
     if (MONITOR) log_params(par_all, names, paste0("valeur_finale_spatial_loop_n", v),
                logs$log_file, logs$log_file_st, logs$log_file_temp, which="spatial")
-    
+    cat("loglik après optimize_spatial", v, ":", loglik(par=par_all, parms=names(par_all), par_all=par_all, data=data, names=names, Vi=Vi, uh=uh, cr=cr), "\n")
     # Optimize spatotemporal parameters
     #par_all <- optimize_spatiotemporal_parameters(par_all, data, names, Vi, uh=[uh[,1] <= 2,], cr, max_it, ep)
     par_all <- optimize_spatiotemporal_parameters(par_all, data, names, Vi, uh, cr, max_it)
     #write_st_params(par_all, names, paste0("valeur_finale_spatiotemp_loop_", v), log_file_st)
     if (MONITOR) log_params(par_all, names, paste0("valeur_finale_spatiotemp_loop_", v),
                logs$log_file, logs$log_file_st, logs$log_file_temp, which="st")
+    cat("loglik après optimize_spatiotemporal", v, ":", loglik(par=par_all, parms=names(par_all), par_all=par_all, data=data, names=names, Vi=Vi, uh=uh, cr=cr), "\n")
   }
   
   if (MONITOR) stop_monitoring()
   
   # Construct parameter and beta matrices
   # rho1 in par_all already update in optimize_spatial_parameters
+  ll_final <- loglik(par=par_all, parms=parms_all, par_all=par_all,
+                     data=data, names=names, Vi=Vi, uh=uh, cr=cr)
+  cat("=== Loglik finale   :", ll_final, "===\n")
+  cat("=== Amélioration    :", ll_init - ll_final, "===\n")
+  
   par_all <- update_rho1_parameters(par_all, names, extract_rho1(create_df_param(par_all, names), names))
   parm <- create_df_param(par_all, names)
   par_all <- update_rho2_parameters(par_all,names, compute_rho2(parm, names, cr))
@@ -746,9 +759,13 @@ generate_spatial_index_pairs <- function(coordinates, n1, n2) {
 #' @keywords internal
 generate_temporal_index_pairs <- function(wt_id, dates, tmax) {
   Ti <- lapply(0:tmax, function(i) {
-    Ti <- cbind(wt_id - i, wt_id, i)
-    diff <- dates[wt_id] - dates[wt_id - i]
+    valid_indices    <- (wt_id - i) > 0
+    wt_valid <- wt_id[valid_indices]
+    
+    Ti <- cbind(wt_valid - i, wt_valid, i)
+    diff <- dates[wt_valid] - dates[wt_valid - i]
     Ti <- Ti[diff == i, ]
+    
   })
   Ti <- do.call(rbind, Ti)
   colnames(Ti) <- c("t1", "t2", "u")
