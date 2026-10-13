@@ -273,7 +273,7 @@ colnames(cr) <- rownames(cr) <- names
 
 ```{r eval=FALSE}
 Sys.setenv(MONITOR = "TRUE")
-nb_estimation <- 1
+nb_estimation <- 3
 estim_results <- list()
 
 for( it in 1:nb_estimation) {
@@ -378,4 +378,47 @@ true_params <- data.frame(
 
 # diff estimated vs true_params
 parm_mean[,-c(1,2)] - true_params[,-c(1,2)]
+```
+
+
+
+```{r eval=FALSE}
+build_vgm_for_plot <- function(parm_mean, coordinates, lagstime = 0:2, var_names) {
+  dst       <- as.matrix(dist(coordinates))
+  dist_grid <- sort(unique(round(dst[dst > 0], 3)))
+  dist_grid <- dist_grid[seq(1, length(dist_grid), length.out = 10)]
+
+  vgm_list <- lapply(1:nrow(parm_mean), function(idx) {
+    par_row <- parm_mean[idx, ]
+    v1 <- par_row$v1
+    v2 <- par_row$v2
+
+    par_vec <- c(
+      par_row$a, par_row$b, par_row$c, par_row$d, par_row$e,
+      par_row$Ai, par_row$Aj,
+      par_row$aii, par_row$ajj,
+      par_row$nuii, par_row$nujj,
+      par_row$rho1ij,
+      par_row$r2ii, par_row$r2jj,
+      par_row$r1ii, par_row$r1jj
+    )
+    rho2ij <- par_row$rho2ij
+
+    do.call(rbind, lapply(lagstime, function(u) {
+      data.frame(
+        v1      = v1,
+        v2      = v2,
+        lagtime = u,
+        dist    = dist_grid,
+        cov     = NA_real_,          # pas de covariance empirique
+        vgmsim  = Gneiting(h = dist_grid, u = u, par = par_vec, rho2ij = rho2ij)
+      )
+    }))
+  })
+
+  do.call(rbind, vgm_list)
+}
+
+vgm <- build_vgm_for_plot(parm_mean, coordinates, lagstime = 0:2, var_names = c("v1","v2","v3"))
+plot_multivariate_st_covariances(vgm, names = c("v1","v2","v3"))
 ```
