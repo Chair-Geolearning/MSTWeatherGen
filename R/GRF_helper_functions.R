@@ -583,8 +583,6 @@ estimation_gf <- function(data, wt_id, max_it, dates, tmax, names, par_all = NUL
   h <- preprocessed_data$h
   
   set_spatial_bounds(coordinates)
-  cat("lower aii:", .lower[.aii], "\n")
-  cat("upper aii:", .upper[.aii], "\n")
   # Initialize spatial parameters
   par_s <- init_space_par(data = data, names = names, h = h[u == 0], uh = uh[u == 0, ], max_it = max_it)
   par_s <- do.call(cbind, par_s)
@@ -779,11 +777,11 @@ generate_temporal_index_pairs <- function(wt_id, dates, tmax) {
     in_wt <- t1 %in% wt_id
     wt_valid      <- wt_valid[in_wt]
     t1 <- t1[in_wt]
+    if (length(t1) == 0) return(NULL)
     
     Ti <- cbind(t1, wt_valid, i)
     diff <- dates[wt_valid] - dates[t1]
-    Ti <- Ti[diff == i, ]
-    
+    Ti <- Ti[!is.na(diff) & diff == i, , drop = FALSE]    
   })
   Ti <- do.call(rbind, Ti)
   colnames(Ti) <- c("t1", "t2", "u")
