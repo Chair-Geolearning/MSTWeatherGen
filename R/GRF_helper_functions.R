@@ -263,8 +263,19 @@ initialize_rho1 <- function(corr_spacial, names) {
 
   return(rho1_init)
 }
-  
-process_spatial_correlation <- function(data, dates, coordinates, wt_id, names){
+
+#' process spatial empirical covariance
+#' @description
+#' Process empirical spatial coviariance in site and distant site.
+#' TODO add equation and explanation
+#' 
+#' @param data set of data
+#' @param dates all dates
+#' @param coordinates vector of coordinates (long, lat)
+#' @param wt_id weather type index in data and dates
+#' @param names variables names
+#' @return a data.frame with lagtime (u); dist (h); cov (covariance), v (variable pair), v1 and v2 names
+process_spatial_covariance <- function(data, dates, coordinates, wt_id, names){
   ep <- generate_variable_index_pairs(names)
   # Distance between points
   dst <- sapply(1:nrow(coordinates), function(i) {
@@ -274,10 +285,11 @@ process_spatial_correlation <- function(data, dates, coordinates, wt_id, names){
   })
 
   ## space cov
-  corr_spacial <- lapply(1:nrow(ep), function(i) {
+  cov_spacial <- lapply(1:nrow(ep), function(i) {
     variable <- unlist(ep[i, ])
     dist <- sort(unique(c(floor(dst))))
     # do not take the farest distance but the 2/3 distance
+    # TODO on garde les valeurs supp au 2/3
     dist <- dist[seq(1, length(dist) / 1.5, length.out = 2)]
     # lagtime to 0 over the wt id
     space_time_cov <- spacetime_cov(
@@ -290,9 +302,16 @@ process_spatial_correlation <- function(data, dates, coordinates, wt_id, names){
 
     return(space_time_cov)
   })
-  corr_spacial <- do.call(rbind, corr_spacial)
+  corr_spacial <- do.call(rbind, cov_spacial)
 }
 
+#' process empirical correlation with no lag
+#' @description
+#' Process empirical correlation estimation at each site with no lag in time (h=0 and u=0) mean by nomber of sites.
+#' TODO add equation and explanation
+#' 
+#' @param data set of data
+#' @param names variables names
 process_empirical_correlation <- function(data, names){
   # la corrélation (coefficient de corrélation de Pearson) à distance spatiale h=0 et lag temporel u=0, moyennée spatialement.
   # estimateur empirique de Cij(0,0) sur les Z empiriques (champ latent)
@@ -755,13 +774,13 @@ estimation_gf <- function(data, wt_id, max_it, dates, tmax, names,
   pairs <- paste(Vi[, 1], Vi[, 2], sep = "-")
   
   ## corr_spatial ici pour le moment avec données du wt
-  corr_spatial <- process_spatial_correlation(data, dates, coordinates, wt_id, names)
+  cov_spatial <- process_spatial_covariance(data, dates, coordinates, wt_id, names)
 
   ## CR ici avec les données du wt
   cr = process_empirical_correlation(data[wt_id,,], names)
 
   ## rho1 init
-  rho1_init <- initialize_rho1(corr_spatial, cr, names)
+  rho1_init <- initialize_rho1(cov_spatial, names)
 
   # Check and initialize par_all if missing
   par_all <- initialize_par_all(par_all, names, pairs, par_s, rho1_init, cr = cr)

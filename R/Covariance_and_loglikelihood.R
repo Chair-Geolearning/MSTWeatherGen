@@ -466,7 +466,7 @@ loglik_spatial <- function(par, data, h, uh, v) {
   #debut <- Sys.time()
 
   # Penalize negative parameters to enforce model constraints.
-  if (FALSE & par[.matern_a]  < .lower_spatial[.matern_a] - .numeric_tolerance  |
+  if (par[.matern_a]  < .lower_spatial[.matern_a] - .numeric_tolerance  |
       par[.matern_a] > .upper_spatial[.matern_a] + .numeric_tolerance |
       par[.matern_nu] < .lower_spatial[.matern_nu] - .numeric_tolerance |
       par[.matern_nu] > .upper_spatial[.matern_nu] + .numeric_tolerance ) {
@@ -567,7 +567,7 @@ loglik_spatial <- function(par, data, h, uh, v) {
 #'
 #' @importFrom stats cov
 #' @keywords internal
-spacetime_cov <- function(data, wt_id, locations, ds = NULL, dates, lagstime, dist, covgm = TRUE) {
+spacetime_cov <- function(data, wt_id, locations, ds = NULL, dates, lagstime = 0, dist, covgm = TRUE) {
   # Validate input data structure
   if (covgm && length(dim(data)) < 3) {
     stop("data must be a 3D array when 'covgm' flag is set.")
@@ -580,10 +580,8 @@ spacetime_cov <- function(data, wt_id, locations, ds = NULL, dates, lagstime, di
 
   # Compute covariance for zero distance to establish a baseline
   # Ici on calcul le dénominateur
-  # ATTENTION wt_id est différent de l'original 
-  # avant wt_id = 2:dim(data)[1] <- toutes les dates de la saison
-  # maintenant wt_id = wt_id <- toutes les dates de la saison et du wt
-  # Pour le calcul de c1 et c2 que doit-on prendre comme u et h (et wt_id)
+  # maintenant wt_id <- toutes les dates de la saison et du wt
+  # Pour le calcul de c1 et c2 on prendre u=0 et h=0 
   id <- cbind(wt_id, wt_id)
   idx <- which(ds == 0, arr.ind = TRUE)
   e <- expand.grid(1:nrow(id), 1:nrow(idx))
@@ -611,7 +609,7 @@ spacetime_cov <- function(data, wt_id, locations, ds = NULL, dates, lagstime, di
     as.numeric(d2 - d1)
   })
 
-  vgm <- lapply(lagstime, function(u){
+  space_corr <- lapply(lagstime, function(u){
     # ids dates où lag == u
     id_dates_at_lag <- which( matrice_lag == u, arr.ind = TRUE)
     # pair id dates où lag == u et ids dans wt_id = k
@@ -621,7 +619,8 @@ spacetime_cov <- function(data, wt_id, locations, ds = NULL, dates, lagstime, di
     cv <- sapply(1:length(dist), function(i) {
       d <- dist[i]
       # pair id coordinates avec distance d
-      idx <- which(ds > d - 1 & ds < d + 1, arr.ind = TRUE)
+      #idx <- which(ds > d - 1 & ds < d + 1, arr.ind = TRUE)
+      idx <- which(ds > d - 1, arr.ind = TRUE)
       # toutes les dates du wt dans le lag u X coordinates pair id dans d
       d_x_c <- expand.grid(1:nrow(id_dates_at_lag_wt), 1:nrow(idx))
       # toutes les pairs de dates X combinaisons de pair id coordinates possibles
@@ -637,15 +636,17 @@ spacetime_cov <- function(data, wt_id, locations, ds = NULL, dates, lagstime, di
         x2 <- c(data[cbind(id_d[, 2], id_x[, 2])])
       }
 
-      # Compute normalized covariance
-      # cov(Zi(s,t) , Zj(s+h, t+u))
+      # Compute covariance croisée (entre deux variables) et normalisation par les variance marginales
+      # on obtient la corrélation croisée empirique
+      # cov(Zi(s,t) , Zj(s, t+d))
       return(cov(x1[cbind(id_d[, 1], id_x[, 1])], x2[cbind(id_d[, 2], id_x[, 2])]) / sqrt(c1 * c2))
+      #return(cov(x1[cbind(id_d[, 1], id_x[, 1])], x2[cbind(id_d[, 2], id_x[, 2])]))
     })
     return(data.frame(lagtime = u, dist = dist, cov = cv))
   })
 
   # Combine and return results
-  return(do.call(rbind, vgm))
+  return(do.call(rbind, space_corr))
 }
 
 #' @title Generate Covariance Matrices for Spatio-Temporal Model

@@ -293,8 +293,6 @@ for( it in 1:nb_estimation) {
       coordinates      = coordinates,
       n1               = n1,
       n2               = n2,
-      rho1             = rho1_init,
-      cr               = cr,
       threshold_precip = rep(0,dim(Z)[2])
   )
 }
