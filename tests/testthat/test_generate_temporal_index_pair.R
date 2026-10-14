@@ -97,6 +97,35 @@ test_that("generate_temporal_index_pairs number of pairs does not exceed (length
   expect_lte(nrow(res), length(wt_id) * (tmax + 1))
 })
 
+# 7. Cohérence du nombre potentiel de paires
+test_that("generate_temporal_index_pairs indices stay within data dimensions", {
+  wt_id <- which(wt == 1)   # weather type 1, indices réels
+  tmax  <- 3
+  res   <- generate_temporal_index_pairs(wt_id, dates, tmax)
+  
+  # Nt = 4018 (dim(data)[1])
+  expect_true(all(res[, "t1"] >= 1))
+  expect_true(all(res[, "t1"] <= Nt))
+  expect_true(all(res[, "t2"] >= 1))
+  expect_true(all(res[, "t2"] <= Nt))
+})
+
+# 8. t1 appartient toujours au même weather type
+test_that("generate_temporal_index_pairs : t1 toujours dans wt_id", {
+  wt_id <- which(wt == 1)
+  res   <- generate_temporal_index_pairs(wt_id, dates, tmax = 3)
+  
+  expect_true(all(res[, "t1"] %in% wt_id))
+  expect_true(all(res[, "t2"] %in% wt_id))
+})
+
+# 9. Pas de NA dans le résultat
+test_that("generate_temporal_index_pairs : aucun NA", {
+  wt_id <- which(wt == 1)
+  res   <- generate_temporal_index_pairs(wt_id, dates, tmax = 3)
+  
+  expect_false(anyNA(res))
+})
 # 7. Vérification explicite sur un exemple simple
 # test_that("generate_temporal_index_pairs produces correct pairs for a simple case", {
 #   simple_dates <- as.Date("2020-01-01") + 0:10
