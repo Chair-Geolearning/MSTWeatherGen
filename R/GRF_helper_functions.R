@@ -783,7 +783,7 @@ generate_temporal_index_pairs <- function(wt_id, dates, tmax) {
     
     Ti   <- cbind(t1, wt_valid, i)
     diff <- dates[wt_valid] - dates[t1]
-    Ti   <- Ti[!is.na(diff) & diff == i, , drop = FALSE]    
+    Ti   <- Ti[!is.na(diff) & diff == i, , drop = FALSE]  # drop = FALSE : évite que R convertisse en vecteur quand une seule ligne survit  
   })
   Ti <- do.call(rbind, Ti)
   colnames(Ti) <- c("t1", "t2", "u")
