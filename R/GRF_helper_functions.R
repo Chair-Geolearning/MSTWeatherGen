@@ -779,7 +779,7 @@ generate_temporal_index_pairs <- function(wt_id, dates, tmax) {
     wt_valid <- wt_valid[in_wt]
     t1       <- t1[in_wt]
     
-    if (length(t1) == 0) return(NULL) # Si aucune paire valide pour ce lag, on retourne NULL (ignoré par rbind)
+    if (length(t1) == 0) return(NULL) # Si aucune paire valide pour ce lag
     
     Ti   <- cbind(t1, wt_valid, i)
     diff <- dates[wt_valid] - dates[t1]
