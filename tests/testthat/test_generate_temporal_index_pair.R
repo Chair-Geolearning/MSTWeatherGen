@@ -97,23 +97,98 @@ test_that("generate_temporal_index_pairs number of pairs does not exceed (length
   expect_lte(nrow(res), length(wt_id) * (tmax + 1))
 })
 
-# 7. Vérification explicite sur un exemple simple
-# test_that("generate_temporal_index_pairs produces correct pairs for a simple case", {
-#   simple_dates <- as.Date("2020-01-01") + 0:10
-#   wt_id <- 5:7
-#   tmax <- 2
+# 7. Cohérence du nombre potentiel de paires
+test_that("generate_temporal_index_pairs indices stay within data dimensions", {
+  wt_id <- which(wt == 1)   # weather type 1, indices réels
+  tmax  <- 3
+  res   <- generate_temporal_index_pairs(wt_id, dates, tmax)
+  
+  # Nt = 4018 (dim(data)[1])
+  expect_true(all(res[, "t1"] >= 1))
+  expect_true(all(res[, "t1"] <= Nt))
+  expect_true(all(res[, "t2"] >= 1))
+  expect_true(all(res[, "t2"] <= Nt))
+})
 
-#   res <- generate_temporal_index_pairs(wt_id, simple_dates, tmax)
+# 8. t1 appartient toujours au même weather type
+test_that("generate_temporal_index_pairs : t1 toujours dans wt_id", {
+  wt_id <- which(wt == 1)
+  res   <- generate_temporal_index_pairs(wt_id, dates, tmax = 3)
+  
+  expect_true(all(res[, "t1"] %in% wt_id))
+  expect_true(all(res[, "t2"] %in% wt_id))
+})
 
-# pairs expected manually :
-# t=5 -> (5,5,0), (4,5,1), (3,5,2)
-# t=6 -> (6,6,0), (5,6,1), (4,6,2)
-# t=7 -> (7,7,0), (6,7,1), (5,7,2)
-#   expected <- rbind(
-#     c(5,5,0), c(4,5,1), c(3,5,2),
-#     c(6,6,0), c(5,6,1), c(4,6,2),
-#     c(7,7,0), c(6,7,1), c(5,7,2)
-# )
+# 9. Pas de NA dans le résultat
+test_that("generate_temporal_index_pairs : aucun NA", {
+  wt_id <- which(wt == 1)
+  res   <- generate_temporal_index_pairs(wt_id, dates, tmax = 3)
+  
+  expect_false(anyNA(res))
+})
 
-#   expect_equal(res, expected)
-# })
+
+# 10. La différence de dates correspond exactement au lag u
+test_that("generate_temporal_index_pairs : diff dates == u pour tous les WT", {
+  for (k in 1:K) {
+    wt_id <- which(wt == k)
+    res   <- generate_temporal_index_pairs(wt_id, dates, tmax = 3)
+    
+    diffs <- as.numeric(dates[res[, "t2"]] - dates[res[, "t1"]])
+    expect_equal(diffs, res[, "u"],
+                 info = paste("Echec pour weather type", k))
+  }
+})
+
+# 11. t2 > t1 toujours (sauf lag 0)
+test_that("generate_temporal_index_pairs : t2 >= t1", {
+  wt_id <- which(wt == 1)
+  res   <- generate_temporal_index_pairs(wt_id, dates, tmax = 3)
+  
+  expect_true(all(res[, "t2"] >= res[, "t1"]))
+})
+
+# 12. Les lags présents sont exactement entre 0:tmax
+test_that("generate_temporal_index_pairs : lags couvrent 0:tmax", {
+  wt_id <- which(wt == 1)
+  tmax  <- 3
+  res   <- generate_temporal_index_pairs(wt_id, dates, tmax = tmax)
+  
+  expect_setequal(unique(res[, "u"]), 0:tmax)
+})
+
+# 13. Stress test : indices en début de dataset + grand tmax
+test_that("generate_temporal_index_pairs : petits indices + grand tmax", {
+  # Seulement 2 indices proches du début → wt_id - i <= 0 très vite
+  wt_id <- c(2, 3)
+  tmax  <- 10   # bien plus grand que max(wt_id)
+  res   <- generate_temporal_index_pairs(wt_id, dates, tmax)
+  
+  # Pas de NA
+  expect_false(anyNA(res))
+  
+  # t1 toujours >= 1 (jamais 0 ou car il y a le timelag nul)
+  expect_true(all(res[, "t1"] >= 1))
+  
+  # t1 dans wt_id
+  expect_true(all(res[, "t1"] %in% wt_id))
+  
+  # Seuls lags possibles : 0 (t1==t2) et 1 (t1=2,t2=3)
+  expect_true(all(res[, "u"] %in% c(0, 1)))
+  
+  # Aucun lag >= 2 possible car max(wt_id) - min(wt_id) = 1
+  expect_false(any(res[, "u"] >= 2))
+})
+# 14. Stress test : wt_id = c(1) seul indice au bord absolu
+test_that("generate_temporal_index_pairs : wt_id = c(1) + grand tmax", {
+  wt_id <- c(1)
+  tmax  <- 5
+  res   <- generate_temporal_index_pairs(wt_id, dates, tmax)
+  
+  # Seul lag=0 possible : t1 = t2 = 1
+  expect_false(anyNA(res))
+  expect_true(all(res[, "u"] == 0))
+  expect_true(all(res[, "t1"] == 1))
+  expect_true(all(res[, "t2"] == 1))
+})
+
