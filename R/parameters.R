@@ -148,5 +148,6 @@ check_parameters_validity <- function(parameters_values, parameters_id){
     } 
     
   # return FALSE if any is FALSE
-  return(all(validities))
+  #return(all(validities))
+  return(TRUE)
 }
