@@ -22,3 +22,4 @@ Process empirical correlation estimation at each site with no lag in time (h=0 a
   cr_{ij} = C_{ij}^{(1)}(0) + C_{ij}^{(2)}(0,0) = \frac{\sum_{s=1}^{S}\widehat{\mathrm{Cor}}(Z_i(s,t), Z_j(s,t))}{S}
 }
 }
+\keyword{internal}

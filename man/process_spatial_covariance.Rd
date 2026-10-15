@@ -29,3 +29,4 @@ Process empirical spatial coviariance for distant sites.
  \widehat{Cov}_{[\forall {\bf s},{\bf s'}|d({\bf s},{\bf s'})>\frac{2}{3}d_{max},\forall t \in X_k]}\left( Z_i({\bf s},t),Z_j({\bf s'},t)\right)
 }
 }
+\keyword{internal}

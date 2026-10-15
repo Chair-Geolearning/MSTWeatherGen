@@ -90,19 +90,18 @@ initialize_par_all_if_missing <- function(par_all, names, pairs, par_s, rho1, cr
   return(par_all)
 }
 
-#' Initialize Model Parameters If Missing
+#' Initialize Model Parameters
 #'
-#' Sets up the `par_all` vector with default values or based on provided parameters if it hasn't been initialized. This function ensures that all necessary model parameters are prepared for the modeling process.
+#' Sets up the `par_all` vector with default values or based on provided parameters.
+#' This function ensures that all necessary model parameters are prepared for the modeling process.
 #'
 #' This function implements the methods described in Section 3.3 of the article
 #' *Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8).
 #'
-#' @param par_all Existing vector of all model parameters; if NULL, it will be initialized.
 #' @param names Vector of variable names involved in the model.
-#' @param pairs Generated pairs of variables for which parameters are set.
-#' @param par_s Initial scaling parameters for the covariance function.
-#' @param rho1 Correction term parameters to be updated in `par_all`.
-#' @param cr Initial correlation matrix used for beta computation.
+#' @param par_s Initial scaling parameters for the covariance function aii and nuii.
+#' @param rho1 a matrix of covariance.
+#' @param cr Initial correlation matrix used for rho2 computation.
 #'
 #' @return Updated `par_all` vector with all model parameters, including default and specified values.
 #'
@@ -110,9 +109,8 @@ initialize_par_all_if_missing <- function(par_all, names, pairs, par_s, rho1, cr
 #' @importFrom stats setNames
 #' @noRd
 initialize_par_all <- function(names, par_s, rho1, cr) {
-  # Initialize the `par_all` vector if it is missing, with default values or using `par_s`
-  ## TODO
-  pairs <- generate_variable_index_pairs(names)
+  
+  Vi <- generate_variable_index_pairs(names)
   pairs <- paste(Vi[, 1], Vi[, 2], sep = "-")
   names_par_all <- c(
       paste(pairs, "rho2ij", sep = ":"),
@@ -124,19 +122,18 @@ initialize_par_all <- function(names, par_s, rho1, cr) {
       paste(names, "r2ii", sep = ":"),   # ← par variable (nouveau)
       paste(names, "r1ii", sep = ":")    # ← par variable (nouveau)
     )
-    par_all <- setNames(rep(0.1, length(names_par_all)), names_par_all)
-    par_all[paste(pairs[1:length(names)], "rho2ij", sep = ":")] <- 1 
-    par_all[paste(pairs[1:length(names)], "aii", sep = ":")] <- par_s[1, ]
-    par_all[paste(pairs[1:length(names)], "nuii", sep = ":")] <- par_s[2, ]
-    par_all[paste(pairs[1:length(names)], "rho1ij", sep = ":")] <- .init[.rho1ii] 
-    par_all[paste(pairs[(length(names)+1):length(pairs)], "rho1ij", sep = ":")] <- .init[.rho1ij] 
-    par_all[paste(names, "Ai", sep=":")] <- .init[.Ai]
-    par_all[paste(names, "r2ii", sep=":")] <- .init[.r2ii]
-    par_all[paste(names, "r1ii", sep=":")] <- .init[.r1ii]
-    parm_eta <- c("a", "b", "c", "d", "e")
-    par_all[parm_eta] <- c(.init[.a], .init[.b], .init[.c], .init[.d], .init[.e])
+  par_all <- setNames(rep(0.1, length(names_par_all)), names_par_all)
+  par_all[paste(pairs[1:length(names)], "rho2ij", sep = ":")] <- 1 
+  par_all[paste(pairs[1:length(names)], "aii", sep = ":")] <- par_s[1, ]
+  par_all[paste(pairs[1:length(names)], "nuii", sep = ":")] <- par_s[2, ]
+  par_all[paste(pairs[1:length(names)], "rho1ij", sep = ":")] <- .init[.rho1ii] 
+  par_all[paste(pairs[(length(names)+1):length(pairs)], "rho1ij", sep = ":")] <- .init[.rho1ij] 
+  par_all[paste(names, "Ai", sep=":")] <- .init[.Ai]
+  par_all[paste(names, "r2ii", sep=":")] <- .init[.r2ii]
+  par_all[paste(names, "r1ii", sep=":")] <- .init[.r1ii]
+  parm_eta <- c("a", "b", "c", "d", "e")
+  par_all[parm_eta] <- c(.init[.a], .init[.b], .init[.c], .init[.d], .init[.e])
     
-
   # Update rho1 parameters based on covariance information
   par_all <- update_rho1_parameters(par_all, names, rho1)
   
@@ -172,54 +169,28 @@ initialize_par_all <- function(names, par_s, rho1, cr) {
 #'
 #' @return The modified `par_all` vector with updated 'rho1ij' parameters reflecting the provided covariance information.
 #'
-#' @keywords internal
-#' @noRd
 #' @importFrom Matrix nearPD
 #' @keywords internal
-#' @noRd
-#' @importFrom Matrix nearPD
 update_rho1_parameters <- function(par_all, names, rho1) {
-  # if (!is.matrix(rho1)) {
-  #   print("rho1 n'est pas une matrice")
-  #   for (v1 in names) {
-  #     for (v2 in names) {
-  #       par_all[paste(paste(v1, v2, sep = "-"), "rho1ij", sep = ":")] <-
-  #         rho1$cov[rho1$v1 == v1 & rho1$v2 == v2 | rho1$v2 == v1 & rho1$v1 == v2]
-  #     }
-  #   }
-  #   a <- sapply(names, function(v1) {
-  #     sapply(names, function(v2) {
-  #       rho1ij <- par_all[paste(paste(v1, v2, sep = "-"), "rho1ij", sep = ":")]
-  #       if (is.na(rho1ij)) rho1ij <- par_all[paste(paste(v2, v1, sep = "-"), "rho1ij", sep = ":")]
-  #       return(rho1ij)
-  #     })
-  #   })
-  #   a <- matrix(a, nrow = length(names), ncol = length(names))
-  #   rownames(a) <- colnames(a) <- names
-    
-  #   # Seule contrainte physique : diagonale strictement positive (variance > 0)
-  #   diag(a) <- pmax(pmin(diag(a), 1), 0)   # diagonale ∈ [0, 1]
-  #   a[row(a) != col(a)] <- pmax(pmin(a[row(a) != col(a)], 0.9999), -0.9999) # hors-diagonale ∈ [-1, 1]
-  #   rho1 <- Matrix::nearPD(a)$mat
-      
-  # } else {
   if (!is.matrix(rho1)) {
     stop("rho1 is not a matrix")
   }
-    if (any(diag(rho1) < 0)) {
-      warning("rho1 contient des valeurs negatives avant nearPD : ",
-              paste(as.numeric(rho1), collapse = ", "))
-    }
-    rho1 <- as.matrix(rho1)
+  if (any(diag(rho1) < 0)) {
+    warning("rho1 contient des valeurs negatives avant nearPD : ",
+            paste(as.numeric(rho1), collapse = ", "))
+  }
+  rho1 <- as.matrix(rho1)
     
-    # Seule contrainte physique : diagonale strictement positive (variance > 0)
-    # Should never append
-    rho1 <- clamp(rho1,-1,1)
-    diag(rho1) <- clamp(diag(rho1), 0, 1)
+  # Seule contrainte physique : diagonale strictement positive (variance > 0)
+  # Should never append
+  rho1 <- clamp(rho1,-1,1)
+  diag(rho1) <- clamp(diag(rho1), 0, 1)
+  # To normalize diag to 1
+  #S = diag(1/sqrt(diag(M)))
+  #M = S%*%M%*%S
     
-    # Return a positif define matrix
-    rho1 <- Matrix::nearPD(rho1)$mat
-#  }
+  # Return a positif define matrix
+  rho1 <- Matrix::nearPD(rho1)$mat
   
   colnames(rho1) <- rownames(rho1) <- names
   for (v1 in 1:length(names)) {
@@ -253,6 +224,7 @@ update_rho1_parameters <- function(par_all, names, rho1) {
 #' @param cov_spatial a data.frame of covariance
 #' @param names variables names
 #' @return a matrix 
+#' @keywords internal
 initialize_rho1 <- function(cov_spatial, names) {
 
   # TODO extract variables names from cov_spatial to remove names parameter
@@ -262,7 +234,6 @@ initialize_rho1 <- function(cov_spatial, names) {
 
   temp <- sapply(names, function(name1){
             sapply(names, function(name2){
-              #(cr[name1,name2] - space_cov[which(space_cov$v1==name1 & space_cov$v2 == name2),]$cov) * w1
               cov_spatial[which(cov_spatial$v1==name1 & cov_spatial$v2 == name2),]$cov * w1
             })
           })
@@ -282,14 +253,13 @@ initialize_rho1 <- function(cov_spatial, names) {
 #'  \lim_{u\to 0, {\bf h}\to \infty} C_{ij}\left({\bf h},u \right)=
 #'  \widehat{Cov}_{[\forall {\bf s},{\bf s'}|d({\bf s},{\bf s'})>\frac{2}{3}d_{max},\forall t \in X_k]}\left( Z_i({\bf s},t),Z_j({\bf s'},t)\right)
 #' }
-#' 
-#' 
 #' @param data 3D array representing time, location, and variable dimensions of the spatio-temporal data.
 #' @param dates vector of dates
 #' @param coordinates vector of coordinates (long, lat)
 #' @param wt_id weather type index in data and dates
 #' @param names variables names
 #' @return a data.frame with lagtime (u); dist (h); cov (covariance), v (variable pair), v1 and v2 names
+#' @keywords internal
 process_spatial_covariance <- function(data, dates, coordinates, wt_id, names){
   ep <- generate_variable_index_pairs(names)
   # Distance between points
@@ -307,10 +277,12 @@ process_spatial_covariance <- function(data, dates, coordinates, wt_id, names){
   cov_spatial <- lapply(1:nrow(ep), function(i) {
     variable <- unlist(ep[i, ])
     
-    space_time_cov <- infinit_space_cov(
+    space_time_cov <- spatial_tail_covariance(
       data = data[, , variable], wt_id = wt_id, dist_matrix = dst,
       dist_threshold = start_at_dist
     )
+#    space_time_cov <- spacetime_cov(data=data[, , variable], wt_id, locations=coordinates, ds = dst, dates, lagstime = 0, c(0,start_at_dist), covgm = TRUE)
+
     space_time_cov$v <- paste(variable[1], variable[2], sep = "-")
     space_time_cov$v1 <- variable[1]
     space_time_cov$v2 <- variable[2]
@@ -334,6 +306,7 @@ process_spatial_covariance <- function(data, dates, coordinates, wt_id, names){
 #' @param data 3D array representing time, location, and variable dimensions of the spatio-temporal data.
 #' @param names variables names
 #' @return a matrix of correlation
+#' @keywords internal
 process_empirical_correlation <- function(data, names){
   # la corrélation (coefficient de corrélation de Pearson) à distance spatiale h=0 et lag temporel u=0, moyennée spatialement.
   # estimateur empirique de Cij(0,0) sur les Z empiriques (champ latent)
@@ -789,22 +762,17 @@ estimation_gf <- function(data, wt_id, max_it, dates, tmax, names,
       1.5,       1.5,       1.5),         # nuii = 1.5 (milieu de [0.25, 3])
     nrow=2, byrow=TRUE
   )'
-  
-  # Construct parameter matrix for covariance model
-  # TODO inutil, utiliser 1 fois. 
-  pairs <- paste(Vi[, 1], Vi[, 2], sep = "-")
-  
+    
   ## cov_spatial ici pour le moment avec données du wt
   cov_spatial <- process_spatial_covariance(data, dates, coordinates, wt_id, names)
-
+  ## rho1 init
+  rho1_init <- initialize_rho1(cov_spatial, names)
+  
   ## CR ici avec les données du wt (C(0,0))
   cr = process_empirical_correlation(data[wt_id,,], names)
 
-  ## rho1 init
-  rho1_init <- initialize_rho1(cov_spatial, names)
-
-  # Check and initialize par_all if missing
-  par_all <- initialize_par_all(par_all, names, pairs, par_s, rho1_init, cr = cr)
+  # Check and initialize par_all
+  par_all <- initialize_par_all(names, par_s, rho1_init, cr)
   
   # ← ICI — loglik initiale
   parms_all <- names(par_all)

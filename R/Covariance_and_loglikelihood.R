@@ -363,7 +363,7 @@ loglik <- function(par, parms, par_all, data, names, Vi, h, u, uh, cr) {
           if (!length(which(id3 == TRUE)) == 0) {
             rho_bound <- pmin(pmax(cij[id3], -0.99999999), 0.99999999)
             #l3 <- sum(log(pbinorm(uh_dz[id3, 7], uh_dz[id3, 8], var1 = 1, var2 = 1, cov12 = rho_bound)), na.rm = TRUE)
-            l3 <- sum(log(pmax(pmin(pbinorm(uh_dz[id3, 7], uh_dz[id3, 8], var1 = 1, var2 = 1, cov12 = rho_bound),1 - 1e-15), 1e-15)), na.rm = TRUE)
+            l3 <- sum(log(pmax(pbinorm(uh_dz[id3, 7], uh_dz[id3, 8], var1 = 1, var2 = 1, cov12 = rho_bound), 1e-15)), na.rm = TRUE)
           }
           if (!length(which(id4 == TRUE)) == 0) {
             l4 <- sum((-1 / 2) * (log(delta[id4]) + (v1[id4]^2 - (2 * cij[id4] * v1[id4] * v2[id4]) + v2[id4]^2) / delta[id4]), na.rm = TRUE)
@@ -411,10 +411,9 @@ loglik <- function(par, parms, par_all, data, names, Vi, h, u, uh, cr) {
             l2 <- sum(pnorm((uh_dz[id2, 8] - cij[id2] * v1[id2]) / sqrt(delta[id2]), log.p = TRUE), na.rm = TRUE)
           }
           if (!length(which(id3 == TRUE)) == 0) {
-            # TODO c'est quoi ça ?
             rho_bound <- pmin(pmax(cij[id3], -0.99999999), 0.99999999)
             #l3 <- sum(log(pbinorm(uh_dz[id3, 7], uh_dz[id3, 8], var1 = 1, var2 = 1, cov12 = rho_bound)), na.rm = TRUE)
-            l3 <- sum(log(pmax(pmin(pbinorm(uh_dz[id3, 7], uh_dz[id3, 8], var1 = 1, var2 = 1, cov12 = rho_bound),1 - 1e-15), 1e-15)), na.rm = TRUE)
+            l3 <- sum(log(pmax(pbinorm(uh_dz[id3, 7], uh_dz[id3, 8], var1 = 1, var2 = 1, cov12 = rho_bound), 1e-15)), na.rm = TRUE)
           }
           if (!length(which(id4 == TRUE)) == 0) {
             l4 <- sum((-1 / 2) * (log(delta[id4]) + (v1[id4]^2 - (2 * cij[id4] * v1[id4] * v2[id4]) + v2[id4]^2) / delta[id4]), na.rm = TRUE)
@@ -527,8 +526,9 @@ loglik_spatial <- function(par, data, h, uh, v) {
     } 
     
     if (!length(which(id3 == T)) == 0) {
+      rho_bound <- pmin(pmax(cij[id3], -0.99999999), 0.99999999)
       #l3 <- sum(log(pbinorm(uh_dz[id3, 7], uh_dz[id3, 8], var1 = 1, var2 = 1, cov12 = cij[id3])))
-      l3 <- sum(log(pmax(pmin(pbinorm(uh_dz[id3, 7], uh_dz[id3, 8], var1 = 1, var2 = 1, cov12 = cij[id3]), 1 - 1e-15), 1e-15)), na.rm = TRUE)
+      l3 <- sum(log(pmax(pbinorm(uh_dz[id3, 7], uh_dz[id3, 8], var1 = 1, var2 = 1, cov12 = rho_bound), 1e-15)), na.rm = TRUE)
     }
 
 
@@ -539,13 +539,13 @@ loglik_spatial <- function(par, data, h, uh, v) {
     ll <- try(-(l1 + l2 + l3 + l4), silent = TRUE)
     if (is.character(ll) || is.infinite(ll)){
       ll <- 1e+20
-      print("########## loglik_spatial ll error")
+      warning("# optimisation of loglik_spatial likelihood error : ll")
     }
     return(ll)
     }
 }
 
-#' @title Compute Empirical Spatial Covariances at time lag 0 for a pair of variable
+#' @title Compute Empirical Spatial tail Covariances at time lag 0 for a pair of variable
 #'
 #' @description
 #' Calculates spatial covariances for given spatio-temporal data pair of variables for sites distances greater than dist_threshold
@@ -563,16 +563,18 @@ loglik_spatial <- function(par, data, h, uh, v) {
 #'
 #' @importFrom stats cov
 #' @keywords internal
-infinit_space_cov <- function(data, wt_id, dist_matrix, dist_threshold) {
+spatial_tail_covariance <- function(data, wt_id, dist_matrix, dist_threshold) {
   # Validate input data structure
   if (length(dim(data)) < 3) {
     stop("data must be a 3D array.")
   }
   
-  # pair id dates où lag == u et ids dans wt_id = k
+  # pair id dates où lag == 0 et ids dans wt_id = k
   id_dates_at_lag0_wt <- cbind(wt_id, wt_id)
   # pair id coordinates avec distance d
-  idx <- which(upper.tri(dist_matrix) & dist_matrix >= dist_threshold, arr.ind=TRUE)
+  # reduce time using upper part of the matrix (estimation of cov)
+  #idx <- which(upper.tri(dist_matrix) & dist_matrix >= dist_threshold, arr.ind=TRUE)
+  idx <- which(dist_matrix >= dist_threshold, arr.ind=TRUE)
   # toutes les dates du wt dans le lag 0 X coordinates pair id dans d
   d_x_c <- expand.grid(1:nrow(id_dates_at_lag0_wt), 1:nrow(idx))
   # toutes les pairs de dates X combinaisons de pair id coordinates possibles
