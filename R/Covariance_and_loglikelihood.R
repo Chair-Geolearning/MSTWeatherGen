@@ -362,7 +362,8 @@ loglik <- function(par, parms, par_all, data, names, Vi, h, u, uh, cr) {
           }
           if (!length(which(id3 == TRUE)) == 0) {
             rho_bound <- pmin(pmax(cij[id3], -0.99999999), 0.99999999)
-            l3 <- sum(log(pbinorm(uh_dz[id3, 7], uh_dz[id3, 8], var1 = 1, var2 = 1, cov12 = rho_bound)), na.rm = TRUE)
+            #l3 <- sum(log(pbinorm(uh_dz[id3, 7], uh_dz[id3, 8], var1 = 1, var2 = 1, cov12 = rho_bound)), na.rm = TRUE)
+            l3 <- sum(log(pmax(pbinorm(uh_dz[id3, 7], uh_dz[id3, 8], var1 = 1, var2 = 1, cov12 = rho_bound), 1e-15)), na.rm = TRUE)
           }
           if (!length(which(id4 == TRUE)) == 0) {
             l4 <- sum((-1 / 2) * (log(delta[id4]) + (v1[id4]^2 - (2 * cij[id4] * v1[id4] * v2[id4]) + v2[id4]^2) / delta[id4]), na.rm = TRUE)
@@ -404,14 +405,15 @@ loglik <- function(par, parms, par_all, data, names, Vi, h, u, uh, cr) {
           uh_dz[, 7][which(uh_dz[, 7] == -Inf)] <- -2.58
           
           if (!length(which(id1 == TRUE)) == 0) {
-            l1 <- sum(log(pnorm((uh_dz[id1, 7] - cij[id1] * v2[id1]) / sqrt(delta[id1]))), na.rm = TRUE)
+            l1 <- sum(pnorm((uh_dz[id1, 7] - cij[id1] * v2[id1]) / sqrt(delta[id1]),log.p = TRUE), na.rm = TRUE)
           }
           if (!length(which(id2 == TRUE)) == 0) {
-            l2 <- sum(log(pnorm((uh_dz[id2, 8] - cij[id2] * v1[id2]) / sqrt(delta[id2]))), na.rm = TRUE)
+            l2 <- sum(pnorm((uh_dz[id2, 8] - cij[id2] * v1[id2]) / sqrt(delta[id2]), log.p = TRUE), na.rm = TRUE)
           }
           if (!length(which(id3 == TRUE)) == 0) {
             rho_bound <- pmin(pmax(cij[id3], -0.99999999), 0.99999999)
-            l3 <- sum(log(pbinorm(uh_dz[id3, 7], uh_dz[id3, 8], var1 = 1, var2 = 1, cov12 = rho_bound)), na.rm = TRUE)
+            #l3 <- sum(log(pbinorm(uh_dz[id3, 7], uh_dz[id3, 8], var1 = 1, var2 = 1, cov12 = rho_bound)), na.rm = TRUE)
+            l3 <- sum(log(pmax(pbinorm(uh_dz[id3, 7], uh_dz[id3, 8], var1 = 1, var2 = 1, cov12 = rho_bound), 1e-15)), na.rm = TRUE)
           }
           if (!length(which(id4 == TRUE)) == 0) {
             l4 <- sum((-1 / 2) * (log(delta[id4]) + (v1[id4]^2 - (2 * cij[id4] * v1[id4] * v2[id4]) + v2[id4]^2) / delta[id4]), na.rm = TRUE)
@@ -463,9 +465,12 @@ loglik_spatial <- function(par, data, h, uh, v) {
   #debut <- Sys.time()
 
   # Penalize negative parameters to enforce model constraints.
-  if (par[.matern_a]  < .lower_spatial[.matern_a]  |
-      par[.matern_nu] < .lower_spatial[.matern_nu]) {
-    return(abs(rnorm(1)) * 1e+20)
+  if (par[.matern_a]  < .lower_spatial[.matern_a] - .numeric_tolerance  |
+      par[.matern_a] > .upper_spatial[.matern_a] + .numeric_tolerance |
+      par[.matern_nu] < .lower_spatial[.matern_nu] - .numeric_tolerance |
+      par[.matern_nu] > .upper_spatial[.matern_nu] + .numeric_tolerance ) {
+    print("########## loglik_spatial boundaries")
+    return(1e+20)
   } else {
     # Initialize components of the log-likelihood calculation.
     l1 <- l2 <- l3 <- l4 <- 0
@@ -513,15 +518,17 @@ loglik_spatial <- function(par, data, h, uh, v) {
     } 
 
     if (!length(which(id2 == T)) == 0) {
-      l2 <- sum(log(pnorm((-cij[id2] * v1[id2]) / sqrt(delta[id2]))))
+      l2 <- sum(pnorm((-cij[id2] * v1[id2]) / sqrt(delta[id2]),log.p = TRUE))
     } 
     
     if (!length(which(id1 == T)) == 0) {
-      l1 <- sum(log(pnorm((-cij[id1] * v2[id1]) / sqrt(delta[id1]))))
+      l1 <- sum(pnorm((-cij[id1] * v2[id1]) / sqrt(delta[id1]),log.p = TRUE))
     } 
     
     if (!length(which(id3 == T)) == 0) {
-      l3 <- sum(log(pbinorm(uh_dz[id3, 7], uh_dz[id3, 8], var1 = 1, var2 = 1, cov12 = cij[id3])))
+      rho_bound <- pmin(pmax(cij[id3], -0.99999999), 0.99999999)
+      #l3 <- sum(log(pbinorm(uh_dz[id3, 7], uh_dz[id3, 8], var1 = 1, var2 = 1, cov12 = cij[id3])))
+      l3 <- sum(log(pmax(pbinorm(uh_dz[id3, 7], uh_dz[id3, 8], var1 = 1, var2 = 1, cov12 = rho_bound), 1e-15)), na.rm = TRUE)
     }
 
 
@@ -530,9 +537,57 @@ loglik_spatial <- function(par, data, h, uh, v) {
 
     # Return the aggregated negative log-likelihood, adjusting for errors or infinite values.
     ll <- try(-(l1 + l2 + l3 + l4), silent = TRUE)
-    if (is.character(ll) || is.infinite(ll)) ll <- abs(rnorm(1)) * 1e+20
+    if (is.character(ll) || is.infinite(ll)){
+      ll <- 1e+20
+      warning("# optimisation of loglik_spatial likelihood error : ll")
+    }
     return(ll)
+    }
+}
+
+#' @title Compute Empirical Spatial tail Covariances at time lag 0 for a pair of variable
+#'
+#' @description
+#' Calculates spatial covariances for given spatio-temporal data pair of variables for sites distances greater than dist_threshold
+#'
+#' @details
+#' \deqn{
+#'   \widehat{Cov}_{[\forall {\bf s},{\bf s'}|d({\bf s},{\bf s'})>d_{max},\forall t \in X_k]}\left( Z_i({\bf s},t),Z_j({\bf s'},t)\right)
+#' }
+#' @param data 3D array representing time, location, and 2 variables dimensions of the spatio-temporal data.
+#' @param wt_id Indices of weather types for which covariances are computed.
+#' @param dist_matrix Precomputed distance matrix
+#' @param dist_threshold distance threholds to start using data
+#'
+#' @return Data frame containing computed covariances for dist_threshold spatial distances and time lags 0.
+#'
+#' @importFrom stats cov
+#' @keywords internal
+spatial_tail_covariance <- function(data, wt_id, dist_matrix, dist_threshold) {
+  # Validate input data structure
+  if (length(dim(data)) < 3) {
+    stop("data must be a 3D array.")
   }
+  
+  # pair id dates où lag == 0 et ids dans wt_id = k
+  id_dates_at_lag0_wt <- cbind(wt_id, wt_id)
+  # pair id coordinates avec distance d
+  # reduce time using upper part of the matrix (estimation of cov)
+  #idx <- which(upper.tri(dist_matrix) & dist_matrix >= dist_threshold, arr.ind=TRUE)
+  idx <- which(dist_matrix >= dist_threshold, arr.ind=TRUE)
+  # toutes les dates du wt dans le lag 0 X coordinates pair id dans d
+  d_x_c <- expand.grid(1:nrow(id_dates_at_lag0_wt), 1:nrow(idx))
+  # toutes les pairs de dates X combinaisons de pair id coordinates possibles
+  id_d <- id_dates_at_lag0_wt[d_x_c[, 1], ]
+  # toutes les pair id de coordinates X combinaisons avec les pairs id dates
+  id_x <- idx[d_x_c[, 2], ]
+  x1 <- data[, , 1]
+  x2 <- data[, , 2]
+  # Compute covariance croisée
+  # cov(Zi(s,t) , Zj(s', t))
+  space_cov <- (cov(x1[cbind(id_d[, 1], id_x[, 1])], x2[cbind(id_d[, 2], id_x[, 2])]))
+    
+  return(data.frame(lagtime = 0, dist = dist_threshold, cov = space_cov))
 }
 
 #' @title Compute Spatio-Temporal Covariances
@@ -557,7 +612,7 @@ loglik_spatial <- function(par, data, h, uh, v) {
 #'
 #' @importFrom stats cov
 #' @keywords internal
-spacetime_cov <- function(data, wt_id, locations, ds = NULL, dates, lagstime, dist, covgm = TRUE) {
+spacetime_cov <- function(data, wt_id, locations, ds = NULL, dates, lagstime = 0, dist, covgm = TRUE) {
   # Validate input data structure
   if (covgm && length(dim(data)) < 3) {
     stop("data must be a 3D array when 'covgm' flag is set.")
@@ -569,12 +624,18 @@ spacetime_cov <- function(data, wt_id, locations, ds = NULL, dates, lagstime, di
   }
 
   # Compute covariance for zero distance to establish a baseline
+  # Ici on calcul le dénominateur
+  # maintenant wt_id <- toutes les dates de la saison et du wt
+  # Pour le calcul de c1 et c2 on prendre u=0 et h=0 
   id <- cbind(wt_id, wt_id)
   idx <- which(ds == 0, arr.ind = TRUE)
   e <- expand.grid(1:nrow(id), 1:nrow(idx))
+  # all times
   ide <- id[e[, 1], ]
+  # all points
   idxe <- idx[e[, 2], ]
 
+  ## Pourquoi x1 indice 2 et x2 indice 1 (cross qqch ?)
   if (covgm) {
     x1 <- data[, , 2]
     x2 <- data[, , 1]
@@ -583,40 +644,54 @@ spacetime_cov <- function(data, wt_id, locations, ds = NULL, dates, lagstime, di
     x2 <- c(data[cbind(ide[, 2], idxe[, 2])])
   }
 
-  # Baseline covariances for normalization
+  # Baseline covariances for normalization u=0 and h = 0
   c1 <- cov(x1[cbind(ide[, 1], idxe[, 1])], x1[cbind(ide[, 2], idxe[, 2])])
   c2 <- cov(x2[cbind(ide[, 1], idxe[, 1])], x2[cbind(ide[, 2], idxe[, 2])])
 
-  # Loop over lag times to compute covariances at different spatial distances
-  vgm <- lapply(lagstime, function(u) {
-    id <- cbind(wt_id - u, wt_id)
-    diff <- dates[wt_id] - dates[wt_id - u]
-    id <- id[diff == u, ]
+  ## la matrice est symétrique mais pour prendre les +u on devrait enlever le abs
+  matrice_lag <- outer(dates, dates, function(d1,d2){
+    #abs(as.numeric(d2 - d1))
+    as.numeric(d2 - d1)
+  })
 
+  space_corr <- lapply(lagstime, function(u){
+    # ids dates où lag == u
+    id_dates_at_lag <- which( matrice_lag == u, arr.ind = TRUE)
+    # pair id dates où lag == u et ids dans wt_id = k
+    id_dates_at_lag_wt <- id_dates_at_lag[which(id_dates_at_lag[,1] %in% wt_id & id_dates_at_lag[,2] %in% wt_id),]
+
+    # sur chaque distance évalué (ne doit pas prendre toutes les distance possibles ?)
     cv <- sapply(1:length(dist), function(i) {
       d <- dist[i]
-      idx <- which(ds > d - 1 & ds < d + 1, arr.ind = TRUE)
-      e <- expand.grid(1:nrow(id), 1:nrow(idx))
-      ide <- id[e[, 1], ]
-      idxe <- idx[e[, 2], ]
+      # pair id coordinates avec distance d
+      #idx <- which(ds > d - 1 & ds < d + 1, arr.ind = TRUE)
+      idx <- which(ds > d - 1, arr.ind = TRUE)
+      # toutes les dates du wt dans le lag u X coordinates pair id dans d
+      d_x_c <- expand.grid(1:nrow(id_dates_at_lag_wt), 1:nrow(idx))
+      # toutes les pairs de dates X combinaisons de pair id coordinates possibles
+      id_d <- id_dates_at_lag_wt[d_x_c[, 1], ]
+      # toutes les pair id de coordinates X combinaisons avec les pairs id dates
+      id_x <- idx[d_x_c[, 2], ]
 
       if (covgm) {
         x1 <- data[, , 2]
         x2 <- data[, , 1]
       } else {
-        x1 <- c(data[cbind(ide[, 1], idxe[, 1])])
-        x2 <- c(data[cbind(ide[, 2], idxe[, 2])])
+        x1 <- c(data[cbind(id_d[, 1], id_x[, 1])])
+        x2 <- c(data[cbind(id_d[, 2], id_x[, 2])])
       }
 
-      # Compute normalized covariance
-      return(cov(x1[cbind(ide[, 1], idxe[, 1])], x2[cbind(ide[, 2], idxe[, 2])]) / sqrt(c1 * c2))
+      # Compute covariance croisée (entre deux variables) et normalisation par les variance marginales
+      # on obtient la corrélation croisée empirique
+      # cov(Zi(s,t) , Zj(s, t+d))
+      #return(cov(x1[cbind(id_d[, 1], id_x[, 1])], x2[cbind(id_d[, 2], id_x[, 2])]) / sqrt(c1 * c2))
+      return(cov(x1[cbind(id_d[, 1], id_x[, 1])], x2[cbind(id_d[, 2], id_x[, 2])]))
     })
-
     return(data.frame(lagtime = u, dist = dist, cov = cv))
   })
 
   # Combine and return results
-  return(do.call(rbind, vgm))
+  return(do.call(rbind, space_corr))
 }
 
 #' @title Generate Covariance Matrices for Spatio-Temporal Model
