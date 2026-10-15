@@ -18,8 +18,9 @@ a matrix of correlation
 Process empirical correlation estimation at each site with no lag in time (h=0 and u=0) mean by number of sites.
 }
 \details{
-\deqn{
-  cr_{ij} = C_{ij}^{(1)}(0) + C_{ij}^{(2)}(0,0) = \frac{\sum_{s=1}^{S}\widehat{\mathrm{Cor}}(Z_i(s,t), Z_j(s,t))}{S}
+\deqn{cr_{ij} = C_{ij}^{(1)}(0) + C_{ij}^{(2)}(0,0) = \frac{1}{S}\sum_{s=1}^{S}\,
+   \mathrm{Cor}\!\left[Z_i(s,t),\, Z_j(s,t)\right],
+   \quad \forall s \in D, \forall t \in \mathcal{X}_k
 }
 }
 \keyword{internal}
