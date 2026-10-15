@@ -545,6 +545,49 @@ loglik_spatial <- function(par, data, h, uh, v) {
     }
 }
 
+#' @title Compute Empirical Spatial Covariances at time lag 0 for a pair of variable
+#'
+#' @description
+#' Calculates spatial covariances for given spatio-temporal data pair of variables for sites distances greater than dist_threshold
+#'
+#' @details
+#' \deqn{
+#'   \widehat{Cov}_{[\forall {\bf s},{\bf s'}|d({\bf s},{\bf s'})>d_{max},\forall t \in X_k]}\left( Z_i({\bf s},t),Z_j({\bf s'},t)\right)
+#' }
+#' @param data 3D array representing time, location, and 2 variables dimensions of the spatio-temporal data.
+#' @param wt_id Indices of weather types for which covariances are computed.
+#' @param dist_matrix Precomputed distance matrix
+#' @param dist_threshold distance threholds to start using data
+#'
+#' @return Data frame containing computed covariances for dist_threshold spatial distances and time lags 0.
+#'
+#' @importFrom stats cov
+#' @keywords internal
+infinit_space_cov <- function(data, wt_id, dist_matrix, dist_threshold) {
+  # Validate input data structure
+  if (length(dim(data)) < 3) {
+    stop("data must be a 3D array.")
+  }
+  
+  # pair id dates où lag == u et ids dans wt_id = k
+  id_dates_at_lag0_wt <- cbind(wt_id, wt_id)
+  # pair id coordinates avec distance d
+  idx <- which(upper.tri(dist_matrix) & dist_matrix >= dist_threshold, arr.ind=TRUE)
+  # toutes les dates du wt dans le lag 0 X coordinates pair id dans d
+  d_x_c <- expand.grid(1:nrow(id_dates_at_lag0_wt), 1:nrow(idx))
+  # toutes les pairs de dates X combinaisons de pair id coordinates possibles
+  id_d <- id_dates_at_lag0_wt[d_x_c[, 1], ]
+  # toutes les pair id de coordinates X combinaisons avec les pairs id dates
+  id_x <- idx[d_x_c[, 2], ]
+  x1 <- data[, , 1]
+  x2 <- data[, , 2]
+  # Compute covariance croisée
+  # cov(Zi(s,t) , Zj(s', t))
+  space_cov <- (cov(x1[cbind(id_d[, 1], id_x[, 1])], x2[cbind(id_d[, 2], id_x[, 2])]))
+    
+  return(data.frame(lagtime = 0, dist = dist_threshold, cov = space_cov))
+}
+
 #' @title Compute Spatio-Temporal Covariances
 #'
 #' @description
@@ -639,8 +682,8 @@ spacetime_cov <- function(data, wt_id, locations, ds = NULL, dates, lagstime = 0
       # Compute covariance croisée (entre deux variables) et normalisation par les variance marginales
       # on obtient la corrélation croisée empirique
       # cov(Zi(s,t) , Zj(s, t+d))
-      return(cov(x1[cbind(id_d[, 1], id_x[, 1])], x2[cbind(id_d[, 2], id_x[, 2])]) / sqrt(c1 * c2))
-      #return(cov(x1[cbind(id_d[, 1], id_x[, 1])], x2[cbind(id_d[, 2], id_x[, 2])]))
+      #return(cov(x1[cbind(id_d[, 1], id_x[, 1])], x2[cbind(id_d[, 2], id_x[, 2])]) / sqrt(c1 * c2))
+      return(cov(x1[cbind(id_d[, 1], id_x[, 1])], x2[cbind(id_d[, 2], id_x[, 2])]))
     })
     return(data.frame(lagtime = u, dist = dist, cov = cv))
   })

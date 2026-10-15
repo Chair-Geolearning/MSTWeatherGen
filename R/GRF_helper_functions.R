@@ -230,31 +230,40 @@ update_rho1_parameters <- function(par_all, names, rho1) {
   return(par_all)
 }
 
-#' initialize the matrix rho1
+#' Initialize the matrix rho1ij
 #' @description
-#' 
+#' Calculates initial rho1ij matrix values
+#' @details
 #' \deqn{
-#'   \gamma_{ij}(\mathbf{h},0) = {\tt cr}_{ij} - C_{ij}(\mathbf{h},0)
+#'   \lim_{u\to 0, {\bf h}\to \infty}C_{ij}\left({\bf h},u \right)=\rho_{ij}^{(1)}w_{ij}^{(1)}
 #' }
 #' \deqn{
-#'   \lim_{|\mathbf{h}|\to \infty} \gamma_{ij}(\mathbf{h},0) = {\tt cr}_{ij} - \rho_{ij}^{(1)}\left(r_{ii}^{(1)} r_{jj}^{(1)}\right)^{1/2} \left(r_{ij}^{(1)}\right)^{-1}
+#'   \hat\rho_{ij}^{(1)}=\frac{\lim_{u\to 0, {\bf h}\to \infty} C_{ij}\left({\bf h},u \right)}{w_{ij}^{(1)}}=
+#' \frac{\widehat{Cov}_{[\forall {\bf s},{\bf s'}|d({\bf s},{\bf s'})>\frac{2}{3}d_{max},\forall t \in X_k]}\left( Z_i({\bf s},t),Z_j({\bf s'},t)\right)}{w_{ij}^{(1)}}
 #' }
 #' \deqn{
-#' \hat{\rho}_{ij}^{(1)} = \left(cr_{ij} - \lim_{|h|\to\infty}\gamma_{ij}(h,0)\right)\frac{r_{ij}^{(1)}}{\sqrt{r_{ii}^{(1)}r_{jj}^{(1)}}}
+#' w^{(1)}_{ij}=\left(r_{ii}^{(1)} r_{jj}^{(1)}\right)^{1/2} \left(r_{ij}^{(1)}\right)^{-1}
 #' }
-#' @param vgm a matrix
-#' 
-initialize_rho1 <- function(corr_spacial, names) {
+#' \deqn{
+#' \hat{\rho}_{ij}^{(1)} = \widehat{Cov}_{[\forall {\bf s},{\bf s'}|d({\bf s},{\bf s'})>\frac{2}{3}d_{max},\forall t \in X_k]}\left( Z_i({\bf s},t),Z_j({\bf s'},t)\right)\frac{r_{ij}^{(1)}}{\sqrt{r_{ii}^{(1)}r_{jj}^{(1)}}}
+#' }
+#' \deqn{
+#' r^{(1)\,2}_{ij}=\frac{r^{(1)\,2}_{ii}+r^{(1)\,2}_{jj}}{2}
+#' }
+#' @param cov_spatial a data.frame of covariance
+#' @param names variables names
+#' @return a matrix 
+initialize_rho1 <- function(cov_spatial, names) {
 
-  # TODO extract variables names from corr_spacial to remove names parameter
-  corr_spacial = corr_spacial[corr_spacial$lagtime == 0 & corr_spacial$dist == max(corr_spacial$dist), ]
+  # TODO extract variables names from cov_spatial to remove names parameter
+  cov_spatial = cov_spatial[cov_spatial$lagtime == 0 & cov_spatial$dist == max(cov_spatial$dist), ]
     
   w1 <- (sqrt((.init[.r1ii]^2 + .init[.r1jj]^2) / 2)) / sqrt(.init[.r1ii]*.init[.r1jj])
 
   temp <- sapply(names, function(name1){
             sapply(names, function(name2){
               #(cr[name1,name2] - space_cov[which(space_cov$v1==name1 & space_cov$v2 == name2),]$cov) * w1
-              corr_spacial[which(corr_spacial$v1==name1 & corr_spacial$v2 == name2),]$cov * w1
+              cov_spatial[which(cov_spatial$v1==name1 & cov_spatial$v2 == name2),]$cov * w1
             })
           })
   rho1_init <- matrix(as.numeric(temp), nrow = length(names), ncol = length(names))
@@ -264,13 +273,19 @@ initialize_rho1 <- function(corr_spacial, names) {
   return(rho1_init)
 }
 
-#' process spatial empirical covariance
+#' Process spatial empirical covariance
 #' @description
-#' Process empirical spatial coviariance in site and distant site.
-#' TODO add equation and explanation
+#' Process empirical spatial coviariance for distant sites.
+#' @details
 #' 
-#' @param data set of data
-#' @param dates all dates
+#' \deqn{
+#'  \lim_{u\to 0, {\bf h}\to \infty} C_{ij}\left({\bf h},u \right)=
+#'  \widehat{Cov}_{[\forall {\bf s},{\bf s'}|d({\bf s},{\bf s'})>\frac{2}{3}d_{max},\forall t \in X_k]}\left( Z_i({\bf s},t),Z_j({\bf s'},t)\right)
+#' }
+#' 
+#' 
+#' @param data 3D array representing time, location, and variable dimensions of the spatio-temporal data.
+#' @param dates vector of dates
 #' @param coordinates vector of coordinates (long, lat)
 #' @param wt_id weather type index in data and dates
 #' @param names variables names
@@ -283,18 +298,18 @@ process_spatial_covariance <- function(data, dates, coordinates, wt_id, names){
       geosphere::distHaversine(coordinates[i, ], coordinates[j, ]) / 1000
     })
   })
+  dist <- sort(unique(c(floor(dst))))
+  # do not take the farest distance but the 2/3 distance
+  start_at_dist <- dist[round(length(dist) / 1.5)]
+  
 
   ## space cov
-  cov_spacial <- lapply(1:nrow(ep), function(i) {
+  cov_spatial <- lapply(1:nrow(ep), function(i) {
     variable <- unlist(ep[i, ])
-    dist <- sort(unique(c(floor(dst))))
-    # do not take the farest distance but the 2/3 distance
-    # TODO on garde les valeurs supp au 2/3
-    dist <- dist[seq(1, length(dist) / 1.5, length.out = 2)]
-    # lagtime to 0 over the wt id
-    space_time_cov <- spacetime_cov(
-      data = data[, , variable], wt_id = wt_id, locations = coordinates, ds = dst,
-      dates = dates, lagstime = 0, dist = dist, covgm = T
+    
+    space_time_cov <- infinit_space_cov(
+      data = data[, , variable], wt_id = wt_id, dist_matrix = dst,
+      dist_threshold = start_at_dist
     )
     space_time_cov$v <- paste(variable[1], variable[2], sep = "-")
     space_time_cov$v1 <- variable[1]
@@ -302,20 +317,26 @@ process_spatial_covariance <- function(data, dates, coordinates, wt_id, names){
 
     return(space_time_cov)
   })
-  corr_spacial <- do.call(rbind, cov_spacial)
+  cov_spatial <- do.call(rbind, cov_spatial)
+  return(cov_spatial)
 }
 
-#' process empirical correlation with no lag
-#' @description
-#' Process empirical correlation estimation at each site with no lag in time (h=0 and u=0) mean by nomber of sites.
-#' TODO add equation and explanation
+#' Process empirical correlation with no lag
 #' 
-#' @param data set of data
+#' @description
+#' Process empirical correlation estimation at each site with no lag in time (h=0 and u=0) mean by number of sites.
+#' 
+#' @details
+#' \deqn{
+#'   cr_{ij} = C_{ij}^{(1)}(0) + C_{ij}^{(2)}(0,0) = \frac{\sum_{s=1}^{S}\widehat{\mathrm{Cor}}(Z_i(s,t), Z_j(s,t))}{S}
+#' }
+#' 
+#' @param data 3D array representing time, location, and variable dimensions of the spatio-temporal data.
 #' @param names variables names
+#' @return a matrix of correlation
 process_empirical_correlation <- function(data, names){
   # la corrélation (coefficient de corrélation de Pearson) à distance spatiale h=0 et lag temporel u=0, moyennée spatialement.
   # estimateur empirique de Cij(0,0) sur les Z empiriques (champ latent)
-  # qui est une covariance ponctuelle avec les Z 
   cr <- sapply(names, function(v1) {
     sapply(names, function(v2) {
       mean(sapply(1:dim(data)[2], function(j) cor(data[, j, v1], data[, j, v2], use = "complete.obs")), na.rm = TRUE)
@@ -773,10 +794,10 @@ estimation_gf <- function(data, wt_id, max_it, dates, tmax, names,
   # TODO inutil, utiliser 1 fois. 
   pairs <- paste(Vi[, 1], Vi[, 2], sep = "-")
   
-  ## corr_spatial ici pour le moment avec données du wt
+  ## cov_spatial ici pour le moment avec données du wt
   cov_spatial <- process_spatial_covariance(data, dates, coordinates, wt_id, names)
 
-  ## CR ici avec les données du wt
+  ## CR ici avec les données du wt (C(0,0))
   cr = process_empirical_correlation(data[wt_id,,], names)
 
   ## rho1 init
