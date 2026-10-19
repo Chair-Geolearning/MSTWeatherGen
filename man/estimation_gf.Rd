@@ -11,12 +11,9 @@ estimation_gf(
   dates,
   tmax,
   names,
-  par_all = NULL,
   coordinates,
   n1,
   n2,
-  rho1,
-  cr,
   threshold_precip
 )
 }
@@ -33,17 +30,13 @@ estimation_gf(
 
 \item{names}{Vector containing the names of the variables included in the analysis.}
 
-\item{par_all}{(Optional) Initial or current complete set of model parameters. If not provided, parameters are initialized within the function.}
-
 \item{coordinates}{Matrix containing the geographical coordinates of the spatial locations in the dataset.}
 
 \item{n1, }{n2 Parameters that define the granularity for generating spatial index pairs, affecting the spatial resolution of the model.}
 
-\item{rho1}{Matrix of precomputed correction terms used to adjust the covariance matrix, aiding in model stabilization.}
-
-\item{cr}{Initial correlation matrix representing the base relationships between variables, used as a starting point for optimization.}
-
 \item{threshold_precip}{Threshold values for precipitation, used in preprocessing to distinguish between different precipitation intensities.}
+
+\item{par_all}{(Optional) Initial or current complete set of model parameters. If not provided, parameters are initialized within the function.}
 }
 \value{
 A list containing two elements: `parm`, the parameter matrix formatted for interpretation and use in subsequent model applications, and
