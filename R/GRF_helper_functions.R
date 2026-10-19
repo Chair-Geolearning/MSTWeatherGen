@@ -216,10 +216,13 @@ update_rho1_parameters <- function(par_all, names, rho1) {
 #' w^{(1)}_{ij}=\left(r_{ii}^{(1)} r_{jj}^{(1)}\right)^{1/2} \left(r_{ij}^{(1)}\right)^{-1}
 #' }
 #' \deqn{
-#' \hat{\rho}_{ij}^{(1)} = \widehat{Cov}_{[\forall {\bf s},{\bf s'}|d({\bf s},{\bf s'})>\frac{2}{3}d_{max},\forall t \in X_k]}\left( Z_i({\bf s},t),Z_j({\bf s'},t)\right)\frac{r_{ij}^{(1)}}{\sqrt{r_{ii}^{(1)}r_{jj}^{(1)}}}
+#' r^{(1)\,2}_{ij}=\frac{r^{(1)\,2}_{ii}+r^{(1)\,2}_{jj}}{2}
 #' }
 #' \deqn{
-#' r^{(1)\,2}_{ij}=\frac{r^{(1)\,2}_{ii}+r^{(1)\,2}_{jj}}{2}
+#' \frac{1}{w^{(1)}_{ij}}=\sqrt{\frac{r_{ii}^{(1)\,2} + r_{jj}^{(1)\,2}}{2\, r_{ii}^{(1)} r_{jj}^{(1)}}}
+#' }
+#' \deqn{
+#' \hat{\rho}_{ij}^{(1)} = \widehat{Cov}_{[\forall {\bf s},{\bf s'}|d({\bf s},{\bf s'})>\frac{2}{3}d_{max},\forall t \in X_k]}\left( Z_i({\bf s},t),Z_j({\bf s'},t)\right)\sqrt{\frac{r_{ii}^{(1)\,2} + r_{jj}^{(1)\,2}}{2\, r_{ii}^{(1)} r_{jj}^{(1)}}}
 #' }
 #' @param cov_spatial a data.frame of covariance
 #' @param names variables names
@@ -230,11 +233,11 @@ initialize_rho1 <- function(cov_spatial, names) {
   # TODO extract variables names from cov_spatial to remove names parameter
   cov_spatial = cov_spatial[cov_spatial$lagtime == 0 & cov_spatial$dist == max(cov_spatial$dist), ]
     
-  w1 <- (sqrt((.init[.r1ii]^2 + .init[.r1jj]^2) / 2)) / sqrt(.init[.r1ii]*.init[.r1jj])
+  w1_minus1 <- sqrt((.init[.r1ii]^2 + .init[.r1jj]^2) / (2*.init[.r1ii]*.init[.r1jj]))
 
   temp <- sapply(names, function(name1){
             sapply(names, function(name2){
-              cov_spatial[which(cov_spatial$v1==name1 & cov_spatial$v2 == name2),]$cov * w1
+              cov_spatial[which(cov_spatial$v1==name1 & cov_spatial$v2 == name2),]$cov * w1_minus1
             })
           })
   rho1_init <- matrix(as.numeric(temp), nrow = length(names), ncol = length(names))
@@ -753,14 +756,7 @@ estimation_gf <- function(data, wt_id, max_it, dates, tmax, names,
   # Initialize spatial parameters
   par_s <- init_space_par(data = data, names = names, h = h[u == 0], uh = uh[u == 0, ], max_it = max_it)
   par_s <- do.call(cbind, par_s)
-
-  ## TODO a supprimer
-  'par_s <- matrix(
-    c(1/0.4, 1/5, 1/12,   # aii = 1/taille domaine
-      1.5,       1.5,       1.5),         # nuii = 1.5 (milieu de [0.25, 3])
-    nrow=2, byrow=TRUE
-  )'
-    
+  
   ## cov_spatial ici pour le moment avec données du wt
   cov_spatial <- process_spatial_covariance(data, dates, coordinates, wt_id, names)
   ## rho1 init

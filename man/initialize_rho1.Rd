@@ -29,10 +29,13 @@ Calculates initial rho1ij matrix values
 w^{(1)}_{ij}=\left(r_{ii}^{(1)} r_{jj}^{(1)}\right)^{1/2} \left(r_{ij}^{(1)}\right)^{-1}
 }
 \deqn{
-\hat{\rho}_{ij}^{(1)} = \widehat{Cov}_{[\forall {\bf s},{\bf s'}|d({\bf s},{\bf s'})>\frac{2}{3}d_{max},\forall t \in X_k]}\left( Z_i({\bf s},t),Z_j({\bf s'},t)\right)\frac{r_{ij}^{(1)}}{\sqrt{r_{ii}^{(1)}r_{jj}^{(1)}}}
+r^{(1)\,2}_{ij}=\frac{r^{(1)\,2}_{ii}+r^{(1)\,2}_{jj}}{2}
 }
 \deqn{
-r^{(1)\,2}_{ij}=\frac{r^{(1)\,2}_{ii}+r^{(1)\,2}_{jj}}{2}
+\frac{1}{w^{(1)}_{ij}}=\sqrt{\frac{r_{ii}^{(1)\,2} + r_{jj}^{(1)\,2}}{2\, r_{ii}^{(1)} r_{jj}^{(1)}}}
+}
+\deqn{
+\hat{\rho}_{ij}^{(1)} = \widehat{Cov}_{[\forall {\bf s},{\bf s'}|d({\bf s},{\bf s'})>\frac{2}{3}d_{max},\forall t \in X_k]}\left( Z_i({\bf s},t),Z_j({\bf s'},t)\right)\sqrt{\frac{r_{ii}^{(1)\,2} + r_{jj}^{(1)\,2}}{2\, r_{ii}^{(1)} r_{jj}^{(1)}}}
 }
 }
 \keyword{internal}
