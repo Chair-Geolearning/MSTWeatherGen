@@ -943,19 +943,13 @@ generate_spatial_index_pairs <- function(coordinates, n1, n2) {
 ## TODO Vérifier qu'o ndoit bien rester dans les indice du wt_id
 generate_temporal_index_pairs <- function(wt_id, dates, tmax) {
   Ti <- lapply(0:tmax, function(i) {
-    idx_positive <- (wt_id - i) > 0
-    wt_valid       <- wt_id[idx_positive]
-    t1             <- wt_valid - i
-    
-    # t1 doit aussi être dans wt_id (même weather type K)
-    in_wt    <- t1 %in% wt_id
-    wt_valid <- wt_valid[in_wt]
-    t1       <- t1[in_wt]
+    t1 <- intersect(wt_id - i, wt_id)
+    t2 <- t1 + i
     
     if (length(t1) == 0) return(NULL) # Si aucune paire valide pour ce lag
     
-    Ti   <- cbind(t1, wt_valid, i)
-    diff <- dates[wt_valid] - dates[t1]
+    Ti   <- cbind(t1, t2, i)
+    diff <- dates[t2] - dates[t1]
     Ti   <- Ti[!is.na(diff) & diff == i, , drop = FALSE]  # drop = FALSE : évite que R convertisse en vecteur quand une seule ligne survit  
   })
   Ti <- do.call(rbind, Ti)
