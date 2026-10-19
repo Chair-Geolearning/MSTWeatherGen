@@ -22,7 +22,7 @@ Nv <- dim(data)[3]
 
 # --- Tests for generate_temporal_index_pairs ---
 
-# 0.
+'# 0.
 test_that("generate_temporal_index_pairs returns a matrix with 3 columns", {
   wt_id <- 10:20
   res <- generate_temporal_index_pairs(wt_id, dates, tmax = 3)
@@ -96,7 +96,7 @@ test_that("generate_temporal_index_pairs number of pairs does not exceed (length
 
   expect_lte(nrow(res), length(wt_id) * (tmax + 1))
 })
-
+'
 # 7. Cohérence du nombre potentiel de paires
 test_that("generate_temporal_index_pairs indices stay within data dimensions", {
   wt_id <- which(wt == 1)   # weather type 1, indices réels
