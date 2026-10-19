@@ -948,7 +948,7 @@ generate_temporal_index_pairs <- function(wt_id, dates, tmax) {
     t1             <- wt_valid - i
     
     # t1 doit aussi être dans wt_id (même weather type K)
-    in_wt    <- t1 %in% wt_valid
+    in_wt    <- t1 %in% wt_id
     wt_valid <- wt_valid[in_wt]
     t1       <- t1[in_wt]
     
