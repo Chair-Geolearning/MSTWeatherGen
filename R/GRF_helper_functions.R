@@ -726,10 +726,6 @@ estimation_gf <- function(data, wt_id, max_it, dates, tmax, names,
   # pair by row , cols spatial indice (s1,s2)
   Si <- generate_spatial_index_pairs(coordinates, n1 = n1, n2 = n2)
   # pair by row with time lag (t1,t2,u)
-  
-  ## ATTENTION TODO les Ti doivent être issue des wt ? (les dates doivent être incluse dnas le wt)
-  # Ici on prend une dates a  wt_id - u (tmax) , qui n'est pas forcement dans le wt_id actuel
-  # wt_id = c(3,4) dans dates -> retourne 2 , 3, u=1 -> 2 n'est pas dans wt.
   Ti <- generate_temporal_index_pairs(wt_id, dates, tmax)
   # pair of variable by row (V1,V2)
   Vi <- generate_variable_index_pairs(names)
@@ -758,6 +754,7 @@ estimation_gf <- function(data, wt_id, max_it, dates, tmax, names,
   par_s <- init_space_par(data = data, names = names, h = h[u == 0], uh = uh[u == 0, ], max_it = max_it)
   par_s <- do.call(cbind, par_s)
 
+  ## TODO a supprimer
   'par_s <- matrix(
     c(1/0.4, 1/5, 1/12,   # aii = 1/taille domaine
       1.5,       1.5,       1.5),         # nuii = 1.5 (milieu de [0.25, 3])
@@ -1061,7 +1058,7 @@ estimate_gaussian_field_params <- function(data, wt, names, coordinates, tmax, m
   # For each weather type, estimate Gaussian field parameters
   for (k in 1:K) {
     wt_id <- which(wt == k)
-    wt_id <- wt_id[wt_id > tmax + 1]
+    #wt_id <- wt_id[wt_id > tmax + 1] # ancien parfeu
 
     # Estimate Gaussian field parameters
     ## data de la saison, wt_id id du wt k , dates de la saison -> wt_id indice de wt k dans data et dates
