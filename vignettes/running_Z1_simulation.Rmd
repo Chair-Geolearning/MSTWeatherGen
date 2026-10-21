@@ -384,7 +384,7 @@ parm_mean[,-c(1,2)] - true_params[,-c(1,2)]
 #### Pour chaque lag temporel u et chaque distance h :
 ####   - h n'est pas une distance exacte : toutes les paires de stations
 ####     dont la distance tombe dans [h - tol, h + tol] sont regroupées ensemble
-####     pour estimer la covariance à cette échelle spatiale. A rechecker avec Denis
+####     pour estimer la covariance à cette échelle spatiale. A rechecker avec Denis.
 
 empirical_st_cov_pair <- function(data_v1, data_v2, wt_id, dates,
                                    coordinates, lagstime = 0:tmax,nb_points_distance = 10) {
@@ -393,7 +393,7 @@ empirical_st_cov_pair <- function(data_v1, data_v2, wt_id, dates,
   dist_grid <- sort(unique(dst[dst > 0])) #length(dist_grid) = 278
   dist_grid <- dist_grid[seq(1, length(dist_grid), length.out = nb_points_distance)]  #length(dist_grid) = nb_points_distance = 10 ici
 
-  tol       <- diff(range(dist_vals)) / 2*nb_points_distance
+  tol <- diff(range(dist_vals)) / (2 * nb_points_distance)e #max-min
 
   Ti <- generate_temporal_index_pairs(wt_id, dates, tmax = max(lagstime))
 
