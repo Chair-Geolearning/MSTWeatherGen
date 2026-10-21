@@ -274,7 +274,7 @@ colnames(cr) <- rownames(cr) <- names
 
 ```{r eval=FALSE}
 Sys.setenv(MONITOR = "TRUE")
-nb_estimation <- 3
+nb_estimation <- 10
 estim_results <- list()
 
 for( it in 1:nb_estimation) {
@@ -380,6 +380,48 @@ parm_mean[,-c(1,2)] - true_params[,-c(1,2)]
 ```
 
 
+```{r eval=FALSE}
+empirical_st_cov_pair <- function(data_v1, data_v2, wt_id, dates,
+                                   coordinates, lagstime = 0:2) {
+  # data_v1, data_v2 : matrices 2D [time × space]
+
+  dst       <- round(as.matrix(dist(coordinates)), 3)
+  dist_vals <- sort(unique(dst[dst > 0]))
+  dist_grid <- dist_vals[seq(1, length(dist_vals), length.out = 10)]
+  tol       <- diff(range(dist_vals)) / 20
+
+  Ti <- generate_temporal_index_pairs(wt_id, dates, tmax = max(lagstime))
+
+  do.call(rbind, lapply(lagstime, function(u) {
+    Ti_u <- Ti[Ti[, "u"] == u, , drop = FALSE]
+
+    data.frame(
+      lagtime = u,
+      dist    = dist_grid,
+      cov     = sapply(dist_grid, function(h) {
+        sp_idx <- which(abs(dst - h) <= tol, arr.ind = TRUE)
+        if (nrow(Ti_u) == 0 || nrow(sp_idx) == 0) return(NA_real_)
+
+        g  <- expand.grid(ti = seq_len(nrow(Ti_u)), si = seq_len(nrow(sp_idx)))
+        t1 <- Ti_u[g$ti, "t1"];  t2 <- Ti_u[g$ti, "t2"]
+        s1 <- sp_idx[g$si, 1];   s2 <- sp_idx[g$si, 2]
+
+        cov(data_v1[cbind(t1, s1)],
+            data_v2[cbind(t2, s2)])
+      })
+    )
+  }))
+}
+
+result <- empirical_st_cov_pair(
+  data_v1      = Z[, , 1],
+  data_v2      = Z[, , 2],
+  wt_id        = wt_id,
+  dates        = dates,
+  coordinates  = coordinates,
+  lagstime     = 0:2
+)
+```
 
 ```{r eval=FALSE}
 build_vgm_for_plot <- function(parm_mean, coordinates, lagstime = 0:2, var_names) {
