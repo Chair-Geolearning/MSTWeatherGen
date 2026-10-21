@@ -274,7 +274,7 @@ colnames(cr) <- rownames(cr) <- names
 
 ```{r eval=FALSE}
 Sys.setenv(MONITOR = "TRUE")
-nb_estimation <- 10
+nb_estimation <- 1
 estim_results <- list()
 
 for( it in 1:nb_estimation) {
@@ -435,4 +435,60 @@ emp_all <- do.call(rbind, lapply(seq_len(nrow(ep)), function(i) {
   res$v1 <- v1;  res$v2 <- v2
   res
 }))
+```
+
+
+```{r eval=FALSE}
+build_vgm_for_plot <- function(parm_mean, coordinates, lagstime = 0:2) {
+  # Grille de distances depuis les coordonnées
+  dst       <- round(as.matrix(dist(coordinates)), 3)
+  dist_grid <- sort(unique(dst[dst > 0]))
+  dist_grid <- dist_grid[seq(1, length(dist_grid), length.out = 10)]
+
+  # Une ligne de parm_mean = une paire (v1, v2)
+  do.call(rbind, lapply(seq_len(nrow(parm_mean)), function(idx) {
+    par_row <- parm_mean[idx, ]
+
+    # Vecteur de paramètres attendu par Gneiting()
+    par_vec <- c(
+      par_row$a, par_row$b, par_row$c, par_row$d, par_row$e,
+      par_row$Ai,   par_row$Aj,
+      par_row$aii,  par_row$ajj,
+      par_row$nuii, par_row$nujj,
+      par_row$rho1ij,
+      par_row$r2ii, par_row$r2jj,
+      par_row$r1ii, par_row$r1jj
+    )
+
+    do.call(rbind, lapply(lagstime, function(u) {
+      data.frame(
+        v1      = par_row$v1,
+        v2      = par_row$v2,
+        lagtime = u,
+        dist    = dist_grid,
+        cov     = NA_real_,
+        vgmsim  = Gneiting(h = dist_grid, u = u,
+                           par = par_vec, rho2ij = par_row$rho2ij)
+      )
+    }))
+  }))
+}
+```
+
+```{r eval=FALSE}
+vgm_theo <- build_vgm_for_plot(
+  parm_mean   = parm_mean,    # data.frame : 1 ligne par paire (v1,v2)
+  coordinates = coordinates,
+  lagstime    = 0:2
+)
+```
+
+```{r eval=FALSE}
+vgm <- merge(
+  vgm_theo[, c("v1","v2","lagtime","dist","vgmsim")],
+  emp_all [, c("v1","v2","lagtime","dist","cov")],
+  by = c("v1","v2","lagtime","dist"),
+  all = TRUE
+)
+plot_multivariate_st_covariances(vgm, names = names)
 ```
