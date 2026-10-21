@@ -377,6 +377,10 @@ true_params <- data.frame(
 parm_mean[,-c(1,2)] - true_params[,-c(1,2)]
 ```
 
+
+#### GRAPH PAGE 18 PAPIER
+
+
 #### empirical_st_cov_pair : Covariance empirique spatio-temporelle sur les données Gaussiennes Z Calcule C_chapeau(h, u) entre deux variables v1 et v2 à partir des données Z dans deja l'espace Gaussien. On s'inspire de spacetime cov sans normalise comme Said a fait pour une paire de variables v1 et v2 et des distance h et lag u.
 ```{r eval=FALSE}
 
@@ -385,6 +389,7 @@ parm_mean[,-c(1,2)] - true_params[,-c(1,2)]
 ####   - h n'est pas une distance exacte : toutes les paires de stations
 ####     dont la distance tombe dans [h - tol, h + tol] sont regroupées ensemble
 ####     pour estimer la covariance à cette échelle spatiale. A rechecker avec Denis.
+####    on choisit nb de points distance sinn trop grands nombre de paires en plusieur millions
 
 empirical_st_cov_pair <- function(data_v1, data_v2, wt_id, dates,
                                    coordinates, lagstime = 0:tmax,nb_points_distance = 10) {
@@ -393,18 +398,24 @@ empirical_st_cov_pair <- function(data_v1, data_v2, wt_id, dates,
   dist_grid <- sort(unique(dst[dst > 0])) #length(dist_grid) = 278
   dist_grid <- dist_grid[seq(1, length(dist_grid), length.out = nb_points_distance)]  #length(dist_grid) = nb_points_distance = 10 ici
 
-  tol <- diff(range(dist_vals)) / (2 * nb_points_distance)e #max-min
+  tol <- diff(range(dist_vals)) / (2 * nb_points_distance) #max-min/2*nb_points_distance : demi largeur en qqsorte entre deux points h.
 
   Ti <- generate_temporal_index_pairs(wt_id, dates, tmax = max(lagstime))
 
   do.call(rbind, lapply(lagstime, function(u) {
-    Ti_u <- Ti[Ti[, "u"] == u, , drop = FALSE] #On selectionne les Ti qui valent time lag u donc a time fixe, ie stationnaire la cov depend que de h
+    Ti_u <- Ti[Ti[, "u"] == u, , drop = FALSE] # On selectionne les Ti qui valent time lag u donc a time fixe, ie stationnaire la
+    #cov depend que de h
 
     data.frame(
       lagtime = u,
       dist    = dist_grid,
       cov     = sapply(dist_grid, function(h) {
-        sp_idx <- which(abs(dst - h) <= tol, arr.ind = TRUE)
+        # Pour chaque point h de la grille de distances :
+        # On cherche toutes les paires de stations (s1, s2) dont la distance
+        # tombe dans l'intervalle [h - tol, h + tol]
+        # abs(dst - h) = écart entre la vraie distance et le centre du bin h
+        # <= tol        = on garde seulement les bonnes paires 
+        sp_idx <- which(abs(dst - h) <= tol, arr.ind = TRUE) 
         if (nrow(Ti_u) == 0 || nrow(sp_idx) == 0) return(NA_real_)
 
         g  <- expand.grid(ti = seq_len(nrow(Ti_u)), si = seq_len(nrow(sp_idx)))
@@ -418,6 +429,7 @@ empirical_st_cov_pair <- function(data_v1, data_v2, wt_id, dates,
   }))
 }
 
+#cov pour tous les timelags et nb_points_distance h ici 10 par ex
 result <- empirical_st_cov_pair(
   data_v1      = Z[, , 1],
   data_v2      = Z[, , 2],
@@ -428,6 +440,8 @@ result <- empirical_st_cov_pair(
 )
 ```
 
+
+#### On englobe ici pour toutes les variables
 ```{r eval=FALSE}
 ep <- generate_variable_index_pairs(names)
 
