@@ -751,7 +751,7 @@ estimation_gf <- function(data, wt_id, max_it, dates, tmax, names,
   # u : time lag
   # h : distance between 2 coordinates
   # uh (u, h, Ti, Tj, Sk, Sl) T and S are indices in dates and coordinates
-  # TODO check preprocessed_data et données utilisé dans vgm et cr
+  # TODO check preprocessed_data et données utilisé dans la suite
   preprocessed_data <- preprocess_data(Ti, Si, dist_matrix)
   uh <- preprocessed_data$uh
   uh <- cbind(uh, threshold_precip[uh[, 5]], threshold_precip[uh[, 6]])
@@ -1025,7 +1025,7 @@ unique_elements <- function(Si) {
 preprocess_data <- function(Ti, Si, dist_matrix) {
   e <- expand.grid(1:nrow(Ti), 1:nrow(Si))
   u <- Ti[e[, 1], 3]
-  h <- dist_matrix[Si[e[, 2], 1], Si[e[, 2], 2]]
+  h <- dist_matrix[cbind(Si[e[, 2], 1], Si[e[, 2], 2])]
   uh <- cbind(u, h, Ti[e[, 1], 1], Ti[e[, 1], 2], Si[e[, 2], 1], Si[e[, 2], 2])
   return(list(uh = uh, u = u, h = h))
 }
