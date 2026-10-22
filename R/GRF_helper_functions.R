@@ -455,9 +455,11 @@ optimize_spatial_parameters <- function(par_all, data, names, Vi, uh, cr, max_it
   upper <- c(rep(.upper[.aii],  n_aii),
              rep(.upper[.nuii], n_nuii))
   
-  parscale = c(rep(.upper[.aii]-.lower[.aii],  n_aii),
-               rep(.upper[.nuii]-.lower[.nuii],  n_nuii))
-  ndeps = c(rep(0.01, n_aii+n_nuii))
+  # parscale = c(rep(.upper[.aii]-.lower[.aii],  n_aii),
+  #              rep(.upper[.nuii]-.lower[.nuii],  n_nuii))
+  parscale = c(rep(.init[.aii], n_aii),
+               rep(.init[.nuii],  n_nuii))
+  ndeps = c(rep(0.001, n_aii+n_nuii))
 
   optimized_par <- optim(
     par_all[parms],
@@ -534,14 +536,16 @@ optimize_spatiotemporal_parameters <- function(par_all, data, names, Vi, uh, cr,
     .upper[.a], .upper[.b], .upper[.c], .upper[.d], .upper[.e],
     rep(.upper[.Ai], n_Ai)
   )
-  parscale = c(.upper[.a]-.lower[.a],
-               .upper[.b]-.lower[.b],
-               .upper[.c]-.lower[.c],
-               .upper[.d]-.lower[.d],
-               .upper[.e]-.lower[.e],
-               rep(.upper[.Ai]-.lower[.Ai], n_Ai))
+  # parscale = c(.upper[.a]-.lower[.a],
+  #              .upper[.b]-.lower[.b],
+  #              .upper[.c]-.lower[.c],
+  #              .upper[.d]-.lower[.d],
+  #              .upper[.e]-.lower[.e],
+  #              rep(.upper[.Ai]-.lower[.Ai], n_Ai))
+  parscale <- c(.init[.a], .init[.b], .init[.c], .init[.d], .init[.e],
+              rep(.init[.Ai], n_Ai))
   
-  ndeps = c(rep(0.01,5+n_Ai))
+  ndeps = c(rep(0.001,5+n_Ai))
   
   optimized_par <- optim(
     par_all[parms],
@@ -628,11 +632,13 @@ optimize_temporal_parameters <- function(par_all, data, names, Vi, uh, cr, max_i
              rep(.upper[.r2ii], n_r2ii),
              upper_rho1)
   
-  parscale =  c(rep(.upper[.r1ii]-.lower[.r1ii], n_r1ii),
-                rep(.upper[.r2ii]-.lower[.r2ii], n_r2ii),
-                rep(.upper[.rho1ij]-.lower[.rho1ij], n_rho1ij))
-                
-  ndeps = c(rep(0.1,n_r1ii+n_r2ii+n_rho1ij))
+  # parscale =  c(rep(.upper[.r1ii]-.lower[.r1ii], n_r1ii),
+  #               rep(.upper[.r2ii]-.lower[.r2ii], n_r2ii),
+  #               rep(.upper[.rho1ij]-.lower[.rho1ij], n_rho1ij))
+  parscale =  pmax(c(rep(.init[.r1ii], n_r1ii),
+                rep(.init[.r2ii], n_r2ii),
+                rep(.init[.rho1ij], n_rho1ij)),0.1)
+  ndeps = c(rep(0.001,n_r1ii+n_r2ii+n_rho1ij))
   
   optimized_par <- optim(
     par_all[parms],
