@@ -312,8 +312,9 @@ process_spatial_covariance <- function(data, dates, coordinates, wt_id, names){
 #' @return a matrix of correlation
 #' @keywords internal
 process_empirical_correlation <- function(data, names){
-  # la corrélation (coefficient de corrélation de Pearson) à distance spatiale h=0 et lag temporel u=0, moyennée spatialement.
-  # estimateur empirique de Cij(0,0) sur les Z empiriques (champ latent)
+  # Pearson correlation coefficient at spatial distance h=0 and temporal lag u=0, averaged over space.
+  # Empirical estimator of the pointwise correlation (0,0) on the empirical Z (latent field);
+  # with unit-variance latent fields this equals the pointwise covariance Cij(0,0).
   cr <- sapply(names, function(v1) {
     sapply(names, function(v2) {
       mean(sapply(1:dim(data)[2], function(j) cor(data[, j, v1], data[, j, v2], use = "complete.obs")), na.rm = TRUE)
@@ -705,11 +706,8 @@ set_spatial_bounds <- function(coordinates) {
 #' @param dates Vector of dates corresponding to the temporal observations within the dataset.
 #' @param tmax The maximum temporal lag considered for the model, influencing temporal dependency estimation.
 #' @param names Vector containing the names of the variables included in the analysis.
-#' @param par_all (Optional) Initial or current complete set of model parameters. If not provided, parameters are initialized within the function.
 #' @param coordinates Matrix containing the geographical coordinates of the spatial locations in the dataset.
 #' @param n1, n2 Parameters that define the granularity for generating spatial index pairs, affecting the spatial resolution of the model.
-# @param rho1 Matrix of precomputed correction terms used to adjust the covariance matrix, aiding in model stabilization.
-# @param cr Initial correlation matrix representing the base relationships between variables, used as a starting point for optimization.
 #' @param threshold_precip Threshold values for precipitation, used in preprocessing to distinguish between different precipitation intensities.
 #'
 #' @return A list containing two elements: `parm`, the parameter matrix formatted for interpretation and use in subsequent model applications, and

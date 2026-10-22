@@ -163,6 +163,35 @@ create_df_param <- function(par, names) {
 #' This function implements the methods described in Section 2.4 in Equation 8 of the article
 #' \strong{Stochastic Environmental Research and Risk Assessment, 2025} (DOI: 10.1007/s00477-024-02897-8).
 #'
+#' The matrix \eqn{[\rho^{(2)}_{ij}]_{i,j=1}^p} is estimated from all the other parameters.
+#' Starting from the covariance parameterisation expressed at \eqn{\mathbf{h}=0} and \eqn{u=0},
+#' we have
+#' \deqn{
+#'   C(0,0) = \rho^{(1)}_{ij} \left(r_{ii}^{(1)} r_{jj}^{(1)}\right)^{1/2} \left(r_{ij}^{(1)}\right)^{-1}
+#'          + \rho^{(2)}_{ij} w_{2,ij}
+#'          = \rho^{(1)}_{ij} w_{1,ij} + \rho^{(2)}_{ij} w_{2,ij},
+#' }{C(0,0) = rho1_ij * w1_ij + rho2_ij * w2_ij}
+#' where \eqn{w_{2,ij}} denotes the whole term multiplying \eqn{\rho^{(2)}_{ij}} in the 
+#' space-time component of the covariance (Eq. 5). This yields
+#' \deqn{
+#'   \hat{\rho}^{(2)}_{ij} = \frac{C(0,0) - \rho^{(1)}_{ij} w_{1,ij}}{w_{2,ij}},
+#' }{hat(rho2_ij) = (C(0,0) - rho1_ij * w1_ij) / w2_ij}
+#' where \eqn{C(0,0)} is the pointwise correlation between the two variables at
+#' \eqn{\mathbf{h}=0, u=0} (the latent field has unit variance, so correlation and
+#' covariance coincide), called \code{cr} in the code. Now let \code{cc} =
+#' \eqn{C(0,0 \,;\, \rho^{(2)}_{ij}=1)}. Then
+#' \deqn{ \code{cc} = \rho^{(1)}_{ij} w_{1,ij} + w_{2,ij}, }
+#' and therefore
+#' \deqn{ w_{2,ij} = \code{cc} - \rho^{(1)}_{ij} w_{1,ij}. }
+#' Consequently,
+#' \deqn{
+#'   \hat{\rho}^{(2)}_{ij} = \frac{\code{cr} - \rho^{(1)}_{ij} w_{1,ij}}
+#'                                {\code{cc} - \rho^{(1)}_{ij} w_{1,ij}}.
+#' }
+#' Mathematically the matrix \eqn{[\hat{\rho}^{(2)}_{ij}]_{i,j=1}^p} is positive definite,
+#' but once computed from the data and the estimated parameters this may need to be checked.
+#' When it is not positive definite, it is made positive definite by \code{Matrix::nearPD}.
+#'
 #' @param parm A data frame or list containing parameters for the Gneiting function.
 #' @param names A vector of variable names (e.g., "temperature", "wind") to calculate correlations between.
 #' @param cr Matrix of initial correlation values between the variables.
@@ -185,8 +214,8 @@ compute_rho2 <- function(parm, names, cr) {
     parameters_pair <- as.numeric(parm[pair_indice,-c(1,2)])
 
     # w1,ij = sqrt(r1ii * r1jj) / r1ij
-    r1ij   <- sqrt((parameters_pair[.r1ii]^2 + parameters_pair[.r2jj]^2) / 2)
-    w1     <- sqrt(parameters_pair[.r1ii] * parameters_pair[.r2jj]) / r1ij
+    r1ij   <- sqrt((parameters_pair[.r1ii]^2 + parameters_pair[.r1jj]^2) / 2)
+    w1     <- sqrt(parameters_pair[.r1ii] * parameters_pair[.r1jj]) / r1ij
     rho1ij <- parameters_pair[.rho1ij]
       
     # cc = Gneiting(0, 0, par, rho2ij=1) = rho1ij*w1 + w2
@@ -199,10 +228,10 @@ compute_rho2 <- function(parm, names, cr) {
     
     if (v1 == v2) {
       # La diagonale bornée entre 0 et 1. 
-      rho2ij <- min(max(rho2ij, 0), 1)
+      rho2ij <- clamp(rho2ij, min=0, max=1)
     } else {
       # Hors diagonale [-1, 1] 
-      rho2ij <- min(max(rho2ij, -1), 1)
+      rho2ij <- clamp(rho2ij, min=-1, max=1)
     }
     
     rho2[v1, v2] <- rho2[v2, v1] <- rho2ij
