@@ -258,20 +258,17 @@ initialize_rho1 <- function(cov_spatial, names) {
 #' }
 #' @param data 3D array representing time, location, and variable dimensions of the spatio-temporal data.
 #' @param dates vector of dates
-#' @param coordinates vector of coordinates (long, lat)
+#' @param dist_matrix a matrix of distances between points
 #' @param wt_id weather type index in data and dates
 #' @param names variables names
 #' @return a data.frame with lagtime (u); dist (h); cov (covariance), v (variable pair), v1 and v2 names
 #' @keywords internal
-process_spatial_covariance <- function(data, dates, coordinates, wt_id, names){
+process_spatial_covariance <- function(data, dates, dist_matrix, wt_id, names){
   ep <- generate_variable_index_pairs(names)
-  # Distance between points
-  dst <- sapply(1:nrow(coordinates), function(i) {
-    sapply(1:nrow(coordinates), function(j) {
-      geosphere::distHaversine(coordinates[i, ], coordinates[j, ]) / 1000
-    })
-  })
-  dist <- sort(unique(c(floor(dst))))
+
+  #dist <- sort(unique(c(floor(dist_matrix)))) # rm floor for euclidean metrics
+  dist <- sort(unique(c(floor(dist_matrix))))
+  dist <- dist[dist > 0]
   # do not take the farest distance but the 2/3 distance
   start_at_dist <- dist[round(length(dist) / 1.5)]
   
@@ -281,7 +278,7 @@ process_spatial_covariance <- function(data, dates, coordinates, wt_id, names){
     variable <- unlist(ep[i, ])
     
     space_time_cov <- spatial_tail_covariance(
-      data = data[, , variable], wt_id = wt_id, dist_matrix = dst,
+      data = data[, , variable], wt_id = wt_id, dist_matrix = dist_matrix,
       dist_threshold = start_at_dist
     )
 #    space_time_cov <- spacetime_cov(data=data[, , variable], wt_id, locations=coordinates, ds = dst, dates, lagstime = 0, c(0,start_at_dist), covgm = TRUE)
@@ -413,7 +410,7 @@ init_space_par <- function(data, names, h, uh, max_it = 2000) {
 
   return(par)
 }
-#' Optimize Spatial Parameters for Variable Pairs
+#' Optimize Spatial Parameters aii and nuii for Variable Pairs
 #'
 #' Performs optimization of model parameters for each pair of variables based on spatial data.
 #' This function iteratively optimizes spatial parameters to maximize the log-likelihood
@@ -433,9 +430,6 @@ init_space_par <- function(data, names, h, uh, max_it = 2000) {
 #'        a starting point for parameter estimation.
 #' @param max_it Maximum number of iterations allowed for the optimization algorithm,
 #'        controlling the depth of the search process.
-#' @param ep Data frame defining pairs of variables for analysis and optimization,
-#'        used to guide the optimization process by specifying which variable interactions to consider.
-#'
 #' @return A vector `par_all` updated with optimized model parameters for each variable pair.
 #'         This vector consolidates the model parameters post-optimization, ready for model application or further analysis.
 #'
@@ -661,13 +655,24 @@ optimize_temporal_parameters <- function(par_all, data, names, Vi, uh, cr, max_i
   return(par_all)
 }
 
-set_spatial_bounds <- function(coordinates) {
-  # Calculer les distances entre tous les sites
-  dst <- as.matrix(dist(coordinates))
-  
+#' Spatial Parameter Bounds from the Distance Matrix
+#'
+#' Sets the lower/upper bounds for the spatial Matérn range parameters (aii/ajj
+#' and the spatial Matérn a) from the min/max inter-site distances held in the
+#' distance matrix. Bounds are 1/dst_max and 1/dst_min, i.e. in [1/km] for
+#' lon/lat coordinates or [1/unit] for euclidean coordinates, matching the h
+#' consumed by Gneiting/Matern.
+#'
+#' @param dist_matrix Square symmetric matrix of distances between sites
+#'   (km for lon/lat, arbitrary unit for euclidean), as returned by
+#'   `spatial_distance_matrix()`.
+#' @return nothings
+set_spatial_bounds <- function(dist_matrix) {
+    
+  ## TODO on devrait peut être mettre les parameters dans .pkgenv plutôt
   # Pour eviter que 1/0 = inf
-  dst_min <- min(dst[dst > 0])
-  dst_max <- max(dst)
+  dst_min <- min(dist_matrix[dist_matrix>0])
+  dst_max <- max(dist_matrix)
   
   lower_aii <- 1 / dst_max
   upper_aii <- 1 / dst_min
@@ -707,6 +712,7 @@ set_spatial_bounds <- function(coordinates) {
 #' @param tmax The maximum temporal lag considered for the model, influencing temporal dependency estimation.
 #' @param names Vector containing the names of the variables included in the analysis.
 #' @param coordinates Matrix containing the geographical coordinates of the spatial locations in the dataset.
+#' @param use_euclidean coordinates parameter TRUE (default) -> euclidean; FALSE -> degres (lon/lat)
 #' @param n1, n2 Parameters that define the granularity for generating spatial index pairs, affecting the spatial resolution of the model.
 #' @param threshold_precip Threshold values for precipitation, used in preprocessing to distinguish between different precipitation intensities.
 #'
@@ -717,15 +723,17 @@ set_spatial_bounds <- function(coordinates) {
 #' @importFrom parallel mclapply
 
 estimation_gf <- function(data, wt_id, max_it, dates, tmax, names,
-                          coordinates, n1, n2, threshold_precip) {
+                          coordinates, use_euclidean = TRUE, n1, n2, threshold_precip) {
   # Dimensions of the data
   Nt <- dim(data)[1] # Number of time points
   Ns <- dim(data)[2] # Number of spatial locations
   Nv <- dim(data)[3] # Number of variables
 
+  dist_matrix <- spatial_distance_matrix(coordinates, use_euclidean)
+
   # Generate spatial, temporal, and variable index pairs
   # pair by row , cols spatial indice (s1,s2)
-  Si <- generate_spatial_index_pairs(coordinates, n1 = n1, n2 = n2)
+  Si <- generate_spatial_index_pairs(coordinates, dist_matrix, n1 = n1, n2 = n2)
   # pair by row with time lag (t1,t2,u)
   Ti <- generate_temporal_index_pairs(wt_id, dates, tmax)
   # pair of variable by row (V1,V2)
@@ -744,19 +752,19 @@ estimation_gf <- function(data, wt_id, max_it, dates, tmax, names,
   # h : distance between 2 coordinates
   # uh (u, h, Ti, Tj, Sk, Sl) T and S are indices in dates and coordinates
   # TODO check preprocessed_data et données utilisé dans vgm et cr
-  preprocessed_data <- preprocess_data(Ti, Si, coordinates)
+  preprocessed_data <- preprocess_data(Ti, Si, dist_matrix)
   uh <- preprocessed_data$uh
   uh <- cbind(uh, threshold_precip[uh[, 5]], threshold_precip[uh[, 6]])
   u <- preprocessed_data$u
   h <- preprocessed_data$h
   
-  set_spatial_bounds(coordinates)
+  set_spatial_bounds(dist_matrix)
   # Initialize spatial parameters
   par_s <- init_space_par(data = data, names = names, h = h[u == 0], uh = uh[u == 0, ], max_it = max_it)
   par_s <- do.call(cbind, par_s)
   
   ## cov_spatial ici pour le moment avec données du wt
-  cov_spatial <- process_spatial_covariance(data, dates, coordinates, wt_id, names)
+  cov_spatial <- process_spatial_covariance(data, dates, dist_matrix, wt_id, names)
   ## rho1 init
   rho1_init <- initialize_rho1(cov_spatial, names)
   
@@ -839,6 +847,11 @@ estimation_gf <- function(data, wt_id, max_it, dates, tmax, names,
 #' @keywords internal
 #' @importFrom stats kmeans
 selectUniformPointsIndices <- function(coordinates, N) {
+  ## TODO test with distance matrix rather than coordinates
+  #pam_dist <- as.dist(dist_matrix)      # symmetric distance -> dist object
+  #cl <- cluster::pam(pam_dist, k = N, diss = TRUE)
+  #return(cl$id.med) 
+  
   colnames(coordinates) <- c("lon", "lat")
   # K-means clustering
   clusters <- stats::kmeans(coordinates, centers = N)
@@ -862,27 +875,29 @@ selectUniformPointsIndices <- function(coordinates, N) {
 #' This function implements the methods described in Section 3.3 of the article, in Equation 17
 #' *Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8).
 #'
-#' @param coordinates A matrix or data frame containing the coordinates of points.
-#' @param betaIndex The index of the reference point in the coordinates matrix/data frame.
+#' @param dist_matrix A matrix of distances between points.
+#' @param betaIndex The index of the reference point in the dist_matrix.
 #' @param v The number of points to select, including the reference point.
 #'
-#' @return A vector of selected indices from the coordinates matrix/data frame, including the index of the reference point.
+#' @return A vector of selected indices from the dist_matrix, including the index of the reference point.
 #'
 #' @keywords internal
 
 
-selectPoints <- function(coordinates, betaIndex, v) {
-  if (v > nrow(coordinates) || betaIndex > nrow(coordinates)) {
+selectPoints <- function(dist_matrix, betaIndex, v) {
+  if (v > nrow(dist_matrix) || betaIndex > nrow(dist_matrix)) {
     stop("Invalid v or betaIndex")
   }
 
   calculateProbability <- function(alphaIndex) {
-    1 / (sum((coordinates[alphaIndex, ] - coordinates[betaIndex, ])^2) + 1)
+    distance <- dist_matrix[betaIndex,alphaIndex]
+    1 / (distance^2 + 1)
+    #1 / (sum((coordinates[alphaIndex, ] - coordinates[betaIndex, ])^2) + 1)
   }
 
-  probabilities <- sapply(1:nrow(coordinates), calculateProbability)
+  probabilities <- sapply(1:nrow(dist_matrix), calculateProbability)
 
-  selectedIndices <- unique(c(betaIndex, sample(1:nrow(coordinates), size = v, prob = probabilities)))
+  selectedIndices <- unique(c(betaIndex, sample(seq_len(nrow(dist_matrix)), size = v, prob = probabilities)))
   return(selectedIndices)
 }
 #' Generate Spatial Index Pairs
@@ -895,6 +910,7 @@ selectPoints <- function(coordinates, betaIndex, v) {
 #' *Stochastic Environmental Research and Risk Assessment, 2025* (DOI: 10.1007/s00477-024-02897-8).
 #'
 #' @param coordinates A matrix or data frame containing the coordinates of points.
+#' @param dist_matrix distances matrix between coordinates points
 #' @param n1 The number of points to uniformly distribute across the spatial domain.
 #' @param n2 The number of points to select based on proximity to each of the n1 points.
 #'
@@ -903,12 +919,11 @@ selectPoints <- function(coordinates, betaIndex, v) {
 #' @keywords internal
 #' @importFrom stringr str_split
 #' @importFrom stats dist
-generate_spatial_index_pairs <- function(coordinates, n1, n2) {
-  D <- as.matrix(dist(coordinates))
+generate_spatial_index_pairs <- function(coordinates, dist_matrix, n1, n2) {
   Ns <- nrow(coordinates)
   rs <- selectUniformPointsIndices(coordinates, n1)
   Si <- sapply(rs, function(p1) {
-    rs1 <- selectPoints(coordinates, p1, v = n2)
+    rs1 <- selectPoints(dist_matrix, p1, v = n2)
 
     sapply(rs1, function(p2) {
       return(paste(min(c(p1, p2)), max(c(p1, p2)), sep = "-"))
@@ -1001,16 +1016,16 @@ unique_elements <- function(Si) {
 #'
 #' @param Ti A matrix containing temporal index pairs and their respective lags.
 #' @param Si A matrix containing spatial index pairs.
-#' @param coordinates A matrix of spatial coordinates for each location.
+#' @param dist_matrix A matrix of spatial distances for each location.
 #'
 #' @return A list containing the preprocessed data, including a combined matrix of temporal lags, spatial distances, and indices (`uh`), as well as separate vectors of temporal lags (`u`) and spatial distances (`h`).
 #'
 #' @keywords internal
 
-preprocess_data <- function(Ti, Si, coordinates) {
+preprocess_data <- function(Ti, Si, dist_matrix) {
   e <- expand.grid(1:nrow(Ti), 1:nrow(Si))
   u <- Ti[e[, 1], 3]
-  h <- ds(Si[e[, 2], 1], Si[e[, 2], 2], coordinates)
+  h <- dist_matrix[Si[e[, 2], 1], Si[e[, 2], 2]]
   uh <- cbind(u, h, Ti[e[, 1], 1], Ti[e[, 1], 2], Si[e[, 2], 1], Si[e[, 2], 2])
   return(list(uh = uh, u = u, h = h))
 }
@@ -1026,6 +1041,7 @@ preprocess_data <- function(Ti, Si, coordinates) {
 #' @param wt Vector of weather type classifications for each time point in the data.
 #' @param names Vector of variable names in the data array.
 #' @param coordinates A matrix of geographic coordinates for the locations in the data.
+#' @param use_euclidean TRUE (default) -> coordinates parameter is euclidean ; FALSE -> coordinates are in degres (long/lat)
 #' @param tmax Maximum time lag for temporal analysis.
 #' @param max_it Maximum number of iterations for optimization procedures.
 #' @param n1, n2 Parameters defining the granularity of spatial analysis.
@@ -1037,7 +1053,7 @@ preprocess_data <- function(Ti, Si, coordinates) {
 #' @keywords internal
 #' @importFrom geosphere distHaversine
 #' @importFrom stats cor
-estimate_gaussian_field_params <- function(data, wt, names, coordinates, tmax, max_it, n1, n2, dates, threshold_precip) {
+estimate_gaussian_field_params <- function(data, wt, names, coordinates, use_euclidean=TRUE, tmax, max_it, n1, n2, dates, threshold_precip) {
   K <- length(unique(wt))
   # Initialize the Gaussian field parameters storage
   gf_par <- vector(mode = "list", length = K)
@@ -1052,8 +1068,8 @@ estimate_gaussian_field_params <- function(data, wt, names, coordinates, tmax, m
     ## data de la saison, wt_id id du wt k , dates de la saison -> wt_id indice de wt k dans data et dates
     gf_par[[k]] <- estimation_gf(
       data = data, wt_id = wt_id, max_it = max_it, dates = dates,
-      tmax = tmax, names = names, coordinates = coordinates, n1 = n1,
-      n2 = n2, threshold_precip = threshold_precip[[k]]
+      tmax = tmax, names = names, coordinates = coordinates, use_euclidean = use_euclidean,
+      n1 = n1, n2 = n2, threshold_precip = threshold_precip[[k]]
     )$parm
   }
 

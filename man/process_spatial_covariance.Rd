@@ -4,14 +4,14 @@
 \alias{process_spatial_covariance}
 \title{Process spatial empirical covariance}
 \usage{
-process_spatial_covariance(data, dates, coordinates, wt_id, names)
+process_spatial_covariance(data, dates, dist_matrix, wt_id, names)
 }
 \arguments{
 \item{data}{3D array representing time, location, and variable dimensions of the spatio-temporal data.}
 
 \item{dates}{vector of dates}
 
-\item{coordinates}{vector of coordinates (long, lat)}
+\item{dist_matrix}{a matrix of distances between points}
 
 \item{wt_id}{weather type index in data and dates}
 

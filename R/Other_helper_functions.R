@@ -150,6 +150,20 @@ ds <- function(i, j, coordinates) {
   # return(sqrt(rowSums((coordinates[i,]-coordinates[j,])^2)))
 }
 
+#' Distance matrix between sites, in km for lon/lat or raw units for euclidean coords
+#' @param coordinates Matrix with columns (lon, lat) if use_haversine=TRUE
+#' @param use_euclidean Logical: TRUE -> euclidean (units of coords); FALSE -> great-circle km
+#' @return a matrix of distance euclidean (unit) or haversine (km)
+#' @keywords internal
+spatial_distance_matrix <- function(coordinates, use_euclidean = TRUE) {
+  n <- nrow(coordinates)
+  if (use_euclidean != TRUE) {
+    outer(seq_len(n), seq_len(n), function(i, j) ds(i, j, coordinates))
+  } else {
+    as.matrix(stats::dist(coordinates))
+  }
+}
+
 #' Calculate Insolation Clearness Index (ICI)
 #'
 #' Computes the Insolation Clearness Index (ICI) based on the provided radiation and time.

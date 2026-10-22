@@ -12,6 +12,7 @@ MSTWeatherGen_Estim_season(
   names = NULL,
   names_weather_types = NULL,
   coordinates,
+  use_euclidean = TRUE,
   season,
   max_it,
   tmax,
@@ -34,6 +35,8 @@ is standardized at each location using smoothed mean and standard deviation.}
 \item{names_weather_types}{Subset of 'names', variables to be used for weather type classification.}
 
 \item{coordinates}{Matrix with columns for the coordinates of each location.}
+
+\item{use_euclidean}{TRUE (default) coordinates parameter is euclidean; FALSE -> coordinates parameter is in degres (long/lat)}
 
 \item{season}{Vector of integers representing months to define the season for analysis.}
 

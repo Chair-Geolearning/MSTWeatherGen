@@ -2,7 +2,7 @@
 % Please edit documentation in R/GRF_helper_functions.R
 \name{optimize_spatial_parameters}
 \alias{optimize_spatial_parameters}
-\title{Optimize Spatial Parameters for Variable Pairs}
+\title{Optimize Spatial Parameters aii and nuii for Variable Pairs}
 \usage{
 optimize_spatial_parameters(par_all, data, names, Vi, uh, cr, max_it)
 }
@@ -24,9 +24,6 @@ a starting point for parameter estimation.}
 
 \item{max_it}{Maximum number of iterations allowed for the optimization algorithm,
 controlling the depth of the search process.}
-
-\item{ep}{Data frame defining pairs of variables for analysis and optimization,
-used to guide the optimization process by specifying which variable interactions to consider.}
 }
 \value{
 A vector `par_all` updated with optimized model parameters for each variable pair.

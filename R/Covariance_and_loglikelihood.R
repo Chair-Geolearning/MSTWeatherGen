@@ -196,9 +196,9 @@ create_df_param <- function(par, names) {
 #' @param names A vector of variable names (e.g., "temperature", "wind") to calculate correlations between.
 #' @param cr Matrix of initial correlation values between the variables.
 #'
-#' @return Symmetric matrix of adjusted correlation coefficients (beta) between the variables.
+#' @return Symmetric matrix of adjusted correlation coefficients (rho2if) between the variables.
 #' where each element [i, j] represents the correlation coefficient
-#'  between variables i and j, adjusted based on the Gneiting function and a correction term.
+#'  between variables i and j, adjusted based on the Gneiting function.
 #'
 #' @importFrom Matrix nearPD
 #' @keywords internal

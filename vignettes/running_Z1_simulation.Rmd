@@ -244,7 +244,7 @@ if (length(dim(Z)) != 3L) {
 
 ```{r eval=FALSE}
 tmax <- 3 # nb of days of lag
-wt_id = (tmax+1):(length(t_seq)) # one weather type , all indexes starting at tmax+1 match t_seq and dates
+wt_id = 1:(length(t_seq)) # one weather type , all indexes starting at tmax+1 match t_seq and dates
 
 max_it <- 1000 # Maximum number of iteration for optimisation process
 
@@ -291,6 +291,7 @@ for( it in 1:nb_estimation) {
       tmax             = tmax,
       names            = names,
       coordinates      = coordinates,
+      use_euclidean    = TRUE,
       n1               = n1,
       n2               = n2,
       threshold_precip = rep(0,dim(Z)[2])

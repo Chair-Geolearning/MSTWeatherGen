@@ -12,6 +12,7 @@ estimation_gf(
   tmax,
   names,
   coordinates,
+  use_euclidean = TRUE,
   n1,
   n2,
   threshold_precip
@@ -31,6 +32,8 @@ estimation_gf(
 \item{names}{Vector containing the names of the variables included in the analysis.}
 
 \item{coordinates}{Matrix containing the geographical coordinates of the spatial locations in the dataset.}
+
+\item{use_euclidean}{coordinates parameter TRUE (default) -> euclidean; FALSE -> degres (lon/lat)}
 
 \item{n1, }{n2 Parameters that define the granularity for generating spatial index pairs, affecting the spatial resolution of the model.}
 

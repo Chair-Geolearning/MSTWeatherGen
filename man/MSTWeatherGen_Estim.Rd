@@ -14,6 +14,7 @@ MSTWeatherGen_Estim(
   names = NULL,
   names_weather_types = NULL,
   coordinates,
+  use_euclidean = TRUE,
   max_it,
   tmax,
   n1,
@@ -41,7 +42,8 @@ and `names` is not provided, "Precipitation" is assumed to be the first variable
 
 \item{coordinates}{A matrix or data frame containing the geographical coordinates for each location in the data.}
 
-\item{max_it}{The maximum number of iterations for optimization procedures within the estimation process.}
+\item{use_euclidean}{TRUE (default) coordinates parameter is euclidean; FALSE -> coordinates parameter is in degres (long/lat)
+@param max_it The maximum number of iterations for optimization procedures within the estimation process.}
 
 \item{tmax}{The maximum temporal lag to be considered in the analysis.}
 

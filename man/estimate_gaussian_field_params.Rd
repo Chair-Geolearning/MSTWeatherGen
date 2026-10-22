@@ -9,6 +9,7 @@ estimate_gaussian_field_params(
   wt,
   names,
   coordinates,
+  use_euclidean = TRUE,
   tmax,
   max_it,
   n1,
@@ -25,6 +26,8 @@ estimate_gaussian_field_params(
 \item{names}{Vector of variable names in the data array.}
 
 \item{coordinates}{A matrix of geographic coordinates for the locations in the data.}
+
+\item{use_euclidean}{TRUE (default) -> coordinates parameter is euclidean ; FALSE -> coordinates are in degres (long/lat)}
 
 \item{tmax}{Maximum time lag for temporal analysis.}
 

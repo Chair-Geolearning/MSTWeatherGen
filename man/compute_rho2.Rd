@@ -14,9 +14,9 @@ compute_rho2(parm, names, cr)
 \item{cr}{Matrix of initial correlation values between the variables.}
 }
 \value{
-Symmetric matrix of adjusted correlation coefficients (beta) between the variables.
+Symmetric matrix of adjusted correlation coefficients (rho2if) between the variables.
 where each element [i, j] represents the correlation coefficient
- between variables i and j, adjusted based on the Gneiting function and a correction term.
+ between variables i and j, adjusted based on the Gneiting function.
 }
 \description{
 This function calculates the beta correlation coefficients between variables based on the Gneiting function, adjusted for a correction term. It is intended for internal use within package functions to adjust initial correlation values using specified parameters.
