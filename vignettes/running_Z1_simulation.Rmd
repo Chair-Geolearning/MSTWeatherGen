@@ -448,9 +448,9 @@ emp_all <- do.call(rbind, lapply(seq_len(nrow(ep)), function(i) {
 #### Maintenent on calcule la covariance a partir des parametres qu'on a avec Gneiting fonction
 
 ```{r eval=FALSE}
-build_vgm_for_plot <- function(parm_mean, coordinates, lagstime = 0:tmax, nb_points_dsitance = 10) {
+build_vgm_for_plot <- function(parm_mean, coordinates, lagstime = 0:tmax, nb_points_distance = 10) {
   dst       <- round(spatial_distance_matrix(coordinates), 3)
-  dist_grid <- sort(unique(dst[dst > 0])))
+  dist_grid <- sort(unique(dst[dst > 0]))
   dist_grid <- dist_grid[seq(1, length(dist_grid), length.out = nb_points_distance)]
 
 

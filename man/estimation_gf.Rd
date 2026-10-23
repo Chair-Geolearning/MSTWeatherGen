@@ -38,8 +38,6 @@ estimation_gf(
 \item{n1, }{n2 Parameters that define the granularity for generating spatial index pairs, affecting the spatial resolution of the model.}
 
 \item{threshold_precip}{Threshold values for precipitation, used in preprocessing to distinguish between different precipitation intensities.}
-
-\item{par_all}{(Optional) Initial or current complete set of model parameters. If not provided, parameters are initialized within the function.}
 }
 \value{
 A list containing two elements: `parm`, the parameter matrix formatted for interpretation and use in subsequent model applications, and
