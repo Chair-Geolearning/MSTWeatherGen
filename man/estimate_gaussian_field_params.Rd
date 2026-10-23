@@ -9,6 +9,7 @@ estimate_gaussian_field_params(
   wt,
   names,
   coordinates,
+  use_euclidean = TRUE,
   tmax,
   max_it,
   n1,
@@ -18,13 +19,15 @@ estimate_gaussian_field_params(
 )
 }
 \arguments{
-\item{data}{A 3D array containing weather data with dimensions [time, location, variable].}
+\item{data}{A 3D array containing weather data of the same season with dimensions [time, location, variable].}
 
 \item{wt}{Vector of weather type classifications for each time point in the data.}
 
 \item{names}{Vector of variable names in the data array.}
 
 \item{coordinates}{A matrix of geographic coordinates for the locations in the data.}
+
+\item{use_euclidean}{TRUE (default) -> coordinates parameter is euclidean ; FALSE -> coordinates are in degres (long/lat)}
 
 \item{tmax}{Maximum time lag for temporal analysis.}
 
