@@ -274,7 +274,7 @@ colnames(cr) <- rownames(cr) <- names
 
 ```{r eval=FALSE}
 Sys.setenv(MONITOR = "TRUE")
-nb_estimation <- 3
+nb_estimation <- 1
 estim_results <- list()
 
 for( it in 1:nb_estimation) {
@@ -398,7 +398,7 @@ empirical_st_cov_pair <- function(data_v1, data_v2, wt_id, dates,
   dist_grid <- sort(unique(dst[dst > 0])) #length(dist_grid) = 278
   dist_grid <- dist_grid[seq(1, length(dist_grid), length.out = nb_points_distance)]  #length(dist_grid) = nb_points_distance = 10 ici
 
-  tol <- diff(range(dist_vals)) / (2 * nb_points_distance) #max-min/2*nb_points_distance : demi largeur en qqsorte entre deux points h.
+  tol <- diff(range(dist_grid)) / (2 * nb_points_distance) #max-min/2*nb_points_distance : demi largeur en qqsorte entre deux points h.
 
   Ti <- generate_temporal_index_pairs(wt_id, dates, tmax = max(lagstime))
 
@@ -430,7 +430,7 @@ empirical_st_cov_pair <- function(data_v1, data_v2, wt_id, dates,
 }
 
 #cov pour tous les timelags et nb_points_distance h ici 10 par ex
-result <- empirical_st_cov_pair(
+ waresult <- empirical_st_cov_pair(
   data_v1      = Z[, , 1],
   data_v2      = Z[, , 2],
   wt_id        = wt_id,
