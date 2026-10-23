@@ -430,7 +430,7 @@ empirical_st_cov_pair <- function(data_v1, data_v2, wt_id, dates,
 }
 
 #cov pour tous les timelags et nb_points_distance h ici 10 par ex
- waresult <- empirical_st_cov_pair(
+result <- empirical_st_cov_pair(
   data_v1      = Z[, , 1],
   data_v2      = Z[, , 2],
   wt_id        = wt_id,
