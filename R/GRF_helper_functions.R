@@ -137,7 +137,8 @@ initialize_par_all <- function(names, par_s, rho1, cr) {
   # Update rho1 parameters based on covariance information
   par_all <- update_rho1_parameters(par_all, names, rho1)
   
-  ## TODO necessité du DF pour compute rho2 ?
+  ## TODO REvoir toute cette partie 
+  #  necessité du DF pour compute rho2 ?
   parm <- create_df_param(par_all, names)
   rho2 <- try(compute_rho2(parm, names, cr), silent = T)
   # A rechecker sur le try de cholesky car on fait nearPD dans rho2

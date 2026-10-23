@@ -262,7 +262,7 @@ dimnames(Z)[[3]] = names
 
 ```{r eval=FALSE}
 Sys.setenv(MONITOR = "TRUE")
-nb_estimation <- 1
+nb_estimation <- 4
 estim_results <- list()
 
 for( it in 1:nb_estimation) {
@@ -372,7 +372,7 @@ parm_mean[,-c(1,2)] - true_params[,-c(1,2)]
 
 ```{r eval=FALSE}
 build_vgm_for_plot <- function(parm_mean, coordinates, lagstime = 0:2, var_names) {
-  dst       <- as.matrix(dist(coordinates))
+  dst       <- spatial_distance_matrix(coordinates)
   dist_grid <- sort(unique(round(dst[dst > 0], 3)))
   dist_grid <- dist_grid[seq(1, length(dist_grid), length.out = 10)]
 
