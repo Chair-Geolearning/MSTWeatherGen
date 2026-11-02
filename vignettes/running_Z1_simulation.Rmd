@@ -66,7 +66,7 @@ generate_Z <- function(t_seq, spatial_coordinates){
   L = 3000 # Number of waves
 
   # Définition des Matern
-  rs = c(0.5,1,2) # paramètres aii dans le papier
+  rs = c(0.2,0.5,1) # paramètres aii dans le papier (anciennement 0.5,1,2)
   nu = c(0.5,1,2) # nuii
 
   # Define Matern covariance function parameters
@@ -99,7 +99,7 @@ generate_Z <- function(t_seq, spatial_coordinates){
     p = p,
     nt = nt,
     t = t_seq,
-    A = c(0.2,0.5,0.8), # paramètres A_i
+    A = c(0,0,0), # paramètres A_i
     a = 1/2,   # a=d
     alpha = 1, # b=e, with c=1
     delta = 0, # does not exist in MSTWeatherGen
@@ -126,16 +126,23 @@ generate_Z <- function(t_seq, spatial_coordinates){
 
   dimnames(Z1)[[3]] <- c("v1","v2","v3")
 
-  r_t = c(0.2,0.4,0.6) # r¹ii et r²ii
+  r_t = c(0.1,0.2,0.3) # r¹ii et r²ii
   rho  = Sigma_fun(1,1)
   Z_T1 = TemporalSim(nt,r_t,rho,a=rep(1,p),nu=rep(1,p),A=rep(0,p))
-  Z_T2 = TemporalSim(nt,r_t,rho,a=rs,nu=nu,A=c(0.2,0.5,0.8))
+  Z_T2 = TemporalSim(nt,r_t,rho,a=rs,nu=nu,A=c(0.0,0.0,0.0))
 
+  # 1. Construction de Z (boucle sur i ET k)
   Z = Z1
   for (i in seq_len(ns)) {
-    for (k in seq_len(p)){
+    for (k in seq_len(p)) {
       Z[,i,k] = 0.707*(Z_T2[,k]*Z1[,i,k] + Z_T1[,k])
     }
+  }
+  
+  # 2. Standardisation (boucle sur k seulement, APRÈS construction)
+  for (k in seq_len(p)) {
+    Zk <- Z[,,k]
+    Z[,,k] <- (Zk - mean(Zk)) / sd(Zk)
   }
 
   #plot(1:40,Z_T1[,1],type="l")
@@ -262,7 +269,7 @@ dimnames(Z)[[3]] = names
 
 ```{r eval=FALSE}
 Sys.setenv(MONITOR = "TRUE")
-nb_estimation <- 4
+nb_estimation <- 5
 estim_results <- list()
 
 for( it in 1:nb_estimation) {
@@ -382,13 +389,17 @@ parm_mean[,-c(1,2)] - true_params[,-c(1,2)]
 nb_points_distance = 10
 empirical_st_cov_pair <- function(data_v1, data_v2, wt_id, dates,
                                    coordinates, lagstime = 0:tmax,nb_points_distance = 10) {
+  
 
   dst       <- round(as.matrix(dist(coordinates)), 3) #length(dst) = 298116
   dist_grid <- sort(unique(dst[dst > 0])) #length(dist_grid) = 278
-  dist_grid <- dist_grid[seq(1, length(dist_grid), length.out = nb_points_distance)]  #length(dist_grid) = nb_points_distance = 10 ici
+  dist_cov <- seq(from=0, to=max(dist_grid), length.out=10)  
+#length(dist_grid) = nb_points_distance = 10 ici
+  dist_cov <- seq(0, 5.4, length.out = nb_points_distance)
 
-  tol <- diff(range(dist_grid)) / (2 * nb_points_distance) #max-min/2*nb_points_distance : demi largeur en qqsorte entre deux points h.
-
+  
+  tol <- max(dist_grid) / (2 * (nb_points_distance - 1)) #max-min/2*nb_points_distance : demi largeur en qqsorte entre deux points h.
+  tol <- 5.4 / (2 * (nb_points_distance - 1))   # = 0.3
   Ti <- generate_temporal_index_pairs(wt_id, dates, tmax = max(lagstime))
 
   do.call(rbind, lapply(lagstime, function(u) {
@@ -397,8 +408,8 @@ empirical_st_cov_pair <- function(data_v1, data_v2, wt_id, dates,
 
     data.frame(
       lagtime = u,
-      dist    = dist_grid,
-      cov     = sapply(dist_grid, function(h) {
+      dist    = dist_cov,
+      cov     = sapply(dist_cov, function(h) {
         # Pour chaque point h de la grille de distances :
         # On cherche toutes les paires de stations (s1, s2) dont la distance
         # tombe dans l'intervalle [h - tol, h + tol]
@@ -451,8 +462,8 @@ emp_all <- do.call(rbind, lapply(seq_len(nrow(ep)), function(i) {
 build_vgm_for_plot <- function(parm_mean, coordinates, lagstime = 0:tmax, nb_points_distance = 10) {
   dst       <- round(spatial_distance_matrix(coordinates), 3)
   dist_grid <- sort(unique(dst[dst > 0]))
-  dist_grid <- dist_grid[seq(1, length(dist_grid), length.out = nb_points_distance)]
-
+  #dist_grid <- dist_grid[seq(1, length(dist_grid), length.out = nb_points_distance)]
+  dist_grid <- seq(0, 5.4, length.out = nb_points_distance)
 
   # Une ligne de parm_mean = une paire (v1, v2)
   do.call(rbind, lapply(seq_len(nrow(parm_mean)), function(idx) {
@@ -493,11 +504,50 @@ vgm_theo <- build_vgm_for_plot(
 ```
 
 ```{r eval=FALSE}
+# Vrais paramètres de génération
+rs_true   <- c(0.2, 0.5, 1)
+nu_true   <- c(0.5, 1, 2)
+r_t_true  <- c(0.1, 0.2, 0.3)
+A_true    <- c(0, 0, 0)
+rho_cross <- 0.7
+
+ep <- generate_variable_index_pairs(names)
+
+parm_true <- do.call(rbind, lapply(seq_len(nrow(ep)), function(i) {
+  vi1 <- which(names == ep[i, "v1"])
+  vi2 <- which(names == ep[i, "v2"])
+  data.frame(
+    v1 = ep[i, "v1"], v2 = ep[i, "v2"],
+    a = 0.5, b = 1, c = 1, d = 0.5, e = 1,
+    Ai = A_true[vi1], Aj = A_true[vi2],
+    aii = rs_true[vi1], ajj = rs_true[vi2],
+    nuii = nu_true[vi1], nujj = nu_true[vi2],
+    rho1ij = ifelse(vi1 == vi2, 1, rho_cross),
+    r2ii = r_t_true[vi1], r2jj = r_t_true[vi2],
+    r1ii = r_t_true[vi1], r1jj = r_t_true[vi2],
+    rho2ij = 1
+  )
+}))
+
+vgm_true <- build_vgm_for_plot(parm_true, coordinates, lagstime = 0:tmax)
+```
+
+```{r eval=FALSE}
 vgm <- merge(
   vgm_theo[, c("v1","v2","lagtime","dist","vgmsim")],
   emp_all [, c("v1","v2","lagtime","dist","cov")],
   by = c("v1","v2","lagtime","dist"),
   all = TRUE
 )
+
+vgm <- merge(
+  vgm,
+  vgm_true[, c("v1","v2","lagtime","dist","vgmsim")],
+  by = c("v1","v2","lagtime","dist"),
+  all = TRUE,
+  suffixes = c("", "_true")
+)
+
+
 plot_multivariate_st_covariances(vgm, names = names)
 ```
