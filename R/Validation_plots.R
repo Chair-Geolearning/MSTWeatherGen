@@ -273,7 +273,7 @@ plot_mean_by_month <- function(sim, observed, places, names_places, names, dates
   return(p)
 }
 
-utils::globalVariables(c("v1", "v2", "lagtime", "vgmsim"))
+utils::globalVariables(c("v1", "v2", "lagtime", "vgmsim", "vgmsim_true"))
 #' Plot multivariate space-time covariances
 #'
 #' Function plot multivariate space-time covariances.
@@ -300,6 +300,7 @@ plot_multivariate_st_covariances <- function(vgm, names) {
 
       p <- ggplot2::ggplot(filtered_vgm, ggplot2::aes(x = dist, color = factor(lagtime))) +
         ggplot2::geom_line(ggplot2::aes(y = vgmsim)) +
+        ggplot2::geom_line(ggplot2::aes(y = vgmsim_true/2), linetype = "dashed", linewidth = 0.6) +
         ggplot2::geom_point(ggplot2::aes(y = cov)) +
         ggplot2::labs(title = paste(variable1, "vs", variable2), x = "", y = "") +
         ggplot2::theme_minimal() +
