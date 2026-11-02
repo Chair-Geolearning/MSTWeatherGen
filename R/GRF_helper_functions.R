@@ -362,9 +362,9 @@ init_space_par <- function(data, names, h, uh, max_it = 2000) {
   
   upper <- c(.upper_spatial[.matern_a],
              .upper_spatial[.matern_nu])
-  
-  parscale = c(.upper[.matern_a]-.lower[.matern_a],
-               .upper[.matern_nu]-.lower[.matern_nu])
+  # PAR :
+  parscale = c(.upper_spatial[.matern_a]-.lower_spatial[.matern_a],
+               .upper_spatial[.matern_nu]-.lower_spatial[.matern_nu])
   
   if (.Platform$OS.type == "windows") {
     cl <- parallel::makeCluster(ncores)
@@ -439,31 +439,44 @@ init_space_par <- function(data, names, h, uh, max_it = 2000) {
 #' @importFrom stats optim
 optimize_spatial_parameters <- function(par_all, data, names, Vi, uh, cr, max_it) {
   pairs <- paste(Vi[,1], Vi[,2], sep="-")
-  parms <- c(
-    paste(pairs[1:length(names)], "aii",  sep=":"),
-    paste(pairs[1:length(names)], "nuii", sep=":")
-  )
-
+  
+  #parms <- c(
+  #  paste(pairs[1:length(names)], "aii", sep = ":"),
+  #  paste(pairs[1:length(names)], "nuii", sep = ":")
+  # )
+  
+  # nuii figé — on n'optimise que aii
+  parms <- paste(pairs[1:length(names)], "aii", sep=":")
+  
   cat("Spatial parameters optimization\n")
   print(parms)
   cat("Processing...")
-
-  n_aii  <- length(names)
-  n_nuii <- length(names)
   
-  lower <- c(rep(.lower[.aii],  n_aii),
-             rep(.lower[.nuii], n_nuii))
-  upper <- c(rep(.upper[.aii],  n_aii),
-             rep(.upper[.nuii], n_nuii))
+  n_aii <- length(names)
+  #n_nuii <- length(names)
   
-  # parscale = c(rep(.upper[.aii]-.lower[.aii],  n_aii),
-  #              rep(.upper[.nuii]-.lower[.nuii],  n_nuii))
-  parscale = c(rep(.init[.aii], n_aii),
-               rep(.init[.nuii],  n_nuii))
-  ndeps = c(rep(0.001, n_aii+n_nuii))
-
+  lower    <- rep(.lower[.aii], n_aii)
+  upper    <- rep(.upper[.aii], n_aii)
+  
+  #lower <- c(
+  #rep(.lower[.aii], n_aii),
+  #rep(.lower[.nuii], n_nuii))
+  
+  #upper <- c(
+  # rep(.upper[.aii], n_aii),
+  #  rep(.upper[.nuii], n_nuii))
+  #ndeps = c(rep(0.001, n_aii+n_nuii))
+  #parscale <- c(
+  #rep(.init[.aii], n_aii),
+  #rep(.init[.nuii], n_nuii)
+  #)
+  
+  parscale <- rep(.init[.aii],  n_aii)
+  
+  ndeps    <- rep(0.001, n_aii)
+  
   optimized_par <- optim(
-    par_all[parms],
+    par    = par_all[parms],
     fn     = loglik,
     method = .optim_method,
     lower  = lower,
@@ -474,7 +487,7 @@ optimize_spatial_parameters <- function(par_all, data, names, Vi, uh, cr, max_it
   )$par
   
   cat("... done\n")
-
+  
   par_all[parms] <- optimized_par
   return(update_rho1_parameters(par_all, names,
                                 extract_rho1(create_df_param(par_all, names), names)))
@@ -769,6 +782,7 @@ estimation_gf <- function(data, wt_id, max_it, dates, tmax, names,
   # Initialize spatial parameters
   par_s <- init_space_par(data = data, names = names, h = h[u == 0], uh = uh[u == 0, ], max_it = max_it)
   par_s <- do.call(cbind, par_s)
+  par_s[2, ] <- c(0.5, 1, 2) 
   
   ## cov_spatial ici pour le moment avec données du wt
   cov_spatial <- process_spatial_covariance(data, dates, dist_matrix, wt_id, names)
