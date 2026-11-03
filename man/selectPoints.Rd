@@ -4,17 +4,17 @@
 \alias{selectPoints}
 \title{Select Points Based on Probabilities}
 \usage{
-selectPoints(coordinates, betaIndex, v)
+selectPoints(dist_matrix, betaIndex, v)
 }
 \arguments{
-\item{coordinates}{A matrix or data frame containing the coordinates of points.}
+\item{dist_matrix}{A matrix of distances between points.}
 
-\item{betaIndex}{The index of the reference point in the coordinates matrix/data frame.}
+\item{betaIndex}{The index of the reference point in the dist_matrix.}
 
 \item{v}{The number of points to select, including the reference point.}
 }
 \value{
-A vector of selected indices from the coordinates matrix/data frame, including the index of the reference point.
+A vector of selected indices from the dist_matrix, including the index of the reference point.
 }
 \description{
 Selects a set of points from a dataset based on probabilities calculated from their spatial distances to a specific reference point.

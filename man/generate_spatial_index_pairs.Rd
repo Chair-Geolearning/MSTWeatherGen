@@ -4,10 +4,12 @@
 \alias{generate_spatial_index_pairs}
 \title{Generate Spatial Index Pairs}
 \usage{
-generate_spatial_index_pairs(coordinates, n1, n2)
+generate_spatial_index_pairs(coordinates, dist_matrix, n1, n2)
 }
 \arguments{
 \item{coordinates}{A matrix or data frame containing the coordinates of points.}
+
+\item{dist_matrix}{distances matrix between coordinates points}
 
 \item{n1}{The number of points to uniformly distribute across the spatial domain.}
 

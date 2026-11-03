@@ -4,14 +4,14 @@
 \alias{preprocess_data}
 \title{Data Preprocessing for Spatio-Temporal Models}
 \usage{
-preprocess_data(Ti, Si, coordinates)
+preprocess_data(Ti, Si, dist_matrix)
 }
 \arguments{
 \item{Ti}{A matrix containing temporal index pairs and their respective lags.}
 
 \item{Si}{A matrix containing spatial index pairs.}
 
-\item{coordinates}{A matrix of spatial coordinates for each location.}
+\item{dist_matrix}{A matrix of spatial distances for each location.}
 }
 \value{
 A list containing the preprocessed data, including a combined matrix of temporal lags, spatial distances, and indices (`uh`), as well as separate vectors of temporal lags (`u`) and spatial distances (`h`).

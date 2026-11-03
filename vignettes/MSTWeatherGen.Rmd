@@ -87,7 +87,7 @@ names_weather_types <- names
 swg <- MSTWeatherGen_Estim(
   data = data, seasons = seasons, dates = dates, names = names, by_season = T, scale = T,
   precipitation = T, names_weather_types = names_weather_types,
-  coordinates = coordinates, max_it = 100, tmax = 1, n1 = 3, n2 = 3
+  coordinates = coordinates, use_euclidean=FALSE, max_it = 100, tmax = 1, n1 = 3, n2 = 3
 )
 ```
 
