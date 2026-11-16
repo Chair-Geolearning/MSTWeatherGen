@@ -66,7 +66,7 @@ nu         <- c(0.5, 1.0, 2.0)     # nuii : lissages Matérn fixes maintenant da
 r_t        <- c(1000, 1000, 1000)  # r1ii = r2ii : taux décroissance temporelle mis a 1000 et a tester a 0.0001
 A_params   <- c(0.0, 0.0, 0.0)    # Ai : non-séparabilité mis a zero
 rho_cross  <- 0.7                  # corrélation croisée entre variables
-a = 1/2,   # a=d
+a = 1/2   # a=d
 e = 1  #b=e, with c=1
 
 
@@ -115,7 +115,7 @@ generate_Z <- function(t_seq, spatial_coordinates){
     anisotropies = anisotropies,
     SpectralPars = SpectralPars,
     Sigma_fun    = Sigma_fun,
-    rs = rs,
+    rs = rs, 
     nu = nu)
 
   # Run spatio-temporal simulation 
@@ -265,11 +265,11 @@ dimnames(Z)[[3]] = names
 # Vrais paramètres de génération mis en forme
 
 ```{r eval=FALSE}
-rs_true   <- c(0.2, 0.5, 1)
-nu_true   <- c(0.5, 1, 2)
-r_t_true  <- c(1000, 1000, 1000)  
-A_true    <- c(0, 0, 0)
-rho_cross <- 0.7
+rs_true   <- rs
+nu_true   <- nu
+r_t_true  <- r_t
+A_true    <- A_params
+rho_cross <- rho_cross
 
 ep <- generate_variable_index_pairs(names)
 
@@ -487,7 +487,7 @@ emp_all <- aggregate(cov ~ v1 + v2 + lagtime + dist,
 ```{r eval=FALSE}
 # ── 1. VGM théorique estimé ───────────────────────────────────────────────────
 vgm_theo <- build_vgm_for_plot(
-  parm_mean          = parm_mean,
+  parm_mean          = parm_true,
   coordinates        = coordinates,
   lagstime           = 0:tmax,
   nb_points_distance = nb_points_distance
