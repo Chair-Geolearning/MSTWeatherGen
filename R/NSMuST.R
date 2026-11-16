@@ -216,7 +216,7 @@ TemporalSim = function(nt,r_t,rho,a,nu,A){
   }
   
   # Cholesky multiplication
-  Zt = W %*% t(chol(beta))
+  Zt = W %*% chol(beta)
 }
 
 
