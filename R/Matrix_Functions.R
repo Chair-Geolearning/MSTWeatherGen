@@ -10,7 +10,7 @@
 #' @param tol tolerance (default 1e-6)
 #'
 #' @return a boolean
-is_positive_definite <- function(M, tol = 1e-6) {
+is_positive_definite <- function(M, tol = .numeric_tolerance) {
   # Retrieve eigenvalues only .
   eigenvalues <- eigen(M, symmetric = TRUE)$values
   
@@ -38,7 +38,7 @@ is_positive_definite <- function(M, tol = 1e-6) {
 #' 
 #' @return a symmetric positive definite corrected matrix of the 
 #' same dimensions as the original 
-make_positive_definite <- function(M, epsilon = 1e-6) {
+make_positive_definite <- function(M, epsilon = .numeric_tolerance) {
   # Decompose M into eigenvalues and eigenvectors (exploiting symmetry)
   eigen_decomp <- eigen(M, symmetric = TRUE)
   values <- eigen_decomp$values  # numeric vector of eigenvalues
@@ -51,4 +51,26 @@ make_positive_definite <- function(M, epsilon = 1e-6) {
   ##Reconstruct the matrix: M_corrected = V * diag(lambda) * Vt
   M_corrected <- vectors %*% diag(corrected_values) %*% t(vectors)
   return(M_corrected)
+}
+
+
+#' Borne les valeurs d'une matrice entre des bornes min/max, avec une tolérance
+#'
+#' @param x      matrice (ou vecteur) à borner
+#' @param min    borne inférieure
+#' @param max    borne supérieure
+#' @param tol    tolérance (>= 0). Si NULL, aucune tolérance.
+#' @return       matrice de même dimension que x, avec valeurs bornées
+clamp <- function(x, min=-1, max=1, tol = .numeric_tolerance) {
+
+  if (!is.null(tol)) {
+    stopifnot(tol >= 0)
+    lo <- min - tol
+    hi <- max + tol
+  } else {
+    lo <- min
+    hi <- max
+  }
+
+  pmin(pmax(x, lo), hi)
 }

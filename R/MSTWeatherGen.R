@@ -26,7 +26,8 @@
 #' and `names` is not provided, "Precipitation" is assumed to be the first variable, with other variables numerically named.
 #' @param names_weather_types Specific variables from `names` to be used for classifying weather types. If not provided, it defaults to using all variables specified in `names`.
 #' @param coordinates A matrix or data frame containing the geographical coordinates for each location in the data.
-#' @param max_it The maximum number of iterations for optimization procedures within the estimation process.
+#' @param use_euclidean TRUE (default) coordinates parameter is euclidean; FALSE -> coordinates parameter is in degres (long/lat)
+#'  @param max_it The maximum number of iterations for optimization procedures within the estimation process.
 #' @param tmax The maximum temporal lag to be considered in the analysis.
 #' @param n1 First parameter defining spatial window size for analysis, crucial for detailed spatial analysis within the Gaussian field model.
 #' @param n2 Second parameter defining spatial window size.
@@ -34,7 +35,7 @@
 #' including estimated parameters and other outputs relevant to weather generation, such as weather type classifications and spatial dependencies.
 #' @export
 MSTWeatherGen_Estim <- function(data, dates, by_season = TRUE, seasons, scale = FALSE, precipitation = T, names = NULL,
-                                names_weather_types = NULL, coordinates,
+                                names_weather_types = NULL, coordinates, use_euclidean = TRUE,
                                 max_it, tmax, n1, n2) {
   # Validate input parameters, especially the requirement for 'seasons' when 'by_season' is TRUE
   if (by_season & missing(seasons)) {
@@ -70,7 +71,7 @@ MSTWeatherGen_Estim <- function(data, dates, by_season = TRUE, seasons, scale = 
     MSTWeatherGen_Estim_season(
       data = data, dates = dates, scale = scale, precipitation = precipitation,
       names = names, names_weather_types = names_weather_types,
-      coordinates = coordinates, season = season, max_it = max_it, tmax = tmax,
+      coordinates = coordinates, use_euclidean = use_euclidean, season = season, max_it = max_it, tmax = tmax,
       n1 = n1, n2 = n2
     )
   })
@@ -169,6 +170,7 @@ MSTWeatherGen_Sim <- function(dates_sim, dates_original, data, seasons = NULL, p
 #' @param names Names of the variables in the data array to be used for analysis.
 #' @param names_weather_types Subset of 'names', variables to be used for weather type classification.
 #' @param coordinates Matrix with columns for the coordinates of each location.
+#' @param use_euclidean TRUE (default) coordinates parameter is euclidean; FALSE -> coordinates parameter is in degres (long/lat)
 #' @param season Vector of integers representing months to define the season for analysis.
 #' @param max_it Maximum number of iterations for optimization procedures.
 #' @param tmax Maximum time lag for temporal analysis.
@@ -187,7 +189,7 @@ MSTWeatherGen_Sim <- function(dates_sim, dates_original, data, seasons = NULL, p
 #'
 #' @keywords internal
 MSTWeatherGen_Estim_season <- function(data, dates, precipitation = T, scale = FALSE, names = NULL,
-                                       names_weather_types = NULL, coordinates,
+                                       names_weather_types = NULL, coordinates, use_euclidean=TRUE,
                                        season, max_it, tmax, n1, n2) {
   # Check names
   if (is.null(names) & precipitation) {
@@ -238,7 +240,7 @@ MSTWeatherGen_Estim_season <- function(data, dates, precipitation = T, scale = F
 
   # Step 5: Estimate parameters for the Gaussian field model
   gf_par <- estimate_gaussian_field_params(
-    data = data, wt = wt, names = names, coordinates = coordinates,
+    data = data, wt = wt, names = names, coordinates = coordinates, use_euclidean=use_euclidean,
     tmax = tmax, max_it = max_it, n1 = n1, n2 = n2,
     dates = dates, threshold_precip = threshold_precip
   )

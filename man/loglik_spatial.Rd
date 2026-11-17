@@ -18,7 +18,7 @@ loglik_spatial(par, data, h, uh, v)
 \item{v}{Index of the variable within `data` for which the log-likelihood is computed.}
 }
 \value{
-Log-likelihood value for the spatial data under the Matérn covariance model.
+negatif Log-likelihood value for the spatial data under the Matérn covariance model.
 }
 \description{
 Calculates the log-likelihood for spatial data based on the Matérn covariance function. This function plays a pivotal role in estimating spatial parameters for geostatistical models in spatial models.

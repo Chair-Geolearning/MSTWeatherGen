@@ -10,7 +10,7 @@ spacetime_cov(
   locations,
   ds = NULL,
   dates,
-  lagstime,
+  lagstime = 0,
   dist,
   covgm = TRUE
 )

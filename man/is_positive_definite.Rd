@@ -4,7 +4,7 @@
 \alias{is_positive_definite}
 \title{Check if a Matrix is Positive Definite}
 \usage{
-is_positive_definite(M, tol = 1e-06)
+is_positive_definite(M, tol = .numeric_tolerance)
 }
 \arguments{
 \item{M}{a square, symmetric numeric matrix}

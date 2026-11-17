@@ -2,7 +2,7 @@
 % Please edit documentation in R/Covariance_and_loglikelihood.R
 \name{compute_rho2}
 \alias{compute_rho2}
-\title{Compute rho2ij Correlations}
+\title{Compute rho2 Correlations}
 \usage{
 compute_rho2(parm, names, cr)
 }
@@ -14,9 +14,9 @@ compute_rho2(parm, names, cr)
 \item{cr}{Matrix of initial correlation values between the variables.}
 }
 \value{
-Symmetric matrix of adjusted correlation coefficients (beta) between the variables.
+Symmetric matrix of adjusted correlation coefficients (rho2if) between the variables.
 where each element [i, j] represents the correlation coefficient
- between variables i and j, adjusted based on the Gneiting function and a correction term.
+ between variables i and j, adjusted based on the Gneiting function.
 }
 \description{
 This function calculates the beta correlation coefficients between variables based on the Gneiting function, adjusted for a correction term. It is intended for internal use within package functions to adjust initial correlation values using specified parameters.
@@ -24,5 +24,34 @@ This function calculates the beta correlation coefficients between variables bas
 \details{
 This function implements the methods described in Section 2.4 in Equation 8 of the article
 \strong{Stochastic Environmental Research and Risk Assessment, 2025} (DOI: 10.1007/s00477-024-02897-8).
+
+The matrix \eqn{[\rho^{(2)}_{ij}]_{i,j=1}^p} is estimated from all the other parameters.
+Starting from the covariance parameterisation expressed at \eqn{\mathbf{h}=0} and \eqn{u=0},
+we have
+\deqn{
+  C(0,0) = \rho^{(1)}_{ij} \left(r_{ii}^{(1)} r_{jj}^{(1)}\right)^{1/2} \left(r_{ij}^{(1)}\right)^{-1}
+         + \rho^{(2)}_{ij} w_{2,ij}
+         = \rho^{(1)}_{ij} w_{1,ij} + \rho^{(2)}_{ij} w_{2,ij},
+}{C(0,0) = rho1_ij * w1_ij + rho2_ij * w2_ij}
+where \eqn{w_{2,ij}} denotes the whole term multiplying \eqn{\rho^{(2)}_{ij}} in the 
+space-time component of the covariance (Eq. 5). This yields
+\deqn{
+  \hat{\rho}^{(2)}_{ij} = \frac{C(0,0) - \rho^{(1)}_{ij} w_{1,ij}}{w_{2,ij}},
+}{hat(rho2_ij) = (C(0,0) - rho1_ij * w1_ij) / w2_ij}
+where \eqn{C(0,0)} is the pointwise correlation between the two variables at
+\eqn{\mathbf{h}=0, u=0} (the latent field has unit variance, so correlation and
+covariance coincide), called \code{cr} in the code. Now let \code{cc} =
+\eqn{C(0,0 \,;\, \rho^{(2)}_{ij}=1)}. Then
+\deqn{ \code{cc} = \rho^{(1)}_{ij} w_{1,ij} + w_{2,ij}, }
+and therefore
+\deqn{ w_{2,ij} = \code{cc} - \rho^{(1)}_{ij} w_{1,ij}. }
+Consequently,
+\deqn{
+  \hat{\rho}^{(2)}_{ij} = \frac{\code{cr} - \rho^{(1)}_{ij} w_{1,ij}}
+                               {\code{cc} - \rho^{(1)}_{ij} w_{1,ij}}.
+}
+Mathematically the matrix \eqn{[\hat{\rho}^{(2)}_{ij}]_{i,j=1}^p} is positive definite,
+but once computed from the data and the estimated parameters this may need to be checked.
+When it is not positive definite, it is made positive definite by \code{Matrix::nearPD}.
 }
 \keyword{internal}
