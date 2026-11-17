@@ -184,39 +184,17 @@ SimulateParsimNS = function(L, ns, nt, p, params, spatial_coordinates, SpectralD
 
 ############################# For temporal simulations #################
 
-TemporalSim = function(nt,r_t,rho,a,nu,A){
-  # nt = number of time steps
-  # r  = a p-vector of scale parameters 
-  # rho = a p x p matrix of correlation 
-  # a = scale parameters for spatial Matern (default is 1)
-  # nu = regul. parameters for spatial Matern (default is 1)
-  # A = parameters in the pseudo-variogram (default is 0)
-  
-  # For C^(1)
+TemporalSim = function(nt, r_t, rho) {
   p = length(r_t)
-  W = array(0,dim=c(nt,p))
-  rt_ij = sqrt(0.5*outer(r_t^2,r_t^2,'+'))
-  w = sqrt(outer(r_t,r_t,'*'))/rt_ij
-  beta = rho*w
-  
-  # In case of c^(2) as in Eq. (8)
-  nu_ij = 0.5*(outer(nu,nu,'+'))
-  nu_factor = gamma(nu_ij)/outer(sqrt(gamma(nu)),sqrt(gamma(nu)),'*')
-  a2_ij = 0.5*outer(a^2,a^2,'+')
-  x_ij = sqrt(a2_ij)^(nu_ij)
-  x = a^nu
-  a_factor = outer(x,x,'*')/x_ij
-  A_ij = sqrt(outer(1-A^2,1-A^2,'*'))
-  beta = beta*a_factor*nu_factor*A_ij
-  
-  # Indep simulation
-  for (k in seq_len(p)){
-    Cov = exp(-r_t[k]*abs(outer(seq_len(nt),seq_len(nt),'-')))
-    W[,k] = t(chol(Cov))%*%rnorm(nt)
+  W = array(0, dim = c(nt, p))
+  rt_ij  = sqrt(0.5 * outer(r_t^2, r_t^2, '+'))
+  w      = sqrt(outer(r_t, r_t, '*')) / rt_ij
+  beta   = rho * w
+  for (k in seq_len(p)) {
+    Cov = exp(-r_t[k] * abs(outer(seq_len(nt), seq_len(nt), '-')))
+    W[, k] = t(chol(Cov)) %*% rnorm(nt)
   }
-  
-  # Cholesky multiplication
-  Zt = W %*% chol(beta)
+  W %*% chol(beta)
 }
 
 

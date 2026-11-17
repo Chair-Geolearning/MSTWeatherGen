@@ -50,7 +50,7 @@ library(invgamma)
 spatial_resolution  = 0.4
 temporal_resolution = 1 # nb of day
 
-  # Generate spatial grid for simulation
+# Generate spatial grid for simulation
 s1_seq = seq(0, 10, by = spatial_resolution)
 s2_seq = seq(0, 8, by = spatial_resolution)
 grid_spatial = expand.grid(s1 = s1_seq, s2 = s2_seq)
@@ -61,13 +61,15 @@ t_seq = seq(1, 40, by = temporal_resolution)
 # ══════════════════════════════════════════════════════════════════════════════
 # PARAMÈTRES (modifiables ici)
 # ══════════════════════════════════════════════════════════════════════════════
-rs         <- c(0.2, 0.5, 1.0)     # aii : portées spatiales Matérn divise par deux
+rs         <- c(0.2, 0.5, 1.0)     # aii 
 nu         <- c(0.5, 1.0, 2.0)     # nuii : lissages Matérn fixes maintenant dans l'estimation
-r_t        <- c(1000, 1000, 1000)  # r1ii = r2ii : taux décroissance temporelle mis a 1000 et a tester a 0.0001
+r_t        <- c(0.2, 0.4, 0.6)  # r1ii = r2ii : taux décroissance temporelle mis a 1000 et a tester a 0.0001
 A_params   <- c(0.0, 0.0, 0.0)    # Ai : non-séparabilité mis a zero
 rho_cross  <- 0.7                  # corrélation croisée entre variables
 a = 1/2   # a=d
 e = 1  #b=e, with c=1
+alpha=1
+delta=0
 
 
 generate_Z <- function(t_seq, spatial_coordinates){
@@ -109,8 +111,8 @@ generate_Z <- function(t_seq, spatial_coordinates){
     t = t_seq,
     A = A_params, # paramètres A_i mis a 0
     a = a,   # a=d
-    alpha = 1, # b=e, with c=1
-    delta = 0, # does not exist in MSTWeatherGen
+    alpha = alpha, # b=e, with c=1
+    delta = delta, # does not exist in MSTWeatherGen
     b = e, # non-separability - does not exist in MSTWeatherGen
     anisotropies = anisotropies,
     SpectralPars = SpectralPars,
@@ -136,22 +138,22 @@ generate_Z <- function(t_seq, spatial_coordinates){
 
   r_t = r_t # r¹ii et r²ii 
   rho  = Sigma_fun(1,1)
-  Z_T1 = TemporalSim(nt,r_t,rho,a=rep(1,p),nu=rep(1,p),A=A_params)
-  Z_T2 = TemporalSim(nt,r_t,rho,a=rs,nu=nu,A=A_params)
+  Z_T1 = TemporalSim(nt,r_t,rho)
+  Z_T2 = TemporalSim(nt,r_t,rho)
 
   # 1. Construction de Z (boucle sur i ET k)
   Z = Z1
   for (i in seq_len(ns)) {
     for (k in seq_len(p)) {
-      Z[,i,k] = 0.707*(Z_T2[,k]*Z1[,i,k] + Z_T1[,k])
+      Z[,i,k] = (Z_T2[,k]*Z1[,i,k] + Z_T1[,k])/sqrt(2)
     }
   }
   
   # 2. Standardisation (boucle sur k seulement, APRÈS construction) Ca a ete rajoute.
-  for (k in seq_len(p)) {
+  'for (k in seq_len(p)) {
     Zk <- Z[,,k]
     Z[,,k] <- (Zk - mean(Zk)) / sd(Zk)
-  }
+  }'
   
   return(Z)
 }
@@ -294,7 +296,7 @@ parm_true <- do.call(rbind, lapply(seq_len(nrow(ep)), function(i) {
 
 ```{r eval=FALSE}
 Sys.setenv(MONITOR = "TRUE")
-nb_estimation <- 5
+nb_estimation <- 3
 estim_results <- list()
 
 for( it in 1:nb_estimation) {
@@ -304,7 +306,19 @@ for( it in 1:nb_estimation) {
   Z <- generate_Z(t_seq, spatial_coordinates)
 
   estim_results[[it]] <- list(
-    estimation = NULL,  # NULL ici
+    estimation = estimation_gf(
+        data             = Z,
+        wt_id            = wt_id,
+        max_it           = max_it,
+        dates            = dates,
+        tmax             = tmax,
+        names            = names,
+        coordinates      = coordinates,
+        use_euclidean    = TRUE,
+        n1               = n1,
+        n2               = n2,
+        threshold_precip = rep(0, dim(Z)[2])
+    ),  # NULL ici
     Z = Z   # ← stocke le Z du run
   )
 }
@@ -347,8 +361,7 @@ for (it in 1:nb_estimation) {
 
 ```{r eval=FALSE}
 # get all par_all values from all estimation
-all_estimations <- do.call(rbind,lapply(estim_results, function(est){return(est$par_all)}))
-
+all_estimations <- do.call(rbind, lapply(estim_results, function(est) est$estimation$par_all))
 all_estimations_stats <- data.frame(
   moyenne = apply(all_estimations, 2, mean, na.rm = TRUE),
   variance = apply(all_estimations, 2, var, na.rm = TRUE),
@@ -360,6 +373,22 @@ all_estimations_stats <- data.frame(
 
 all_estimations_stats
 
+```
+
+# Mean
+```{r eval=FALSE}
+cols_num <- c("a","b","c","d","e","Ai","Aj","aii","ajj",
+              "nuii","nujj","r1ii","r1jj","r2ii","r2jj",
+              "rho1ij","rho2ij")
+
+# Mean
+parm_all_runs <- do.call(rbind, lapply(1:nb_estimation, function(k) estim_results[[k]]$estimation$parm))
+parm_mean <- aggregate(parm_all_runs[, cols_num], 
+            by = list(v1=parm_all_runs$v1, v2=parm_all_runs$v2), 
+            FUN = mean, na.rm = TRUE)
+
+# estimated parameters mean values
+parm_mean
 ```
 
 #### GRAPH PAGE 18 PAPIER 
@@ -487,7 +516,7 @@ emp_all <- aggregate(cov ~ v1 + v2 + lagtime + dist,
 ```{r eval=FALSE}
 # ── 1. VGM théorique estimé ───────────────────────────────────────────────────
 vgm_theo <- build_vgm_for_plot(
-  parm_mean          = parm_true,
+  parm_mean          = parm_mean,
   coordinates        = coordinates,
   lagstime           = 0:tmax,
   nb_points_distance = nb_points_distance
@@ -518,4 +547,100 @@ vgm <- merge(
 
 ```{r eval=FALSE}
 plot_multivariate_st_covariances(vgm, names = names)
+```
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# BANDE DE FLUCTUATION (style Bollinger)
+# ══════════════════════════════════════════════════════════════════════════════
+```{r eval=FALSE}
+
+nb_macro      <- 3   # nombre de macro-simulations (courbes)
+nb_z_per_macro <- 3  # nombre de generate_Z par macro-simulation
+
+macro_results <- list()
+nb_points_distance = 20
+
+for (macro_it in seq_len(nb_macro)) {
+  print(paste("Macro-simulation:", macro_it))
+  
+  emp_runs <- do.call(rbind, lapply(seq_len(nb_z_per_macro), function(it) {
+    Z <- generate_Z(t_seq, spatial_coordinates)
+    do.call(rbind, lapply(seq_len(nrow(ep)), function(i) {
+      v1_ <- ep[i, "v1"];  vi1 <- which(names == v1_)
+      v2_ <- ep[i, "v2"];  vi2 <- which(names == v2_)
+      res <- empirical_st_cov_pair(Z[,,vi1], Z[,,vi2],
+                                   wt_id, dates, coordinates,
+                                   lagstime = 0:tmax,
+                                   nb_points_distance = nb_points_distance)
+      res$v1 <- v1_;  res$v2 <- v2_
+      res
+    }))
+  }))
+  
+  emp_mean <- aggregate(cov ~ v1 + v2 + lagtime + dist,
+                        data = emp_runs, FUN = mean, na.rm = TRUE)
+  emp_mean$macro_it <- macro_it
+  macro_results[[macro_it]] <- emp_mean
+}
+
+all_macro <- do.call(rbind, macro_results)
+
+# Bande : min/max (ou quantiles) des 10 courbes moyennes
+band <- do.call(data.frame, aggregate(cov ~ v1 + v2 + lagtime + dist,
+                                      data = all_macro,
+                                      FUN = function(x) c(lo = min(x), mid = mean(x), hi = max(x))))
+names(band)[5:7] <- c("lo", "mid", "hi")
+
+vgm_true <- build_vgm_for_plot(parm_true, coordinates, lagstime = 0:tmax, nb_points_distance = 50)
+
+# Fusion avec théorique
+band_vgm <- merge(band,
+                  vgm_true[, c("v1","v2","lagtime","dist","vgmsim")],
+                  by = c("v1","v2","lagtime","dist"))
+
+# ── Fonction de plot avec bande ───────────────────────────────────────────────
+plot_band_covariances <- function(bvgm, names) {
+  empty_plot <- ggplot2::ggplot() + ggplot2::theme_void()
+  plot_matrix <- matrix(list(empty_plot), nrow = length(names), ncol = length(names))
+  
+  for (i in seq_along(names)) {
+    for (j in seq_len(i)) {
+      v1_ <- names[i]; v2_ <- names[j]
+      df  <- subset(bvgm, (v1 == v1_ & v2 == v2_) | (v1 == v2_ & v2 == v1_))
+      
+      p <- ggplot2::ggplot(df, ggplot2::aes(x = dist, color = factor(lagtime),
+                                            fill  = factor(lagtime))) +
+        ggplot2::geom_ribbon(ggplot2::aes(ymin = lo, ymax = hi), alpha = 0.25, color = NA) +
+        ggplot2::geom_line(ggplot2::aes(y = mid), linewidth = 0.7) +
+        ggplot2::geom_line(ggplot2::aes(y = vgmsim / 2), linetype = "dashed",
+                           linewidth = 0.6, color = "black") +
+        ggplot2::labs(title = paste(v1_, "vs", v2_), x = "", y = "") +
+        ggplot2::theme_minimal() +
+        ggplot2::theme(plot.title = ggplot2::element_text(size = 8),
+                       legend.position = "none")
+      
+      last_row <- length(names); mid_col <- round(length(names) / 2)
+      if (i == last_row && j == mid_col)
+        p <- p + ggplot2::labs(x = "Distance (degree)") +
+        ggplot2::theme(axis.text.x = ggplot2::element_text(), axis.ticks.x = ggplot2::element_line())
+      if (i == mid_col && j == 1)
+        p <- p + ggplot2::labs(y = "Covariance") +
+        ggplot2::theme(axis.text.y = ggplot2::element_text(), axis.ticks.y = ggplot2::element_line())
+      
+      plot_matrix[j, i] <- list(p)
+    }
+  }
+  
+  legend_plot <- ggplot2::ggplot(subset(bvgm, v1 == names[1] & v2 == names[1]),
+                                 ggplot2::aes(x = dist, color = factor(lagtime))) +
+    ggplot2::geom_line(ggplot2::aes(y = mid)) +
+    ggplot2::scale_color_discrete("Time lag (day)") +
+    ggplot2::theme_minimal()
+  plot_matrix[length(names), 1] <- list(ggpubr::get_legend(legend_plot))
+  
+  patchwork::wrap_plots(plot_matrix)
+}
+
+plot_band_covariances(band_vgm, names = names)
 ```
